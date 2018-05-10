@@ -1,0 +1,35 @@
+function  menuFiles_SaveRec_Callback(~,~,handles)
+% Save Recording as txt file
+
+global FILES SEED_SWL CUR_FILE DIR_SAVE;
+
+% Loading Separators
+load('Preferences.mat','GParams');
+sep_swl_1 = GParams.sep_swl_1;
+sep_swl_2 = GParams.sep_swl_2;
+
+% asking for filename
+%filename = 'rec_list.txt';
+filter = {'*.txt'};
+title = 'Save recording list';
+defname = fullfile(SEED_SWL,strcat(FILES(CUR_FILE).parent,'.txt'));
+[file,path]  = uiputfile(filter,title,defname);
+
+% Extracting FileName
+if file == 0
+    return;
+else
+    filename = fullfile(path,file);
+    fid = fopen(filename, 'wt' );
+    for i=1:length(FILES)
+        % Saving nlab files
+        % fprintf(fid,'%s',sprintf('%s%s%s',sep_swl_1,FILES(i).fullpath, sep_swl_2));
+        % Saving seed files
+        fprintf(fid,'%s',sprintf('%s%s%s',sep_swl_1,fullfile(DIR_SAVE,FILES(i).nlab), sep_swl_2));
+        fprintf(fid,'%s',newline);
+    end
+    fclose(fid);
+    fprintf('Recording list saved %s.\n',filename);
+end
+
+end
