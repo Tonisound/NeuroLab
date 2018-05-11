@@ -16,10 +16,10 @@ switch strtrim(str(val,:))
         compute_deformationfield(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     case 'Import Reference Time'
-        import_reference_time(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        import_reference_time(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
     
     case 'Import Spikoscope Time Tags' 
-        import_time_tags(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        import_time_tags(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     case 'Edit Time Tags'
         menuTag_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

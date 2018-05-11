@@ -252,12 +252,13 @@ for i = 1:length(FileList)
             
             % Detect trigger
             n_burst = 1;
+            reference = 'default';
             length_burst = size(Doppler_film,3);
             time_ref.X=(1:length_burst)';
             time_ref.Y=(0:length_burst-1)'/2.5;
             time_ref.nb_images= size(Doppler_film,3);
             save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),...
-                'n_burst','length_burst','time_ref');
+                'n_burst','length_burst','time_ref','reference');
             fprintf('Time_Reference.mat saved.\n');
             
             % select EEG

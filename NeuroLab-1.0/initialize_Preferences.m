@@ -4,19 +4,28 @@ function success = initialize_Preferences()
 success = false;
 
 % Inputdlg to choose booting options
-prompt={'(1) Data Disk E           (2) Data Disk ETNA            (3) Data Disk MacBook';
-    '(1) Data Disk D         (2) Local files MacBook'};
+prompt={sprintf('(1) E (Etna from Windows) \n(2) ETNA from Mac \n(3) Data Disk Toni-HD2 \n(4) Data Disk MacBook');
+    sprintf('(1) Data Disk D \n(2) Local files MacBook')};
 name = 'Booting options';
 defaultans = {'1';'1'};
 options.Interpreter = 'tex';
 answer = inputdlg(prompt,name,[1 80],defaultans,options);
+
+if isempty(answer)
+    return;
+end
+
 switch strtrim(char(answer(1)))
     case '1'
-        str_disk = fullfile('E:');
+        str_disk = fullfile('E:','DATA');
     case '2'
-        str_disk = fullfile('/','Volumes','ETNA');%'/Volumes/ETNA/DATA'
+        str_disk = fullfile('/','Volumes','ETNA','DATA');%'/Volumes/ETNA/DATA'
     case '3'
-        str_disk =  fullfile('/','Users','tonio','Documents','MATLAB');%'/Users/tonio/Documents/MATLAB/DATA_NEUROLAB';
+        str_disk =  fullfile('/','Volumes','Toni_HD2','DATA_NLAB');%'/Users/tonio/Documents/MATLAB/DATA_NEUROLAB';
+    case '4'
+        str_disk =  fullfile('/','Users','tonio','Documents','DATA_NLAB');%'/Volumes/Toni_HD2'
+    case ''
+        return;
     otherwise
         str_disk = char(answer(1));
 end 
@@ -30,7 +39,8 @@ switch strtrim(char(answer(2)))
 end
 
 % Data Disk
-GParams.SEED = fullfile(str_disk,'DATA');
+%GParams.SEED = fullfile(str_disk,'DATA');
+GParams.SEED = fullfile(str_disk);
 % Local Disk
 GParams.DIR_SAVE = fullfile(str_save,'NLab_DATA');
 GParams.DIR_FIG = fullfile(str_save,'NLab_Figures');

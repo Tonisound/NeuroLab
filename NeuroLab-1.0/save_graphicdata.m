@@ -21,7 +21,7 @@ function save_graphicdata(savedir,handles)
     Current_Image = IM(:,:,CUR_IM);
     
     if isdir(savedir)
-        save(fullfile(savedir,'Config.mat'),'Current_Image','START_IM','CUR_IM','END_IM','LAST_IM','UiValues','-append','-v7.3');
+        save(fullfile(savedir,'Config.mat'),'Current_Image','START_IM','CUR_IM','END_IM','LAST_IM','UiValues','-append');
         %fprintf('Configuration Saved %s.\n',fullfile(savedir,'Config.mat'))
     else
         warning('%s is not a directory.\n',savedir);
