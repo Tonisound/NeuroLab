@@ -131,6 +131,11 @@ uimenu(m1b,'Label','Import Spikoscope Regions','Tag','ImportMenu_Regions');
 uimenu(m1b,'Label','Import Spikoscope Traces','Tag','ImportMenu_Traces');
 uimenu(m1b,'Label','Import all','Tag','ImportMenu_All','Enable','off');
 
+% handles.ViewMenu
+m1c = uimenu('Label','View','Tag','ViewMenu','Parent',f);
+uimenu(m1c,'Label','Show Video','Tag','ViewMenu_Video','Checked',UiValues.video_status);
+uimenu(m1c,'Label','Split axes','Tag','ViewMenu_Split','Enable','off');
+
 % handles.TracesMenu
 m2 = uimenu('Label','Traces','Tag','TracesMenu','Parent',f);
 uimenu(m2,'Label','Edit Traces','Tag','TracesMenu_Edition','Accelerator','T');
@@ -497,10 +502,31 @@ h54.Position = [56/60 4.5/30 3/60 1.5/30];
 % Handles for argument passing
 myhandles = guihandles(f);
 
+f2 = figure('Units','normalized',...
+    'Position',[.25*w0 .4*h0 .25*W .4*H],...
+    'Color',panelColor,...
+    'HandleVisibility','Callback',...
+    'IntegerHandle','off',...
+    'Renderer','painters',...
+    'Toolbar','none',...
+    'MenuBar','none',...
+    'NumberTitle','off',...
+    'Tag','VideoFigure',...
+    'Visible',UiValues.video_status,...
+    'WindowStyle','normal',...
+    'Name','Behavior');
+ax = axes('Parent',f2,'Tag','VideoAxes',...
+    'Position',[.05 .05 .9 .9],'Box','on',...
+    'XTick',[],'XTickLabel','',...
+    'YTick',[],'YTickLabel','');
+myhandles.VideoFigure=f2;
+myhandles.VideoAxes=ax;
+
 % Interactive Control
 set(myhandles.MainFigure,'KeyPressFcn',{@mainFigure_keypressFcn,myhandles});
 set(myhandles.RightAxes,'ButtonDownFcn',{@rightPanel_clickFcn,myhandles});
 set(myhandles.CenterAxes,'ButtonDownFcn',{@centerPanel_clickFcn,myhandles});
+set(myhandles.MainFigure,'DeleteFcn',{@mainFigure_closeFcn,myhandles});
 
 % Menu Callback Attribution
 set(myhandles.PrefMenu_Edit,'Callback',{@menuPreferences_Callback,myhandles});
@@ -514,10 +540,13 @@ set(myhandles.FileMenu_Prev,'Callback',{@menuFiles_Prev_Callback,myhandles});
 set(myhandles.FileMenu_Save,'Callback',{@mainFigure_saveFcn,myhandles});
 
 % handles.ImportMenu
-set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_Episodes,'Callback','import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Traces,'Callback','import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
+
+% handles.ViewMenu
+set(myhandles.ViewMenu_Video,'Callback',{@menuView_Video_Callback,myhandles});
 
 % handles.TracesMenu
 set(myhandles.TracesMenu_Edition,'Callback',{@menuTraces_Edition_Callback,myhandles.RightAxes,myhandles});

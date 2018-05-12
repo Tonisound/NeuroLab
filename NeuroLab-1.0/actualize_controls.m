@@ -11,11 +11,14 @@ handles.CenterPanelPopup.UserData = uivalues.CenterPanelPopup;
 set(handles.FigureListPopup,'Value',uivalues.FigureListPopup);
 set(handles.ProcessListPopup,'Value',uivalues.ProcessListPopup);
 set(handles.RightPanelPopup,'Value',uivalues.RightPanelPopup);
-set(handles.LabelBox,'Value',uivalues.LabelBox);
 
+set(handles.LabelBox,'Value',uivalues.LabelBox);
 set(handles.PatchBox,'Value',uivalues.PatchBox);
 set(handles.MaskBox,'Value',uivalues.MaskBox);
 handles.TagButton.UserData = uivalues.TagSelection;
+%Video Menu
+handles.ViewMenu.Checked = uivalues.video_status;
+menuView_Video_Callback(handles.ViewMenu,[],handles);
 
 if ~isempty(FILES)
      try

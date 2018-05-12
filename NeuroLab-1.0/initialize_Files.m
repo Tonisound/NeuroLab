@@ -15,6 +15,7 @@ UiValues.TagSelection ='';
 UiValues.LabelBox = 0;
 UiValues.PatchBox = 0;
 UiValues.MaskBox = 0;
+UiValues.video_status = 'off';
 UiValues_default = UiValues;
 
 save('Files.mat','FILES','CUR_FILE','str','UiValues','UiValues_default');
