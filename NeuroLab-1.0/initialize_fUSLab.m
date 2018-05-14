@@ -118,17 +118,18 @@ m1 = uimenu('Label','File','Tag','FileMenu','Parent',f);
 uimenu(m1,'Label','Manage Files','Tag','FileMenu_Manage','Accelerator','F');
 uimenu(m1,'Label','Load Recording List','Tag','FileMenu_LoadRecList');
 uimenu(m1,'Label','Save Recording List','Tag','FileMenu_SaveRecList');
-uimenu(m1,'Label','Import File','Tag','FileMenu_Import','Separator','on');
-uimenu(m1,'Label','Next File','Tag','FileMenu_Next','Accelerator','L');
+uimenu(m1,'Label','Next File','Tag','FileMenu_Next','Accelerator','L','Separator','on');
 uimenu(m1,'Label','Previous File','Tag','FileMenu_Prev','Accelerator','P');
 uimenu(m1,'Label','Save Configuration','Tag','FileMenu_Save','Accelerator','S');
 
 % handles.ImportMenu
 m1b = uimenu('Label','Import','Tag','ImportMenu','Parent',f);
-uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime');
+uimenu(m1b,'Label','Import File','Tag','FileMenu_Import');
+uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime','Separator','on');
+uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
+uimenu(m1b,'Label','Import EEG Traces','Tag','ImportMenu_Traces');
 uimenu(m1b,'Label','Import Episodes','Tag','ImportMenu_Episodes');
 uimenu(m1b,'Label','Import Spikoscope Regions','Tag','ImportMenu_Regions');
-uimenu(m1b,'Label','Import Spikoscope Traces','Tag','ImportMenu_Traces');
 uimenu(m1b,'Label','Import all','Tag','ImportMenu_All','Enable','off');
 
 % handles.ViewMenu
@@ -515,18 +516,21 @@ f2 = figure('Units','normalized',...
     'Visible',UiValues.video_status,...
     'WindowStyle','normal',...
     'Name','Behavior');
-ax = axes('Parent',f2,'Tag','VideoAxes',...
-    'Position',[.05 .05 .9 .9],'Box','on',...
-    'XTick',[],'XTickLabel','',...
-    'YTick',[],'YTickLabel','');
+
 myhandles.VideoFigure=f2;
-myhandles.VideoAxes=ax;
+%myhandles.VideoAxes=axes('Parent',f2);
+%myhandles.VideoImage = image(zeros(10,10,3),'Parent',myhandles.VideoAxes);
+myhandles.VideoAxes = axes('Parent',f2,'Tag','VideoAxes',...
+    'XTick',[],'YTick',[],'XTickLabel',[],'YTickLabel',[],...
+        'Position',[.05 .05 .9 .9],'Box','on');
+
 
 % Interactive Control
 set(myhandles.MainFigure,'KeyPressFcn',{@mainFigure_keypressFcn,myhandles});
 set(myhandles.RightAxes,'ButtonDownFcn',{@rightPanel_clickFcn,myhandles});
 set(myhandles.CenterAxes,'ButtonDownFcn',{@centerPanel_clickFcn,myhandles});
 set(myhandles.MainFigure,'DeleteFcn',{@mainFigure_closeFcn,myhandles});
+set(f2,'CloseRequestFcn',{@videoFigure_closereqFcn,myhandles});
 
 % Menu Callback Attribution
 set(myhandles.PrefMenu_Edit,'Callback',{@menuPreferences_Callback,myhandles});
@@ -534,13 +538,14 @@ set(myhandles.PrefMenu_Edit,'Callback',{@menuPreferences_Callback,myhandles});
 set(myhandles.FileMenu_Manage,'Callback',{@menuFiles_Callback,myhandles});
 set(myhandles.FileMenu_LoadRecList,'Callback',{@menuFiles_Callback,myhandles,2});
 set(myhandles.FileMenu_SaveRecList,'Callback',{@menuFiles_SaveRec_Callback,myhandles});
-set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
 set(myhandles.FileMenu_Next,'Callback',{@menuFiles_Next_Callback,myhandles});
 set(myhandles.FileMenu_Prev,'Callback',{@menuFiles_Prev_Callback,myhandles});
 set(myhandles.FileMenu_Save,'Callback',{@mainFigure_saveFcn,myhandles});
 
 % handles.ImportMenu
+set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
 set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
 set(myhandles.ImportMenu_Episodes,'Callback','import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Traces,'Callback','import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');

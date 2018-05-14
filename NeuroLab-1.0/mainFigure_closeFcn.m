@@ -16,6 +16,6 @@ function mainFigure_closeFcn(~,~,handles)
 % fprintf('main_fUSLab.fig Saved %s.\n Thanks for using fUSLab ! Goodbye !\n',fullfile(pwd,'main_fUSLab.fig'));
 % close(handles.MainFigure);
 
-close(handles.VideoFigure);
+delete(handles.VideoFigure);
 
 end

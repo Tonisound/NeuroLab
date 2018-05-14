@@ -114,6 +114,8 @@ GImport.Doppler_normalization_index = 1;
 GImport.Doppler_normalization = 'std';
 GImport.Doppler_loading_index = 1;
 GImport.Doppler_loading = 'full';
+GImport.Video_loading_index = 1;
+GImport.Video_loading = 'full';
 
 GImport_default = GImport;
 GParams_default = GParams;

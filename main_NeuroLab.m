@@ -1,4 +1,4 @@
-% NeuroLab Analysis Software 
+% NeuroLab Analysis Software
 % Version 1.0
 % Project EEG-EMG-fUS-VIDEO
 % User : Antoine BERGEL antoine.bergel@espci.fr
@@ -68,7 +68,6 @@ if isempty(FILES)
 else
     if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')
         load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
-        %load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),UiValues.CenterPanelPopup);
     else
         errordlg('Missing File Config.mat.\nTry reloading files.\n');
         return ;
@@ -89,7 +88,13 @@ if ~isempty(FILES)
     else
         warning('Missing Graphic Objects. File %s.\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     end
+    
+    % Loading Video file
+    import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);
 end
+
+
+
 actualize_plot(myhandles);
 myhandles.Cursor.XData = [CUR_IM, CUR_IM];
 myhandles.Cursor.YData = ylim(myhandles.RightAxes);

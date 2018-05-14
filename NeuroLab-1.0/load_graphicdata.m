@@ -38,7 +38,9 @@ set(hr,'ButtonDownFcn',{@click_RegionFcn,handles});
 cursor = findobj(handles.RightAxes,'Tag','Cursor');
 uistack(cursor,'top');
 
+%Update Box Patches
 boxPatch_Callback(handles.PatchBox,[],handles);
+
 success = true;
 toc;
 

@@ -62,8 +62,10 @@ if ~strcmp(old,new)
                 'HitTest','off','Parent',handles.RightAxes);
             s.Name = 'Whole';
             hl.UserData = s;
-            
         end
+        
+    % Loading Video file
+    import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
         
     else
         IM = zeros(88,169,2);
@@ -72,6 +74,10 @@ if ~strcmp(old,new)
         END_IM = 2;
         CUR_IM = 1;
         menuTraces_DeleteAll_Callback([],[],handles);
+        delete(handles.VideoAxes.UserData.Image);
+        delete(handles.VideoAxes.UserData.VideoReader);
+        handles.VideoAxes.UserData = [];
+        
     end
 else
     if ~isempty(FILES) && exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')
