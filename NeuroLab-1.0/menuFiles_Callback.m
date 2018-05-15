@@ -7,10 +7,9 @@ if nargin<4
     flag=0;
 end
 
-global SEED SEED_SWL DIR_SAVE;
+global SEED DIR_SAVE;
 global FILES CUR_FILE;
-
-%global IM START_IM END_IM LAST_IM CUR_IM;
+%global SEED_SWL IM START_IM END_IM LAST_IM CUR_IM;
 
 % Working with files
 files_temp = FILES;
@@ -460,7 +459,7 @@ end
     function addfileButton_callback(~,~)
         f2.Pointer = 'watch';
         drawnow;
-        F = menuImportfile_Callback([],[],1);
+        F = menuImportfile_Callback([],[],handles,1);
         f2.Pointer = 'arrow';
         if isempty(F)
             return;
@@ -487,7 +486,7 @@ end
 
     function load_file_callback (~,~)
 
-        F = menuImportfile_Callback([],[],2);
+        F = menuImportfile_Callback([],[],handles,2);
         if isempty(F)
             return;
         else

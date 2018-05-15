@@ -1,22 +1,32 @@
-function import_reference_time(dir_save,handles)
+function import_reference_time(F,Doppler_film,handles)
+% Import reference time - Detects NEV channel and extracts trigger from it
+% Adds one trigger if discrepancy between fus data and trigger number
 
-global LAST_IM IM CUR_IM DIR_SAVE FILES CUR_FILE;
+%global LAST_IM IM CUR_IM  FILES CUR_FILE;
+global CUR_IM DIR_SAVE;
 load('Preferences.mat','GImport');
+dir_save = fullfile(DIR_SAVE,F.nlab);
 
 % Trigger Importation
-if exist(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).nev), 'file')
+if exist(fullfile(F.fullpath,F.nev), 'file')
     fprintf('Importing Neural-Event data.\n');
-    data_nev = openNEV(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).nev));
+    data_nev = openNEV(fullfile(F.fullpath,F.nev),'nosave','nomat');
 else
-    errrordlg('Missing NEV file.\n');
+    % Missing NEV : template trigger
+    warning('Missing NEV file.\n');
+    templatetrigg_save(Doppler_film, dir_save,handles);
+    return;
 end
 
 % Asks User to pick trigger chanel if two or more channels detected
 trig_list  = unique(data_nev.Data.Spikes.Electrode);
 switch length(trig_list) 
     case 0
-        errordlg('No trigger channel found');
-        return
+        % Missing NEV : template trigger
+        warning('No trigger channel found: using template trigger.\n');
+        templatetrigg_save(Doppler_film, dir_save,handles);
+        return;
+        
     case 1
         fprintf('Trigger channel detected : %d.\n',trig_list(1));
         ind_trig = 1;
@@ -40,13 +50,21 @@ f_trig = 30000;
 time_stamp = data_nev.Data.Spikes.TimeStamp(data_nev.Data.Spikes.Electrode==trig_list(ind_trig))';
 trigger = double(time_stamp)/f_trig;
 
-% Test if trigger matches IM size
-if size(IM,3)~= length(trigger)
-    warning('Trigger (%d) and IM size (%d) do not match.\n',length(trigger),size(IM,3));
-    if length(trigger)+1 == size(IM,3)
+% Test if trigger matches Doppler_film size
+if size(Doppler_film,3)~= length(trigger)
+    if length(trigger)+1 == size(Doppler_film,3)
+        warning('Trigger (%d) and IM size (%d) do not match. -> Adding end trig',length(trigger),size(Doppler_film,3));
+        % extend one trigger
         trigger = [trigger; trigger(end)+trigger(2)-trigger(1)];
         time_stamp = [time_stamp; time_stamp(end)+time_stamp(2)-time_stamp(1)];
+    elseif length(trigger) > size(Doppler_film,3)
+        warning('Trigger (%d) and IM size (%d) do not match. -> Discarding end trigs',length(trigger),size(Doppler_film,3));
+        % keep only first triggers
+        trigger = trigger(end-size(Doppler_film,3)+1:end);
+        %trigger = trigger(1:size(Doppler_film,3));
+        time_stamp = time_stamp(1:size(Doppler_film,3));
     else
+        errordlg('Trigger (%d) and IM size (%d) do not match.\n',length(trigger),size(Doppler_film,3));
         return;
     end
 end
@@ -60,79 +78,33 @@ n_burst = 1;
 length_burst = length(trigger);
 reference = time_ref.name;
 
-% % Reloading Doppler_film
-% if ~exist('Doppler_film','var')
-%     fprintf('Loading Doppler_film ...\n');
-%     load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'),'Doppler_film');
-%     fprintf('Doppler_film loaded : %s\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'));
-% end
-%     
-% % Check fUS
-% % Removing data points where variance is too high
-% test = permute(mean(mean(Doppler_film,2,'omitnan'),1,'omitnan'),[3,1,2]);
-% test = (test-mean(test))/std(test);
-% ind_remove = find(test.^2>9);
-% 
-% % CHECKPOINT HERE WHEN LOADING
-% for i=1:length(ind_remove)
-%     Doppler_film(:,:,ind_remove(i)) = Doppler_film(:,:,ind_remove(i)-1);
-% end
-% 
-% % Doppler Resampling
-% delta_t = time_ref.Y(2)-time_ref.Y(1);
-% if n_burst==1
-%     rate = round(delta_t/GImport.resamp_cont);
-% else
-%     rate = round(delta_t/GImport.resamp_burst);
-% end
-% if rate>1
-%     promptMessage = sprintf('fUSLab is about to resample by factor %d,\nThis will modify Doppler_film.\nDo you want to continue ?',rate);
-%     button = questdlg(promptMessage, 'Continue', 'Continue', 'Cancel', 'Continue');
-%     if strcmpi(button, 'Cancel')
-%         return;
-%     end
-%     
-%     % Reshaping Doppler_film
-%     temp=[];
-%     Doppler_line = reshape(permute(Doppler_film,[3,1,2]),[size(Doppler_film,3) size(IM,1)*size(Doppler_film,2)]);
-%     Doppler_dummy = [Doppler_line;Doppler_line(end,:)];
-%     Doppler_line = resample(Doppler_dummy,rate,1);
-%     Doppler_line = Doppler_line(1:end-rate,:);
-%     Doppler_resample = zeros(size(IM,1),size(IM,2),size(Doppler_line,1));
-%     for k = 1:size(Doppler_line,1)
-%         Doppler_resample(:,:,k) = reshape(Doppler_line(k,:),[size(IM,1),size(IM,2)]);
-%         temp=[temp;time_ref.Y(ceil(k/rate))+(delta_t/rate*mod(k-1,rate))];
-%     end
-%     % Removing last image
-%     for i = flip(length_burst*rate*(1:n_burst)')
-%         Doppler_resample(:,:,i)=[];
-%         temp(i)=[];
-%     end
-%     Doppler_film = Doppler_resample;
-%     
-%     % Reshaping time_ref
-%     time_ref.Y = temp;
-%     time_ref.X = (1:length(temp))';
-%     time_ref.nb_images = length(time_ref.Y);
-%     length_burst = length_burst*rate-1;
-%         
-% end
-% 
-% % Updating global variables
-% IM = Doppler_film;
-% LAST_IM = size(IM,3);
-% % Saving Doppler_film
-% save(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'),'Doppler_film','-v7.3');
-% fprintf('Doppler_film saved at %s.mat\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'));
 
 % Save dans ReferenceTime.mat
 if  ~isempty(time_ref)
-    
     save(fullfile(dir_save,'Time_Reference.mat'),'time_ref','n_burst','length_burst','reference','-v7.3');
     handles.TimeDisplay.UserData = datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF');
     handles.TimeDisplay.String = datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
     fprintf('Succesful Reference Time Importation\n===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));
     
 end
+
+end
+
+function templatetrigg_save(Doppler_film,dir_save,handles)
+
+global CUR_IM;
+
+n_burst = 1;
+length_burst = size(Doppler_film,3);
+reference = 'default';
+time_ref.X=(1:length_burst)';
+time_ref.Y=(0:length_burst-1)'/2.5;
+time_ref.nb_images= size(Doppler_film,3);
+time_ref.name = reference;
+time_ref.time_stamp = [];
+save(fullfile(dir_save,'Time_Reference.mat'),'time_ref','n_burst','length_burst','reference','-v7.3');
+handles.TimeDisplay.UserData = datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF');
+handles.TimeDisplay.String = datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
+fprintf('Time_Reference.mat saved at %s.\n',fullfile(dir_save,'Time_Reference.mat'));
 
 end

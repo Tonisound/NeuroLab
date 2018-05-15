@@ -1,10 +1,9 @@
-function F = menuImportfile_Callback(~,~,flag)
+function F = menuImportfile_Callback(~,~,handles,flag)
 % File Importation
 % Searches for EEG, fUS and video files
-% Author : AB
-% Last modified: 10/04/18
 
 global SEED SEED_SWL DIR_SAVE;
+global CUR_IM START_IM END_IM LAST_IM;
 
 % Initialization
 F = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},'video',{},'dir_fus',{},'acq',{},'biq',{},...
@@ -215,51 +214,11 @@ for i = 1:length(FileList)
             mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
             fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
             
-            % create Doppler.mat
-            if ~isempty(F(ind_file).acq)
-                file_mat = fullfile(SEED,F(ind_file).parent,F(ind_file).session,F(ind_file).recording,F(ind_file).dir_fus,regexprep(F(ind_file).acq,'.acq','.mat'));
-                file_acq = fullfile(SEED,F(ind_file).parent,F(ind_file).session,F(ind_file).recording,F(ind_file).dir_fus,F(ind_file).acq);
-                % rename .acq in .mat
-                movefile(file_acq,file_mat);
-                fprintf('Loading Doppler_film...');
-                data = load(file_mat);
-                fprintf(' done.\n');
-                Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
-                % rename .mat in .acq
-                movefile(file_mat,file_acq);
-                fprintf('Saving Doppler_film...');
-                save(fullfile(DIR_SAVE,F(ind_file).nlab,'Doppler.mat'),'Doppler_film','-v7.3');
-                fprintf(' done.\n');
-            else
-                Doppler_film = NaN(0,0,2);
-            end
-            
-            % create Config.mat
-            START_IM = 1;
-            CUR_IM = 1;
-            END_IM = size(Doppler_film,3);
-            LAST_IM = size(Doppler_film,3);
-            X = size(Doppler_film,1);
-            Y = size(Doppler_film,2);
-            Current_Image = zeros(X,Y);
-            File = F(ind_file);
-            l = load('Files.mat','UiValues_default');
-            UiValues = l.UiValues_default;
-            Current_Image = zeros(X,Y);
-            save(fullfile(DIR_SAVE,F(ind_file).nlab,'Config.mat'),...
-                'START_IM','CUR_IM','END_IM','LAST_IM','X','Y','Current_Image','File','UiValues','-v7.3');
-            fprintf('Config.mat saved.\n');
+            % Import fUS Movie and Save Config.mat
+            Doppler_film = import_DopplerFilm(F(ind_file));
             
             % Detect trigger
-            n_burst = 1;
-            reference = 'default';
-            length_burst = size(Doppler_film,3);
-            time_ref.X=(1:length_burst)';
-            time_ref.Y=(0:length_burst-1)'/2.5;
-            time_ref.nb_images= size(Doppler_film,3);
-            save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),...
-                'n_burst','length_burst','time_ref','reference');
-            fprintf('Time_Reference.mat saved.\n');
+            import_reference_time(F(ind_file),Doppler_film,handles);
             
             % select EEG
         end

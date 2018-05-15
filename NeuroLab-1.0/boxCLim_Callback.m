@@ -9,16 +9,11 @@ if get(src,'Value') == 1
 else
     handles.CenterAxes.CLimMode = 'manual';
     
-    if handles.RightPanelPopup.Value<=3
-        % Regions Dynamics 
-        handles.CenterAxes.CLim = handles.RightAxes.YLim;
-    else
-        % otherwise using min max value IM
-        all_movie = IM(:,:,START_IM:END_IM);
-        m = min(all_movie(:),[],'omitnan');
-        M = max(all_movie(:),[],'omitnan');
-        handles.CenterAxes.CLim = [m,M];
-    end
+    all_movie = IM(:,:,START_IM:END_IM);
+    m = min(all_movie(:),[],'omitnan');
+    M = max(all_movie(:),[],'omitnan');
+    handles.CenterAxes.CLim = [m,M];
+    
     fprintf('CLim Mode set to manual. CLim = [%.1f %.1f].\n',handles.CenterAxes.CLim(1),handles.CenterAxes.CLim(2));
 end
 

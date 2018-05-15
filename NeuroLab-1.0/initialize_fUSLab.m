@@ -125,12 +125,12 @@ uimenu(m1,'Label','Save Configuration','Tag','FileMenu_Save','Accelerator','S');
 % handles.ImportMenu
 m1b = uimenu('Label','Import','Tag','ImportMenu','Parent',f);
 uimenu(m1b,'Label','Import File','Tag','FileMenu_Import');
-uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime','Separator','on');
+uimenu(m1b,'Label','Import Doppler film','Tag','ImportMenu_Doppler','Separator','on');
+uimenu(m1b,'Label','Import Timing','Tag','ImportMenu_ReferenceTime');
 uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
-uimenu(m1b,'Label','Import EEG Traces','Tag','ImportMenu_Traces');
-uimenu(m1b,'Label','Import Episodes','Tag','ImportMenu_Episodes');
-uimenu(m1b,'Label','Import Spikoscope Regions','Tag','ImportMenu_Regions');
-uimenu(m1b,'Label','Import all','Tag','ImportMenu_All','Enable','off');
+uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
+uimenu(m1b,'Label','Import Spikoscope Regions','Tag','ImportMenu_Regions','Enable','off');
+uimenu(m1b,'Label','Import Episodes','Tag','ImportMenu_Episodes','Enable','off');
 
 % handles.ViewMenu
 m1c = uimenu('Label','View','Tag','ViewMenu','Parent',f);
@@ -544,11 +544,12 @@ set(myhandles.FileMenu_Save,'Callback',{@mainFigure_saveFcn,myhandles});
 
 % handles.ImportMenu
 set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
-set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE));actualize_traces(myhandles);actualize_plot(myhandles);');
+set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),IM,myhandles);');
 set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
-set(myhandles.ImportMenu_Episodes,'Callback','import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
+set(myhandles.ImportMenu_LFPTraces,'Callback','import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
-set(myhandles.ImportMenu_Traces,'Callback','import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
+set(myhandles.ImportMenu_Episodes,'Callback','import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 
 % handles.ViewMenu
 set(myhandles.ViewMenu_Video,'Callback',{@menuView_Video_Callback,myhandles});

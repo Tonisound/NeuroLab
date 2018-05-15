@@ -55,13 +55,15 @@ fprintf('===> Saved at %s.\n',fullfile(folder_name,'Doppler_normalized.mat'));
 
 %Display directly Normalized Movie
 str = strtrim(handles.CenterPanelPopup.String(handles.CenterPanelPopup.Value,:));
-if strcmp(str,'Doppler_normalized')
-    IM = Doppler_normalized;
-    LAST_IM = size(Doppler_normalized,3);
-    actualize_traces(handles);
-    actualize_plot(handles);
-    buttonAutoScale_Callback(0,0,handles);
+if ~strcmp(str,'Doppler_normalized')
+     %ind = strcmp(handles.CenterPanelPopup.String,'Doppler_normalized');
+     handles.CenterPanelPopup.Value = 2;
 end
+IM = Doppler_normalized;
+LAST_IM = size(Doppler_normalized,3);
+actualize_traces(handles);
+actualize_plot(handles);
+buttonAutoScale_Callback(0,0,handles);
 
 handles.MainFigure.Pointer = 'arrow';
 success = true;

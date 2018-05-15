@@ -17,8 +17,9 @@ set(handles.PatchBox,'Value',uivalues.PatchBox);
 set(handles.MaskBox,'Value',uivalues.MaskBox);
 handles.TagButton.UserData = uivalues.TagSelection;
 %Video Menu
-handles.ViewMenu.Checked = uivalues.video_status;
-menuView_Video_Callback(handles.ViewMenu,[],handles);
+handles.ViewMenu_Video.Checked = uivalues.video_status;
+handles.VideoFigure.Visible = uivalues.video_status;
+%uivalues.video_status
 
 if ~isempty(FILES)
      try

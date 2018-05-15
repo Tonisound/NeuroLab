@@ -86,7 +86,7 @@ if ~isempty(FILES)
     elseif exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.fig'),'file')
         load_graphicfigure(fullfile(DIR_SAVE,[FILES(CUR_FILE).nlab]),myhandles);
     else
-        warning('Missing Graphic Objects. File %s.\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
+        warning('Missing Graphic Objects. File %s.',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     end
     
     % Loading Video file

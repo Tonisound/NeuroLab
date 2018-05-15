@@ -19,6 +19,7 @@ function save_graphicdata(savedir,handles)
     UiValues.PatchBox = handles.PatchBox.Value;
     UiValues.MaskBox = handles.MaskBox.Value;
     UiValues.video_status = handles.ViewMenu_Video.Checked;
+    handles.ViewMenu_Video.Checked;
     Current_Image = IM(:,:,CUR_IM);
     
     if isdir(savedir)

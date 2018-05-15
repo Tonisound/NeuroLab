@@ -1,5 +1,7 @@
 function menuView_Video_Callback(hObj,~,handles)
 
+%disp('menu view')
+
 if strcmp(hObj.Checked,'on')
     %hide video
     hObj.Checked = 'off';
@@ -10,7 +12,6 @@ else
     hObj.Checked = 'on';
     handles.VideoFigure.Visible = 'on';
     
-    %look for video reader and update UserData
 end
 
 end 

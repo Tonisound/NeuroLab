@@ -116,6 +116,8 @@ GImport.Doppler_loading_index = 1;
 GImport.Doppler_loading = 'full';
 GImport.Video_loading_index = 1;
 GImport.Video_loading = 'full';
+GImport.LFP_loading_index = 2;
+GImport.LFP_loading = 'ns2';
 
 GImport_default = GImport;
 GParams_default = GParams;
