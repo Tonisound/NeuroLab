@@ -164,10 +164,10 @@ set(resetAllparamButton,'Callback',@resetAllparamButton_callback);
         % Loading graphic data or Doppler if changed 
         global FILES CUR_FILE; 
         if flag_gload
-            load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus),handles);
+            load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         end
         if flag_dload
-            load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus),handles.CenterPanelPopup.Value);
+            load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles.CenterPanelPopup.Value);
             actualize_plot(handles);
         end
     end

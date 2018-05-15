@@ -4,9 +4,9 @@ function displayButtonCallback(~,~,handles)
 global DIR_SAVE FILES CUR_FILE IM START_IM END_IM;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
 catch
-    warning('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'));
+    warning('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
     length_burst = size(IM,3);
     n_burst =1;
 end
@@ -26,18 +26,18 @@ switch strtrim(str(val,:))
         
     case '(Movie) Deformation Field'
         try
-            load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'),'Doppler_film');
-            load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler_deformation.mat'),'Doppler_def','Doppler_defx','Doppler_defy');
+            load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'Doppler_film');
+            load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_deformation.mat'),'Doppler_def','Doppler_defx','Doppler_defy');
             movie_deformation(Doppler_film,Doppler_defx,Doppler_defy);
         catch
-            errordlg(sprintf('Missing File Doppler_deformation : %s\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler_deformation.mat')));
+            errordlg(sprintf('Missing File Doppler_deformation : %s\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_deformation.mat')));
             return;
         end
     case '(Movie) Data Reconstruction'
         try
-            %load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'),'Doppler_film');
-            load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler_normalized.mat'),'Doppler_normalized');
-            load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler_reconstructed.mat'),'Doppler_reconstructed_ICA','Doppler_reconstructed_PCA');
+            %load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'Doppler_film');
+            load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_normalized.mat'),'Doppler_normalized');
+            load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_reconstructed.mat'),'Doppler_reconstructed_ICA','Doppler_reconstructed_PCA');
             
             if ~isempty(X)&&~isempty(Y)
                 movie_reconstruction(Doppler_normalized,Doppler_reconstructed_ICA,Doppler_reconstructed_PCA,'Normalized Movie','ICA Reconstruction','PCA Reconstruction',X,Y);
@@ -45,7 +45,7 @@ switch strtrim(str(val,:))
                 movie_reconstruction(Doppler_normalized,Doppler_reconstructed_ICA,Doppler_reconstructed_PCA,'Normalized Movie','ICA Reconstruction','PCA Reconstruction');
             end
         catch
-            errordlg(sprintf('Missing File Doppler_reconstructed : %s\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler_reconstructed.mat')));
+            errordlg(sprintf('Missing File Doppler_reconstructed : %s\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_reconstructed.mat')));
             return;
         end
         

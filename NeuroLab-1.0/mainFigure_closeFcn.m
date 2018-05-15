@@ -6,7 +6,7 @@ function mainFigure_closeFcn(~,~,handles)
 % 
 % if ~isempty(FILES)
 %     % Saving Configuration
-%     save_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus),handles);
+%     save_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
 %     % Saving Files.mat
 %     save('Files.mat','CUR_FILE','-append');
 %     fprintf('Files.mat Saved %s.\n',fullfile(pwd,'Files.mat'));

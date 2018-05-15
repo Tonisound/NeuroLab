@@ -3,10 +3,10 @@ function menuTag_nextTag_Callback(~,~,handles)
 global DIR_SAVE FILES CUR_FILE CUR_IM START_IM END_IM;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell');
-    %fprintf('Successful Time Tags Importation (File %s).\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'));
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell');
+    %fprintf('Successful Time Tags Importation (File %s).\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'));
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 

@@ -89,8 +89,8 @@ fprintf('Config.mat saved.\n');
 % IM = Doppler_film;
 % LAST_IM = size(IM,3);
 % % Saving Doppler_film
-% save(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'),'Doppler_film','-v7.3');
-% fprintf('Doppler_film saved at %s.mat\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'));
+% save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'Doppler_film','-v7.3');
+% fprintf('Doppler_film saved at %s.mat\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'));
 
 end
 

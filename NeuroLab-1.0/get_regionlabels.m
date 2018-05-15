@@ -3,9 +3,9 @@ function labels = get_regionlabels
 global FILES CUR_FILE DIR_SAVE IM;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Spikoscope_Regions.mat'),'regions');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Regions.mat'),'regions');
 catch
-    errordlg(sprintf('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Spikoscope_Regions.mat')));
+    errordlg(sprintf('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Regions.mat')));
     return;
 end
 
