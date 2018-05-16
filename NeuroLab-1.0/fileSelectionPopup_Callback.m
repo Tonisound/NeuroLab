@@ -43,7 +43,7 @@ if ~strcmp(old,new)
             load_graphicdata(fullfile(DIR_SAVE,new_fus),handles);
         else
             % Delete existing graphic data
-            warning('Missing Graphic Objects. File %s.\n',fullfile(DIR_SAVE,new_fus));
+            warning('Missing Graphic Objects. File %s.',fullfile(DIR_SAVE,new_fus));
             delete(findobj(handles.CenterAxes,'Type','Line','-not','Tag','Cursor','-or','Type','Patch'));
             delete(findobj(handles.RightAxes,'Type','Line','-not','Tag','Cursor','-or','Type','Text'));
             

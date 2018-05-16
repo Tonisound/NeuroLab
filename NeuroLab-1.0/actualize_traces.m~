@@ -1,7 +1,7 @@
 function success = actualize_traces(handles)
 % Actualize Right Panel Traces when user modifies IM
 
-global DIR_SAVE FILES CUR_FILE IM ;
+global DIR_SAVE FILES CUR_FILE IM CUR_IM;
 success = false;
 
 indexes  = isinf(1./IM);
@@ -56,13 +56,12 @@ for idx =1:length(graphics)
             I = max(reg_x(1),reg_x(2));
             J = max(reg_y(3),reg_y(2));
             %graphics(idx).UserData.YData(~isnan(graphics(idx).UserData.YData)) = mean(mean(IM(i:I,j:J,:),2,'omitnan'),1,'omitnan');
-            graphics(idx).UserData.YData(1:end-1) = mean(mean(IM(i:I,j:J,:),2,'omitnan'),1,'omitnan');
+            graphics(idx).UserData.YData(~isnan(graphics(idx).UserData.YData)) = mean(mean(IM(i:I,j:J,:),2,'omitnan'),1,'omitnan');
         case 'Region'
             im_mask = graphics(idx).UserData.UserData.Mask;
             im_mask(im_mask==0)=NaN;
             im_mask = IM.*repmat(im_mask,1,1,size(IM,3));
-            %graphics(idx).UserData.YData(~isnan(graphics(idx).UserData.YData)) = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
-            graphics(idx).UserData.YData(1:end-1) = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
+            graphics(idx).UserData.YData(~isnan(graphics(idx).UserData.YData)) = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
     end
 end
 
