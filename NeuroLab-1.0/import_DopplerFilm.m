@@ -4,10 +4,6 @@ function Doppler_film = import_DopplerFilm(F,handles,flag)
 % flag 0 - first import
 % flag 1 - reimport
 
-% Setting flag to 0 if unprecised
-if nargin < 3
-    flag =1;
-end
 
 global IM LAST_IM SEED DIR_SAVE;
 
@@ -25,12 +21,22 @@ if ~isempty(F.acq)
     movefile(file_mat,file_acq);
     
     % Checking Doppler
-    ind_remove = check_Doppler(Doppler_film);
+    if flag == 1
+        d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh');
+        [ind_remove,thresh] = check_Doppler(Doppler_film,d.ind_remove,d.thresh);
+    else
+        [ind_remove,thresh] = check_Doppler(Doppler_film);
+    end
+    
+    
+    if isempty(ind_remove)
+        return;
+    end
     Doppler_film(:,:,ind_remove) = NaN(size(Doppler_film,1),size(Doppler_film,2),sum(ind_remove));
     
     % Saving Doppler_film
     fprintf('Saving Doppler_film ...');
-    save(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'Doppler_film','ind_remove','-v7.3');
+    save(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'Doppler_film','ind_remove','thresh','-v7.3');
     handles.RightAxes.UserData.ind_remove = ind_remove;
     fprintf(' done.\n');
 else

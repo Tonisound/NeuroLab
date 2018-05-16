@@ -544,7 +544,7 @@ set(myhandles.FileMenu_Save,'Callback',{@mainFigure_saveFcn,myhandles});
 
 % handles.ImportMenu
 set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
-set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE),myhandles);');
+set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE),myhandles,1);');
 set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),IM,myhandles);');
 set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
 set(myhandles.ImportMenu_LFPTraces,'Callback','import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');

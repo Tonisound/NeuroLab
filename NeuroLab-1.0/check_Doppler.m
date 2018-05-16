@@ -1,15 +1,28 @@
-function ind_rm_final = check_Doppler(Doppler_film)
+function [ind_rm_final,thresh_out] = check_Doppler(Doppler_film,ind_rm_initial,thresh_in)
 
 global CUR_IM;
-ind_rm_final = false(size(Doppler_film,3),1);
+
+ind_rm_final = [];
+thresh_out = [];
 
 % Check fUS
 % Removing data points where variance is too high
 t = (1:size(Doppler_film,3))';
 test = permute(mean(mean(Doppler_film,2,'omitnan'),1,'omitnan'),[3,1,2]);
-thresh = mean(test,'omitnan')+3*std(test,[],'omitnan');
-ind_remove = test>thresh;
-ind_keep = test<=thresh;
+
+
+% Checking arguments depending on importation type
+if nargin == 1
+    thresh = mean(test,'omitnan')+3*std(test,[],'omitnan');
+    ind_remove = test>thresh;
+    ind_keep = test<=thresh;
+    status = 'off';
+else
+    ind_remove = ind_rm_initial;
+    ind_keep = ~ind_rm_initial;
+    thresh = thresh_in;
+    status = 'on';
+end
 
 f = figure('Name','CheckDoppler','Units','normalized','Position',[.1 .3 .8 .4]);
 clrmenu(f);
@@ -43,12 +56,18 @@ l_rm = line('XData',t(ind_remove==1),'YData',test(ind_remove==1),...
     'Color','r','LineStyle','none','Marker','o','Parent',ax2,'HitTest','on');
 
 okButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.3 .025 .15 .1],'String','OK',...
+    'Position',[.2 .025 .2 .1],'String','OK',...
     'Tag','okButton','Parent',f);
-cancelButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.55 .025 .15 .1],'String','Skip',...
+skipButton = uicontrol('Style','pushbutton','Units','normalized',...
+    'Position',[.4 .025 .2 .1],'String','Skip',...
     'Tag','cancelButton','Parent',f);
+cancelButton = uicontrol('Style','pushbutton','Units','normalized',...
+    'Position',[.6 .025 .2 .1],'String','Cancel',...
+    'Tag','cancelButton','Parent',f);
+cancelButton.Enable = status;
+
 set(okButton,'Callback',{@okButton_callback});
+set(skipButton,'Callback',{@skipButton_callback});
 set(cancelButton,'Callback',{@cancelButton_callback});
 
 % Interactive control
@@ -61,6 +80,13 @@ set(f,'KeyPressFcn',{@key_pressFcn});
 
     function okButton_callback(~,~)
         ind_rm_final = ind_remove;
+        thresh_out = thresh;
+        close(f);
+    end
+
+    function skipButton_callback(~,~)
+        ind_rm_final = false(size(Doppler_film,3),1);
+        thresh_out = thresh;
         close(f);
     end
 

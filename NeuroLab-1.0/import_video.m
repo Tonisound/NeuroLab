@@ -13,7 +13,7 @@ if strcmp(GImport.Video_loading,'skip')
 end
 
 
-global CUR_IM;
+%global CUR_IM;
 
 load('Preferences.mat','GTraces');
 %load_fmt = GTraces.GraphicLoadFormat;
@@ -26,7 +26,7 @@ if exist(video_file,'file')
     fprintf('Video file loaded %s.\n',video_file);
     
     % Reading Current Frame
-    temp = datenum(handles.TimeDisplay.UserData(CUR_IM,:));
+    temp = datenum(handles.TimeDisplay.UserData(1,:));
     v.CurrentTime = (temp-floor(temp))*24*3600;
     vidFrame = readFrame(v);
     
