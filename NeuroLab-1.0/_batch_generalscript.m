@@ -331,7 +331,7 @@ for i =1:length(ft.UserData.Selection)%size(FILES,2)
             if exist(fullfile(DIR_SAVE,FILES(ii).gfus,'Trace_light.mat'),'file')
                 data = load(fullfile(DIR_SAVE,FILES(ii).gfus,'Trace_light.mat'),'traces');
                 ind_regions = strcmp(data.traces(:,2),'Trace_Region');
-                ind_spiko = strcmp(data.traces(:,2),'Trace_Spiko');
+                ind_spiko = strcmp(data.traces(:,2),'Trace_Cerep');
                 str_regions = [str_regions;data.traces(ind_regions,1)];
                 str_spiko = [str_spiko;data.traces(ind_spiko,1)];
             end
@@ -339,14 +339,14 @@ for i =1:length(ft.UserData.Selection)%size(FILES,2)
             if exist(fullfile(DIR_SAVE,FILES(ii).gfus,'Trace_light.mat'),'file')
                 data = load(fullfile(DIR_SAVE,FILES(ii).gfus,'Trace_light.mat'),'traces');
                 ind_regions = strcmp(data.traces(:,2),'Trace_Region');
-                ind_spiko = strcmp(data.traces(:,2),'Trace_Spiko');
+                ind_spiko = strcmp(data.traces(:,2),'Trace_Cerep');
                 str_regions = [str_regions;data.traces(ind_regions,1)];
                 str_spiko = [str_spiko;data.traces(ind_spiko,1)];
             end
             if exist(fullfile(DIR_SAVE,FILES(ii).gfus,'Trace_LFP.mat'),'file')
                 data = load(fullfile(DIR_SAVE,FILES(ii).gfus,'Trace_LFP.mat'),'traces');
                 ind_regions = strcmp(data.traces(:,2),'Trace_Region');
-                ind_spiko = strcmp(data.traces(:,2),'Trace_Spiko');
+                ind_spiko = strcmp(data.traces(:,2),'Trace_Cerep');
                 str_regions = [str_regions;data.traces(ind_regions,1)];
                 str_spiko = [str_spiko;data.traces(ind_spiko,1)];
             end           

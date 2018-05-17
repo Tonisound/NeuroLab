@@ -122,9 +122,9 @@ m = findobj(handles.RightAxes,'Tag','Trace_Mean');
 l = flipud(findobj(handles.RightAxes,'Tag','Trace_Region'));
 u = flipud(findobj(handles.RightAxes,'Tag','Trace_Pixel'));
 v = flipud(findobj(handles.RightAxes,'Tag','Trace_Box'));
-t = flipud(findobj(handles.RightAxes,'Tag','Trace_Spiko'));
+t = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep'));
 
-% Sorting Trace_Spiko
+% Sorting Trace_Cerep
 t1 = [];
 t2 = [];
 for i =1:length(t)

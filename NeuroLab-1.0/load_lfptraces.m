@@ -1,15 +1,14 @@
-function success = load_traces(folder_name,handles)
+function success = load_lfptraces(folder_name,handles)
 
 %global FILES CUR_FILE DIR_SAVE CUR_IM;
 %folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).gfus);
 success = false;
-global CUR_IM;
 
 load('Preferences.mat','GDisp','GTraces');
-try
-    load(fullfile(folder_name,'Spikoscope_Traces.mat'),'traces');
-catch
-    errordlg(sprintf('Missing File %s',fullfile(folder_name,'Spikoscope_Traces.mat')));
+if exist(fullfile(folder_name,'Cereplex_Traces.mat'),'file')
+    load(fullfile(folder_name,'Cereplex_Traces.mat'),'traces','MetaData');
+else
+    errordlg(sprintf('Missing File %s',fullfile(folder_name,'Cereplex_Traces.mat')));
     return;
 end
 
@@ -18,7 +17,7 @@ set(handles.MainFigure, 'pointer', 'watch');
 drawnow;
 
 set(handles.MainFigure, 'pointer', 'arrow');
-[ind_traces,ok] = listdlg('PromptString','Select Traces','SelectionMode','multiple','ListString',{traces.fullname},'ListSize',[400 500]);
+[ind_traces,ok] = listdlg('PromptString','Select Traces','SelectionMode','multiple','ListString',{traces.shortname},'ListSize',[400 500]);
 g_colors = get(groot,'defaultAxesColorOrder');
 
 if ~ok || isempty(ind_traces)
@@ -26,7 +25,7 @@ if ~ok || isempty(ind_traces)
 end
 
 for i=1:length(ind_traces)
-    str = lower(char(traces(ind_traces(i)).fullname));
+    str = lower(char(traces(ind_traces(i)).shortname));
     if strfind(str,'CA1')
         color = 'r';
     elseif strfind(str,'CA2')
@@ -63,7 +62,7 @@ for i=1:length(ind_traces)
     hl = line('XData',traces(ind_traces(i)).X_ind,...
         'YData',traces(ind_traces(i)).Y_im,...
         'Color',color,...
-        'Tag','Trace_Spiko',...
+        'Tag','Trace_Cerep',...
         'Visible','off',...
         'HitTest','off',...
         'Parent', handles.RightAxes);
@@ -73,7 +72,7 @@ for i=1:length(ind_traces)
     end
     
     % Updating UserData
-    t = traces(ind_traces(i)).fullname;
+    t = traces(ind_traces(i)).shortname;
     p = traces(ind_traces(i)).parent;
     %BEHAVIOR
     if strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_X_(m)_B0_B0')
@@ -108,7 +107,7 @@ for i=1:length(ind_traces)
     hl.UserData = s;
     
 end
-fprintf('Spikoscope Trace successfully loaded (%s)\n',traces(ind_traces).fullname);
+fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces).shortname);
 success = true;
 
 end

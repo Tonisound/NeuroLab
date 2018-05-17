@@ -106,7 +106,7 @@ function traces = generate_traces_data(ax)
     l2 = flipud(findobj(ax,'Tag','Trace_Pixel'));
     l3 = flipud(findobj(ax,'Tag','Trace_Box'));
     l = [l1;l2;l3];
-    t = flipud(findobj(ax,'Tag','Trace_Spiko'));
+    t = flipud(findobj(ax,'Tag','Trace_Cerep'));
     lines = [m;l;t];
 
     % Table Data

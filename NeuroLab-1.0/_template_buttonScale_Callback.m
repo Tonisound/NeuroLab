@@ -1,7 +1,7 @@
 function template_buttonScale_Callback(hObj,~,ax)
 
 %ax = findobj(handles.TopPanel,'Tag','Ax1');
-lines = findobj(ax,'Tag','Trace_Spiko');
+lines = findobj(ax,'Tag','Trace_Cerep');
 others = findobj(ax,'Tag','Trace_Region','-or','Tag','Trace_Pixel','-or','Tag','Trace_Box','-or','Tag','Trace_Mean');
 visible = findobj(ax,'Visible','on');
 others = visible(ismember(visible,others));

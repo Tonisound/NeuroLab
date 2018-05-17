@@ -25,8 +25,8 @@ Ydata = NaN(length(ind_events),length(ref_time),length(ind_electrodes));
 f_samp = NaN(length(ind_electrodes),1);
 for k = 1:length(ind_electrodes)
     switch char(LFP_Selection(k,2))
-        % Trace_Spiko
-        case {'Trace_Spiko'}
+        % Trace_Cerep
+        case {'Trace_Cerep'}
             X = lines_electrodes(k).UserData.X;
             Y = lines_electrodes(k).UserData.Y;
             f_samp(k) = length(lines_electrodes(k).UserData.X)/(lines_electrodes(k).UserData.X(end));

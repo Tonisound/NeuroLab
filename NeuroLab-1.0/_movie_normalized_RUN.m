@@ -25,7 +25,7 @@ t_video = .005;
 clim_default = handles.CenterAxes.CLimMode;
 
 % Finding X Y if exist
-l = findobj(handles.RightAxes,'Tag','Trace_Spiko');
+l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
 X_m = [];
 Y_m = [];
 for i=1:length(l)
@@ -38,7 +38,7 @@ for i=1:length(l)
 end
 
 % Finding LFP channels
-l = findobj(handles.RightAxes,'Tag','Trace_Spiko');
+l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
 str_lfp = [];
 % All channels
 ind_keep = ones(length(l),1);

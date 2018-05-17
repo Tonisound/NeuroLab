@@ -6,7 +6,7 @@ load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref');
 % Loading Traces
 xlim1 = time_ref.Y(1);
 xlim2 = time_ref.Y(end);
-l = findobj(myhandles.RightAxes,'Tag','Trace_Spiko');
+l = findobj(myhandles.RightAxes,'Tag','Trace_Cerep');
 temp=[];
 all_traces = struct('X',[],'Y',[],'f_samp',[]);
 for i =1:length(l)
@@ -457,7 +457,7 @@ if channels > l
         all_obj = ax.Children;
         for j = 1:length(all_obj)
             ll = all_obj(j);
-            if strcmp(ll.Tag,'Trace_Spiko')
+            if strcmp(ll.Tag,'Trace_Cerep')
                 set(ll,'XData',ll.UserData.X,'YData',ll.UserData.Y)
             elseif strcmp(ll.Type,'line')
                 ll.XData = xdat(:);

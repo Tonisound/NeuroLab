@@ -107,12 +107,12 @@ pos = get(mainPanel,'Position');
 
 % Lines Array
 m = findobj(ax,'Tag','Trace_Mean');
-%l = flipud(findobj(ax,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Spiko','-not','Tag','Trace_Mean'));
+%l = flipud(findobj(ax,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
 l1 = flipud(findobj(ax,'Tag','Trace_Region'));
 l2 = flipud(findobj(ax,'Tag','Trace_Pixel'));
 l3 = flipud(findobj(ax,'Tag','Trace_Box'));
 l = [l1;l2;l3];
-t = flipud(findobj(ax,'Tag','Trace_Spiko'));
+t = flipud(findobj(ax,'Tag','Trace_Cerep'));
 lines = [m;l;t];
 
 % Table Data
@@ -143,22 +143,22 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
         r = evnt.Indices(1);
         c = evnt.Indices(2);
         switch c
-            case 3,
+            case 3
                 hObj.Data{r,c} = rgb2char(char2rgb(evnt.EditData));
                 if isempty(hObj.Data{r,c}) && ismember(evnt.EditData,GDisp.colors_info)
                    [~,b] = ismember(evnt.EditData,GDisp.colors_info);
                    hObj.Data{r,c} = char(GDisp.colors(b));
                 end
                 
-            case 4,
+            case 4
                 if ~ismember(hObj.Data{r,c},GDisp.linestyle)
                     hObj.Data{r,c} = evnt.PreviousData;
                 end
-            case 5,
+            case 5
                 if ~isnumeric(eval(hObj.Data{r,c})) || eval(hObj.Data{r,c})<0
                     hObj.Data{r,c} = evnt.PreviousData;
                 end
-            case 6,
+            case 6
                 if ~ismember(hObj.Data{r,c},['on','off'])
                     hObj.Data{r,c} = evnt.PreviousData;
                 end    
@@ -274,9 +274,9 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
                 temp(ind(k),:) = {sprintf('SpikoRegion_%d',k),'Trace_Region',rgb2char(rand(1,3)),'-','0.5',char(status(3))};
             end
             
-            ind = find(strcmp(D(:,2),'Trace_Spiko'));
+            ind = find(strcmp(D(:,2),'Trace_Cerep'));
             for k =1:length(ind)
-                temp(ind(k),:) = {sprintf('SpikoTrace_%d',k),'Trace_Spiko',rgb2char(rand(1,3)),'-','0.5',char(status(4))};
+                temp(ind(k),:) = {sprintf('SpikoTrace_%d',k),'Trace_Cerep',rgb2char(rand(1,3)),'-','0.5',char(status(4))};
             end
             
             for ii=1:length(indices)
@@ -326,9 +326,9 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
             %ui_T.Data = ui_T.Data(ind_keep,:);
             for k =1:length(ind_rm)
                 switch lines(ind_rm(k)).Tag
-                    case {'Trace_Pixel','Trace_Box','Trace_Region'},
+                    case {'Trace_Pixel','Trace_Box','Trace_Region'}
                         ui_T.Data(ind_rm(k),:) = {'','.','','','','',''};
-                    case 'Trace_Spiko',
+                    case 'Trace_Cerep'
                         ui_T.Data(ind_rm(k),:) = {'','..','','','','',''};
                 end
             end

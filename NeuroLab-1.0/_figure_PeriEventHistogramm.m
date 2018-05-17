@@ -271,8 +271,8 @@ uitab('Parent',tabgp,...
 
 % Lines Array
 m = findobj(handles.RightAxes,'Tag','Trace_Mean');
-l = flipud(findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Spiko','-not','Tag','Trace_Mean'));
-t = flipud(findobj(handles.RightAxes,'Tag','Trace_Spiko'));
+l = flipud(findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
+t = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep'));
 lines_channels = [m;l];
 bc.UserData.lines_channels = lines_channels;
 bc.UserData.lines_electrodes = t;

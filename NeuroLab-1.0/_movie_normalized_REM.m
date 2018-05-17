@@ -83,8 +83,8 @@ end
 % end
 
 % Trace Selection
-l = flipud(findobj(handles.RightAxes,'Tag','Trace_Spiko','-or','Tag','Trace_Region'));
-%l = findobj(handles.RightAxes,'Tag','Trace_Spiko');
+l = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Region'));
+%l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
 str_lfp = [];
 % All channels
 for i=1:length(l)

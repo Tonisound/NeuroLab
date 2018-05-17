@@ -17,7 +17,7 @@ delete(findobj(ax2,'Type','Line','-not','Tag','Cursor','-or','Type','Text'));
 
 all_lines = findobj(RightAxes,'Type','Line','-not','Tag','Cursor');
 lines_other = findobj(all_lines,'Tag','Trace_Pixel','-or','Tag','Trace_Box','-or','Tag','Trace_Region','-or','Tag','Trace_Mean');
-lines_spiko = findobj(all_lines,'Tag','Trace_Spiko');
+lines_spiko = findobj(all_lines,'Tag','Trace_Cerep');
 
 ind_keep = ones(length(lines_spiko),1);
 for i =1:length(lines_spiko)
@@ -47,7 +47,7 @@ for i=length(h_line):-1:1
             s.Name = h_line(i).UserData.Name;
             h_line(i).UserData = s;
         
-        case {'Trace_Spiko'}
+        case {'Trace_Cerep'}
             s.Name = h_line(i).UserData.Name;
             dir_save = fullfile(save_dir,'Traces_Spiko');
             name = regexprep(s.Name,'/|\','_');

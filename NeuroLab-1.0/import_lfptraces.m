@@ -2,7 +2,7 @@ function success = import_lfptraces(F,handles)
 
 success = false;
 
-global CUR_IM DIR_SAVE;
+global DIR_SAVE;
 load('Preferences.mat','GImport');
 dir_save = fullfile(DIR_SAVE,F.nlab);
 
@@ -34,10 +34,10 @@ end
 fprintf(' done.\n');
 
 %Storing MetaData
-Metadada = data_ns.MetaTags;
-channel_list = cell(Metadada.ChannelCount,1);
+MetaData = data_ns.MetaTags;
+channel_list = cell(MetaData.ChannelCount,1);
 for i =1:length(channel_list)
-    channel_list(i) = {sprintf('Channel %3d',Metadada.ChannelID(i))};
+    channel_list(i) = {sprintf('LFP-%03d',MetaData.ChannelID(i))};
 end
 
 % Prompt user to select files 
@@ -50,28 +50,35 @@ if isempty(ind_channel)||v==0
 %     channel_list = channel_list(ind_channel);
 end
 
+
 % Storing data in traces
+parent = strcat(MetaData.Filename,MetaData.FileExt);
+nb_samples = MetaData.DataPoints;
+duration = MetaData.DataDurationSec;
+f_samp = MetaData.SamplingFreq;
 traces = struct('shortname',{},'fullname',{},'parent',{},...
-    'X',{},'Y','X_ind',{},'X_im',{},'Y_im',{},'nb_samples',{});
+    'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{},'nb_samples',{});
+
 for count=1:length(ind_channel)
     i = ind_channel(count);
     traces(count).shortname = char(channel_list(i));
-    traces(count).parent = char(dir_traces(ind_traces(i)).name);
-    traces(count).fullname = strcat(char(dir_traces(ind_traces(i)).name(1:30)),'/',char(hline_2(k)));
-    traces(count).X = T(:,1);
-    traces(count).Y = Data(count,:);
-    traces(count).X_ind = T(:,1);
-    traces(count).X_im = T(:,1);
-    traces(count).Y_im = T(:,k);
-    traces(count).nb_samples = length(T(:,k));
+    traces(count).parent = parent;
+    traces(count).fullname = fullfile(parent,char(channel_list(i)));
+    traces(count).X = (0: 1/f_samp : duration-(1/f_samp))';
+    traces(count).Y = double(data_ns.Data(count,:)');
+    traces(count).X_ind = data_t.time_ref.X;
+    traces(count).X_im = data_t.time_ref.Y;
+    traces(count).Y_im = interp1(traces(count).X,traces(count).Y,traces(count).X_im);
+    traces(count).nb_samples = nb_samples;
+    fprintf('Succesful Importation %s [Parent %s].\n',traces(count).shortname,traces(count).parent);
 end
-%fprintf('Succesful Importation (File %s /Folder %s).\n',data_ns);
+
 
 % Save dans SpikoscopeTraces.mat
 if ~isempty(traces)
-    save(fullfile(dir_save,'LFP_Traces.mat'),'traces','-v7.3');
+    save(fullfile(dir_save,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
 end
-fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Spikoscope_Traces.mat'));
+fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Cereplex_Traces.mat'));
 
 success = true;
 end

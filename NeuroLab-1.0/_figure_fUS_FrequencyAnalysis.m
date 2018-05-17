@@ -160,9 +160,9 @@ m = findobj(handles.RightAxes,'Tag','Trace_Mean');
 l = flipud(findobj(handles.RightAxes,'Tag','Trace_Region'));
 u = flipud(findobj(handles.RightAxes,'Tag','Trace_Pixel'));
 v = flipud(findobj(handles.RightAxes,'Tag','Trace_Box'));
-t = flipud(findobj(handles.RightAxes,'Tag','Trace_Spiko'));
+t = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep'));
 
-% Sorting Trace_Spiko
+% Sorting Trace_Cerep
 t1 = [];
 t2 = [];
 for i =1:length(t)
@@ -401,7 +401,7 @@ for k=1:length(panels)
             % button trace
             for j = 1:length(all_obj)
                 l = copyobj(all_obj(j),ax);
-                if strcmp(l.Tag,'Trace_Spiko')
+                if strcmp(l.Tag,'Trace_Cerep')
                     set(l,'XData',l.UserData.X,'YData',l.UserData.Y)
                 elseif strcmp(l.Type,'line')
                     l.XData = xdat(:);

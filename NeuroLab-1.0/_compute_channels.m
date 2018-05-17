@@ -25,8 +25,8 @@ Ydata = NaN(length(ind_events),length(ref_time),length(ind_channels));
 f_samp = NaN(length(ind_channels),1);
 for k = 1:length(ind_channels)
     switch char(fUS_Selection(k,2))
-        % Trace_Spiko
-        case {'Trace_Spiko'}
+        % Trace_Cerep
+        case {'Trace_Cerep'}
             X = lines_channels(k).UserData.X;
             Y = lines_channels(k).UserData.Y;
             f_samp(k) = length(lines_channels(k).UserData.X)/(lines_channels(k).UserData.X(end));

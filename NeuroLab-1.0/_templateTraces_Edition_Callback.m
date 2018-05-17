@@ -51,8 +51,8 @@ pos = get(mainPanel,'Position');
 
 % Lines Array
 m = findobj(ax,'Tag','Trace_Mean');
-l = flipud(findobj(ax,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Spiko','-not','Tag','Trace_Mean'));
-t = flipud(findobj(ax,'Tag','Trace_Spiko'));
+l = flipud(findobj(ax,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
+t = flipud(findobj(ax,'Tag','Trace_Cerep'));
 lines = [m;l;t];
 
 % UiTable Data

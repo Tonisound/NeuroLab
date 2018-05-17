@@ -43,8 +43,8 @@ switch strtrim(str(val,:))
     case 'Load Spikoscope Regions'
         load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
     
-    case 'Load Spikoscope Traces'
-        load_traces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+    case 'Load Cereplex Traces'
+        load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     case 'Detect Vascular Surges'
         detect_vascular_surges(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

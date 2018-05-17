@@ -398,8 +398,8 @@ e2.Position = [19/20     .9      w_button   2*w_button];
 % Fourth Tab
 % Lines Array
 m = findobj(myhandles.RightAxes,'Tag','Trace_Mean');
-l = flipud(findobj(myhandles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Spiko','-not','Tag','Trace_Mean'));
-t = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Spiko'));
+l = flipud(findobj(myhandles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
+t = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
 lines_1 = [m;l];
 lines_2 = t;
 lines = [lines_1;lines_2];
@@ -1152,7 +1152,7 @@ switch tag
                 handles.Edit1.String = -15;
                 handles.Edit2.String = 15;
         end
-    case {'Trace_Spiko'}
+    case {'Trace_Cerep'}
         switch n_burst
             
             case 1,

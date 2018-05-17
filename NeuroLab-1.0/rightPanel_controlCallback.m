@@ -11,7 +11,7 @@ box = findobj(handles.CenterAxes,'Tag','Box');
 hp = findobj(handles.RightAxes,'Tag','Trace_Pixel','-or','Tag','Trace_Pixel_label');
 hb = findobj(handles.RightAxes,'Tag','Trace_Box','-or','Tag','Trace_Box_label');
 hr = findobj(handles.RightAxes,'Tag','Trace_Region','-or','Tag','Trace_Region_label');
-ht = findobj(handles.RightAxes,'Tag','Trace_Spiko','-or','Tag','Trace_Spiko_label');
+ht = findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Cerep_label');
 hlab = findobj(handles.RightAxes,'Type','text','-not','Tag','Trace_Mean_label');
 
 set([pix;box;hp;hb;hr;ht],'Visible','off');

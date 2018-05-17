@@ -143,7 +143,7 @@ uimenu(m2,'Label','Edit Traces','Tag','TracesMenu_Edition','Accelerator','T');
 uimenu(m2,'Label','Delete All Traces','Tag','TracesMenu_Delete_All','Separator','on');
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','TracesMenu_Delete_Pixels');
 uimenu(m2,'Label','Delete Region Traces','Tag','TracesMenu_Delete_Regions');
-uimenu(m2,'Label','Delete Spikoscope Traces','Tag','TracesMenu_Delete_Spiko');
+uimenu(m2,'Label','Delete Cereplex Traces','Tag','TracesMenu_Delete_Spiko');
 uimenu(m2,'Label','Reload Configuration','Tag','TracesMenu_ReloadConfig','Separator','on');
 uimenu(m2,'Label','Reload Doppler film','Tag','TracesMenu_ReloadDoppler');
 uimenu(m2,'Label','Actualize Traces','Tag','TracesMenu_ActualizeTraces');
@@ -287,7 +287,7 @@ pl = uicontrol(f,'Style','popup',...
     'FontSize',fontsize,...
     'Parent',botPanel);
 pl_str = 'Compute Normalized Movie|Compute Deformation Field|Edit Time Tags|Edit Time Groups';
-pl_str = strcat(pl_str,'|Load Spikoscope Regions|Load Spikoscope Traces|Detect Vascular Surges|Edit Anatomical Regions|Export Anatomical Regions');
+pl_str = strcat(pl_str,'|Load Spikoscope Regions|Load Cereplex Traces|Detect Vascular Surges|Edit Anatomical Regions|Export Anatomical Regions');
 pl.String = pl_str;
 
 % Process Button

@@ -120,8 +120,8 @@ groupPanel = uipanel('Parent',tab0,...
 
 % Lines Array
 m = findobj(handles.RightAxes,'Tag','Trace_Mean');
-l = flipud(findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Spiko','-not','Tag','Trace_Mean'));
-t = flipud(findobj(handles.RightAxes,'Tag','Trace_Spiko'));
+l = flipud(findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
+t = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep'));
 lines = [m;l;t];
 bc.UserData.lines = lines;
 pu1.UserData.lines = lines;
@@ -1450,7 +1450,7 @@ for i=1:channels
             case {'Peak Time Per Burst (Ref:Speed)','Peak Time Per Burst (Ref:Accel)','Peak Time Per Burst (Ref:Theta)'}
                 
                 % Choosing Reference Data
-                l = findobj(lines,'Tag','Trace_Spiko');
+                l = findobj(lines,'Tag','Trace_Cerep');
                 switch strtrim(str_popup2(val_popup2,end-5:end-1))
                     case 'Speed',
                         for j=1:length(l)

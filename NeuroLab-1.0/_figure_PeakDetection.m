@@ -397,7 +397,7 @@ all_axes = findobj(handles.MainTab,'Type','Axes');
 % Callback function Attribution
 % Loading traces
 pu = handles.Popup1;
-traces = flipud(findobj(old_handles.RightAxes,'Tag','Trace_Spiko'));
+traces = flipud(findobj(old_handles.RightAxes,'Tag','Trace_Cerep'));
 handles.MainFigure.UserData.traces = traces;
 pu.Callback = {@update_popup_Callback,handles};
 update_popup_Callback(pu,[],handles);
