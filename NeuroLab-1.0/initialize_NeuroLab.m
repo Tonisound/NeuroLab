@@ -1,4 +1,4 @@
-function [f,myhandles] = initialize_fUSLab(str,UiValues)
+function [f,myhandles] = initialize_NeuroLab(str,UiValues)
 % GUI Reinitialization 
 % Author : AB
 % Last modified: 10/04/18
@@ -286,10 +286,10 @@ pl = uicontrol(f,'Style','popup',...
     'Tag','ProcessListPopup',...
     'FontSize',fontsize,...
     'Parent',botPanel);
-pl_str = 'Compute Normalized Movie|Compute Deformation Field|Import Reference Time|Import Spikoscope Time Tags';
-pl_str = strcat(pl_str,'|Import Spikoscope Episodes|Edit Time Tags|Edit Time Groups|Import Spikoscope Regions|Import Spikoscope Traces');
+pl_str = 'Compute Normalized Movie|Compute Deformation Field|Edit Time Tags|Edit Time Groups';
 pl_str = strcat(pl_str,'|Load Spikoscope Regions|Load Spikoscope Traces|Detect Vascular Surges|Edit Anatomical Regions|Export Anatomical Regions');
 pl.String = pl_str;
+
 % Process Button
 % handles.ProcessButton
 h22 = uicontrol(f,'Style','pushbutton',...
@@ -547,7 +547,7 @@ set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
 set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE),myhandles,1);');
 set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),IM,myhandles);');
 set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
-set(myhandles.ImportMenu_LFPTraces,'Callback','import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
+set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),myhandles);');
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Episodes,'Callback','import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 

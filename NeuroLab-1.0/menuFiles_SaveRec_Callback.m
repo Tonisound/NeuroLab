@@ -23,9 +23,16 @@ else
     fid = fopen(filename, 'wt' );
     for i=1:length(FILES)
         % Saving nlab files
-        % fprintf(fid,'%s',sprintf('%s%s%s',sep_swl_1,FILES(i).fullpath, sep_swl_2));
-        % Saving seed files
         fprintf(fid,'%s',sprintf('%s%s%s',sep_swl_1,fullfile(DIR_SAVE,FILES(i).nlab), sep_swl_2));
+        fprintf(fid,'%s',newline);
+    end
+    fclose(fid);
+    
+    filename = fullfile(path,strcat(file(1:end-4),'_S',file(end-3:end)));
+    fid = fopen(filename, 'wt' );
+    for i=1:length(FILES)
+        % Saving seed files
+        fprintf(fid,'%s',sprintf('%s%s%s',sep_swl_1,FILES(i).fullpath, sep_swl_2));
         fprintf(fid,'%s',newline);
     end
     fclose(fid);

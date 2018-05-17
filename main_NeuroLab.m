@@ -68,15 +68,18 @@ if isempty(FILES)
 else
     if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')
         load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
+        if ~exist('IM','var')
+            load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),UiValues.CenterPanelPopup);
+        end
     else
         errordlg('Missing File Config.mat.\nTry reloading files.\n');
         return ;
     end
 end
 
-% Initializing fUSLab if main_fUSLab.fig is missing
-[f,myhandles] = initialize_fUSLab(str,UiValues);
-fprintf('fUSLab successfully reinitialized.\n');
+% Initializing NeuroLab if main_NeuroLab.fig is missing
+[f,myhandles] = initialize_NeuroLab(str,UiValues);
+fprintf('NeuroLab successfully reinitialized.\n');
 
 
 % Adding graphic data if Config.fig is found
@@ -93,8 +96,6 @@ if ~isempty(FILES)
     import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);
 end
 
-
-
 actualize_plot(myhandles);
 myhandles.Cursor.XData = [CUR_IM, CUR_IM];
 myhandles.Cursor.YData = ylim(myhandles.RightAxes);
@@ -106,4 +107,4 @@ end
 %boxCLim_Callback(myhandles.CLimBox,[],myhandles);
 
 % Success
-fprintf(' Welcome to fUSLab! \n');
+fprintf(' Welcome to NeuroLab! \n');

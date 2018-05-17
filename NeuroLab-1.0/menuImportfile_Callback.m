@@ -7,7 +7,7 @@ global CUR_IM START_IM END_IM LAST_IM;
 
 % Initialization
 F = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},'video',{},'dir_fus',{},'acq',{},'biq',{},...
-    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},'nev',{},'nlab',{},'type',{});
+    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},'nev',{},'ccf',{},'rcf',{},'nlab',{},'type',{});
 
 
 if flag == 1
@@ -170,6 +170,16 @@ for i = 1:length(FileList)
     if ~isempty(d)
         str = char(d(1).name);
         F(ind_file).nev = str;
+    end
+    d = dir(fullfile(FileName,'*.ccf'));
+    if ~isempty(d)
+        str = char(d(1).name);
+        F(ind_file).ccf = str;
+    end
+    d = dir(fullfile(FileName,'*.rcf'));
+    if ~isempty(d)
+        str = char(d(1).name);
+        F(ind_file).rcf = str;
     end
     
     % File type

@@ -15,30 +15,30 @@ switch strtrim(str(val,:))
     case 'Compute Deformation Field'
         compute_deformationfield(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-    case 'Import Reference Time'
-        import_reference_time(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-    
-    case 'Import Spikoscope Time Tags' 
-        import_time_tags(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+%     case 'Import Reference Time'
+%         import_reference_time(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+%     
+%     case 'Import Spikoscope Time Tags' 
+%         import_time_tags(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+%             
+%     case 'Import Spikoscope Traces'
+%         v = import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
+%         if v==1
+%             load_traces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+%         end
+%         
+%     case 'Import Spikoscope Regions'
+%         import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
+%         load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+%         
+%     case 'Import Spikoscope Episodes'
+%         import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
         
     case 'Edit Time Tags'
         menuTag_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
     
     case 'Edit Time Groups'
         menuTag_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-
-    case 'Import Spikoscope Regions'
-        import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
-        load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles); 
-    
-    case 'Import Spikoscope Traces'
-        v = import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
-        if v==1
-            load_traces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-        end
-    
-    case 'Import Spikoscope Episodes'
-        import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
         
     case 'Load Spikoscope Regions'
         load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

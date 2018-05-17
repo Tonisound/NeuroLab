@@ -1,6 +1,6 @@
 function mainFigure_closeFcn(~,~,handles)
 % GUI closing function
-% Saving Config.mat Files.mat & main_fUSLab.fig
+% Saving Config.mat & Files.mat
 
 % global FILES CUR_FILE DIR_SAVE;
 % 
@@ -12,8 +12,8 @@ function mainFigure_closeFcn(~,~,handles)
 %     fprintf('Files.mat Saved %s.\n',fullfile(pwd,'Files.mat'));
 % end
 % % Saving GUI figure
-% savefig('main_fUSLab.fig');
-% fprintf('main_fUSLab.fig Saved %s.\n Thanks for using fUSLab ! Goodbye !\n',fullfile(pwd,'main_fUSLab.fig'));
+% savefig('main_NeuroLab.fig');
+% fprintf('main_NeuroLab.fig Saved %s.\n Thanks for using NeuroLab ! Goodbye !\n',fullfile(pwd,'main_NeuroLab.fig'));
 % close(handles.MainFigure);
 
 delete(handles.VideoFigure);

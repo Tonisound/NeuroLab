@@ -21,6 +21,7 @@ load('Preferences.mat','GTraces');
 
 % Load Video File as Video Reader
 if exist(video_file,'file')
+    tic
     fprintf('Loading Video file ...\n');
     v = VideoReader(video_file);
     fprintf('Video file loaded %s.\n',video_file);
@@ -43,7 +44,7 @@ if exist(video_file,'file')
     handles.VideoAxes.UserData.VideoReader = v;
     handles.VideoAxes.UserData.Image = im;
     handles.VideoAxes.Visible = 'off';
-    
+    toc
 else
     if ~isempty(handles.VideoAxes.UserData)
         delete(handles.VideoAxes.UserData.Image);

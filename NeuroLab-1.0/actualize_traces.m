@@ -6,7 +6,7 @@ success = false;
 
 indexes  = isinf(1./IM);
 if size(IM,1)*size(IM,2)*(size(IM,3)-1) == sum(indexes(:))
-    choice = questdlg('fUSLab is going to modify traces without loading Doppler',...
+    choice = questdlg('NeuroLab is going to modify traces without loading Doppler',...
             'User Confirmation','Proceed','Load Doppler','Cancel','Cancel');
         % Proceed, cancel, update
         if ~isempty(choice)

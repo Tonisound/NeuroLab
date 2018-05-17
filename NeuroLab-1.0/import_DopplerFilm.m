@@ -93,7 +93,7 @@ end
 %     rate = round(delta_t/GImport.resamp_burst);
 % end
 % if rate>1
-%     promptMessage = sprintf('fUSLab is about to resample by factor %d,\nThis will modify Doppler_film.\nDo you want to continue ?',rate);
+%     promptMessage = sprintf('NeuroLab is about to resample by factor %d,\nThis will modify Doppler_film.\nDo you want to continue ?',rate);
 %     button = questdlg(promptMessage, 'Continue', 'Continue', 'Cancel', 'Continue');
 %     if strcmpi(button, 'Cancel')
 %         return;
