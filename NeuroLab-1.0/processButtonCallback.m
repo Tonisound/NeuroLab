@@ -24,7 +24,7 @@ switch strtrim(str(val,:))
 %     case 'Import Spikoscope Traces'
 %         v = import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
 %         if v==1
-%             load_traces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+%             load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
 %         end
 %         
 %     case 'Import Spikoscope Regions'
@@ -35,10 +35,10 @@ switch strtrim(str(val,:))
 %         import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
         
     case 'Edit Time Tags'
-        menuTag_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
     
     case 'Edit Time Groups'
-        menuTag_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     case 'Load Spikoscope Regions'
         load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

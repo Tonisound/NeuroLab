@@ -1,4 +1,4 @@
-function menuTag_nextTag_Callback(~,~,handles)
+function menuEdit_prevTag_Callback(~,~,handles)
 
 global DIR_SAVE FILES CUR_FILE CUR_IM START_IM END_IM;
 
@@ -12,7 +12,7 @@ end
 
 if ~isempty(handles.TagButton.UserData)
     
-    ind_new = min(max(handles.TagButton.UserData.Selected)+1,size(TimeTags_cell,1)-1);  
+    ind_new = max(min(handles.TagButton.UserData.Selected)-1,1);  
     min_time = char(TimeTags_cell(ind_new+1,3));
     max_time_on = char(TimeTags_cell(ind_new+1,3));
     max_time_dur = char(TimeTags_cell(ind_new+1,4));

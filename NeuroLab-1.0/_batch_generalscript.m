@@ -479,7 +479,7 @@ for i = 1:length(ind_files)
                     success = import_time_tags(fullfile(SEED,FILES(ii).parent,FILES(ii).spiko),fullfile(DIR_SAVE,FILES(ii).gfus),myhandles);
                     
                 case 'Edit Time Groups'
-                    success = menuTag_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).gfus),myhandles);
+                    success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).gfus),myhandles);
                     
                 case 'Import Spikoscope Episodes'
                     success = import_episodes(fullfile(SEED,FILES(ii).parent,FILES(ii).spiko),fullfile(DIR_SAVE,FILES(ii).gfus));
@@ -494,7 +494,7 @@ for i = 1:length(ind_files)
                     success = load_regions(fullfile(DIR_SAVE,FILES(ii).gfus),myhandles);
                     
                 case 'Load Spikoscope Traces'
-                    success = load_traces(fullfile(DIR_SAVE,FILES(ii).gfus),myhandles);
+                    success = load_lfptraces(fullfile(DIR_SAVE,FILES(ii).gfus),myhandles);
                     
                 case 'Detect Vascular Surges'
                     success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).gfus),myhandles,0);
@@ -520,7 +520,7 @@ for i = 1:length(ind_files)
                     f2 = figure_PeakDetection(myhandles,0,str_tag);
                    
                 case 'Trace Edition'
-                    success = menuTraces_Edition_Callback([],[],myhandles.RightAxes,myhandles);
+                    success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);
                     
                 case 'Actualize Traces'
                     success = actualize_traces(myhandles);

@@ -132,31 +132,27 @@ uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
 uimenu(m1b,'Label','Import Spikoscope Regions','Tag','ImportMenu_Regions','Enable','off');
 uimenu(m1b,'Label','Import Episodes','Tag','ImportMenu_Episodes','Enable','off');
 
+% handles.EditMenu
+m2 = uimenu('Label','Edit','Tag','EditMenu','Parent',f);
+uimenu(m2,'Label','Edit Traces','Tag','EditMenu_Edition','Accelerator','T');
+uimenu(m2,'Label','Edit Time Tags','Tag','EditMenu_TimeTagEdition');
+uimenu(m2,'Label','Select Time Tags','Tag','EditMenu_TagSelection');
+uimenu(m2,'Label','Edit Time Groups','Tag','EditMenu_TimeGroupEdition');
+uimenu(m2,'Label','Select Time Groups','Tag','EditMenu_TimeGroupSelection');
+
+uimenu(m2,'Label','Reload Doppler film','Tag','EditMenu_ReloadDoppler','Separator','on');
+uimenu(m2,'Label','Reload Configuration','Tag','EditMenu_ReloadConfig');
+uimenu(m2,'Label','Actualize Traces','Tag','EditMenu_ActualizeTraces');
+
+uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','on');
+uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
+uimenu(m2,'Label','Delete Region Traces','Tag','EditMenu_Delete_Regions');
+uimenu(m2,'Label','Delete Cereplex Traces','Tag','EditMenu_Delete_Spiko');
+
 % handles.ViewMenu
 m1c = uimenu('Label','View','Tag','ViewMenu','Parent',f);
 uimenu(m1c,'Label','Show Video','Tag','ViewMenu_Video','Checked',UiValues.video_status);
 uimenu(m1c,'Label','Split axes','Tag','ViewMenu_Split','Enable','off');
-
-% handles.TracesMenu
-m2 = uimenu('Label','Traces','Tag','TracesMenu','Parent',f);
-uimenu(m2,'Label','Edit Traces','Tag','TracesMenu_Edition','Accelerator','T');
-uimenu(m2,'Label','Delete All Traces','Tag','TracesMenu_Delete_All','Separator','on');
-uimenu(m2,'Label','Delete Pixels and Boxes','Tag','TracesMenu_Delete_Pixels');
-uimenu(m2,'Label','Delete Region Traces','Tag','TracesMenu_Delete_Regions');
-uimenu(m2,'Label','Delete Cereplex Traces','Tag','TracesMenu_Delete_Spiko');
-uimenu(m2,'Label','Reload Configuration','Tag','TracesMenu_ReloadConfig','Separator','on');
-uimenu(m2,'Label','Reload Doppler film','Tag','TracesMenu_ReloadDoppler');
-uimenu(m2,'Label','Actualize Traces','Tag','TracesMenu_ActualizeTraces');
-
-% handles.TagMenu
-m2b = uimenu('Label','Time Tags','Tag','TagMenu','Parent',f);
-uimenu(m2b,'Label','Import Time Tags','Tag','ImportMenu_TimeTags');
-uimenu(m2b,'Label','Edit Time Tags','Tag','TagMenu_TimeTagEdition');
-uimenu(m2b,'Label','Select Time Tags','Tag','TagMenu_TagSelection');
-uimenu(m2b,'Label','Edit Time Groups','Tag','TagMenu_TimeGroupEdition');
-uimenu(m2b,'Label','Select Time Groups','Tag','TagMenu_TimeGroupSelection');
-uimenu(m2b,'Label','Previous Time Tag','Tag','TagMenu_prevTag','Separator','on');
-uimenu(m2b,'Label','Next Time Tag','Tag','TagMenu_nextTag')
 
 % handles.SynthesisMenu
 m2c = uimenu('Label','Synthesis','Tag','SynthesisMenu','Parent',f);
@@ -554,26 +550,21 @@ set(myhandles.ImportMenu_Episodes,'Callback','import_episodes(fullfile(SEED,FILE
 % handles.ViewMenu
 set(myhandles.ViewMenu_Video,'Callback',{@menuView_Video_Callback,myhandles});
 
-% handles.TracesMenu
-set(myhandles.TracesMenu_Edition,'Callback',{@menuTraces_Edition_Callback,myhandles.RightAxes,myhandles});
-set(myhandles.TracesMenu_Delete_All,'Callback',{@menuTraces_DeleteAll_Callback,myhandles});
-set(myhandles.TracesMenu_Delete_Pixels,'Callback',{@menuTraces_DeleteLines_Callback,myhandles,1});
-set(myhandles.TracesMenu_Delete_Regions,'Callback',{@menuTraces_DeleteLines_Callback,myhandles,2});
-set(myhandles.TracesMenu_Delete_Spiko,'Callback',{@menuTraces_DeleteLines_Callback,myhandles,3});
-set(myhandles.TracesMenu_ReloadConfig,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.TracesMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
-set(myhandles.TracesMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
+% handles.EditMenu
+set(myhandles.EditMenu_Edition,'Callback',{@menuEdit_TracesEdition_Callback,myhandles.RightAxes,myhandles});
+set(myhandles.EditMenu_TimeTagEdition,'Callback','menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.EditMenu_TagSelection,'Callback',{@menuEdit_TimeTagSelection_Callback,myhandles});
+set(myhandles.EditMenu_TimeGroupEdition,'Callback','menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.EditMenu_TimeGroupSelection,'Callback',{@menuEdit_TimeGroupSelection_Callback,myhandles});
+set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhandles});
+set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
+set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
+set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
+set(myhandles.EditMenu_ReloadConfig,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.EditMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
+set(myhandles.EditMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
 
-% handles.TagMenu
-set(myhandles.ImportMenu_TimeTags,'Callback','import_time_tags(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.TagMenu_TimeTagEdition,'Callback','menuTag_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.TagMenu_TagSelection,'Callback',{@menuTag_TimeTagSelection_Callback,myhandles});
-set(myhandles.TagMenu_TimeGroupEdition,'Callback','menuTag_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.TagMenu_TimeGroupSelection,'Callback',{@menuTag_TimeGroupSelection_Callback,myhandles});
-set(myhandles.TagMenu_nextTag,'Callback',{@menuTag_nextTag_Callback,myhandles});
-set(myhandles.TagMenu_prevTag,'Callback',{@menuTag_prevTag_Callback,myhandles});
-
-% handles.ProcesMenu
+% handles.ProcessMenu
 set(myhandles.SynthesisMenu_Batch,'Callback',{@batch_generalscript,myhandles});
 set(myhandles.SynthesisMenu_Correlation,'Callback','synthesis_CorrelationAnalysis();');
 set(myhandles.SynthesisMenu_Region,'Callback','synthesis_RegionStatistics();');
@@ -595,10 +586,10 @@ set(myhandles.ProcessButton,'Callback',{@processButtonCallback,myhandles});
 set(myhandles.DisplayButton,'Callback',{@displayButtonCallback,myhandles});
 set(myhandles.LabelBox,'Callback',{@boxLabel_Callback,myhandles});
 set(myhandles.AutoScaleButton,'Callback',{@buttonAutoScale_Callback,myhandles});
-set(myhandles.TracesButton,'Callback',{@menuTraces_Edition_Callback,myhandles.RightAxes,myhandles});
-set(myhandles.TagButton,'Callback',{@menuTag_TimeTagSelection_Callback,myhandles});
-set(myhandles.prevTagButton,'Callback',{@menuTag_prevTag_Callback,myhandles});
-set(myhandles.nextTagButton,'Callback',{@menuTag_nextTag_Callback,myhandles});
+set(myhandles.TracesButton,'Callback',{@menuEdit_TracesEdition_Callback,myhandles.RightAxes,myhandles});
+set(myhandles.TagButton,'Callback',{@menuEdit_TimeTagSelection_Callback,myhandles});
+set(myhandles.prevTagButton,'Callback',{@menuEdit_prevTag_Callback,myhandles});
+set(myhandles.nextTagButton,'Callback',{@menuEdit_nextTag_Callback,myhandles});
 set(myhandles.ScaleButton,'Callback',{@buttonScale_Callback,myhandles.RightAxes});
 set(myhandles.PatchBox,'Callback',{@boxPatch_Callback,myhandles});
 set(myhandles.MaskBox,'Callback',{@boxMask_Callback,myhandles});

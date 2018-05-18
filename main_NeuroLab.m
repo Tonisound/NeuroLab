@@ -68,7 +68,7 @@ if isempty(FILES)
 else
     if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')
         load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
-        if ~exist('IM','var')
+        if ~exist('IM','var')||isempty(IM)
             load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),UiValues.CenterPanelPopup);
         end
     else

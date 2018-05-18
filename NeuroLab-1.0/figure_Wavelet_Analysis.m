@@ -1,7 +1,7 @@
 function f2 = figure_Wavelet_Analysis(myhandles,val,str_tag)
 
 global DIR_SAVE FILES CUR_FILE START_IM END_IM;
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
 
 % Loading Traces
 xlim1 = time_ref.Y(1);
@@ -32,10 +32,10 @@ traces = all_traces(ind_1==1);
 phases = all_traces(ind_2==1);
 
 % Loading Time Reference
-if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'file'))
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file'))
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
 else
-    warning('Missing Reference Time File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus));
+    errordlg('Missing Reference Time File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     return;
 end
 
@@ -80,7 +80,7 @@ t1 = uicontrol('Units','normalized',...
     'Style','text',...
     'HorizontalAlignment','left',...
     'Parent',iP,...
-    'String',sprintf('File : %s\n (Source : %s) ',FILES(CUR_FILE).gfus,...
+    'String',sprintf('File : %s\n (Source : %s) ',FILES(CUR_FILE).nlab,...
     strtrim(myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:))),...
     'Tag','Text1');
 efc = uicontrol('Units','normalized',...
@@ -855,7 +855,7 @@ set(handles.ScaleButton,'Callback',{@template_buttonScale_Callback,all_topaxes})
 for i=1:length(all_topaxes)
     ax = findobj(handles.TopPanel,'Tag',sprintf('Ax%d',i));
     button = findobj(handles.TopPanel,'Tag',sprintf('Button%d',i));
-    button.Callback = {@menuTraces_Edition_Callback,ax};
+    button.Callback = {@menuEdit_TracesEdition_Callback,ax};
 end
 
 % Linking axes x
@@ -1216,7 +1216,7 @@ handles.MainFigure.Pointer = 'watch';
 handles.MainFigure.UserData.success = false;
 
 global DIR_SAVE FILES CUR_FILE;
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
     
 % Wavelet Parameters
 bands = str2double(handles.Edit4.String);
@@ -1329,7 +1329,7 @@ for k=1:bands
     %ax.YLim = [fdom_min,fdom_max];
     
     % Case of early break
-    early_break = false;
+    early_break = true;
     if early_break
         %Saving data
         save_data(k).trace_name = trace_name;
@@ -1981,10 +1981,10 @@ function batchsave_Callback(~,~,handles,str_tag,v)
 
 global DIR_SAVE FILES CUR_FILE;
 
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell','TimeTags_strings','TimeTags_images');
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_strings','TimeTags_images');
 else
-    errordlg(sprintf('Missing file Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing file Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 

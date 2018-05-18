@@ -1,4 +1,4 @@
-function success = menuTraces_Edition_Callback(~,~,ax,handles)
+function success = menuEdit_TracesEdition_Callback(~,~,ax,handles)
 % Trace Edition Callback
 % Allows Traces Edition
 

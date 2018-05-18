@@ -1,4 +1,4 @@
-function menuTag_TimeTagSelection_Callback(~,~,handles,ind_tag,v)
+function menuEdit_TimeTagSelection_Callback(~,~,handles,ind_tag,v)
 % Time Tag Selection Callback
 % If nargin == 3 : opens list dialog to manually select Time Tags
 

@@ -31,9 +31,9 @@ switch evnt.Key
         handles.PlayToggle.Value = abs(val-1);
         buttonPlay_Callback(handles.PlayToggle,[],handles);
     case 'o',
-        menuTag_prevTag_Callback([],[],handles);
+        menuEdit_prevTag_Callback([],[],handles);
     case 'p',
-        menuTag_nextTag_Callback([],[],handles);
+        menuEdit_nextTag_Callback([],[],handles);
 end
     set(hObj,'WindowButtonUpFcn','');
 end

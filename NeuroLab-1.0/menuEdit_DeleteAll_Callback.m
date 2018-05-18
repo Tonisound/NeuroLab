@@ -1,4 +1,4 @@
-function menuTraces_DeleteAll_Callback(~,~,handles)
+function menuEdit_DeleteAll_Callback(~,~,handles)
 % 104 -- Manual Reset
 
 global CUR_IM START_IM END_IM LAST_IM DIR_SAVE FILES CUR_FILE IM;

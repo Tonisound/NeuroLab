@@ -1,4 +1,4 @@
-function success = menuTag_TimeGroupEdition_Callback(folder_name,handles)
+function success = menuEdit_TimeGroupEdition_Callback(folder_name,handles)
 % Time Group Edition
 
 %global DIR_SAVE FILES CUR_FILE;

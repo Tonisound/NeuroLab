@@ -73,7 +73,7 @@ if ~strcmp(old,new)
         START_IM = 1;
         END_IM = 2;
         CUR_IM = 1;
-        menuTraces_DeleteAll_Callback([],[],handles);
+        menuEdit_DeleteAll_Callback([],[],handles);
         delete(handles.VideoAxes.UserData.Image);
         delete(handles.VideoAxes.UserData.VideoReader);
         handles.VideoAxes.UserData = [];

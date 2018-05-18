@@ -1,4 +1,4 @@
-function menuTag_TimeGroupSelection_Callback(hObj,~,handles,ind_group)
+function menuEdit_TimeGroupSelection_Callback(hObj,~,handles,ind_group)
 % Time Group Selection Callback
 
 global DIR_SAVE FILES CUR_FILE CUR_IM START_IM END_IM;

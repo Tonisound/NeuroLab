@@ -37,7 +37,7 @@ fprintf(' done.\n');
 MetaData = data_ns.MetaTags;
 channel_list = cell(MetaData.ChannelCount,1);
 for i =1:length(channel_list)
-    channel_list(i) = {sprintf('LFP-%03d',MetaData.ChannelID(i))};
+    channel_list(i) = {sprintf('LFP/%03d',MetaData.ChannelID(i))};
 end
 
 % Prompt user to select files 

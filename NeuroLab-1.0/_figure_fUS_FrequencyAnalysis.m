@@ -411,7 +411,7 @@ for k=1:length(panels)
             button.Units = 'normalized';
             button.Tag = sprintf('Button%d',i);
             button.TooltipString = sprintf('Traces Edition Ax%d',i);
-            button.Callback = {@menuTraces_Edition_Callback,ax,old_handles};
+            button.Callback = {@menuEdit_TracesEdition_Callback,ax,old_handles};
         end
     end
     % Axes Position

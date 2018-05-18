@@ -1,4 +1,4 @@
-function success = menuTag_TimeTagEdition_Callback(folder_name,handles)
+function success = menuEdit_TimeTagEdition_Callback(folder_name,handles)
 % Time Tag Edition
 
 success =false;

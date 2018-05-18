@@ -1,4 +1,4 @@
-function menuTraces_DeleteLines_Callback(~,~,handles,val)
+function menuEdit_DeleteLines_Callback(~,~,handles,val)
 
 switch val
     case 1
