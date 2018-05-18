@@ -48,6 +48,7 @@ GParams.DIR_STATS = fullfile(str_save,'NLab_Statistics');
 GParams.DIR_SYNT = fullfile(str_save,'NLab_Synthesis');
 GParams.SEED_REGION = fullfile(str_save,'Nlab_Files','NRegions');
 GParams.SEED_SWL = fullfile(str_save,'Nlab_Files','NReclists');
+GParams.SEED_CONFIG = fullfile(str_save,'Nlab_Files','NConfigs');
 GParams.sep_swl_1 = 'SEP1';
 GParams.sep_swl_2 = 'SEP2';
 
@@ -65,7 +66,7 @@ if ~exist(str_save,'dir')
         return;
     else
         folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;...
-            GParams.DIR_SYNT;GParams.SEED_REGION;GParams.SEED_SWL};
+            GParams.DIR_SYNT;GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
         for j= 1:length(folder_list)
             folder = char(folder_list(j));
             if ~exist(folder,'dir')

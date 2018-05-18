@@ -7,7 +7,7 @@ global CUR_IM START_IM END_IM LAST_IM;
 
 % Initialization
 F = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},'video',{},'dir_fus',{},'acq',{},'biq',{},...
-    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},'nev',{},'ccf',{},'rcf',{},'nlab',{},'type',{});
+    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},'nev',{},'ccf',{},'rcf',{},'ncf',{},'nlab',{},'type',{});
 
 
 if flag == 1
@@ -230,7 +230,20 @@ for i = 1:length(FileList)
             % Detect trigger
             import_reference_time(F(ind_file),Doppler_film,handles);
             
-            % select EEG
+            % save TimeTags.mat (whole episode)
+            data_t = load(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),'time_ref');
+            TimeTags_images = [data_t.time_ref.X(1),data_t.time_ref.X(end)];
+            TimeTags_strings = [{handles.TimeDisplay.UserData(1,:)},{handles.TimeDisplay.UserData(end,:)}];
+            TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
+            TimeTags(1,1).Episode = '';
+            TimeTags(1,1).Tag = 'Whole-fUS';
+            TimeTags(1,1).Onset = handles.TimeDisplay.UserData(1,:);
+            TimeTags(1,1).Duration = handles.TimeDisplay.UserData(end,:);
+            TimeTags(1,1).Reference = handles.TimeDisplay.UserData(1,:);
+            TimeTags(1,1).Tokens = '';
+            TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'};
+            TimeTags_cell(2,:) = {'',TimeTags(1).Tag,TimeTags(1).Onset,TimeTags(1).Duration,TimeTags(1).Reference,''};
+            save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
         end
     end
 end

@@ -346,6 +346,23 @@ if ~isempty(FILES)
         'TooltipString','Time Reference',...
         'Parent',tab1);
     e19.String = d2.reference;
+    uicontrol('Style','text',...
+        'Units','characters',...
+        'Position',[2 pos(4)-43 20 2],...
+        'BackgroundColor',panelColor,...
+        'HorizontalAlignment', 'left',...
+        'String','Nconfig File',...
+        'Parent',tab1);
+    e20 = uicontrol('Style','text',...
+        'Units','characters',...
+        'Position',[22 pos(4)-42.5 38 1.5],...
+        'BackgroundColor',backColor,...
+        'HorizontalAlignment', 'left',...
+        'String',FILES(CUR_FILE).ncf,...
+        'TooltipString','Cereplex Configuration',...
+        'Parent',tab1);
+    
+    
     e100 = uicontrol('Style','text',...
         'Units','characters',...
         'Position',[62 pos(4)-43 52 38],...
@@ -365,7 +382,7 @@ if ~isempty(FILES)
     catch
         e100.String = '';
     end
-    edits = [e1;e2;e3;e4;e5;e6;e7;e8;e9;e10;e11;e12;e13;e14;e15;e16;e16b;e16c;e17;e18;e19;e100];
+    edits = [e1;e2;e3;e4;e5;e6;e7;e8;e9;e10;e11;e12;e13;e14;e15;e16;e16b;e16c;e17;e18;e19;e20;e100];
 
 end
 
@@ -561,10 +578,10 @@ end
             edits(16).String = files_temp(cur_file).nev;
             edits(17).String = files_temp(cur_file).ccf;
             edits(18).String = files_temp(cur_file).rcf;
-            
             edits(19).String = files_temp(cur_file).type;
             edits(20).String = data_norm.normalization;
             edits(21).String = data_ref.reference;
+            edits(22).String = files_temp(cur_file).ncf;
             
             try
                 fid = fopen(fullfile(SEED,files_temp(cur_file).parent,files_temp(cur_file).session,files_temp(cur_file).info),'r');
@@ -572,10 +589,10 @@ end
                 while ~feof(fid)
                     line_ex = [line_ex;{fgetl(fid)}];
                 end
-                edits(22).String = line_ex;
+                edits(23).String = line_ex;
                 fclose(fid);
             catch
-                edits(22).String = '';
+                edits(23).String = '';
             end
         end 
     end

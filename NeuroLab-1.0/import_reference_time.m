@@ -78,14 +78,12 @@ n_burst = 1;
 length_burst = length(trigger);
 reference = time_ref.name;
 
-
 % Save dans ReferenceTime.mat
 if  ~isempty(time_ref)
     save(fullfile(dir_save,'Time_Reference.mat'),'time_ref','n_burst','length_burst','reference','-v7.3');
     handles.TimeDisplay.UserData = datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF');
     handles.TimeDisplay.String = datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
     fprintf('Succesful Reference Time Importation\n===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));
-    
 end
 
 end

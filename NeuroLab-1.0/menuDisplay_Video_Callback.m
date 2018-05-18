@@ -1,4 +1,4 @@
-function menuView_Video_Callback(hObj,~,handles)
+function menuDisplay_Video_Callback(hObj,~,handles)
 
 %disp('menu view')
 global CUR_IM;

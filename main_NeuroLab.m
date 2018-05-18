@@ -37,6 +37,7 @@ end
 global SEED;                    % String : Main Directory
 global SEED_SWL;                % String : Recording List Directory
 global SEED_REGION;             % String : Spikoscope Regions Directory
+global SEED_CONFIG;             % String : Configuration Directory
 global DIR_SAVE;                % String : Saving Directory
 global DIR_FIG;                 % String : Figure Directory
 global DIR_STATS;               % String : Statistics Directory
@@ -54,6 +55,7 @@ load('Files.mat','FILES','CUR_FILE','str','UiValues');
 SEED =          GParams.SEED;
 SEED_SWL =      GParams.SEED_SWL;
 SEED_REGION =   GParams.SEED_REGION;
+SEED_CONFIG =   GParams.SEED_CONFIG;
 DIR_SAVE =      GParams.DIR_SAVE;
 DIR_FIG =       GParams.DIR_FIG;
 DIR_STATS =     GParams.DIR_STATS;

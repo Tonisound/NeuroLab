@@ -136,9 +136,8 @@ uimenu(m1b,'Label','Import Episodes','Tag','ImportMenu_Episodes','Enable','off')
 m2 = uimenu('Label','Edit','Tag','EditMenu','Parent',f);
 uimenu(m2,'Label','Edit Traces','Tag','EditMenu_Edition','Accelerator','T');
 uimenu(m2,'Label','Edit Time Tags','Tag','EditMenu_TimeTagEdition');
-uimenu(m2,'Label','Select Time Tags','Tag','EditMenu_TagSelection');
 uimenu(m2,'Label','Edit Time Groups','Tag','EditMenu_TimeGroupEdition');
-uimenu(m2,'Label','Select Time Groups','Tag','EditMenu_TimeGroupSelection');
+uimenu(m2,'Label','Edit LFP Configuration','Tag','EditMenu_LFPConfig');
 
 uimenu(m2,'Label','Reload Doppler film','Tag','EditMenu_ReloadDoppler','Separator','on');
 uimenu(m2,'Label','Reload Configuration','Tag','EditMenu_ReloadConfig');
@@ -149,10 +148,13 @@ uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
 uimenu(m2,'Label','Delete Region Traces','Tag','EditMenu_Delete_Regions');
 uimenu(m2,'Label','Delete Cereplex Traces','Tag','EditMenu_Delete_Spiko');
 
-% handles.ViewMenu
-m1c = uimenu('Label','View','Tag','ViewMenu','Parent',f);
-uimenu(m1c,'Label','Show Video','Tag','ViewMenu_Video','Checked',UiValues.video_status);
-uimenu(m1c,'Label','Split axes','Tag','ViewMenu_Split','Enable','off');
+% handles.DisplayMenu
+m1c = uimenu('Label','Display','Tag','DisplayMenu','Parent',f);
+uimenu(m1c,'Label','Show Video','Tag','DisplayMenu_Video','Checked',UiValues.video_status);
+uimenu(m1c,'Label','Split axes','Tag','DisplayMenu_Split','Enable','off');
+uimenu(m1c,'Label','Select Time Tags','Tag','DisplayMenu_TagSelection','Separator','on');
+uimenu(m1c,'Label','Select Time Groups','Tag','DisplayMenu_TimeGroupSelection');
+
 
 % handles.SynthesisMenu
 m2c = uimenu('Label','Synthesis','Tag','SynthesisMenu','Parent',f);
@@ -547,15 +549,17 @@ set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Episodes,'Callback','import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 
-% handles.ViewMenu
-set(myhandles.ViewMenu_Video,'Callback',{@menuView_Video_Callback,myhandles});
+% handles.DisplayMenu
+set(myhandles.DisplayMenu_Video,'Callback',{@menuDisplay_Video_Callback,myhandles});
+set(myhandles.DisplayMenu_TagSelection,'Callback',{@menuDisplay_TimeTagSelection_Callback,myhandles});
+set(myhandles.DisplayMenu_TimeGroupSelection,'Callback',{@menuDisplay_TimeGroupSelection_Callback,myhandles});
 
 % handles.EditMenu
 set(myhandles.EditMenu_Edition,'Callback',{@menuEdit_TracesEdition_Callback,myhandles.RightAxes,myhandles});
 set(myhandles.EditMenu_TimeTagEdition,'Callback','menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.EditMenu_TagSelection,'Callback',{@menuEdit_TimeTagSelection_Callback,myhandles});
 set(myhandles.EditMenu_TimeGroupEdition,'Callback','menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.EditMenu_TimeGroupSelection,'Callback',{@menuEdit_TimeGroupSelection_Callback,myhandles});
+set(myhandles.EditMenu_LFPConfig,'Callback','menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+
 set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhandles});
 set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
@@ -587,7 +591,7 @@ set(myhandles.DisplayButton,'Callback',{@displayButtonCallback,myhandles});
 set(myhandles.LabelBox,'Callback',{@boxLabel_Callback,myhandles});
 set(myhandles.AutoScaleButton,'Callback',{@buttonAutoScale_Callback,myhandles});
 set(myhandles.TracesButton,'Callback',{@menuEdit_TracesEdition_Callback,myhandles.RightAxes,myhandles});
-set(myhandles.TagButton,'Callback',{@menuEdit_TimeTagSelection_Callback,myhandles});
+set(myhandles.TagButton,'Callback',{@menuDisplay_TimeTagSelection_Callback,myhandles});
 set(myhandles.prevTagButton,'Callback',{@menuEdit_prevTag_Callback,myhandles});
 set(myhandles.nextTagButton,'Callback',{@menuEdit_nextTag_Callback,myhandles});
 set(myhandles.ScaleButton,'Callback',{@buttonScale_Callback,myhandles.RightAxes});

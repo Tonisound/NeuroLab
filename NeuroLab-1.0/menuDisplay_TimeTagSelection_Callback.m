@@ -1,12 +1,13 @@
-function menuEdit_TimeTagSelection_Callback(~,~,handles,ind_tag,v)
+function menuDisplay_TimeTagSelection_Callback(~,~,handles,ind_tag,v)
 % Time Tag Selection Callback
 % If nargin == 3 : opens list dialog to manually select Time Tags
 
 global DIR_SAVE FILES CUR_FILE CUR_IM START_IM END_IM;
 
-try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_strings','TimeTags_images');
-catch
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),...
+        'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
+else
     errordlg(sprintf('Please re-import Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end

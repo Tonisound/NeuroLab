@@ -10,7 +10,7 @@ function videoFigure_closereqFcn(hObj,~,handles)
 %         return
 % end
 
-    handles.ViewMenu_Video.Checked = 'off';
+    handles.DisplayMenu_Video.Checked = 'off';
     hObj.Visible = 'off';
 
 end

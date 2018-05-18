@@ -17,7 +17,7 @@ set(handles.PatchBox,'Value',uivalues.PatchBox);
 set(handles.MaskBox,'Value',uivalues.MaskBox);
 handles.TagButton.UserData = uivalues.TagSelection;
 %Video Menu
-handles.ViewMenu_Video.Checked = uivalues.video_status;
+handles.DisplayMenu_Video.Checked = uivalues.video_status;
 handles.VideoFigure.Visible = uivalues.video_status;
 %uivalues.video_status
 
