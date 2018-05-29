@@ -388,10 +388,10 @@ end
 
 
 % Files Selection Table
-file_uitable = uitable('ColumnName',{'Session','nlab','fUS','Video'},...
-    'ColumnFormat',{'char','char','char','char'},...
-    'ColumnEditable',[false,false,false,false],...
-    'ColumnWidth',{160 160 160 160},...
+file_uitable = uitable('ColumnName',{'Session','fUS','Video','NEV','nlab'},...
+    'ColumnFormat',{'char','char','char','char','char'},...
+    'ColumnEditable',[false,false,false,false,false],...
+    'ColumnWidth',{130 130 130,130 130},...
     'Units','characters',...
     'Position',[0 0 120 40],...
     'CellSelectionCallback',{@uitable_select,edits},...
@@ -400,7 +400,7 @@ file_uitable = uitable('ColumnName',{'Session','nlab','fUS','Video'},...
 
 if ~isempty(files_temp)
     file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',...
-        {files_temp.video}'];
+        {files_temp.video}',{files_temp.nev}'];
 end
 
 loadfileButton = uicontrol('Style','pushbutton',...
@@ -514,19 +514,22 @@ end
         else
             % Sorting files
             files_temp = sortstruct(F,files_temp);
-            file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+            file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',...
+                {files_temp.video}',{files_temp.nev}'];
         end
     end
 
     function rmfileButton_callback(~,~)
         selection = get(file_uitable,'UserData');
         files_temp(unique(selection(:,1)))=[];
-        file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+        file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',...
+                {files_temp.video}',{files_temp.nev}'];
     end
 
     function rmallfilesButton_callback(~,~)
         files_temp(1:length(files_temp))=[];
-        file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+        file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',...
+                {files_temp.video}',{files_temp.nev}'];
     end
 
     function load_file_callback (~,~)
@@ -537,7 +540,8 @@ end
         else
             % Sorting files
             files_temp = sortstruct(F,files_temp);
-            file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+            file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',...
+                {files_temp.video}',{files_temp.nev}'];
         end
     end
 

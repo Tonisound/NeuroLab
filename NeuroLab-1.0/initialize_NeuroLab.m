@@ -125,7 +125,7 @@ uimenu(m1,'Label','Save Configuration','Tag','FileMenu_Save','Accelerator','S');
 % handles.ImportMenu
 m1b = uimenu('Label','Import','Tag','ImportMenu','Parent',f);
 uimenu(m1b,'Label','Import File','Tag','FileMenu_Import');
-uimenu(m1b,'Label','Import Doppler film','Tag','ImportMenu_Doppler','Separator','on');
+uimenu(m1b,'Label','Check Doppler film','Tag','ImportMenu_Doppler','Separator','on');
 uimenu(m1b,'Label','Import Timing','Tag','ImportMenu_ReferenceTime');
 uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
 uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');

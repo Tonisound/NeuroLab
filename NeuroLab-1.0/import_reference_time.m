@@ -53,18 +53,20 @@ trigger = double(time_stamp)/f_trig;
 % Test if trigger matches Doppler_film size
 if size(Doppler_film,3)~= length(trigger)
     if length(trigger)+1 == size(Doppler_film,3)
-        warning('Trigger (%d) and IM size (%d) do not match. -> Adding end trig',length(trigger),size(Doppler_film,3));
+        warning('Trigger (%d) and IM size (%d) do not match [Missing end trig]. -> Adding end trig',length(trigger),size(Doppler_film,3));
         % extend one trigger
         trigger = [trigger; trigger(end)+trigger(2)-trigger(1)];
         time_stamp = [time_stamp; time_stamp(end)+time_stamp(2)-time_stamp(1)];
     elseif length(trigger) > size(Doppler_film,3)
-        warning('Trigger (%d) and IM size (%d) do not match. -> Discarding end trigs',length(trigger),size(Doppler_film,3));
+        warning('Trigger (%d) and IM size (%d) do not match [Excess trigs]. -> Discarding end trigs',length(trigger),size(Doppler_film,3));
         % keep only first triggers
         trigger = trigger(end-size(Doppler_film,3)+1:end);
         %trigger = trigger(1:size(Doppler_film,3));
         time_stamp = time_stamp(1:size(Doppler_film,3));
     else
-        errordlg('Trigger (%d) and IM size (%d) do not match.\n',length(trigger),size(Doppler_film,3));
+        % Missing trigs : template trigger
+        errordlg('Trigger (%d) and IM size (%d) do not match [Missing trigs]. -> Default\n',length(trigger),size(Doppler_film,3));
+        templatetrigg_save(Doppler_film, dir_save,handles);
         return;
     end
 end

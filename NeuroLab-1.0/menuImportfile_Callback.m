@@ -221,29 +221,35 @@ for i = 1:length(FileList)
         if isempty(button) || strcmp(button,'Cancel')
             return;
         else
-            mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
-            fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
-            
-            % Import fUS Movie and Save Config.mat
-            Doppler_film = import_DopplerFilm(F(ind_file),handles,0);
-            
-            % Detect trigger
-            import_reference_time(F(ind_file),Doppler_film,handles);
-            
-            % save TimeTags.mat (whole episode)
-            data_t = load(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),'time_ref');
-            TimeTags_images = [data_t.time_ref.X(1),data_t.time_ref.X(end)];
-            TimeTags_strings = [{handles.TimeDisplay.UserData(1,:)},{handles.TimeDisplay.UserData(end,:)}];
-            TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
-            TimeTags(1,1).Episode = '';
-            TimeTags(1,1).Tag = 'Whole-fUS';
-            TimeTags(1,1).Onset = handles.TimeDisplay.UserData(1,:);
-            TimeTags(1,1).Duration = handles.TimeDisplay.UserData(end,:);
-            TimeTags(1,1).Reference = handles.TimeDisplay.UserData(1,:);
-            TimeTags(1,1).Tokens = '';
-            TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'};
-            TimeTags_cell(2,:) = {'',TimeTags(1).Tag,TimeTags(1).Onset,TimeTags(1).Duration,TimeTags(1).Reference,''};
-            save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
+            try
+                mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
+                fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
+                
+                % Import fUS Movie and Save Config.mat
+                Doppler_film = import_DopplerFilm(F(ind_file),handles,0);
+                
+                % Detect trigger
+                import_reference_time(F(ind_file),Doppler_film,handles);
+                
+                % save TimeTags.mat (whole episode)
+                data_t = load(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),'time_ref');
+                TimeTags_images = [data_t.time_ref.X(1),data_t.time_ref.X(end)];
+                TimeTags_strings = [{handles.TimeDisplay.UserData(1,:)},{handles.TimeDisplay.UserData(end,:)}];
+                TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
+                TimeTags(1,1).Episode = '';
+                TimeTags(1,1).Tag = 'Whole-fUS';
+                TimeTags(1,1).Onset = handles.TimeDisplay.UserData(1,:);
+                TimeTags(1,1).Duration = handles.TimeDisplay.UserData(end,:);
+                TimeTags(1,1).Reference = handles.TimeDisplay.UserData(1,:);
+                TimeTags(1,1).Tokens = '';
+                TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'};
+                TimeTags_cell(2,:) = {'',TimeTags(1).Tag,TimeTags(1).Onset,TimeTags(1).Duration,TimeTags(1).Reference,''};
+                save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
+            catch
+                rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');
+                fprintf('Nlab directory deleted : %s.\n',F(ind_file).nlab);
+                F(ind_file).nlab = '';
+            end
         end
     end
 end

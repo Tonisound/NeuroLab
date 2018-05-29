@@ -1,5 +1,5 @@
 function Doppler_film = import_DopplerFilm(F,handles,flag)
-% Import Doppler mvoie from .acq file 
+% Import Doppler movie from .acq file 
 % Generates Configuration file Config.mat
 % flag 0 - first import
 % flag 1 - reimport
@@ -9,16 +9,18 @@ global IM LAST_IM SEED DIR_SAVE;
 
 % create Doppler.mat
 if ~isempty(F.acq)
-    file_mat = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,regexprep(F.acq,'.acq','.mat'));
     file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
+    % file_mat = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,regexprep(F.acq,'.acq','.mat'));
     % rename .acq in .mat
-    movefile(file_acq,file_mat);
+    % movefile(file_acq,file_mat);
+    % data = load(file_mat,'-mat');
+    % rename .mat in .acq
+    % movefile(file_mat,file_acq);
     fprintf('Loading Doppler_film...');
-    data = load(file_mat);
+    data = load(file_acq,'-mat');
     fprintf(' done.\n');
     Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
-    % rename .mat in .acq
-    movefile(file_mat,file_acq);
+
     
     % Checking Doppler
     if flag == 1
