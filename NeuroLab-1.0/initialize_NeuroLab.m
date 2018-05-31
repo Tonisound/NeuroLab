@@ -126,7 +126,7 @@ uimenu(m1,'Label','Save Configuration','Tag','FileMenu_Save','Accelerator','S');
 m1b = uimenu('Label','Import','Tag','ImportMenu','Parent',f);
 uimenu(m1b,'Label','Import File','Tag','FileMenu_Import');
 uimenu(m1b,'Label','Check Doppler film','Tag','ImportMenu_Doppler','Separator','on');
-uimenu(m1b,'Label','Import Timing','Tag','ImportMenu_ReferenceTime');
+uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime');
 uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
 uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
 uimenu(m1b,'Label','Import Spikoscope Regions','Tag','ImportMenu_Regions','Enable','off');
@@ -464,6 +464,7 @@ h52 = uicontrol(f,'Style','pushbutton',...
     'TooltipString','Previous Tag',...
     'Tag','prevTagButton',...
     'Parent',rightPanel);
+
 % handles.ScaleButton
 h53 = uicontrol(f,'Style','togglebutton',...
     'Units','normalized',...
@@ -480,6 +481,14 @@ h54 = uicontrol(f,'Style','toggle',...
     'Value',0,...
     'Tag','PlayToggle',...
     'Parent',rightPanel);
+% handles.addTagButton
+h55 = uicontrol(f,'Style','pushbutton',...
+    'Units','normalized',...
+    'String','T +',...
+    'TooltipString','Add Tag',...
+    'Tag','addTagButton',...
+    'Parent',rightPanel);
+
 % Resizing
 b.Position = [.05 .1 .85 .8];
 h41.Position = [.25/60 28/30 1.25/60 1.5/30];
@@ -497,6 +506,7 @@ h51.Position = [56/60 17.5/30 3/60 1.5/30];
 h52.Position = [56/60 19/30 3/60 1.5/30];
 h53.Position = [56/60 6/30 3/60 1.5/30];
 h54.Position = [56/60 4.5/30 3/60 1.5/30];
+h55.Position = [56/60 16/30 3/60 1.5/30];
 
 % Handles for argument passing
 myhandles = guihandles(f);
@@ -594,6 +604,7 @@ set(myhandles.TracesButton,'Callback',{@menuEdit_TracesEdition_Callback,myhandle
 set(myhandles.TagButton,'Callback',{@menuDisplay_TimeTagSelection_Callback,myhandles});
 set(myhandles.prevTagButton,'Callback',{@menuEdit_prevTag_Callback,myhandles});
 set(myhandles.nextTagButton,'Callback',{@menuEdit_nextTag_Callback,myhandles});
+set(myhandles.addTagButton,'Callback',{@menuEdit_addTag_Callback,myhandles});
 set(myhandles.ScaleButton,'Callback',{@buttonScale_Callback,myhandles.RightAxes});
 set(myhandles.PatchBox,'Callback',{@boxPatch_Callback,myhandles});
 set(myhandles.MaskBox,'Callback',{@boxMask_Callback,myhandles});

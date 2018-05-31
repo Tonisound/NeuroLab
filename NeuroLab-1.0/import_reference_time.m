@@ -54,18 +54,23 @@ trigger = double(time_stamp)/f_trig;
 if size(Doppler_film,3)~= length(trigger)
     if length(trigger)+1 == size(Doppler_film,3)
         warning('Trigger (%d) and IM size (%d) do not match [Missing end trig]. -> Adding end trig',length(trigger),size(Doppler_film,3));
+        discrepant = size(Doppler_film,3)-length(trigger);
         % extend one trigger
         trigger = [trigger; trigger(end)+trigger(2)-trigger(1)];
         time_stamp = [time_stamp; time_stamp(end)+time_stamp(2)-time_stamp(1)];
+        padding = 'missing';
     elseif length(trigger) > size(Doppler_film,3)
         warning('Trigger (%d) and IM size (%d) do not match [Excess trigs]. -> Discarding end trigs',length(trigger),size(Doppler_film,3));
+        discrepant = size(Doppler_film,3)-length(trigger);
         % keep only first triggers
         trigger = trigger(end-size(Doppler_film,3)+1:end);
         %trigger = trigger(1:size(Doppler_film,3));
         time_stamp = time_stamp(1:size(Doppler_film,3));
+        padding = 'excess';
+        
     else
         % Missing trigs : template trigger
-        errordlg('Trigger (%d) and IM size (%d) do not match [Missing trigs]. -> Default\n',length(trigger),size(Doppler_film,3));
+        warning('Trigger (%d) and IM size (%d) do not match [Missing trigs]. -> Default\n',length(trigger),size(Doppler_film,3));
         templatetrigg_save(Doppler_film, dir_save,handles);
         return;
     end
@@ -82,9 +87,11 @@ reference = time_ref.name;
 
 % Save dans ReferenceTime.mat
 if  ~isempty(time_ref)
-    save(fullfile(dir_save,'Time_Reference.mat'),'time_ref','n_burst','length_burst','reference','-v7.3');
-    handles.TimeDisplay.UserData = datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF');
-    handles.TimeDisplay.String = datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
+    time_str = cellstr(datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF'));
+    handles.TimeDisplay.UserData = char(time_str);
+    handles.TimeDisplay.String = char(time_str(CUR_IM));
+    %datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
+    save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst','length_burst','reference','padding','discrepant','-v7.3');
     fprintf('Succesful Reference Time Importation\n===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));
 end
 
@@ -97,14 +104,19 @@ global CUR_IM;
 n_burst = 1;
 length_burst = size(Doppler_film,3);
 reference = 'default';
+padding = 'none';
+discrepant = 0;
 time_ref.X=(1:length_burst)';
 time_ref.Y=(0:length_burst-1)'/2.5;
 time_ref.nb_images= size(Doppler_film,3);
 time_ref.name = reference;
 time_ref.time_stamp = [];
-save(fullfile(dir_save,'Time_Reference.mat'),'time_ref','n_burst','length_burst','reference','-v7.3');
-handles.TimeDisplay.UserData = datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF');
-handles.TimeDisplay.String = datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
+time_str = cellstr(datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF'));
+handles.TimeDisplay.UserData = char(time_str);
+handles.TimeDisplay.String = char(time_str(CUR_IM));
+%datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
+
+save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst','length_burst','reference','padding','discrepant','-v7.3');
 fprintf('Time_Reference.mat saved at %s.\n',fullfile(dir_save,'Time_Reference.mat'));
 
 end

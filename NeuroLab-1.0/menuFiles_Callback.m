@@ -328,8 +328,9 @@ if ~isempty(FILES)
         'TooltipString', 'normalization',...
         'Parent',tab1);
     d2.reference = '';
+    d2.padding = '';
     if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
-        d2 = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'reference');
+        d2 = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'reference','padding');
     end
     uicontrol('Style','text',...
         'Units','characters',...
@@ -345,7 +346,7 @@ if ~isempty(FILES)
         'HorizontalAlignment', 'left',...
         'TooltipString','Time Reference',...
         'Parent',tab1);
-    e19.String = d2.reference;
+    e19.String = sprintf('%s [%s]',d2.reference,d2.padding);
     uicontrol('Style','text',...
         'Units','characters',...
         'Position',[2 pos(4)-43 20 2],...
@@ -552,8 +553,9 @@ end
                 data_norm = load(fullfile(DIR_SAVE,files_temp(cur_file).nlab,'Doppler_normalized.mat'),'normalization');
             end
             data_ref.reference = '';
+            data_ref.padding = '';
             if exist(fullfile(DIR_SAVE,files_temp(cur_file).nlab,'Time_Reference.mat'),'file')
-                data_ref = load(fullfile(DIR_SAVE,files_temp(cur_file).nlab,'Time_Reference.mat'),'reference');
+                data_ref = load(fullfile(DIR_SAVE,files_temp(cur_file).nlab,'Time_Reference.mat'),'reference','padding');
             end
             
             edits(1).String = data.START_IM;
@@ -576,7 +578,7 @@ end
             edits(18).String = files_temp(cur_file).rcf;
             edits(19).String = files_temp(cur_file).type;
             edits(20).String = data_norm.normalization;
-            edits(21).String = data_ref.reference;
+            edits(21).String = sprintf('%s [%s]',data_ref.reference,data_ref.padding);
             edits(22).String = files_temp(cur_file).ncf;
             
             try

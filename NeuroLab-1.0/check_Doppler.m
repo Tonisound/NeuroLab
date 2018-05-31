@@ -26,21 +26,20 @@ end
 
 f = figure('Name','CheckDoppler','Units','normalized','Position',[.1 .3 .8 .4]);
 clrmenu(f);
-ax1 = axes('Position',[.025 .2 .2 .75],'Visible','off','Parent',f);
+ax1 = axes('Visible','off','Parent',f);
 im  = imagesc(Doppler_film(:,:,1),'Parent',ax1);
 ax1.Visible = 'off';
 %colormap(ax1,'gray');
 
-text1 = uicontrol('Style','text','Units','normalized','String','','Position',[.025 .1 .2 .075],'Parent',f);
+text1 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
 text1.String = sprintf('Frame %d/%d',CUR_IM,size(Doppler_film,3));
-text2 = uicontrol('Style','text','Units','normalized','String','','Position',[.025 .025 .2 .075],'Parent',f);
+text2 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
 text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
     sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
-text3 = uicontrol('Style','text','Units','normalized','String','','Position',[.1 .95 .8 .04],'Parent',f);
+text3 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
 text3.String = 'Drag/drop cursor and threshold.Arrows to move cursor. Press enter to discard/include cursor frame';
 
-
-ax2 = axes('Position',[.25 .2 .7 .75],'Parent',f);
+ax2 = axes('Parent',f);
 ax2.XLim = [.5,size(Doppler_film,3)+5];
 ax2.YLim = [min(test),max(test)];
 ax2.UserData = [];
@@ -55,17 +54,35 @@ l_keep = line('XData',t(ind_keep==1),'YData',test(ind_keep==1),...
 l_rm = line('XData',t(ind_remove==1),'YData',test(ind_remove==1),...
     'Color','r','LineStyle','none','Marker','o','Parent',ax2,'HitTest','on');
 
+invertButton = uicontrol('Style','pushbutton','Units','normalized',...
+    'Position',[.875 .025 .4 .1],'String','Invert',...
+    'Tag','InvertButton','Parent',f);
 okButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.2 .025 .2 .1],'String','OK',...
+    'Position',[.875 .025 .8 .1],'String','OK',...
     'Tag','okButton','Parent',f);
 skipButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.4 .025 .2 .1],'String','Skip',...
+    'Position',[.875 .025 .7 .1],'String','Skip',...
     'Tag','cancelButton','Parent',f);
 cancelButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.6 .025 .2 .1],'String','Cancel',...
+    'Position',[.875 .025 .6 .1],'String','Cancel',...
     'Tag','cancelButton','Parent',f);
 cancelButton.Enable = status;
 
+
+%Positions
+ax1.Position = [.025 .1 .2 .8];
+ax2.Position = [.25 .1 .65 .8];
+text1.Position = [.025 .925 .2 .04];
+text2.Position = [.92 .7 .06 .2];
+text3.Position = [.1 .925 .8 .04];
+
+invertButton.Position = [.92 .4 .06 .1];
+okButton.Position = [.92 .3 .06 .1];
+cancelButton.Position = [.92 .2 .06 .1];
+skipButton.Position = [.92 .1 .06 .1];
+
+
+set(invertButton,'Callback',{@invertButton_callback});
 set(okButton,'Callback',{@okButton_callback});
 set(skipButton,'Callback',{@skipButton_callback});
 set(cancelButton,'Callback',{@cancelButton_callback});
@@ -78,6 +95,20 @@ set(l_rm,'ButtonDownFcn',{@click_l_keeprm});
 set(l_keep,'ButtonDownFcn',{@click_l_keeprm});
 set(f,'KeyPressFcn',{@key_pressFcn});
 
+    function invertButton_callback(~,~)
+        i1 = max(1,round(ax2.XLim(1)));
+        i2 = min(round(ax2.XLim(2)),size(Doppler_film,3));
+        
+        ind_remove(i1:i2) = ~ind_remove(i1:i2);
+        ind_keep(i1:i2) = ~ind_keep(i1:i2);
+        l_keep.XData = t(ind_keep==1);
+        l_keep.YData = test(ind_keep==1);
+        l_rm.XData = t(ind_remove==1);
+        l_rm.YData = test(ind_remove==1);
+        text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
+            sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
+    end
+    
     function okButton_callback(~,~)
         ind_rm_final = ind_remove;
         thresh_out = thresh;
@@ -145,9 +176,8 @@ set(f,'KeyPressFcn',{@key_pressFcn});
                 % Move thresh
                 if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<Ylim(2))
                     
-                    i1 = max(1,round(Xlim(1)))
-                    i2 = min(round(Xlim(2)),size(Doppler_film,3))
-                    
+                    i1 = max(1,round(Xlim(1)));
+                    i2 = min(round(Xlim(2)),size(Doppler_film,3));     
                     thresh = pt_rp(1,2);
                     ind_remove_temp = test>thresh;
                     ind_keep_temp = test<=thresh;
