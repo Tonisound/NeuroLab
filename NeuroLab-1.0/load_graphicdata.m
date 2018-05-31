@@ -17,10 +17,15 @@ if exist(fullfile(savedir,'Trace_light.mat'),'file')
             fprintf('Graphic Data loaded %s.\n',fullfile(savedir,'Trace_light.mat'));
         case 'Graphic_objects_full.mat'
             data1 = load(fullfile(savedir,'Trace_light.mat'),'h');
-            data2 = load(fullfile(savedir,'Trace_LFP.mat'),'h');
-            copy_graphicdata([data1.h(2);data2.h(2)],handles.CenterAxes,handles.RightAxes,'loading',savedir);
-            fprintf('Graphic Data loaded %s.\n',fullfile(savedir,'Trace_light.mat'));
-            fprintf('Graphic Data loaded %s.\n',fullfile(savedir,'Trace_LFP.mat'));
+            fprintf('Graphic Data loaded %s.\n',fullfile(savedir,'Trace_light.mat')); 
+            try
+                data2 = load(fullfile(savedir,'Trace_LFP.mat'),'h');
+                fprintf('Graphic Data loaded %s.\n',fullfile(savedir,'Trace_LFP.mat'));
+                copy_graphicdata([data1.h(2);data2.h(2)],handles.CenterAxes,handles.RightAxes,'loading',savedir);
+            catch
+                copy_graphicdata(data1.h(2),handles.CenterAxes,handles.RightAxes,'loading',savedir);
+            end
+            
     end
 else
     warning('No Graphic Format detected.\n');

@@ -1,7 +1,7 @@
-function load_lfpconfig(~,~,handles)
+function load_lfpconfig(folder_name,handles)
 % Load LFP Configuration from NConfig
 
-global DIR_SAVE SEED_CONFIG FILES CUR_FILE
+global SEED_CONFIG FILES CUR_FILE
 
 % Pick file
 filter = {'*.txt'};
@@ -37,8 +37,8 @@ fclose(fileID);
 FILES(CUR_FILE).ncf = file;
 save('Files.mat','FILES','-append');
 fprintf('Files.mat updated.\n');
-save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),...
+save(fullfile(folder_name,'Nconfig.mat'),...
     'ind_channel','channel_id','channel_list','channel_type');
-fprintf('===> Channel Configuration saved at %s.\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'));
+fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
 
 end

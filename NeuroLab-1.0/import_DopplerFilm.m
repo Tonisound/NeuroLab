@@ -1,11 +1,11 @@
-function Doppler_film = import_DopplerFilm(F,handles,flag)
+function [Doppler_film,tag] = import_DopplerFilm(F,handles,flag)
 % Import Doppler movie from .acq file 
 % Generates Configuration file Config.mat
 % flag 0 - first import
 % flag 1 - reimport
 
-
 global IM LAST_IM SEED DIR_SAVE;
+tag = [];
 
 % create Doppler.mat
 if ~isempty(F.acq)
@@ -25,11 +25,10 @@ if ~isempty(F.acq)
     % Checking Doppler
     if flag == 1
         d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh');
-        [ind_remove,thresh] = check_Doppler(Doppler_film,d.ind_remove,d.thresh);
+        [ind_remove,thresh,tag] = check_Doppler(Doppler_film,d.ind_remove,d.thresh);
     else
-        [ind_remove,thresh] = check_Doppler(Doppler_film);
+        [ind_remove,thresh,tag] = check_Doppler(Doppler_film);
     end
-    
     
     if isempty(ind_remove)
         return;

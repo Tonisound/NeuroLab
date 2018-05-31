@@ -1,7 +1,7 @@
 function success = load_lfptraces(folder_name,handles)
 
 %global FILES CUR_FILE DIR_SAVE CUR_IM;
-%folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).gfus);
+%folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
 success = false;
 
 load('Preferences.mat','GDisp','GTraces');

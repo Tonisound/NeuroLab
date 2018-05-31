@@ -226,7 +226,7 @@ for i = 1:length(FileList)
                 fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
                 
                 % Import fUS Movie and Save Config.mat
-                Doppler_film = import_DopplerFilm(F(ind_file),handles,0);
+                [Doppler_film,tag] = import_DopplerFilm(F(ind_file),handles,0);
                 
                 % Detect trigger
                 import_reference_time(F(ind_file),Doppler_film,handles);
@@ -244,6 +244,20 @@ for i = 1:length(FileList)
                 TimeTags(1,1).Tokens = '';
                 TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'};
                 TimeTags_cell(2,:) = {'',TimeTags(1).Tag,TimeTags(1).Onset,TimeTags(1).Duration,TimeTags(1).Reference,''};
+                
+                if ~isempty(tag)
+                    TimeTags_images(2,:) = [data_t.time_ref.X(tag.im1),data_t.time_ref.X(tag.im2)];
+                    dur = data_t.time_ref.Y(tag.im2) - data_t.time_ref.Y(tag.im1);
+                    str_dur = datestr(dur/(24*3600),'HH:MM:SS.FFF');
+                    TimeTags_strings(2,:) = [{handles.TimeDisplay.UserData(tag.im1,:)},{handles.TimeDisplay.UserData(tag.im2,:)}];
+                    TimeTags(2,1).Episode = '';
+                    TimeTags(2,1).Tag = 'BASELINE';
+                    TimeTags(2,1).Onset = handles.TimeDisplay.UserData(tag.im1,:);
+                    TimeTags(2,1).Duration = str_dur;
+                    TimeTags(2,1).Reference = handles.TimeDisplay.UserData(tag.im1,:);
+                    TimeTags(2,1).Tokens = '';
+                    TimeTags_cell(3,:) = {'',TimeTags(2).Tag,TimeTags(2).Onset,TimeTags(2).Duration,TimeTags(2).Reference,''};
+                end
                 save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
             catch
                 rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');

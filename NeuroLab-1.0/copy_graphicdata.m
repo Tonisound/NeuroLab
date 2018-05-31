@@ -49,7 +49,7 @@ for i=length(h_line):-1:1
         
         case {'Trace_Cerep'}
             s.Name = h_line(i).UserData.Name;
-            dir_save = fullfile(save_dir,'Traces_Spiko');
+            dir_save = fullfile(save_dir,'Traces_Cerep');
             name = regexprep(s.Name,'/|\','_');
                     
             switch mode

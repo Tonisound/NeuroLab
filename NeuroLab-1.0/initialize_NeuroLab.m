@@ -579,7 +579,7 @@ set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,m
 %set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
 set(myhandles.ImportMenu_LoadConfig,'Callback','load_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces([],[],myhandles);');
+set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LoadRegions,'Callback','load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 
 % handles.ProcessMenu

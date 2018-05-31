@@ -1,9 +1,10 @@
-function [ind_rm_final,thresh_out] = check_Doppler(Doppler_film,ind_rm_initial,thresh_in)
+function [ind_rm_final,thresh_out,tag] = check_Doppler(Doppler_film,ind_rm_initial,thresh_in)
 
 global CUR_IM;
 
 ind_rm_final = [];
 thresh_out = [];
+tag = [];
 
 % Check fUS
 % Removing data points where variance is too high
@@ -38,6 +39,7 @@ text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
     sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
 text3 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
 text3.String = 'Drag/drop cursor and threshold.Arrows to move cursor. Press enter to discard/include cursor frame';
+text4 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
 
 ax2 = axes('Parent',f);
 ax2.XLim = [.5,size(Doppler_film,3)+5];
@@ -54,6 +56,9 @@ l_keep = line('XData',t(ind_keep==1),'YData',test(ind_keep==1),...
 l_rm = line('XData',t(ind_remove==1),'YData',test(ind_remove==1),...
     'Color','r','LineStyle','none','Marker','o','Parent',ax2,'HitTest','on');
 
+tagButton = uicontrol('Style','pushbutton','Units','normalized',...
+    'Position',[.875 .025 .4 .1],'String','Tag',...
+    'Tag','InvertButton','Parent',f);
 invertButton = uicontrol('Style','pushbutton','Units','normalized',...
     'Position',[.875 .025 .4 .1],'String','Invert',...
     'Tag','InvertButton','Parent',f);
@@ -75,13 +80,15 @@ ax2.Position = [.25 .1 .65 .8];
 text1.Position = [.025 .925 .2 .04];
 text2.Position = [.92 .7 .06 .2];
 text3.Position = [.1 .925 .8 .04];
+text4.Position = [.92 .6 .06 .1];
 
+tagButton.Position = [.92 .5 .06 .1];
 invertButton.Position = [.92 .4 .06 .1];
 okButton.Position = [.92 .3 .06 .1];
 cancelButton.Position = [.92 .2 .06 .1];
 skipButton.Position = [.92 .1 .06 .1];
 
-
+set(tagButton,'Callback',{@tagButton_callback});
 set(invertButton,'Callback',{@invertButton_callback});
 set(okButton,'Callback',{@okButton_callback});
 set(skipButton,'Callback',{@skipButton_callback});
@@ -107,6 +114,14 @@ set(f,'KeyPressFcn',{@key_pressFcn});
         l_rm.YData = test(ind_remove==1);
         text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
             sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
+    end
+
+    function tagButton_callback(~,~)
+        i1 = max(1,ceil(ax2.XLim(1)));
+        i2 = min(floor(ax2.XLim(2)),size(Doppler_film,3));
+        tag.im1 = i1;
+        tag.im2 = i2;  
+        text4.String = sprintf('Baseline [%03d-%03d]',i1,i2);
     end
     
     function okButton_callback(~,~)
