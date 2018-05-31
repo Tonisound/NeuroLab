@@ -13,7 +13,7 @@ end
 load('Preferences.mat','GImport');
 if strcmp(GImport.Doppler_loading,'skip')
     data_l = load(fullfile(folder_name,'Config.mat'),'Current_Image');
-    IM = zeros(size(data_l.Current_Image,1),size(Current_Image,2),LAST_IM);
+    IM = zeros(size(data_l.Current_Image,1),size(data_l.Current_Image,2),LAST_IM);
     IM(:,:,CUR_IM) = data_l.Current_Image;
     fprintf('Loading Doppler_film skipped : %s\n',fullfile(folder_name,'Doppler.mat'));
     return;

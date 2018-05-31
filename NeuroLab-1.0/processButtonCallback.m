@@ -15,36 +15,17 @@ switch strtrim(str(val,:))
     case 'Compute Deformation Field'
         compute_deformationfield(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-%     case 'Import Reference Time'
-%         import_reference_time(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+%     case 'Edit Time Tags'
+%         menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
 %     
-%     case 'Import Spikoscope Time Tags' 
-%         import_time_tags(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-%             
-%     case 'Import Spikoscope Traces'
-%         v = import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
-%         if v==1
-%             load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-%         end
+%     case 'Edit Time Groups'
+%         menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
 %         
-%     case 'Import Spikoscope Regions'
-%         import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
+%     case 'Load Spikoscope Regions'
 %         load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-%         
-%     case 'Import Spikoscope Episodes'
-%         import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
-        
-    case 'Edit Time Tags'
-        menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-    
-    case 'Edit Time Groups'
-        menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-        
-    case 'Load Spikoscope Regions'
-        load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-    
-    case 'Load Cereplex Traces'
-        load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+%     
+%     case 'Load Cereplex Traces'
+%         load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     case 'Detect Vascular Surges'
         detect_vascular_surges(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

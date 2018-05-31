@@ -1,6 +1,7 @@
 function success = menuEdit_LFPConfig_Callback(folder_name,handles)
 % Channel Configuration Edition
 
+global FILES CUR_FILE;
 success = false;
 
 % Loading Channel Config
@@ -72,7 +73,7 @@ panel1 = uipanel('FontSize',ftsize,...
 % UiTable 
 t1 = uitable('ColumnName',{'ID','Type','Name'},...
     'ColumnFormat',{'char','char','char'},...
-    'ColumnEditable',[true,true,true],...
+    'ColumnEditable',[true,true,false],...
     'ColumnWidth',{180 180 180 90},...
     'Tag','Tag_Table',...
     'Units','normalized',...
@@ -98,8 +99,12 @@ t1.Data = D;
     end
 
     function removeButton_callback(~,~)
-        selection = t1.UserData.Selection;
-        t1.Data(selection,:)=[];
+        if isempty(t1.UserData)
+            t1.Data(1:size(t1.Data,1),:)=[];
+        else
+            selection = t1.UserData.Selection;
+            t1.Data(selection,:)=[];
+        end
     end
 
     function okButton_callback(~,~)
@@ -107,6 +112,7 @@ t1.Data = D;
         channel_id = t1.Data(:,1);
         channel_type = t1.Data(:,2);
         ind_channel = str2double(channel_id);
+        channel_list = cell(size(channel_id));
         for i =1:length(ind_channel)
             channel_list(i) = {sprintf('%s/%03d',char(channel_type(i)),ind_channel(i))};
         end
@@ -115,6 +121,9 @@ t1.Data = D;
         if isempty(channel_id)
             delete(fullfile(folder_name,'Nconfig.mat'));
             fprintf('Removed configuration %s.\n',fullfile(folder_name,'Nconfig.mat'));
+            FILES(CUR_FILE).ncf = '';
+            save('Files.mat','FILES','-append');
+            fprintf('Files.mat updated.\n');
         else
             save(fullfile(folder_name,'Nconfig.mat'),...
                 'ind_channel','channel_id','channel_list','channel_type');

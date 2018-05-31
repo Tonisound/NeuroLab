@@ -130,7 +130,13 @@ uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime');
 uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
 uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
 uimenu(m1b,'Label','Import Spikoscope Regions','Tag','ImportMenu_Regions','Enable','off');
-uimenu(m1b,'Label','Import Episodes','Tag','ImportMenu_Episodes','Enable','off');
+
+%uimenu(m1b,'Label','Load Doppler film','Tag','ImportMenu_ReloadDoppler');
+%uimenu(m1b,'Label','Load Graphics','Tag','ImportMenu_ReloadGraphic');
+uimenu(m1b,'Label','Actualize Traces','Tag','ImportMenu_ActualizeTraces','Separator','on');
+uimenu(m1b,'Label','Load LFP Configuration','Tag','ImportMenu_LoadConfig');
+uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces');
+uimenu(m1b,'Label','Load Spikoscope Regions','Tag','ImportMenu_LoadRegions','Enable','off');
 
 % handles.EditMenu
 m2 = uimenu('Label','Edit','Tag','EditMenu','Parent',f);
@@ -138,10 +144,6 @@ uimenu(m2,'Label','Edit Traces','Tag','EditMenu_Edition','Accelerator','T');
 uimenu(m2,'Label','Edit Time Tags','Tag','EditMenu_TimeTagEdition');
 uimenu(m2,'Label','Edit Time Groups','Tag','EditMenu_TimeGroupEdition');
 uimenu(m2,'Label','Edit LFP Configuration','Tag','EditMenu_LFPConfig');
-
-uimenu(m2,'Label','Reload Doppler film','Tag','EditMenu_ReloadDoppler','Separator','on');
-uimenu(m2,'Label','Reload Configuration','Tag','EditMenu_ReloadConfig');
-uimenu(m2,'Label','Actualize Traces','Tag','EditMenu_ActualizeTraces');
 
 uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','on');
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
@@ -284,8 +286,8 @@ pl = uicontrol(f,'Style','popup',...
     'Tag','ProcessListPopup',...
     'FontSize',fontsize,...
     'Parent',botPanel);
-pl_str = 'Compute Normalized Movie|Compute Deformation Field|Edit Time Tags|Edit Time Groups';
-pl_str = strcat(pl_str,'|Load Spikoscope Regions|Load Cereplex Traces|Detect Vascular Surges|Edit Anatomical Regions|Export Anatomical Regions');
+pl_str = 'Compute Normalized Movie|Compute Deformation Field|Filter LFP for theta|Compute LFP theta power';
+pl_str = strcat(pl_str,'|Detect Vascular Surges|Edit Anatomical Regions|Export Anatomical Regions');
 pl.String = pl_str;
 
 % Process Button
@@ -557,7 +559,6 @@ set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(C
 set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
 set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),myhandles);');
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
-set(myhandles.ImportMenu_Episodes,'Callback','import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 
 % handles.DisplayMenu
 set(myhandles.DisplayMenu_Video,'Callback',{@menuDisplay_Video_Callback,myhandles});
@@ -574,9 +575,12 @@ set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhan
 set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
 set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
-set(myhandles.EditMenu_ReloadConfig,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.EditMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
-set(myhandles.EditMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
+%set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
+%set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
+set(myhandles.ImportMenu_LoadConfig,'Callback','load_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces([],[],myhandles);');
+set(myhandles.ImportMenu_LoadRegions,'Callback','load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 
 % handles.ProcessMenu
 set(myhandles.SynthesisMenu_Batch,'Callback',{@batch_generalscript,myhandles});

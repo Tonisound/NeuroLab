@@ -17,7 +17,7 @@ set(handles.MainFigure, 'pointer', 'watch');
 drawnow;
 
 set(handles.MainFigure, 'pointer', 'arrow');
-[ind_traces,ok] = listdlg('PromptString','Select Traces','SelectionMode','multiple','ListString',{traces.shortname},'ListSize',[400 500]);
+[ind_traces,ok] = listdlg('PromptString','Select Traces','SelectionMode','multiple','ListString',{traces.fullname},'ListSize',[400 500]);
 g_colors = get(groot,'defaultAxesColorOrder');
 
 if ~ok || isempty(ind_traces)
@@ -25,7 +25,7 @@ if ~ok || isempty(ind_traces)
 end
 
 for i=1:length(ind_traces)
-    str = lower(char(traces(ind_traces(i)).shortname));
+    str = lower(char(traces(ind_traces(i)).fullname));
     if strfind(str,'CA1')
         color = 'r';
     elseif strfind(str,'CA2')
@@ -72,7 +72,7 @@ for i=1:length(ind_traces)
     end
     
     % Updating UserData
-    t = traces(ind_traces(i)).shortname;
+    t = traces(ind_traces(i)).fullname;
     p = traces(ind_traces(i)).parent;
     %BEHAVIOR
     if strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_X_(m)_B0_B0')
@@ -107,7 +107,7 @@ for i=1:length(ind_traces)
     hl.UserData = s;
     
 end
-fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces).shortname);
+fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces).fullname);
 success = true;
 
 end
