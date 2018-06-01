@@ -29,17 +29,29 @@ switch normalization
         M = repmat(im_mean,1,1,size(Doppler_film,3));
         Doppler_normalized = (Doppler_film-M)./M;
     case 'baseline'
-        load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
-        ind_base = strcmp(TimeGroups_name,'BASELINE');
-        ind_images = TimeGroups_S(ind_base).TimeTags_images;
-        if isempty(ind_base)
-            errordlg('Missing Time Group BASELINE');
+%         load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
+%         ind_base = strcmp(TimeGroups_name,'BASELINE');
+%         ind_images = TimeGroups_S(ind_base).TimeTags_images;
+%         if isempty(ind_base)
+%             errordlg('Missing Time Group BASELINE');
+%             return;
+%         end 
+%         for i=1:size(ind_images,1)
+%             ind_keep(ind_images(i,1):ind_images(i,2))=1;
+%         end
+
+        dt = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_images');
+        ind_base = contains({dt.TimeTags(:).Tag}','BASELINE');
+        if isempty(dt.TimeTags_images(ind_base))
+            warning('No Tag baseline defined.\n')
             return;
+        else
+            temp = dt.TimeTags_images(ind_base,:);
+            for i=1:size(temp,1)
+                ind_keep(temp(i,1):temp(i,2))=1;
+            end
         end
         
-        for i=1:size(ind_images,1)
-            ind_keep(ind_images(i,1):ind_images(i,2))=1;
-        end
         Doppler_baseline = Doppler_film(:,:,ind_keep==1);
         im_baseline = mean(Doppler_baseline,3,'omitnan');
         M = repmat(im_baseline,1,1,size(Doppler_film,3));

@@ -13,7 +13,7 @@ else
 %     m = min(all_movie(:),[],'omitnan');
 %     M = max(all_movie(:),[],'omitnan');
 %     handles.CenterAxes.CLim = [m,M];
-    delta = handles.RightAxes.YLim(2)-handles.RightAxes.YLim(1);
+    delta = .5*(handles.RightAxes.YLim(2)-handles.RightAxes.YLim(1));
     handles.CenterAxes.CLim = [handles.RightAxes.YLim(1)-delta handles.RightAxes.YLim(2)+delta];
     
     fprintf('CLim Mode set to manual. CLim = [%.1f %.1f].\n',handles.CenterAxes.CLim(1),handles.CenterAxes.CLim(2));
