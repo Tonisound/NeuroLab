@@ -131,13 +131,13 @@ GFilt.gammalow_sup = 50;
 GFilt.gammalow_smooth = .1;
 GFilt.gammamid_inf = 55;
 GFilt.gammamid_sup = 95;
-GFilt.gammamid_smooth = .05;
+GFilt.gammamid_smooth = .1;
 GFilt.gammahigh_inf = 105;
 GFilt.gammahigh_sup = 150;
-GFilt.gammahigh_smooth = .02;
+GFilt.gammahigh_smooth = .1;
 GFilt.ripple_inf = 150;
 GFilt.ripple_sup = 300;
-GFilt.ripple_smooth = .001;
+GFilt.ripple_smooth = .1;
 
 GImport_default = GImport;
 GParams_default = GParams;

@@ -14,6 +14,9 @@ switch strtrim(str(val,:))
         
     case 'Compute Deformation Field'
         compute_deformationfield(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+            
+    case 'Filter LFP for theta'
+        filter_lfp_theta(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
 %     case 'Edit Time Tags'
 %         menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
