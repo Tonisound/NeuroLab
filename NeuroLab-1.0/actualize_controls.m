@@ -7,7 +7,7 @@ set(handles.CurrentImageDisplay,'String',sprintf('%d/%d',CUR_IM,END_IM));
 set(handles.PlayToggle,'Value',0);
 
 set(handles.CenterPanelPopup,'Value',uivalues.CenterPanelPopup);
-handles.CenterPanelPopup.UserData = uivalues.CenterPanelPopup;
+%handles.CenterPanelPopup.UserData = uivalues.CenterPanelPopup;
 set(handles.FigureListPopup,'Value',uivalues.FigureListPopup);
 set(handles.ProcessListPopup,'Value',uivalues.ProcessListPopup);
 set(handles.RightPanelPopup,'Value',uivalues.RightPanelPopup);

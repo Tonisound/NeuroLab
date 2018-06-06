@@ -47,33 +47,39 @@ end
 
 % Extracting_timing
 f_trig = 30000;
-time_stamp = data_nev.Data.Spikes.TimeStamp(data_nev.Data.Spikes.Electrode==trig_list(ind_trig))';
-trigger = double(time_stamp)/f_trig;
+time_stamp_raw = data_nev.Data.Spikes.TimeStamp(data_nev.Data.Spikes.Electrode==trig_list(ind_trig))';
+trigger_raw = double(time_stamp_raw)/f_trig;
+n_images = size(Doppler_film,3);
 
 % Test if trigger matches Doppler_film size
-if size(Doppler_film,3)~= length(trigger)
-    if length(trigger)+1 == size(Doppler_film,3)
-        warning('Trigger (%d) and IM size (%d) do not match [Missing end trig]. -> Adding end trig',length(trigger),size(Doppler_film,3));
-        discrepant = size(Doppler_film,3)-length(trigger);
-        % extend one trigger
-        trigger = [trigger; trigger(end)+trigger(2)-trigger(1)];
-        time_stamp = [time_stamp; time_stamp(end)+time_stamp(2)-time_stamp(1)];
-        padding = 'missing';
-    elseif length(trigger) > size(Doppler_film,3)
-        warning('Trigger (%d) and IM size (%d) do not match [Excess trigs]. -> Discarding end trigs',length(trigger),size(Doppler_film,3));
-        discrepant = size(Doppler_film,3)-length(trigger);
-        % keep only first triggers
-        trigger = trigger(end-size(Doppler_film,3)+1:end);
-        %trigger = trigger(1:size(Doppler_film,3));
-        time_stamp = time_stamp(1:size(Doppler_film,3));
-        padding = 'excess';
+if n_images~= length(trigger_raw)
+    if length(trigger_raw) < n_images
         
-    else
-        % Missing trigs : template trigger
-        warning('Trigger (%d) and IM size (%d) do not match [Missing trigs]. -> Default\n',length(trigger),size(Doppler_film,3));
-        templatetrigg_save(Doppler_film, dir_save,handles);
-        return;
+        warning('Trigger (%d) and IM size (%d) do not match [Missing end trig]. -> Adding end trig',length(trigger_raw),n_images);
+        discrepant = n_images-length(trigger_raw);
+        padding = 'missing';
+        % extend trigger using delta_trig
+        delta_trig = trigger_raw(2)-trigger_raw(1);
+        additional_trigs = (1:discrepant)'*delta_trig;
+        trigger = [trigger_raw; trigger_raw(end)+additional_trigs];
+        time_stamp = [time_stamp_raw; time_stamp_raw(end)+time_stamp_raw(2)-time_stamp_raw(1)];
+        
+    elseif length(trigger_raw) > n_images
+        
+        warning('Trigger (%d) and IM size (%d) do not match [Excess trigs]. -> Discarding end trigs',length(trigger_raw),n_images);
+        discrepant = n_images-length(trigger_raw);
+        padding = 'excess'; 
+        % keep only first triggers
+        trigger = trigger_raw(end-n_images+1:end);
+        %trigger = trigger_raw(1:n_images);
+        time_stamp = time_stamp_raw(1:n_images);
+            
     end
+else
+    discrepant = 0;
+    padding = 'exact';
+    trigger = trigger_raw;
+    time_stamp = time_stamp_raw;
 end
 
 time_ref.name = sprintf('Channel %d',trig_list(ind_trig));
@@ -91,7 +97,8 @@ if  ~isempty(time_ref)
     handles.TimeDisplay.UserData = char(time_str);
     handles.TimeDisplay.String = char(time_str(CUR_IM));
     %datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
-    save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst','length_burst','reference','padding','discrepant','-v7.3');
+    save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst','length_burst','n_images',...
+        'reference','padding','discrepant','trigger','trigger_raw','time_stamp','time_stamp_raw','-v7.3');
     fprintf('Succesful Reference Time Importation\n===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));
 end
 
@@ -101,14 +108,20 @@ function templatetrigg_save(Doppler_film,dir_save,handles)
 
 global CUR_IM;
 
+n_images = size(Doppler_film,3);
 n_burst = 1;
-length_burst = size(Doppler_film,3);
+length_burst = n_images;
 reference = 'default';
 padding = 'none';
 discrepant = 0;
+trigger_raw = (0:length_burst-1)'/2.5;
+trigger = trigger_raw;
+time_stamp_raw = single(30000*trigger_raw);
+time_stamp = time_stamp_raw;
+
 time_ref.X=(1:length_burst)';
-time_ref.Y=(0:length_burst-1)'/2.5;
-time_ref.nb_images= size(Doppler_film,3);
+time_ref.Y=trigger;
+time_ref.nb_images= n_images;
 time_ref.name = reference;
 time_ref.time_stamp = [];
 time_str = cellstr(datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF'));
@@ -116,7 +129,8 @@ handles.TimeDisplay.UserData = char(time_str);
 handles.TimeDisplay.String = char(time_str(CUR_IM));
 %datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
 
-save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst','length_burst','reference','padding','discrepant','-v7.3');
+save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst','length_burst','n_images',...
+    'reference','padding','discrepant','trigger','trigger_raw','time_stamp','time_stamp_raw','-v7.3');
 fprintf('Time_Reference.mat saved at %s.\n',fullfile(dir_save,'Time_Reference.mat'));
 
 end

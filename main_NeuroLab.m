@@ -18,6 +18,7 @@ d = dir('NPMK*');
 for i = 1:length(d)
     addpath(genpath(char(d(i).name)));
 end
+addpath('IQ_Loading');
 
 % Initializing Preferences.mat if Preferences file is missing
 output=true;

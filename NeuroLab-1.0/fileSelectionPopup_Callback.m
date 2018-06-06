@@ -33,6 +33,7 @@ if ~strcmp(old,new)
     if ~(strcmp(new,'')||strcmp(new,'<0>'))
         
         data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
+        UiValues = data_config.UiValues;
         START_IM = data_config.START_IM;
         CUR_IM = data_config.CUR_IM;
         END_IM = data_config.END_IM;
