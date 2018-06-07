@@ -116,10 +116,11 @@ f.Colormap = cmap;
 % handles.FileMenu
 m1 = uimenu('Label','File','Tag','FileMenu','Parent',f);
 uimenu(m1,'Label','Manage Files','Tag','FileMenu_Manage','Accelerator','F');
-uimenu(m1,'Label','Load Recording List','Tag','FileMenu_LoadRecList');
-uimenu(m1,'Label','Save Recording List','Tag','FileMenu_SaveRecList');
-uimenu(m1,'Label','Next File','Tag','FileMenu_Next','Accelerator','L','Separator','on');
+uimenu(m1,'Label','Next File','Tag','FileMenu_Next','Accelerator','L');
 uimenu(m1,'Label','Previous File','Tag','FileMenu_Prev','Accelerator','P');
+uimenu(m1,'Label','Load Recording List','Tag','FileMenu_LoadRecList','Separator','on');
+uimenu(m1,'Label','Save Recording List','Tag','FileMenu_SaveRecList');
+uimenu(m1,'Label','Save UF Params','Tag','FileMenu_SaveUFParams');
 uimenu(m1,'Label','Save Configuration','Tag','FileMenu_Save','Accelerator','S');
 
 % handles.ImportMenu
@@ -550,6 +551,7 @@ set(myhandles.FileMenu_LoadRecList,'Callback',{@menuFiles_Callback,myhandles,2})
 set(myhandles.FileMenu_SaveRecList,'Callback',{@menuFiles_SaveRec_Callback,myhandles});
 set(myhandles.FileMenu_Next,'Callback',{@menuFiles_Next_Callback,myhandles});
 set(myhandles.FileMenu_Prev,'Callback',{@menuFiles_Prev_Callback,myhandles});
+set(myhandles.FileMenu_SaveUFParams,'Callback','saving_UFParams(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).dir_fus),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab))');
 set(myhandles.FileMenu_Save,'Callback',{@mainFigure_saveFcn,myhandles});
 
 % handles.ImportMenu

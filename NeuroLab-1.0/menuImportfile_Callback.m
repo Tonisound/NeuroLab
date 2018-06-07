@@ -221,7 +221,7 @@ for i = 1:length(FileList)
         if isempty(button) || strcmp(button,'Cancel')
             return;
         else
-            try
+            %try
                 mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
                 fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
                 
@@ -230,6 +230,9 @@ for i = 1:length(FileList)
                 
                 % Detect trigger
                 import_reference_time(F(ind_file),Doppler_film,handles);
+                
+                % Save UF Params
+                saving_UFParams(fullfile(F(ind_file).fullpath,F(ind_file).dir_fus),fullfile(DIR_SAVE,F(ind_file).nlab))
                 
                 % save TimeTags.mat (whole episode)
                 data_t = load(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),'time_ref');
@@ -259,11 +262,11 @@ for i = 1:length(FileList)
                     TimeTags_cell(3,:) = {'',TimeTags(2).Tag,TimeTags(2).Onset,TimeTags(2).Duration,TimeTags(2).Reference,''};
                 end
                 save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
-            catch
-                rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');
-                fprintf('Nlab directory deleted : %s.\n',F(ind_file).nlab);
-                F(ind_file).nlab = '';
-            end
+%             catch
+%                 rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');
+%                 fprintf('Nlab directory deleted : %s.\n',F(ind_file).nlab);
+%                 F(ind_file).nlab = '';
+%             end
         end
     end
 end
