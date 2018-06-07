@@ -236,8 +236,8 @@ set(resetAllparamButton,'Callback',@resetAllparamButton_callback);
     function checkdir_callback(hObj,~,var,label)
         StrValue=get(hObj,'String');
         if isdir(StrValue) && strcmp(StrValue,var)==0
-            if ~strcmp(StrValue(end),'/')
-                StrValue = strcat(StrValue,'/');
+            if ~strcmp(StrValue(end),filesep)
+                StrValue = strcat(StrValue,filesep);
                 set(hObj,'String',StrValue);
             end
         elseif isdir(StrValue)==0

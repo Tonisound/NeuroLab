@@ -17,9 +17,9 @@ else
 end
 new = char(strtrim(hObj.String(hObj.Value,:)));
 
-temp = regexp(new,'/','split');
+temp = regexp(new,filesep,'split');
 new_fus = strcat(char(temp(end)),'_nlab');
-temp = regexp(old,'/','split');
+temp = regexp(old,filesep,'split');
 old_fus = strcat(char(temp(end)),'_nlab');
 CUR_FILE = hObj.Value;
 

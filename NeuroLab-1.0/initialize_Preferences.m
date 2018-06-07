@@ -3,9 +3,18 @@ function success = initialize_Preferences()
 % Default Values used when Preference Files is missing or during Reset
 success = false;
 
+% Default options
+str_disk_1 = fullfile('G:','DATA');
+str_disk_2 = fullfile(filesep,'Volumes','ETNA','DATA');
+str_disk_3 = fullfile(filesep,'Volumes','Toni_HD2','DATA_NLAB');
+str_disk_4 = fullfile(filesep,'Users','tonio','Documents','DATA_NLAB');
+
+str_save_1 = fullfile('D:','NEUROLAB');
+str_save_2 = fullfile(filesep,'Users','tonio','Documents','NEUROLAB');
+
 % Inputdlg to choose booting options
-prompt={sprintf('(1) E (Etna from Windows) \n(2) ETNA from Mac \n(3) Data Disk Toni-HD2 \n(4) Data Disk MacBook');
-    sprintf('(1) Data Disk D \n(2) Local files MacBook')};
+prompt={sprintf('(1) %s \n(2) %s \n(3) %s \n(4) %s',str_disk_1,str_disk_2,str_disk_3,str_disk_4);
+    sprintf('(1) %s \n(2) %s',str_save_1,str_save_2)};
 name = 'Booting options';
 defaultans = {'1';'1'};
 options.Interpreter = 'tex';
@@ -17,13 +26,13 @@ end
 
 switch strtrim(char(answer(1)))
     case '1'
-        str_disk = fullfile('E:','DATA');
+        str_disk = str_disk_1;
     case '2'
-        str_disk = fullfile('/','Volumes','ETNA','DATA');%'/Volumes/ETNA/DATA'
+        str_disk = str_disk_2;
     case '3'
-        str_disk =  fullfile('/','Volumes','Toni_HD2','DATA_NLAB');%'/Users/tonio/Documents/MATLAB/DATA_NEUROLAB';
+        str_disk = str_disk_3;
     case '4'
-        str_disk =  fullfile('/','Users','tonio','Documents','DATA_NLAB');%'/Volumes/Toni_HD2'
+        str_disk = str_disk_4;
     case ''
         return;
     otherwise
@@ -31,9 +40,9 @@ switch strtrim(char(answer(1)))
 end 
 switch strtrim(char(answer(2)))
     case '1'
-        str_save = fullfile('D:','NEUROLAB');
+        str_save = str_save_1;
     case '2'
-        str_save = fullfile('/','Users','tonio','Documents','NEUROLAB');%'/Users/tonio/Documents';
+        str_save = str_save_2;
     otherwise
         str_save = char(answer(2));
 end

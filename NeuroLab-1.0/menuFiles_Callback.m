@@ -489,7 +489,7 @@ end
         FILES = files_temp;
         CUR_FILE = cur_file;
         if ~isempty(FILES)
-            str = strcat({FILES(:).parent}','/',{FILES(:).session}','/',{FILES(:).recording}');
+            str = strcat({FILES(:).parent}',filesep,{FILES(:).session}',filesep,{FILES(:).recording}');
         else
             str = '<0>';
         end

@@ -62,9 +62,9 @@ for i = 1:length(FileList)
         else
             all_files = cell(length(d),1);
             for j=1:length(d)
-                all_files(j) = {fullfile(FileName,'/',char(d(j).name))};
+                all_files(j) = {fullfile(FileName,filesep,char(d(j).name))};
             end
-            %all_files = strcat(FileName,'/',{d(:).name}');
+            %all_files = strcat(FileName,filesep,{d(:).name}');
             FileList_converted = [FileList_converted;all_files];
         end
     else
