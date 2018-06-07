@@ -232,7 +232,7 @@ for i = 1:length(FileList)
                 import_reference_time(F(ind_file),Doppler_film,handles);
                 
                 % Save UF Params
-                saving_UFParams(fullfile(F(ind_file).fullpath,F(ind_file).dir_fus),fullfile(DIR_SAVE,F(ind_file).nlab))
+                saving_UFParams(fullfile(F(ind_file).fullpath,F(ind_file).dir_fus),fullfile(DIR_SAVE,F(ind_file).nlab));
                 
                 % save TimeTags.mat (whole episode)
                 data_t = load(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),'time_ref');
