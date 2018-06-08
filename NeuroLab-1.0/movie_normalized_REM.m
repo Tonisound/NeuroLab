@@ -22,10 +22,10 @@ display_mode = char(answer(4));
 
 
 % Loading Time Reference
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
 % Loading Time Tags
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'file')
-    tt_data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),...
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
+    tt_data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),...
         'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
     flag_tag = 1;
     tt_cell = {tt_data.TimeTags(:).Tag}';
@@ -58,8 +58,8 @@ else
     TimeTags_images = [];
 end
 % Loading Time Groups
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'file')
-    tg_data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),...
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
+    tg_data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),...
         'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
     flag_group = 1;
     tg_cell = tg_data.TimeGroups_name;
@@ -75,8 +75,8 @@ else
 end
 
 % Loading Doppler_Surge
-% if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Surges.mat'),'file')
-%     data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Surges.mat'),'Doppler_Surge');
+% if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Surges.mat'),'file')
+%     data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Surges.mat'),'Doppler_Surge');
 %     Doppler_Surge = data.Doppler_Surge;
 % else
 %     Doppler_Surge = NaN(size(IM));
@@ -162,7 +162,7 @@ t = (b-floor(b))*24*3600;
 % Loading video
 if strcmp(flag_video,'true')
     fprintf('Loading video frames...');
-    data_mov = load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus, 'video.mat'),'video_mat','video_time');
+    data_mov = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab, 'video.mat'),'video_mat','video_time');
     filename = fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko,'BEHAVIOR_0_Scene_source_frame_B0_B0_export','B0.txt');
     % Direct Importation
     fileID = fopen(filename,'r');
@@ -215,7 +215,7 @@ end
 
 % Building figure
 str= strtrim(handles.CenterPanelPopup.String(handles.CenterPanelPopup.Value,:));
-f = figure('Name',sprintf('fUS-EEG Recording - %s (%s)',FILES(CUR_FILE).gfus,str),...
+f = figure('Name',sprintf('fUS-EEG Recording - %s (%s)',FILES(CUR_FILE).nlab,str),...
     'Units','normalized',...
     'MenuBar','none',...
     'Colormap',handles.MainFigure.Colormap,...

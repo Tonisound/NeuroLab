@@ -77,7 +77,7 @@ load(Beta,'-mat');
 Acquisition.Data = permute(Doppler_film,[2 4 1 3]);
 %Acquisition.Data = Doppler;
 fprintf('Saving acq file %s...',Beta);
-save(Beta,'Acquisition','-append');
+save(Beta,'Acquisition','-v7.3');
 fprintf(' done.\n');
 
 end
