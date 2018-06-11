@@ -156,7 +156,7 @@ ft.UserData.Selection = [];
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
 D = [cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Trace Edition'};{'Trace Edition'};{'Actualize Traces'};{'Save UF Params'}];
+    {'Trace Edition'};{'Actualize Traces'};{'Export IMO file'};{'Save UF Params'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -421,7 +421,7 @@ GImport.Doppler_loading_index = handles.Popup3.Value;
 GImport.Doppler_loading = char(str(handles.Popup3.Value));
 
 % Loading graphic data or Doppler if changed
-global CUR_FILE DIR_SAVE FILES SEED SEED_REGION;
+global CUR_FILE DIR_SAVE FILES SEED SEED_REGION SEED_SPIKO;
 if flag_gload
     load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);
 end
@@ -522,6 +522,9 @@ for i = 1:length(ind_files)
                     
                 case 'Save UF Params'
                     success = saving_UFParams(fullfile(FILES(ii).fullpath,FILES(ii).dir_fus),fullfile(DIR_SAVE,FILES(ii).nlab));
+                    
+                case 'Export IMO file'
+                    success = export_imofile(fullfile(DIR_SAVE,FILES(ii).nlab),SEED_SPIKO,FILES(ii).session);
                                     
                 otherwise
                     c2 = now;
