@@ -36,6 +36,7 @@ end
 
 % Setting Global Variables from Preferences.mat and Files.mat
 global SEED;                    % String : Main Directory
+global SEED_SPIKO;              % String : Data Directory (Spikoscope Readout)
 global SEED_SWL;                % String : Recording List Directory
 global SEED_REGION;             % String : Spikoscope Regions Directory
 global SEED_CONFIG;             % String : Configuration Directory
@@ -54,6 +55,7 @@ global LAST_IM;                 % int : Index of Last Image
 load('Preferences.mat', 'GParams','GDisp');
 load('Files.mat','FILES','CUR_FILE','str','UiValues');
 SEED =          GParams.SEED;
+SEED_SPIKO =    GParams.SEED_SPIKO;
 SEED_SWL =      GParams.SEED_SWL;
 SEED_REGION =   GParams.SEED_REGION;
 SEED_CONFIG =   GParams.SEED_CONFIG;

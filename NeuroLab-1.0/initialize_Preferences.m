@@ -50,6 +50,7 @@ end
 % Data Disk
 %GParams.SEED = fullfile(str_disk,'DATA');
 GParams.SEED = fullfile(str_disk);
+GParams.SEED_SPIKO = fullfile(str_disk,'ATLAS_NLAB');
 % Local Disk
 GParams.DIR_SAVE = fullfile(str_save,'NLab_DATA');
 GParams.DIR_FIG = fullfile(str_save,'NLab_Figures');
@@ -66,6 +67,7 @@ GParams.sep_swl_2 = 'SEP2';
 if ~exist(str_disk,'dir')
     warning('Data Disk not found [%s].\n',str_disk);
 end
+
 % save disk
 if ~exist(str_save,'dir')
     %errordlg('Save Disk not found [%s].\n',str_save);
@@ -74,8 +76,8 @@ if ~exist(str_save,'dir')
     if strcmp(h,'Cancel')
         return;
     else
-        folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;...
-            GParams.DIR_SYNT;GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
+        folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;GParams.DIR_SYNT;...
+            GParams.SEED_SPIKO;GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
         for j= 1:length(folder_list)
             folder = char(folder_list(j));
             if ~exist(folder,'dir')

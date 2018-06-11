@@ -1,7 +1,7 @@
 function processButtonCallback(~,~,handles)
 % 213 -- Process List Callbacks
 
-global DIR_SAVE FILES CUR_FILE SEED SEED_REGION ;
+global DIR_SAVE FILES CUR_FILE SEED_SPIKO ;
 %global DIR_SAVE FILES CUR_FILE SEED SEED_REGION LAST_IM CUR_IM START_IM END_IM IM DIR_SYNT;
 
 val = get(handles.ProcessListPopup,'Value');
@@ -11,12 +11,12 @@ switch strtrim(str(val,:))
     
     case 'Compute Normalized Movie'
         compute_normalizedmovie(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-        
-    case 'Compute Deformation Field'
-        compute_deformationfield(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
             
     case 'Filter LFP for theta'
         filter_lfp_theta(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        
+    case 'Export IMO file'
+        export_imofile(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),SEED_SPIKO,FILES(CUR_FILE).session);
         
 %     case 'Edit Time Tags'
 %         menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
