@@ -1,16 +1,47 @@
-function success = import_regions(seed_region,spikodir,dir_save)
-% Searches SEED_REGION directory for file 'spiko_dir'_region_archive/Mask*
+function success = import_regions(foldername,file_session)
+% Flag 1
+% Converts Spikoscope Regions to binary files in txt format to SEED_REGION
 % Select most recent Mask directory and extracts name, mask and patch for
 % each region
 
+% Flag 2
+% Converts binary files directly to file NRegions.mat
+
 success = false;
-dir_regions = dir(sprintf('%s_region_archive/Mask*',fullfile(seed_region,spikodir)));
-dir_regions = fullfile(seed_region,strcat(spikodir,'_region_archive'),dir_regions(end).name);
+global SEED_REGION;
+
+% Searching seed_region
+seed_region = '/Users/tonio/Documents/Spikoscope_RegionArchive/';
+file_E = strrep(file_session,'_MySession','_E_spiko_region_archive');
+dir_regions = dir(fullfile(seed_region,file_E,'Mask*'));
+
+%Sorting by datenum
+S = [dir_regions(:).datenum];
+[~,ind] = sort(S);
+dir_regions = dir_regions(ind);
+
+% Selecting most recent one
+dir_regions = fullfile(seed_region,file_E,char(dir_regions(end).name));
 files_regions = dir(fullfile(dir_regions,'*.U8'));
 
 if isempty(files_regions)
+    warning('No Mask Regions found under binary format [%s].',dir_regions);
     return;
+else
+    % creating saving folder
+    if exist(fullfile(SEED_REGION,file_session),'dir')
+        rmdir(fullfile(SEED_REGION,file_session),'s');
+    end
+    mkdir(fullfile(SEED_REGION,file_session));
+    
+    % copying
+    fprintf('Copying files in NRegions directory\n.');
+    for i =1:length(files_regions)
+        copyfile(fullfile(dir_regions,char(files_regions(i).name)),fullfile(SEED_REGION,file_session,char(files_regions(i).name)))
+    end
 end
+
+
 regions = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});
 
 %Sorting by datenum
@@ -57,8 +88,8 @@ for i=1:length(files_regions)
 end
 
 % Saving Regions
-save(fullfile(dir_save,'Spikoscope_Regions.mat'),'X','Y','regions');
-fprintf('Spikoscope Regions Imported (%s) \n===> Saved in %s\n',dir_regions,fullfile(dir_save,'Spikoscope_Regions.mat'));
+save(fullfile(foldername,'Spikoscope_Regions.mat'),'X','Y','regions');
+fprintf('Spikoscope Regions Imported (%s) \n===> Saved in %s\n',dir_regions,fullfile(foldername,'Spikoscope_Regions.mat'));
 success = true;
 
 end

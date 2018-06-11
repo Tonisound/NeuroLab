@@ -130,14 +130,14 @@ uimenu(m1b,'Label','Check Doppler film','Tag','ImportMenu_Doppler','Separator','
 uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime');
 uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
 uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
-uimenu(m1b,'Label','Import Spikoscope Regions','Tag','ImportMenu_Regions','Enable','off');
+uimenu(m1b,'Label','Import Regions','Tag','ImportMenu_Regions');
 
 %uimenu(m1b,'Label','Load Doppler film','Tag','ImportMenu_ReloadDoppler');
 %uimenu(m1b,'Label','Load Graphics','Tag','ImportMenu_ReloadGraphic');
 uimenu(m1b,'Label','Actualize Traces','Tag','ImportMenu_ActualizeTraces','Separator','on');
 uimenu(m1b,'Label','Load LFP Configuration','Tag','ImportMenu_LoadConfig');
 uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces');
-uimenu(m1b,'Label','Load Spikoscope Regions','Tag','ImportMenu_LoadRegions','Enable','off');
+uimenu(m1b,'Label','Load Regions','Tag','ImportMenu_LoadRegions','Enable','off');
 
 % handles.EditMenu
 m2 = uimenu('Label','Edit','Tag','EditMenu','Parent',f);
@@ -560,7 +560,7 @@ set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE),
 set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),IM,myhandles);');
 set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
 set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),myhandles);');
-set(myhandles.ImportMenu_Regions,'Callback','import_regions(SEED_REGION,FILES(CUR_FILE).spiko,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
+set(myhandles.ImportMenu_Regions,'Callback','import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).session);');
 
 % handles.DisplayMenu
 set(myhandles.DisplayMenu_Video,'Callback',{@menuDisplay_Video_Callback,myhandles});

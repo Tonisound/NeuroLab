@@ -68,7 +68,7 @@ fid_imo = fopen(file_imo,'w');
 pixel = 0;
 format = 0;
 ind_start = 1;
-ind_stop = 103;
+ind_stop = 11;
 %n_images = ind_stop-ind_start+1;
 infoTime = datenum(data_t.time_str(ind_start:ind_stop));
 
