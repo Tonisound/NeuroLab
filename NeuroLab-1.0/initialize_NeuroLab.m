@@ -137,7 +137,7 @@ uimenu(m1b,'Label','Import Regions','Tag','ImportMenu_Regions');
 uimenu(m1b,'Label','Actualize Traces','Tag','ImportMenu_ActualizeTraces','Separator','on');
 uimenu(m1b,'Label','Load LFP Configuration','Tag','ImportMenu_LoadConfig');
 uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces');
-uimenu(m1b,'Label','Load Regions','Tag','ImportMenu_LoadRegions','Enable','off');
+uimenu(m1b,'Label','Load Regions','Tag','ImportMenu_LoadRegions');
 
 % handles.EditMenu
 m2 = uimenu('Label','Edit','Tag','EditMenu','Parent',f);

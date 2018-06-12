@@ -2,19 +2,21 @@ function success = load_regions(folder_name,handles)
 
 %global FILES CUR_FILE DIR_SAVE IM LAST_IM CUR_IM;
 %folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).gfus);
-global IM LAST_IM CUR_IM;
+
+global IM LAST_IM CUR_IM SEED_REGION;
 success = false;
 load('Preferences.mat','GDisp','GTraces');
 
-try
+if exist(fullfile(folder_name,'Spikoscope_Regions.mat'),'file')
     load(fullfile(folder_name,'Spikoscope_Regions.mat'),'regions');
-catch
+else
     errordlg(sprintf('Missing File %s',fullfile(folder_name,'Spikoscope_Regions.mat')));
     return;
 end
-try
+
+if exist(fullfile(folder_name,'Time_Reference.mat'),'file')
     load(fullfile(folder_name,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
-catch
+else
     errordlg(sprintf('Missing File %s',fullfile(folder_name,'Time_Reference.mat')));
     return;
 end
