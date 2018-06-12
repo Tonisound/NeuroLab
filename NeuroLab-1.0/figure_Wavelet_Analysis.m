@@ -48,7 +48,8 @@ f2 = figure('Units','normalized',...
     'NumberTitle','off',...
     'Tag','MainFigure',...
     'PaperPositionMode','auto',...
-    'Name','Wavelet Analysis');
+    'Name',sprintf('LFP Wavelet Analysis [%s] (Source: %s)',FILES(CUR_FILE).nlab,...
+    strtrim(myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:))));
 %f2.DeleteFcn = {@delete_fcn};
 set(f2,'Position',[.1 .1 .6 .6]);
 clrmenu(f2);
@@ -61,6 +62,7 @@ l = 1;                      % Height info panel
 cb1_def = 1;                % freq correction
 cb2_def = 0;                % log scale
 cb3_def = 1;                % linkaxes all channels
+cb4_def = 1;                % early break (spectrogramm only)
 cb11_def = 0;                % lfp display
 cb12_def = 1;                % lfp filtered
 cb21_def = 1;                % Hold on for spectrogram
@@ -76,13 +78,13 @@ iP = uipanel('Units','normalized',...
     'Parent',f2);
 iP.Position = [0 0 1 l/L];
 
-t1 = uicontrol('Units','normalized',...
-    'Style','text',...
-    'HorizontalAlignment','left',...
-    'Parent',iP,...
-    'String',sprintf('File : %s\n (Source : %s) ',FILES(CUR_FILE).nlab,...
-    strtrim(myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:))),...
-    'Tag','Text1');
+% t1 = uicontrol('Units','normalized',...
+%     'Style','text',...
+%     'HorizontalAlignment','left',...
+%     'Parent',iP,...
+%     'String',sprintf('File : %s\n (Source : %s) ',FILES(CUR_FILE).nlab,...
+%     strtrim(myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:))),...
+%     'Tag','Text1');
 efc = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
@@ -116,9 +118,16 @@ efr = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',iP,...
-    'String',30,...
-    'Tag','EditDelta',...
-    'Tooltipstring','Cross correlation span');
+    'String',1,...
+    'Tag','EditGaussian',...
+    'Tooltipstring','Gaussian smoothing (s)');
+exc = uicontrol('Units','normalized',...
+    'Style','edit',...
+    'HorizontalAlignment','center',...
+    'Parent',iP,...
+    'String',.75,...
+    'Tag','EditExpCor',...
+    'Tooltipstring','Exponential Correction factor');
 
 pu = [];
 for i=1:8
@@ -167,7 +176,7 @@ e5 = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',iP,...
-    'String','0.05',...
+    'String','0.01',...
     'Tag','Edit5',...
     'Tooltipstring','Margin');
 e6 = uicontrol('Units','normalized',...
@@ -195,6 +204,12 @@ cb3 = uicontrol('Units','normalized',...
     'Value',cb3_def,...
     'Tag','Checkbox3',...
     'Tooltipstring','Linkaxes all channels');
+cb4 = uicontrol('Units','normalized',...
+    'Style','checkbox',...
+    'Parent',iP,...
+    'Value',cb4_def,...
+    'Tag','Checkbox4',...
+    'Tooltipstring','Early break (spectrogramm only)');
 
 bl = uicontrol('Units','normalized',...
     'Style','pushbutton',...
@@ -234,20 +249,21 @@ bbs = uicontrol('Units','normalized',...
 
 % Info Panel Position
 ipos = [0 0 1 1];
-t1.Position =       [ipos(3)/100     ipos(4)/2    4*ipos(3)/20   ipos(4)/2];
-pu(1).Position=     [0     0    ipos(3)/8   ipos(4)/3];
-pu(2).Position=     [ipos(3)/8     0   ipos(3)/8   ipos(4)/3];
-pu(3).Position=     [ipos(3)/4     0    ipos(3)/8   ipos(4)/3];
-pu(4).Position=     [3*ipos(3)/8     0    ipos(3)/8   ipos(4)/3];
-pu(5).Position=     [0     ipos(4)/3    ipos(3)/8   ipos(4)/3];
-pu(6).Position=     [ipos(3)/8     ipos(4)/3    ipos(3)/8   ipos(4)/3];
-pu(7).Position=     [ipos(3)/4     ipos(4)/3    ipos(3)/8   ipos(4)/3];
-pu(8).Position=     [3*ipos(3)/8     ipos(4)/3    ipos(3)/8   ipos(4)/3];
-efc.Position = [4*ipos(3)/20     6*ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
-efd.Position = [5*ipos(3)/20     6*ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
-efb.Position = [6*ipos(3)/20     6*ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
-efa.Position = [7*ipos(3)/20     6*ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
-efr.Position = [8*ipos(3)/20     6*ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
+%t1.Position =       [ipos(3)/100     ipos(4)/2    4*ipos(3)/20   ipos(4)/2];
+pu(1).Position=     [0     0    ipos(3)/12   ipos(4)/2];
+pu(2).Position=     [ipos(3)/12     0   ipos(3)/12   ipos(4)/2];
+pu(3).Position=     [ipos(3)/6     0    ipos(3)/12   ipos(4)/2];
+pu(4).Position=     [3*ipos(3)/12     0    ipos(3)/12   ipos(4)/2];
+pu(5).Position=     [0     ipos(4)/2    ipos(3)/12   ipos(4)/3];
+pu(6).Position=     [ipos(3)/12     ipos(4)/2    ipos(3)/12   ipos(4)/3];
+pu(7).Position=     [ipos(3)/6     ipos(4)/2    ipos(3)/12   ipos(4)/3];
+pu(8).Position=     [3*ipos(3)/12     ipos(4)/2    ipos(3)/12   ipos(4)/3];
+efc.Position = [7*ipos(3)/20     5.5*ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
+efd.Position = [8*ipos(3)/20     5.5*ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
+efb.Position = [9*ipos(3)/20     5.5*ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
+efa.Position = [7*ipos(3)/20     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
+efr.Position = [8*ipos(3)/20     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
+exc.Position = [9*ipos(3)/20     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
 
 e1.Position = [5.2*ipos(3)/10     2.75*ipos(4)/5   ipos(3)/12   3.5*ipos(4)/10];
 e2.Position = [5.2*ipos(3)/10     ipos(4)/10           ipos(3)/12   3.5*ipos(4)/10];
@@ -255,9 +271,15 @@ e3.Position = [6.5*ipos(3)/10     2.75*ipos(4)/5   ipos(3)/20   3.5*ipos(4)/10];
 e4.Position = [6.5*ipos(3)/10     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
 e5.Position = [6*ipos(3)/10      2.75*ipos(4)/5           ipos(3)/20   3.5*ipos(4)/10];
 e6.Position = [6*ipos(3)/10     ipos(4)/10           ipos(3)/20   3.5*ipos(4)/10];
-cb1.Position = [9.1*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/40   ipos(4)/3];
-cb2.Position = [9.5*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/40   ipos(4)/3];
-cb3.Position = [9.9*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/40   ipos(4)/3];
+% cb1.Position = [9*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/50   ipos(4)/3];
+% cb2.Position = [9.33*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/50   ipos(4)/3];
+% cb3.Position = [9.66*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/50   ipos(4)/3];
+% cb4.Position = [10*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/50   ipos(4)/3.25];
+cb1.Position = [10*ipos(3)/20     3*ipos(4)/4           ipos(3)/50   ipos(4)/4];
+cb2.Position = [10*ipos(3)/20     2*ipos(4)/4           ipos(3)/50   ipos(4)/4];
+cb3.Position = [10*ipos(3)/20     ipos(4)/4           ipos(3)/50   ipos(4)/4];
+cb4.Position = [10*ipos(3)/20     0           ipos(3)/50   ipos(4)/4];
+
 bl.Position = [7*ipos(3)/10     ipos(4)/2     .75*ipos(3)/10   4.5*ipos(4)/10];
 br.Position = [7.75*ipos(3)/10     ipos(4)/2     .75*ipos(3)/10   4.5*ipos(4)/10];
 bc.Position = [8.5*ipos(3)/10     ipos(4)/2     .75*ipos(3)/10   4.5*ipos(4)/10];
@@ -880,9 +902,10 @@ function reload_Callback(~,~,handles)
 
 % Loading Wavelet Data
 global DIR_STATS FILES CUR_FILE;
-data_dir = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).eeg);
+data_dir = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).nlab);
 all_pu = findobj(handles.MainFigure.UserData.all_popups,'Visible','on');
-exp_cor = .75;
+%exp_cor = .75;
+exp_cor = str2double(handles.EditExpCor.String);
 
 for i =1:length(all_pu)
     pu  = all_pu(i);
@@ -901,7 +924,8 @@ for i =1:length(all_pu)
         f_sub = 1/(X_temp(2)-X_temp(1));
         
         %Gaussian smoothing
-        step = 3*round(f_sub);
+        t_gauss = str2double(handles.EditGaussian.String);
+        step = t_gauss*round(f_sub);
         Cdata = imgaussfilt(Cdata,[1 step]);
         %correction = repmat(sqrt(data.freqdom(:)),1,size(Cdata,2));
         correction = repmat((data.freqdom(:).^exp_cor),1,size(Cdata,2));
@@ -1226,8 +1250,10 @@ fdom_step = str2double(handles.fdom_step.String);
 delta_d  = 5;
 bins = 0:delta_d:360;
 flag_leg = 0;
-delta_r = str2double(handles.EditDelta.String);
-exp_cor = 0.75;
+%delta_r = str2double(handles.EditDelta.String);
+delta_r = 30;
+%exp_cor = .75;
+exp_cor = str2double(handles.EditExpCor.String);
 
 % Tag Selection
 xlim1 = handles.CenterAxes.XLim(1);
@@ -1292,7 +1318,8 @@ for k=1:bands
     fprintf(' done.\n');
     
     %Gaussian smoothing
-    step = 2*round(f_sub);
+    t_gauss = str2double(handles.EditGaussian.String);
+    step = t_gauss*round(f_sub);
     Cdata_smooth = imgaussfilt(Cdata,[1 step]);
     %Cdata_smooth = imgaussfilt(Cdata,[1 1]);
     
@@ -1329,7 +1356,12 @@ for k=1:bands
     %ax.YLim = [fdom_min,fdom_max];
     
     % Case of early break
-    early_break = true;
+    early_break = handles.Checkbox4.Value;
+%     if handles.Checkbox4.Value ==1
+%         early_break = true;
+%     else
+%         early_break = false;
+%     end
     if early_break
         %Saving data
         save_data(k).trace_name = trace_name;
@@ -1875,7 +1907,7 @@ load('Preferences.mat','GTraces');
 tag = char(handles.ButtonCompute.UserData.Tag_Selection(1));
 
 % Creating Save Directory
-save_dir = fullfile(DIR_FIG,'Wavelet_Analysis',FILES(CUR_FILE).eeg);
+save_dir = fullfile(DIR_FIG,'Wavelet_Analysis',FILES(CUR_FILE).nlab);
 if ~isdir(save_dir)
     mkdir(save_dir);
 end
@@ -1883,29 +1915,32 @@ end
 % Saving Image
 cur_tab = handles.TabGroup.SelectedTab;
 handles.TabGroup.SelectedTab = handles.MainTab;
-pic_name = sprintf('%s_Wavelet_Analysis_traces_%s%s',FILES(CUR_FILE).eeg,tag,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Wavelet_Analysis_traces_%s%s',FILES(CUR_FILE).nlab,tag,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.FirstTab;
-pic_name = sprintf('%s_Wavelet_Analysis_time-frequency_%s%s',FILES(CUR_FILE).eeg,tag,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Wavelet_Analysis_time-frequency_%s%s',FILES(CUR_FILE).nlab,tag,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
-handles.TabGroup.SelectedTab = handles.SecondTab;
-pic_name = sprintf('%s_Wavelet_Analysis_phase-frequency_%s%s',FILES(CUR_FILE).eeg,tag,GTraces.ImageSaveExtension);
-saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
-fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
-
-handles.TabGroup.SelectedTab = handles.ThirdTab;
-pic_name = sprintf('%s_Wavelet_Analysis_frequency-coupling_%s%s',FILES(CUR_FILE).eeg,tag,GTraces.ImageSaveExtension);
-saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
-fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
-
-handles.TabGroup.SelectedTab = handles.FourthTab;
-pic_name = sprintf('%s_Wavelet_Analysis_xcorrelation_%s%s',FILES(CUR_FILE).eeg,tag,GTraces.ImageSaveExtension);
-saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
-fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+early_break = handles.Checkbox4.Value;
+if ~early_break
+    handles.TabGroup.SelectedTab = handles.SecondTab;
+    pic_name = sprintf('%s_Wavelet_Analysis_phase-frequency_%s%s',FILES(CUR_FILE).nlab,tag,GTraces.ImageSaveExtension);
+    saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+    fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+    
+    handles.TabGroup.SelectedTab = handles.ThirdTab;
+    pic_name = sprintf('%s_Wavelet_Analysis_frequency-coupling_%s%s',FILES(CUR_FILE).nlab,tag,GTraces.ImageSaveExtension);
+    saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+    fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+    
+    handles.TabGroup.SelectedTab = handles.FourthTab;
+    pic_name = sprintf('%s_Wavelet_Analysis_xcorrelation_%s%s',FILES(CUR_FILE).nlab,tag,GTraces.ImageSaveExtension);
+    saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+    fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+end
 
 handles.TabGroup.SelectedTab =cur_tab;
 end
@@ -1926,7 +1961,7 @@ delta_d = params.delta_d;
 bins = params.bins;
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).eeg);
+data_dir = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).nlab);
 if ~isdir(data_dir)
     mkdir(data_dir);
 end
@@ -1966,7 +2001,7 @@ for i =1:length(data)
     Xdata_sub  = X_trace(1:step_sub:end);
     
     temp = regexprep(trace_name,'/','_');
-    filename = sprintf('%s_Wavelet_Analysis_%s_%s.mat',FILES(CUR_FILE).eeg,char(temp),tag);
+    filename = sprintf('%s_Wavelet_Analysis_%s_%s.mat',FILES(CUR_FILE).nlab,char(temp),tag);
     save(fullfile(data_dir,filename),'Fb','Fc','fdom_step','fdom_min','fdom_max','freqdom',...
         'delta_d','bins','trace_name','X_trace','X_phase','Y_trace','Y_phase',...
         'f_sub','f_samp','Tag_Selection','x_start','x_end','gamma','gamma_ascend','gamma_descend',...

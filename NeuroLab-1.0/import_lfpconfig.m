@@ -1,4 +1,4 @@
-function load_lfpconfig(folder_name,handles)
+function import_lfpconfig(folder_name,handles)
 % Load LFP Configuration from NConfig
 
 global SEED_CONFIG FILES CUR_FILE

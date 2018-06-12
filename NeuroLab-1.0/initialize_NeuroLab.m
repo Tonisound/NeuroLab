@@ -129,14 +129,12 @@ uimenu(m1b,'Label','Import File','Tag','FileMenu_Import');
 uimenu(m1b,'Label','Check Doppler film','Tag','ImportMenu_Doppler','Separator','on');
 uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime');
 uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
+uimenu(m1b,'Label','Import LFP Configuration','Tag','ImportMenu_ImportConfig');
 uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
 uimenu(m1b,'Label','Import Regions','Tag','ImportMenu_Regions');
-
 %uimenu(m1b,'Label','Load Doppler film','Tag','ImportMenu_ReloadDoppler');
 %uimenu(m1b,'Label','Load Graphics','Tag','ImportMenu_ReloadGraphic');
-uimenu(m1b,'Label','Actualize Traces','Tag','ImportMenu_ActualizeTraces','Separator','on');
-uimenu(m1b,'Label','Load LFP Configuration','Tag','ImportMenu_LoadConfig');
-uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces');
+uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces','Separator','on');
 uimenu(m1b,'Label','Load Regions','Tag','ImportMenu_LoadRegions');
 
 % handles.EditMenu
@@ -150,6 +148,8 @@ uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','o
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
 uimenu(m2,'Label','Delete Region Traces','Tag','EditMenu_Delete_Regions');
 uimenu(m2,'Label','Delete Cereplex Traces','Tag','EditMenu_Delete_Spiko');
+
+uimenu(m2,'Label','Actualize Traces','Tag','ImportMenu_ActualizeTraces','Separator','on');
 
 % handles.DisplayMenu
 m1c = uimenu('Label','Display','Tag','DisplayMenu','Parent',f);
@@ -559,6 +559,7 @@ set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
 set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE),myhandles,1);');
 set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),IM,myhandles);');
 set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
+set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),myhandles);');
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).session);');
 
@@ -579,10 +580,9 @@ set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback
 set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
 %set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
 %set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
-set(myhandles.ImportMenu_LoadConfig,'Callback','load_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LoadRegions,'Callback','load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
 
 % handles.ProcessMenu
 set(myhandles.SynthesisMenu_Batch,'Callback',{@batch_generalscript,myhandles});
