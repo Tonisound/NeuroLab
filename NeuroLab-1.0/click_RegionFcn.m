@@ -6,6 +6,7 @@ l = hObj.UserData;
 disp(l.UserData.Name);
 
 seltype = get(handles.MainFigure,'SelectionType');
+coeff_increase = 3;
 
 if strcmp(seltype,'normal')
     if hObj.EdgeColor == char2rgb('k')
@@ -14,10 +15,12 @@ if strcmp(seltype,'normal')
         hObj.EdgeColor = char2rgb('w');
         hObj.LineWidth = 2;
         hObj.Selected ='on';
+        hObj.UserData.LineWidth=coeff_increase*hObj.UserData.LineWidth;
     else
         hObj.EdgeColor = char2rgb('k');
         hObj.LineWidth = 1;
         hObj.Selected ='off';
+        hObj.UserData.LineWidth=hObj.UserData.LineWidth/coeff_increase;
     end
 else
     delete(hObj.UserData);

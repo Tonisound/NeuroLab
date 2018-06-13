@@ -15,8 +15,8 @@ if(pt2(1,1)>Xlim2(1) && pt2(1,1)<Xlim2(2) && pt2(1,2)>Ylim2(1) && pt2(1,2)<Ylim2
         pix = findobj(handles.CenterAxes,'Tag','Movable_Pixel');
         pix.XData = pt2(1,1);
         pix.YData = pt2(1,2);
-        pix.MarkerEdgeColor = char2rgb('w');
-        pix.LineWidth = 2;
+        %pix.MarkerEdgeColor = char2rgb('w');
+        %pix.LineWidth = 2;
         set(findobj(handles.CenterAxes,'Tag','Pixel'),'MarkerEdgeColor',char2rgb('k'),'LineWidth',1);
         hp = findobj(handles.RightAxes,'Tag','Movable_Trace_Pixel');
         %hp.YData(~isnan(hp.YData)) = IM(pt2(1,2),pt2(1,1),:);
@@ -24,8 +24,8 @@ if(pt2(1,1)>Xlim2(1) && pt2(1,1)<Xlim2(2) && pt2(1,2)>Ylim2(1) && pt2(1,2)<Ylim2
     end
     if ~isempty(findobj(handles.CenterAxes,'Tag','Movable_Box'))
         reg = findobj(handles.CenterAxes,'Tag','Movable_Box');
-        reg.EdgeColor = char2rgb('w');
-        reg.LineWidth = 2;
+        %reg.EdgeColor = char2rgb('w');
+        %reg.LineWidth = 2;
         set(findobj(handles.CenterAxes,'Tag','Box'),'EdgeColor',char2rgb('k'),'LineWidth',1);
         reg.XData(3) = pt2(1,1);
         reg.XData(4) = pt2(1,1);

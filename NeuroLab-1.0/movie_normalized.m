@@ -1,4 +1,4 @@
-function movie_normalized_REM(handles)
+function movie_normalized(handles)
 % Opens figure to display fUS movie and selected time variables
 % Interactive control of timing and scales
 % save_video(fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).eeg,'CURRENT_Frames'),fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).eeg),'test');

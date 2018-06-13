@@ -4,6 +4,7 @@ function click_PixelFcn(hObj,~,handles)
 disp(hObj);
 disp(hObj.UserData.UserData.Name);
 seltype = get(handles.MainFigure,'SelectionType');
+coeff_increase = 3;
 
 if strcmp(seltype,'normal')
     handles.MainFigure.Pointer = 'hand';
@@ -15,9 +16,11 @@ if strcmp(seltype,'normal')
         hObj.MarkerEdgeColor = char2rgb('w');
         hObj.LineWidth = 2;
         uistack(hObj.UserData,'top');
+        hObj.UserData.LineWidth=coeff_increase*hObj.UserData.LineWidth;
     else
         hObj.MarkerEdgeColor = char2rgb('k');
         hObj.LineWidth = 1;
+        hObj.UserData.LineWidth=hObj.UserData.LineWidth/coeff_increase;
     end
 else
     delete(hObj.UserData);

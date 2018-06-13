@@ -18,11 +18,7 @@ str = get(handles.FigureListPopup,'String');
 switch strtrim(str(val,:))
     
     case '(Movie) Normalized Movie'
-        if n_burst > 1
-            movie_normalized_RUN(handles);
-        else
-            movie_normalized_REM(handles);
-        end
+        movie_normalized(handles);
         
     case '(Movie) Deformation Field'
         try
