@@ -92,6 +92,7 @@ GDisp.W = .80;
 GDisp.H = .80;
 GDisp.w0 = .30;
 GDisp.h0 = .15;
+GDisp.coeff_increase = 4;
 g_colors = get(groot,'DefaultAxesColorOrder');
 GDisp.colors = cell(15,1);
 GDisp.colors(1:6,:) = {'[1 0 0]';'[0 0 1]';'[0 1 0]';'[1 0 1]';'[0 1 1]';'[1 1 0]'};
