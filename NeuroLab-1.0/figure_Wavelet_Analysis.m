@@ -428,12 +428,16 @@ if ~isempty(handles2.TagButton.UserData)&&length(handles2.TagButton.UserData.Sel
 end
 
 %Feeding traces to Button Compute
-[~,ind_sort1] = sort(traces_name);
-[~,ind_sort2] = sort(phases_name);
-bc.UserData.traces = traces(ind_sort1);
-bc.UserData.phases = phases(ind_sort2);
-bc.UserData.traces_name = traces_name(ind_sort1);
-bc.UserData.phases_name = phases_name(ind_sort2);
+% [~,ind_sort1] = sort(traces_name);
+% [~,ind_sort2] = sort(phases_name);
+% bc.UserData.traces = traces(ind_sort1);
+% bc.UserData.phases = phases(ind_sort2);
+% bc.UserData.traces_name = traces_name(ind_sort1);
+% bc.UserData.phases_name = phases_name(ind_sort2);
+bc.UserData.traces = flipud(traces);
+bc.UserData.phases = flipud(phases);
+bc.UserData.traces_name = flipud(traces_name);
+bc.UserData.phases_name = flipud(phases_name);
 
 handles2 = reset_Callback([],[],handles2,myhandles);
 colormap(f2,'jet');
@@ -1626,7 +1630,9 @@ for k=1:bands
     % Computing cross-correlations
     l_width = .2;
     m_size = 10;
-    delta_r = min(delta_r,floor(size(Ydata_reg,2)/(2*f_sub)));
+    if size(Ydata_reg,2)>0
+        delta_r = min(delta_r,floor(size(Ydata_reg,2)/(2*f_sub)));
+    end
     n = round(delta_r*f_sub);
     r_low = [];
     r_mid = [];
@@ -1692,11 +1698,11 @@ for k=1:bands
     end
     
     %Legend Position
-    if flag_leg ==0
+    if flag_leg ==0 && ~isempty(labels)
         lines = flipud(findobj(ax,'Tag','Corr_high'));
         leg = legend(ax,lines,labels,'Visible','on',...
             'Tag','Legend','Units','characters','Box','off');
-        flag_leg =1;
+        flag_leg = 1;
         handles.FourthBotPanel.Units = 'characters';
         pos = handles.FourthBotPanel.Position;
         leg.Position = [.9*pos(3) .05*pos(4) .1*pos(3) .9*pos(4)];
@@ -1943,6 +1949,7 @@ if ~early_break
 end
 
 handles.TabGroup.SelectedTab =cur_tab;
+
 end
 
 function savestats_Callback(~,~,handles)
