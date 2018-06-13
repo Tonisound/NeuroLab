@@ -25,5 +25,6 @@ if ~isempty(pt1)
     delete(findobj(handles.RightAxes,'Tag','T1','-or','Tag','T2','-or','Tag','T3'));
     actualize_plot(handles);
 end
+handles.Cursor.Visible = 'on';
 set(hObj,'WindowButtonUp','');
 end

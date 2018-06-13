@@ -8,6 +8,7 @@ Xlim = get(hObj,'XLim');
 Ylim = get(hObj,'YLim');
 
 if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<Ylim(2))
+    %handles.Cursor.Visible = 'off';
     set(hObj,'UserData',[pt_rp(1,1),pt_rp(1,2)]);
     set(handles.MainFigure,'WindowButtonMotionFcn', {@rightPanel_motionFcn,handles});
     set(handles.MainFigure,'WindowButtonUpFcn', {@rightPanel_unclickFcn,handles});

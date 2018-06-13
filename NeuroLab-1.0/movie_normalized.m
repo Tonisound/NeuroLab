@@ -1,7 +1,7 @@
 function movie_normalized(handles)
 % Opens figure to display fUS movie and selected time variables
 % Interactive control of timing and scales
-% save_video(fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).eeg,'CURRENT_Frames'),fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).eeg),'test');
+% save_video(fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab,'CURRENT_Frames'),fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab),'test');
 
 global SEED IM DIR_SAVE DIR_FIG DIR_STATS FILES CUR_FILE START_IM END_IM;
 
@@ -120,10 +120,10 @@ if ~isempty(l)
 end
 
 % Loading corresponding Wavelet data
-folder_wav = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).eeg);
+folder_wav = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).nlab);
 d = dir(fullfile(folder_wav,'*.mat'));
 str_spec = {d(:).name}';
-str_spec = regexprep(str_spec,strcat(FILES(CUR_FILE).eeg,'_Wavelet_Analysis_'),'');
+str_spec = regexprep(str_spec,strcat(FILES(CUR_FILE).nlab,'_Wavelet_Analysis_'),'');
 % Spectrogram Selection
 if ~isempty(d)
     [ind_spec,v] = listdlg('Name','Spectrogram Selection','PromptString','Select spectrogramms to display',...
@@ -190,9 +190,9 @@ if ~isempty(tt_data.TimeTags(temp==0))
 else
     tag = 'CURRENT';
 end
-save_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).eeg);
-work_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).eeg,strcat(tag,'_Frames'));
-add_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).eeg,strcat(tag,'_AdditionalFrames'));
+save_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab);
+work_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab,strcat(tag,'_Frames'));
+add_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab,strcat(tag,'_AdditionalFrames'));
 if strcmp(display_mode,'save')
     % Removing old folder
     if ~isdir(save_dir)
@@ -297,7 +297,7 @@ f.UserData.flag = 1;
 f.UserData.t_video = .1;                % Video Speed
 f.UserData.t_lfp = t_lfp_0;             % Temporal window
 f.UserData.add_dir = add_dir;
-f.UserData.filename = FILES(CUR_FILE).eeg;
+f.UserData.filename = FILES(CUR_FILE).nlab;
 f.UserData.extension = GTraces.ImageSaveExtension;
 f.UserData.format = GTraces.ImageSaveFormat;
 f.UserData.button_visible = button_visible;
@@ -763,15 +763,15 @@ while i>=START_IM && i<=END_IM
                     pause(t_video-t_elapsed);
                 else
                     % Saving
-                    pic_name = strcat(sprintf('%s_Frame%05d',FILES(CUR_FILE).eeg,i),GTraces.ImageSaveExtension);
+                    pic_name = strcat(sprintf('%s_Frame%05d',FILES(CUR_FILE).nlab,i),GTraces.ImageSaveExtension);
                     if exist(fullfile(work_dir,pic_name),'file')
-                        pic_name = strcat(sprintf('%s_Frame%05d_%03d',FILES(CUR_FILE).eeg,i,count_save),GTraces.ImageSaveExtension);
+                        pic_name = strcat(sprintf('%s_Frame%05d_%03d',FILES(CUR_FILE).nlab,i,count_save),GTraces.ImageSaveExtension);
                     end
                     saveas(f,fullfile(work_dir,pic_name),GTraces.ImageSaveFormat);
                     fprintf('Saving frame %s.\n',pic_name);
                     if i == END_IM
                         close(f);
-                        %save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).eeg,tag));
+                        %save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).nlab,tag));
                         return;
                     end
                 end

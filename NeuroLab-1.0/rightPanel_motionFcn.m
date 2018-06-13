@@ -1,6 +1,7 @@
 function rightPanel_motionFcn(~,~,handles)
 % Called when user manually zooms in RightAxes
 
+handles.Cursor.Visible = 'off';
 pt = get(handles.RightAxes,'CurrentPoint');
 pt1 = get(handles.RightAxes,'UserData');
 c = findobj(handles.RightAxes,'Tag','T2');
