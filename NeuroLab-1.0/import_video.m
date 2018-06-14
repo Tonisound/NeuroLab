@@ -43,6 +43,9 @@ if exist(video_file,'file')
     handles.VideoAxes.UserData.VideoFile = video_file;
     handles.VideoAxes.UserData.VideoReader = v;
     handles.VideoAxes.UserData.Image = im;
+    handles.VideoAxes.UserData.rgb_video = [];
+    handles.VideoAxes.UserData.start_im = 0;
+    handles.VideoAxes.UserData.end_im = 0;
     handles.VideoAxes.Visible = 'off';
     toc
 else

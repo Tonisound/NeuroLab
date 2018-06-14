@@ -80,7 +80,7 @@ end
 
 
 % Trace Selection
-l = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Region'));
+l = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Region','-or','Tag','Trace_Mean'));
 %l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
 str_lfp = [];
 % All channels
@@ -174,24 +174,32 @@ if strcmp(flag_video,'true')
     end
     
     % Conversion to rgb movie
-    fprintf('Converting video to rgb movie frames...');
-    v = handles.VideoAxes.UserData.VideoReader;
-    im = handles.VideoAxes.UserData.Image.CData;
-    %rgb_video = [];
-    rgb_video = zeros(size(im,1),size(im,2),size(im,3),END_IM-START_IM+1,'uint8');
-    
-    h = waitbar(0,'Loading video file. Please wait.');
-    for i = 1:END_IM-START_IM+1
-        v.CurrentTime = t(i);
-        vidFrame = readFrame(v);
-        %rgb_video = cat(4,rgb_video,vidFrame);
-        rgb_video(:,:,:,i) = vidFrame;
-        x = i/(END_IM-START_IM+1);
-        waitbar(x,h,sprintf('%.1f %% converted to RGB movie.',100*x))
+    if ~isempty(handles.VideoAxes.UserData.rgb_video) && handles.VideoAxes.UserData.start_im==START_IM && handles.VideoAxes.UserData.end_im==END_IM
+        rgb_video = handles.VideoAxes.UserData.rgb_video;
+    else
+        fprintf('Converting video to rgb movie frames...');
+        v = handles.VideoAxes.UserData.VideoReader;
+        im = handles.VideoAxes.UserData.Image.CData;
+        %rgb_video = [];
+        rgb_video = zeros(size(im,1),size(im,2),size(im,3),END_IM-START_IM+1,'uint8');
+        
+        h = waitbar(0,'Loading video file. Please wait.');
+        for i = 1:END_IM-START_IM+1
+            v.CurrentTime = t(i+START_IM-1);
+            vidFrame = readFrame(v);
+            %rgb_video = cat(4,rgb_video,vidFrame);
+            rgb_video(:,:,:,i) = vidFrame;
+            x = i/(END_IM-START_IM+1);
+            waitbar(x,h,sprintf('%.1f %% converted to RGB movie.',100*x))
+        end
+        close(h);
+        fprintf(' done.\n');
+        
+        % Storing video
+        handles.VideoAxes.UserData.rgb_video=rgb_video;
+        handles.VideoAxes.UserData.start_im=START_IM;
+        handles.VideoAxes.UserData.end_im=END_IM;
     end
-    toc
-    close(h);
-    fprintf(' done.\n');
     
 else
     rgb_video = ones(1,1,3,END_IM-START_IM+1);
