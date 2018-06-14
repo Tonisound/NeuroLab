@@ -6,7 +6,7 @@ function movie_normalized(handles)
 global SEED IM DIR_SAVE DIR_FIG DIR_STATS FILES CUR_FILE START_IM END_IM;
 
 % Input dialog Initialization
-prompt={'Delay to start (s)';'Window size (s)';'Video loading';'Save/Display mode'};
+prompt={'Delay to start (s)';'Window size (s)';'Video loading';'Save/Display mode (disp/frames/video)'};
 name = 'Select Movie Initialization Parameters';
 defaultans = {'0.0';'240.0';'false';'disp'};
 answer = inputdlg(prompt,name,[1 100],defaultans);
@@ -36,7 +36,7 @@ if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
     TimeTags_seconds = [(tts1-floor(tts1)),(tts2-floor(tts2))]*24*3600;
     
     % Excluding unwanted Time Tags
-    ind_keep_tt = ~contains(tt_cell,["Transition","WHOLE","TEST","BASELINE"]); 
+    ind_keep_tt = ~contains(tt_cell,["Transition","WHOLE","TEST","BASELINE"]);
     tt_cell = tt_cell(ind_keep_tt==1);
     TimeTags_images = tt_data.TimeTags_images(ind_keep_tt==1,:);
     
@@ -58,29 +58,26 @@ else
     TimeTags_images = [];
 end
 % Loading Time Groups
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
     tg_data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),...
         'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
     flag_group = 1;
     tg_cell = tg_data.TimeGroups_name;
     
     % Excluding unwanted Time Groups
-    ind_keep_tg = ~contains(tg_cell,["BASELINE","TEST","REM-SHORT","REM-LONG"]); 
+    ind_keep_tg = ~contains(tg_cell,["BASELINE","TEST","REM-SHORT","REM-LONG"]);
     tg_cell = tg_cell(ind_keep_tg==1);
     TimeGroups_S = tg_data.TimeGroups_S(ind_keep_tg==1,:);
 else
     flag_group = 0;
     tg_cell = [];
     TimeGroups_S = [];
+    tg_data.TimeGroups_name = [];
+    tg_data.TimeGroups_frames = [];
+    tg_data.TimeGroups_duration = [];
+    tg_data.TimeGroups_S = [];
 end
 
-% Loading Doppler_Surge
-% if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Surges.mat'),'file')
-%     data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Surges.mat'),'Doppler_Surge');
-%     Doppler_Surge = data.Doppler_Surge;
-% else
-%     Doppler_Surge = NaN(size(IM));
-% end
 
 % Trace Selection
 l = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Region'));
@@ -90,15 +87,15 @@ str_lfp = [];
 for i=1:length(l)
     str_lfp = [str_lfp;{l(i).UserData.Name}];
     %Multiply line values by 100
-%     if strcmp(l(i).Tag,'Trace_Region')
-%         l(i).YData = 100*l(i).YData;
-%     end
+    %     if strcmp(l(i).Tag,'Trace_Region')
+    %         l(i).YData = 100*l(i).YData;
+    %     end
 end
 
 if ~isempty(l)
     [ind_lfp,v] = listdlg('Name','LFP Selection','PromptString','Select traces to display',...
         'SelectionMode','multiple','ListString',str_lfp,'InitialValue',[],'ListSize',[300 500]);
-    if v==0 
+    if v==0
         warning('No trace selected .\n');
         str_lfp = [];
         %return;
@@ -128,7 +125,7 @@ str_spec = regexprep(str_spec,strcat(FILES(CUR_FILE).nlab,'_Wavelet_Analysis_'),
 if ~isempty(d)
     [ind_spec,v] = listdlg('Name','Spectrogram Selection','PromptString','Select spectrogramms to display',...
         'SelectionMode','multiple','ListString',str_spec,'InitialValue',[],'ListSize',[300 500]);
-    if v==0 
+    if v==0
         warning('No spectrogramm selected .\n');
         str_spec = [];
         %return;
@@ -161,23 +158,41 @@ t = (b-floor(b))*24*3600;
 
 % Loading video
 if strcmp(flag_video,'true')
-    fprintf('Loading video frames...');
-    data_mov = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab, 'video.mat'),'video_mat','video_time');
-    filename = fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko,'BEHAVIOR_0_Scene_source_frame_B0_B0_export','B0.txt');
-    % Direct Importation
-    fileID = fopen(filename,'r');
-    fgetl(fileID);
-    fgetl(fileID);
-    % Reading line-by-line Testing for End of file
-    C  = cell2mat(textscan(fileID,'%f'));
-    fclose(fileID);
-    vt = C(2:5:end);
-    %vt = 2*data_mov.video_time(:);
-    vt_mat = repmat(vt',[END_IM-START_IM+1,1]);
-    ref_mat = repmat(t(START_IM:END_IM),[1 length(vt)]);
-    [~,ind_timings] = min((vt_mat-ref_mat).^2,[],2);
-    rgb_video = data_mov.video_mat(:,:,:,ind_timings);
+
+    % Check if Video_Axes contains video reader
+    if isempty(handles.VideoAxes.UserData)
+        % Check video loading option
+        load('Preferences.mat','GImport');
+        if strcmp(GImport.Video_loading,'skip')
+            GImport.Video_loading = 'full';
+        end
+        save('Preferences.mat','GImport','-append');
+        warning('Preferences.mat Video loading Option updated');
+        
+        % Import Video
+        import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+    end
+    
+    % Conversion to rgb movie
+    fprintf('Converting video to rgb movie frames...');
+    v = handles.VideoAxes.UserData.VideoReader;
+    im = handles.VideoAxes.UserData.Image.CData;
+    %rgb_video = [];
+    rgb_video = zeros(size(im,1),size(im,2),size(im,3),END_IM-START_IM+1,'uint8');
+    
+    h = waitbar(0,'Loading video file. Please wait.');
+    for i = 1:END_IM-START_IM+1
+        v.CurrentTime = t(i);
+        vidFrame = readFrame(v);
+        %rgb_video = cat(4,rgb_video,vidFrame);
+        rgb_video(:,:,:,i) = vidFrame;
+        x = i/(END_IM-START_IM+1);
+        waitbar(x,h,sprintf('%.1f %% converted to RGB movie.',100*x))
+    end
+    toc
+    close(h);
     fprintf(' done.\n');
+    
 else
     rgb_video = ones(1,1,3,END_IM-START_IM+1);
 end
@@ -193,7 +208,7 @@ end
 save_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab);
 work_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab,strcat(tag,'_Frames'));
 add_dir = fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab,strcat(tag,'_AdditionalFrames'));
-if strcmp(display_mode,'save')
+if strcmp(display_mode,'frames')||strcmp(display_mode,'video')
     % Removing old folder
     if ~isdir(save_dir)
         mkdir(save_dir);
@@ -219,7 +234,7 @@ f = figure('Name',sprintf('fUS-EEG Recording - %s (%s)',FILES(CUR_FILE).nlab,str
     'Units','normalized',...
     'MenuBar','none',...
     'Colormap',handles.MainFigure.Colormap,...
-    'KeyPressFcn',{@f_keypress_fcn},...   
+    'KeyPressFcn',{@f_keypress_fcn},...
     'Toolbar','none');
 % Time Tags
 t1 = uicontrol(f,'Units','normalized','Style','text',...
@@ -309,7 +324,7 @@ frame_pause = 3819;
 zoom_min = .5;%s
 zoom_max = t_lfp_0;
 count_save = 0;
-        
+
 clim_default = 'manual';
 ylim_default = 'manual';
 if strcmp(clim_default,'manual')
@@ -357,6 +372,10 @@ if flag_tag ==1
             all_str(i) = {''};
         end
     end
+else
+    for i =START_IM:END_IM
+        all_str(i) = {''};
+    end
 end
 t3.UserData.all_str = all_str;
 % Displaying Time Surges
@@ -369,6 +388,10 @@ if flag_surge ==1
         else
             all_str(i) = {''};
         end
+    end
+else
+    for i =START_IM:END_IM
+        all_str(i) = {''};
     end
 end
 t4.UserData.all_str = all_str;
@@ -389,7 +412,7 @@ colormap(ax_im,'hot');
 cbar = colorbar(ax_im,'Parent',f);
 % Second Image
 % im2 = imagesc(Doppler_Surge(:,:,START_IM),'Parent',ax_im2);
-% set(ax_im2,'XTickLabel','','XTick','','YTick','','YTickLabel','');   
+% set(ax_im2,'XTickLabel','','XTick','','YTick','','YTickLabel','');
 % ax_im2.CLim = [-1,1];
 % colormap(ax_im2,'parula');
 image(rgb_video(:,:,:,1),'Parent',ax_im2);
@@ -410,14 +433,16 @@ g_list = {'QW','REM-TONIC','NREM','REM-PHASIC','AW'};
 g_colors(4,:) = g_colors(2,:);
 for i=1:length(g_list)
     ind_group = strcmp(tg_data.TimeGroups_name,char(g_list(i)));
-    ind_tags = tg_data.TimeGroups_S(ind_group).Selected;
-    %ind_tags = contains(tt_data.TimeTags,char(g_list(i)));
-    patch_colors(ind_tags,:) = repmat(g_colors(i,:),[length(ind_tags),1]);
-    % Highlight REM-PHASIC
-    if i==4
-        face_alpha(ind_tags) = .75;
-    else
-        face_alpha(ind_tags) = alpha_value;
+    if sum(ind_group)~=0
+        ind_tags = tg_data.TimeGroups_S(ind_group).Selected;
+        %ind_tags = contains(tt_data.TimeTags,char(g_list(i)));
+        patch_colors(ind_tags,:) = repmat(g_colors(i,:),[length(ind_tags),1]);
+        % Highlight REM-PHASIC
+        if i==4
+            face_alpha(ind_tags) = .75;
+        else
+            face_alpha(ind_tags) = alpha_value;
+        end
     end
 end
 
@@ -584,7 +609,7 @@ t4.Visible = button_visible;
 f.UserData.controls = [cb1;cb2;cb3;t3;t4];
 
 
-% Movie        
+% Movie
 i = START_IM;
 while i>=START_IM && i<=END_IM
     if ishandle(f)
@@ -598,10 +623,9 @@ while i>=START_IM && i<=END_IM
         t2.String = sprintf('%d/%d',i,END_IM);
         %Update movie
         im.CData = IM(:,:,i);
-        %im2.CData = Doppler_Surge(:,:,i);
         image(rgb_video(:,:,:,i+1-START_IM),'Parent',ax_im2);
         ax_im2.Visible = 'off';
-
+        
         % Plotting traces
         for j=1:length(all_axes)
             ax = all_axes(j);
@@ -716,8 +740,8 @@ while i>=START_IM && i<=END_IM
                 %lim_sup = ax.UserData.mean+factor*ax.UserData.stdev;
                 lim_inf = min(ax.UserData.series(:));
                 lim_sup = max(ax.UserData.series(:));
-%                 lim_inf = lim_inf - .1*(lim_sup-lim_inf);
-%                 lim_sup = lim_sup + .1*(lim_sup-lim_inf);
+                %                 lim_inf = lim_inf - .1*(lim_sup-lim_inf);
+                %                 lim_sup = lim_sup + .1*(lim_sup-lim_inf);
             end
             % YLim
             if lim_inf<lim_sup
@@ -746,7 +770,7 @@ while i>=START_IM && i<=END_IM
                 ax.CLim = [str2double(e4.String),str2double(e5.String)];
             end
         end
-
+        
         % Delay to start
         if i==START_IM
             count = t_start;
@@ -771,7 +795,9 @@ while i>=START_IM && i<=END_IM
                     fprintf('Saving frame %s.\n',pic_name);
                     if i == END_IM
                         close(f);
-                        %save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).nlab,tag));
+                        if strcmp(display_mode,'video')
+                            save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).nlab,tag));
+                        end
                         return;
                     end
                 end
@@ -824,12 +850,12 @@ while i>=START_IM && i<=END_IM
     else
         return;
     end
-   
+    
 end
 close(f);
 
 end
-  
+
 function f_keypress_fcn(hObj,evnt)
 
 %hObj.UserData.flag
@@ -843,16 +869,16 @@ switch evnt.Key
         hObj.UserData.flag=1;
     case 'leftarrow'
         hObj.UserData.flag=-1;
-    case 'space'       
+    case 'space'
         hObj.UserData.flag =(hObj.UserData.flag-1)^2;
     case 'q'
         hObj.UserData.flag =-100;
     case 'm'
         hObj.UserData.t_video = 2*hObj.UserData.t_video;
     case 'p'
-        hObj.UserData.t_video = hObj.UserData.t_video*hObj.UserData.factor_zoom;        
+        hObj.UserData.t_video = hObj.UserData.t_video*hObj.UserData.factor_zoom;
     case 'a'
-        hObj.UserData.t_lfp = hObj.UserData.t_lfp/hObj.UserData.factor_zoom;   
+        hObj.UserData.t_lfp = hObj.UserData.t_lfp/hObj.UserData.factor_zoom;
     case 'z'
         hObj.UserData.t_lfp = 2*hObj.UserData.t_lfp;
     case 's'
@@ -860,7 +886,7 @@ switch evnt.Key
         number = hObj.UserData.i;
         filename = hObj.UserData.filename;
         extension = hObj.UserData.extension;
-        format = hObj.UserData.format;  
+        format = hObj.UserData.format;
         if ~exist(add_dir,'dir')
             mkdir(add_dir)
         end
@@ -871,7 +897,7 @@ switch evnt.Key
             pic_name = strcat(sprintf('%s_Frame%05d_%03d',filename,number,count),extension);
         end
         %pic_name = strcat(sprintf('%s_Frame%05d_%03d',filename,number,count),extension);
-        saveas(hObj,fullfile(add_dir,pic_name),format);    
+        saveas(hObj,fullfile(add_dir,pic_name),format);
         fprintf('[Saving Frame %s, format %s]\n',fullfile(add_dir,pic_name),format);
     case 'v'
         button_visible = hObj.UserData.button_visible;
@@ -887,7 +913,7 @@ switch evnt.Key
                 controls(i).Visible = 'on';
             end
         end
-
+        
 end
 
 end
