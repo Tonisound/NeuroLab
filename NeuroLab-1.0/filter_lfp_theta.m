@@ -65,7 +65,6 @@ else
     end
 end
 
-
 % Save dans SpikoscopeTraces.mat
 MetaData = [];
 if ~isempty(traces)

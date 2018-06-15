@@ -231,6 +231,11 @@ ba = uicontrol('Units','normalized',...
     'Parent',iP,...
     'String','Autoscale',...
     'Tag','ButtonAutoScale');
+be = uicontrol('Units','normalized',...
+    'Style','pushbutton',...
+    'Parent',iP,...
+    'String','Export bands',...
+    'Tag','ButtonExport');
 bss = uicontrol('Units','normalized',...
     'Style','pushbutton',...
     'Parent',iP,...
@@ -271,10 +276,6 @@ e3.Position = [6.5*ipos(3)/10     2.75*ipos(4)/5   ipos(3)/20   3.5*ipos(4)/10];
 e4.Position = [6.5*ipos(3)/10     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
 e5.Position = [6*ipos(3)/10      2.75*ipos(4)/5           ipos(3)/20   3.5*ipos(4)/10];
 e6.Position = [6*ipos(3)/10     ipos(4)/10           ipos(3)/20   3.5*ipos(4)/10];
-% cb1.Position = [9*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/50   ipos(4)/3];
-% cb2.Position = [9.33*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/50   ipos(4)/3];
-% cb3.Position = [9.66*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/50   ipos(4)/3];
-% cb4.Position = [10*ipos(3)/20     2*ipos(4)/3.25           ipos(3)/50   ipos(4)/3.25];
 cb1.Position = [10*ipos(3)/20     3*ipos(4)/4           ipos(3)/50   ipos(4)/4];
 cb2.Position = [10*ipos(3)/20     2*ipos(4)/4           ipos(3)/50   ipos(4)/4];
 cb3.Position = [10*ipos(3)/20     ipos(4)/4           ipos(3)/50   ipos(4)/4];
@@ -284,9 +285,10 @@ bl.Position = [7*ipos(3)/10     ipos(4)/2     .75*ipos(3)/10   4.5*ipos(4)/10];
 br.Position = [7.75*ipos(3)/10     ipos(4)/2     .75*ipos(3)/10   4.5*ipos(4)/10];
 bc.Position = [8.5*ipos(3)/10     ipos(4)/2     .75*ipos(3)/10   4.5*ipos(4)/10];
 ba.Position = [9.25*ipos(3)/10     ipos(4)/2      .75*ipos(3)/10   4.5*ipos(4)/10];
-bss.Position = [7*ipos(3)/10     0      ipos(3)/10    4.5*ipos(4)/10];
-bsi.Position = [8*ipos(3)/10     0      ipos(3)/10    4.5*ipos(4)/10];
-bbs.Position = [9*ipos(3)/10     0      ipos(3)/10    4.5*ipos(4)/10];
+be.Position = [7*ipos(3)/10     0      .75*ipos(3)/10    4.5*ipos(4)/10];
+bss.Position = [7.75*ipos(3)/10     0      .75*ipos(3)/10    4.5*ipos(4)/10];
+bsi.Position = [8.5*ipos(3)/10     0      .75*ipos(3)/10    4.5*ipos(4)/10];
+bbs.Position = [9.25*ipos(3)/10     0      .75*ipos(3)/10    4.5*ipos(4)/10];
 
 % Top Panel
 tP = uipanel('Units','normalized',...
@@ -428,16 +430,11 @@ if ~isempty(handles2.TagButton.UserData)&&length(handles2.TagButton.UserData.Sel
 end
 
 %Feeding traces to Button Compute
-% [~,ind_sort1] = sort(traces_name);
-% [~,ind_sort2] = sort(phases_name);
-% bc.UserData.traces = traces(ind_sort1);
-% bc.UserData.phases = phases(ind_sort2);
-% bc.UserData.traces_name = traces_name(ind_sort1);
-% bc.UserData.phases_name = phases_name(ind_sort2);
 bc.UserData.traces = flipud(traces);
 bc.UserData.phases = flipud(phases);
 bc.UserData.traces_name = flipud(traces_name);
 bc.UserData.phases_name = flipud(phases_name);
+bc.UserData.save_data = [];
 
 handles2 = reset_Callback([],[],handles2,myhandles);
 colormap(f2,'jet');
@@ -857,6 +854,7 @@ set(handles.ButtonReload,'Callback',{@reload_Callback,handles});
 set(handles.ButtonReset,'Callback',{@reset_Callback,handles,old_handles});
 set(handles.ButtonCompute,'Callback',{@compute_wavelet_Callback,handles});
 set(handles.ButtonAutoScale,'Callback',{@buttonAutoScale_Callback,handles});
+set(handles.ButtonExport,'Callback',{@export_wavelet_Callback,handles});
 set(handles.ButtonSaveImage,'Callback',{@saveimage_Callback,handles});
 set(handles.ButtonSaveStats,'Callback',{@savestats_Callback,handles});
 set(handles.ButtonBatchSave,'Callback',{@batchsave_Callback,handles});
@@ -899,6 +897,9 @@ for i =1:length(ax3)
 end
 % Linking channels
 checkbox3_Callback(handles.Checkbox3,[],handles);
+
+% clearing UserData
+handles.ButtonCompute.UserData.save_data = []; 
 
 end
 
@@ -1901,6 +1902,112 @@ end
 %     %c = findobj(handles.FirstBotPanel,'Tag',sprintf('Colorbar%d',k));
 %     %c.Limits = [c_min,c_max];
 %     drawnow;
+
+end
+
+function export_wavelet_Callback(~,~,handles,val)
+% Export bands in Spikoscope_Traces.mat
+% bands frequencies and smoothing defined in the Preferences.mat
+
+global DIR_SAVE FILES CUR_FILE;
+
+if isempty(handles.ButtonCompute.UserData.save_data)
+    warning('No spectrogramm has been computed yet. Retry.');
+    return;
+end
+
+load('Preferences.mat','GFilt');
+data = handles.ButtonCompute.UserData.save_data;
+time_ref = handles.TopPanel.UserData.time_ref;
+
+% if val == 1 (default) user can select which channels to export
+if nargin <4
+    val = 1;
+end
+
+str_lfp = [];
+for i =1 : length(data)
+    str_lfp = [str_lfp;data(i).trace_name];
+end
+
+% asks for user input if val == 1
+if val == 1
+    [ind_lfp,v] = listdlg('Name','LFP Selection','PromptString','Select traces to export',...
+        'SelectionMode','multiple','ListString',str_lfp,'InitialValue',[],'ListSize',[300 500]);
+    if v==0 || isempty(ind_lfp)
+        warning('No trace selected .\n');
+        return;
+    else
+        data = data(ind_lfp);
+        str_lfp =  str_lfp(ind_lfp);
+    end
+end
+
+% Saving struct
+traces = struct('ID',{},'shortname',{},'fullname',{},'parent',{},...
+    'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{},'nb_samples',{});
+
+% Extracting bands for each channel
+for i =1:length(data)
+    trace_name = data(i).trace_name;
+    f_sub = data(i).f_sub;
+    fdom_min = data(i).fdom_min;
+    fdom_max = data(i).fdom_max;
+    freqdom = data(i).freqdom;
+    x_start = data(i).x_start;
+    x_end = data(i).x_end;
+    Cdata = data(i).Cdata;
+    %f_samp = data(i).f_samp;
+    %Y_trace = data(i).Y_trace;
+    %X_trace = data(i).X_trace;
+    
+    % Intializing trace
+    X = (time_ref.Y(1):1/f_sub:time_ref.Y(end))';
+    Y = NaN(size(X));
+    
+    % Computing theta power
+    freq1 = GFilt.theta_inf;
+    freq2 = GFilt.theta_sup;
+    t_smooth  = GFilt.theta_smooth;
+    val_inf = max(fdom_min,freq1);
+    val_sup = min(fdom_max,freq2);
+    if val_inf<=val_sup
+        [~,i_1] = min((freqdom-val_inf).^2);
+        [~,i_2] = min((freqdom-val_sup).^2);
+        trace = mean(Cdata(i_1:i_2,:),1);
+    else
+        trace = NaN(1,size(Cdata,2));
+    end
+    %Gaussian smoothing 
+    trace_smooth =  smoothts(trace,'g',round(t_smooth*f_sub));
+
+    % Inserting trace
+    [~,i_start] = min((X-x_start).^2);
+    [~,i_end] = min((X-x_end).^2);
+    Y(i_start:i_end) = trace_smooth;
+     
+    % saving
+    temp = regexp(char(trace_name),'/','split');
+    %traces(i).ID = sprintf('%d',eval(char(temp(2))));
+    traces(i).ID = char(temp(2));
+    traces(i).shortname = 'Theta-power';
+    traces(i).parent = 'Wavelet-Analysis';
+    traces(i).fullname = strcat(traces(i).shortname,'/',traces(i).ID);
+    traces(i).X = X;
+    traces(i).Y = Y;
+    traces(i).X_ind = time_ref.X;
+    traces(i).X_im = time_ref.Y;
+    traces(i).Y_im = interp1(traces(i).X,traces(i).Y,traces(i).X_im);
+    traces(i).nb_samples = length(Y);
+    fprintf('Theta band [%.1f - %.1f] succesfully extracted and smoothed [%.1f].\n',val_inf,val_sup,t_smooth);
+end
+
+% Save dans SpikoscopeTraces.mat
+MetaData = [];
+if ~isempty(traces)
+    save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
+end
+fprintf('===> Saved at %s.mat\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'));
 
 end
 
