@@ -15,20 +15,17 @@ switch strtrim(str(val,:))
     case 'Filter LFP for theta'
         filter_lfp_theta(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Export LFP bands'
+        export_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles,1)
+        
     case 'Export IMO file'
         export_imofile(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),SEED_SPIKO,FILES(CUR_FILE).session);
         
-%     case 'Edit Time Tags'
-%         menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-%     
-%     case 'Edit Time Groups'
-%         menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-%         
-%     case 'Load Spikoscope Regions'
-%         load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-%     
-%     case 'Load Cereplex Traces'
-%         load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+    case 'Load Anatomical Regions'
+        load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+    
+    case 'Load Cereplex Traces'
+        load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     case 'Detect Vascular Surges'
         detect_vascular_surges(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

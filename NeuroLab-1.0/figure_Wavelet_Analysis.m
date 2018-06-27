@@ -20,16 +20,37 @@ for i =1:length(l)
     all_traces(i).Y = Y;
     all_traces(i).f_samp = f_samp;
 end
-ind_1 = ~(cellfun('isempty',strfind(temp,'LFP/')));
-ind_2 = ~(cellfun('isempty',strfind(temp,'LFP-theta/')));
+
+%Sorting LFP channels according to configuration
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
+    %sort if lfp configuration is found
+    data_lfp = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'channel_type','ind_channel','channel_id');
+    %index_channels = data_lfp.ind_channel(strcmp(data_lfp.channel_type,'LFP'));
+    pattern_channels = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
+    ind_1 = [];
+    ind_2 = [];
+    for i =1:length(pattern_channels)
+        pattern = char(pattern_channels(i));
+        ind_1 = [ind_1;find((~(cellfun('isempty',strfind(temp,'LFP/')))).*(~(cellfun('isempty',strfind(temp,pattern))))==1)];
+        ind_2 = [ind_2;find((~(cellfun('isempty',strfind(temp,'LFP-theta/')))).*(~(cellfun('isempty',strfind(temp,pattern))))==1)];
+    end
+    ind_1 = flipud(ind_1);
+    ind_2 = flipud(ind_2);
+else
+    %unsorted
+    ind_1 = find(~(cellfun('isempty',strfind(temp,'LFP/')))==1);
+    ind_2 = find(~(cellfun('isempty',strfind(temp,'LFP-theta/')))==1);
+end
+
+%Return if LFP channels are missing
 if sum(ind_1)==0 || sum(ind_2)==0
     warning('Missing LFP channels. Reload configuration.');
     return;
 end
-traces_name = temp(ind_1==1);
-phases_name = temp(ind_2==1);
-traces = all_traces(ind_1==1);
-phases = all_traces(ind_2==1);
+traces_name = temp(ind_1);
+phases_name = temp(ind_2);
+traces = all_traces(ind_1);
+phases = all_traces(ind_2);
 
 % Loading Time Reference
 if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file'))
@@ -55,14 +76,14 @@ set(f2,'Position',[.1 .1 .6 .6]);
 clrmenu(f2);
 
 %Parameters
-channels = 1;               % # channels (top) 
-bands = length(traces);     % # lfp (bottom)
-L = 10;                     % Height top panels
-l = 1;                      % Height info panel
-cb1_def = 1;                % freq correction
-cb2_def = 0;                % log scale
-cb3_def = 1;                % linkaxes all channels
-cb4_def = 1;                % early break (spectrogramm only)
+channels = 1;                % # channels (top) 
+bands = length(traces);      % # lfp (bottom)
+L = 10;                      % Height top panels
+l = 1;                       % Height info panel
+cb1_def = 1;                 % freq correction
+cb2_def = 0;                 % log scale
+cb3_def = 1;                 % linkaxes all channels
+cb4_def = 1;                 % early break (spectrogramm only)
 cb11_def = 0;                % lfp display
 cb12_def = 1;                % lfp filtered
 cb21_def = 1;                % Hold on for spectrogram
@@ -235,7 +256,8 @@ be = uicontrol('Units','normalized',...
     'Style','pushbutton',...
     'Parent',iP,...
     'String','Export bands',...
-    'Tag','ButtonExport');
+    'Tag','ButtonExport',...
+    'Enable','off');
 bss = uicontrol('Units','normalized',...
     'Style','pushbutton',...
     'Parent',iP,...
@@ -1957,9 +1979,6 @@ for i =1:length(data)
     x_start = data(i).x_start;
     x_end = data(i).x_end;
     Cdata = data(i).Cdata;
-    %f_samp = data(i).f_samp;
-    %Y_trace = data(i).Y_trace;
-    %X_trace = data(i).X_trace;
     
     % Intializing trace
     X = (time_ref.Y(1):1/f_sub:time_ref.Y(end))';

@@ -149,7 +149,7 @@ GFilt.gammahigh_sup = 150;
 GFilt.gammahigh_smooth = .02;
 GFilt.ripple_inf = 150;
 GFilt.ripple_sup = 300;
-GFilt.ripple_smooth = .001;
+GFilt.ripple_smooth = .01;
 
 GImport_default = GImport;
 GParams_default = GParams;
