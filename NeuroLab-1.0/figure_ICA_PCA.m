@@ -21,7 +21,7 @@ iP = uipanel('Units','characters',...
     'Parent',f2);
 
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
-    'String',sprintf('File : %s',FILES(CUR_FILE).gfus),'Tag','Text1');
+    'String',sprintf('File : %s',FILES(CUR_FILE).nlab),'Tag','Text1');
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
     'String',sprintf('Source : %s',myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:)),...
     'Tag','Text2');
@@ -155,12 +155,12 @@ set(handles2.ButtonDisp,'Callback',{@display_reconstruction,handles2});
 set(handles2.ButtonSave,'Callback',{@save_reconstruction,handles2});
 
 % Direct Load
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'ICA_PCA.mat'),'file')
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'ICA_PCA.mat'),'file')
     
     set(f2,'Pointer','watch');
     drawnow;
     % Setting Button Load for Browsing
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'ICA_PCA.mat'),'data','channel_title','hint_label','r_label','ind_real','ind_null','IM_vect','im','data_ica','data_pca','data_rec_ica','data_rec_pca');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'ICA_PCA.mat'),'data','channel_title','hint_label','r_label','ind_real','ind_null','IM_vect','im','data_ica','data_pca','data_rec_ica','data_rec_pca');
     handles2.ButtonLoad.UserData.data = data;
     handles2.ButtonLoad.UserData.channel_title = channel_title;
     handles2.ButtonLoad.UserData.hint_label = hint_label;
@@ -645,8 +645,7 @@ if isempty(ind_data)
     return;
 end
 switch ind_data
-    case 1,
-        
+    case 1   
         %Subsampled image
         prompt={'SubSampling Size';'Mean (0) Median (1)'};
         name = 'Select Subsampling Parameters';
@@ -657,24 +656,24 @@ switch ind_data
         b = 1:step_sub:size(IM,2);
         im = zeros(length(a),length(b),size(IM,3));
         switch str2double(char(answer(2)))
-            case 0,
+            case 0
                 for i=1:length(a)
                     for j=1:length(b)
                         im(i,j,:) = mean(mean(IM(a(i):min(a(i)+step_sub-1,end),b(j):min(b(j)+step_sub-1,end),:),2,'omitnan'),1,'omitnan');
                     end
                 end
-            case 1,
+            case 1
                 for i=1:length(a)
                     for j=1:length(b)
                         im(i,j,:) = median(median(IM(a(i):min(a(i)+step_sub-1,end),b(j):min(b(j)+step_sub-1,end),:),2,'omitnan'),1,'omitnan');
                     end
                 end
-            otherwise,
+            otherwise
                 errordlg('Unrecognized Operation');
                 set(handles.MainFigure, 'pointer', 'arrow');
                 return;
         end
-    case 2,
+    case 2
         im = NaN(size(IM));
         % All Pixels in Image
         prompt={'Index first row';'Index last row';'Index first column';'Index last column'};
@@ -686,48 +685,56 @@ switch ind_data
         j = str2double(cell2mat(answer(3)));
         J = str2double(cell2mat(answer(4)));
         im(i:I,j:J,:) =  IM(i:I,j:J,:);
-    case 3,
+    case 3
         im = NaN(size(IM));
         % All Pixels in Specified Regions
         regions = hObj.UserData.Regions;
         str_regions = cell(length(regions),1);
         for i=1:length(regions)
-            str_regions(i,:) = {regions(i).UserData.Name};
+            %str_regions(i,:) = {regions(i).UserData.Name};
+            str_regions(i,:) = {regions(i).UserData.UserData.Name};
         end
         ind_regions = listdlg('PromptString','Select Region','SelectionMode','mutiple','ListString',str_regions,'ListSize',[300 500]);
         full_mask = zeros(size(im,1),size(im,2));
         for i=1:length(ind_regions)
-            full_mask = full_mask+regions(ind_regions(i)).UserData.Mask;
+            %full_mask = full_mask+regions(ind_regions(i)).UserData.Mask;
+            full_mask = full_mask+regions(ind_regions(i)).UserData.UserData.Mask;
         end
         full_mask = full_mask>0;
         im = IM.*repmat(full_mask,[1,1,size(im,3)]);
         im(im==0) = NaN;
-    case 4,
+    case 4
         % Pixel Traces
         pix = hObj.UserData.Pixels;
         im = NaN(length(pix),1,size(IM,3));
         for i =1:length(pix)
-            im(i,1,:) =  pix(i).UserData.Trace.YData(~isnan(pix(i).UserData.Trace.YData));
+            %im(i,1,:) =  pix(i).UserData.Trace.YData(~isnan(pix(i).UserData.Trace.YData));
+            im(i,1,:) =  pix(i).UserData.YData(1:end-1);
         end
-    case 5,
+    case 5
         % Box Traces
         box = hObj.UserData.Boxes;
         im = NaN(length(box),1,size(IM,3));
         for i =1:length(box)
-            im(i,1,:) =  box(i).UserData.Trace.YData(~isnan(box(i).UserData.Trace.YData));
+            %im(i,1,:) =  box(i).UserData.Trace.YData(~isnan(box(i).UserData.Trace.YData));
+            im(i,1,:) =  box(i).UserData.YData(1:end-1);
         end
-    case 6,
+    case 6
         % Region Traces
         reg = hObj.UserData.Regions;
         im = NaN(length(reg),1,size(IM,3));
         for i =1:length(reg)
-            im(i,1,:) =  reg(i).UserData.Trace.YData(~isnan(reg(i).UserData.Trace.YData));
+            %im(i,1,:) =  reg(i).UserData.Trace.YData(~isnan(reg(i).UserData.Trace.YData));
+            im(i,1,:) =  reg(i).UserData.YData(1:end-1);
         end
     
-    otherwise,
+    otherwise
         warning('Problem in case selection : Unrecognized case in SWITCH.\n');
         return,
 end
+
+% hard reset NaN values to zeros
+im(isnan(im))=0;
 
 % Formatting data
 IM_vect = reshape(permute(im,[3,1,2]),[size(im,3) size(im,1)*size(im,2)]);
@@ -743,7 +750,7 @@ r_label = '';
 
 % Building Channel_title
 switch ind_data
-    case 1,
+    case 1
         %Subsampled image
         hint_label = rlabels(a,b);
         hint_label = hint_label(ind_real);
@@ -751,7 +758,7 @@ switch ind_data
             channel_title(k,:) = {sprintf('Subsampled Pixel %d (X=%d,Y=%d) (Region : %s)',k,ind_i(k),ind_j(k),char(hint_label(k)))};
         end
         
-    case {2,3},
+    case {2,3}
         % All Pixels in Image
         % All Pixels in Specified Regions
         hint_label = rlabels(ind_real);
@@ -759,32 +766,34 @@ switch ind_data
             channel_title(k,:) = {sprintf('Pixel %d (X=%d,Y=%d) (Region : %s)',k,ind_i(k),ind_j(k),char(hint_label(k)))};
         end
  
-    case 4,
+    case 4
         % Pixel Traces
         r_label = cell(length(pix),1);
         hint_label = cell(length(pix),1);
         for i =1:length(pix)
-            r_label(i) =  {pix(i).UserData.Name};
+            %r_label(i) =  {pix(i).UserData.Name};
+            r_label(i) =  {pix(i).UserData.UserData.Name};
             hint_label(i) = rlabels(pix(i).YData,pix(i).XData);
             channel_title(i,:) = {sprintf('%s (X=%d,Y=%d) (Region : %s)',char(r_label(i)),pix(i).YData,pix(i).XData,char(hint_label(i)))};
         end
         
-    case 5,
+    case 5
         % Box Traces
         r_label = cell(length(box),1);
         hint_label = cell(length(box),1);
         for i =1:length(box)
-            r_label(i) =  {box(i).UserData.Name};
+            %r_label(i) =  {box(i).UserData.Name};
+            r_label(i) =  {box(i).UserData.UserData.Name};
             vert = round(mean(box(i).Vertices));
             hint_label(i) = rlabels(vert(2),vert(1));
             channel_title(i,:) = {sprintf('%s (Center :X=%d,Y=%d) (Region : %s)',char(r_label(i)),vert(2),vert(1),char(hint_label(i)))};
         end
         
-    case 6,
+    case 6
         % Region Traces
         r_label = cell(length(reg),1);
         for i =1:length(reg)
-            r_label(i) =  {reg(i).UserData.Name};
+            r_label(i) =  {reg(i).UserData.UserData.Name};
             channel_title(i,:) = {sprintf('Region %s',char(r_label(i)))};
         end
         hint_label = r_label;
@@ -865,8 +874,8 @@ firstEig = str2double(cell2mat(answer(2)));
 lastEig = str2double(cell2mat(answer(3)));
 
 % Performing ICA & PCA
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'covarianceMat.mat'),'file') && handles.Box1.Value
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'covarianceMat.mat'),'covarianceMat','pcaD','pcaE');
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'covarianceMat.mat'),'file') && handles.Box1.Value
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'covarianceMat.mat'),'covarianceMat','pcaD','pcaE');
     [A, W]  = fastica(data(:,start_im:end_im),'pcaD',pcaD,'pcaE',pcaE,'numOfIC',numOfIC,'firstEig',firstEig,'lastEig',lastEig);
 else
     [A, W, covarianceMat, pcaD, pcaE]  = fastica(data(:,start_im:end_im),'numOfIC',numOfIC,'firstEig',firstEig,'lastEig',lastEig);
@@ -1057,12 +1066,12 @@ else
     PCA_component = handles.ButtonRecon.UserData.PCA_component;
     PCA_title = handles.ButtonRecon.UserData.PCA_title;
     
-    save(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler_reconstructed.mat'),'Doppler_reconstructed_ICA','Doppler_reconstructed_PCA','-v7.3');
-    fprintf('===> Saved at %s.\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler_reconstructed.mat'));
-    save(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'covarianceMat.mat'),'covarianceMat','pcaD','pcaE','-v7.3');
-    save(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'ICA_PCA.mat'),'data','channel_title','hint_label','r_label','ind_real','ind_null','IM_vect','im','data_ica','data_pca','data_rec_ica','data_rec_pca','-v7.3');
-    fprintf('===> Saved at %s.\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'ICAPCA_components.mat'));
-    %fprintf('Reconstructed Movie computed from %s\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Doppler.mat'));
+    save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_reconstructed.mat'),'Doppler_reconstructed_ICA','Doppler_reconstructed_PCA','-v7.3');
+    fprintf('===> Saved at %s.\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_reconstructed.mat'));
+    save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'covarianceMat.mat'),'covarianceMat','pcaD','pcaE','-v7.3');
+    save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'ICA_PCA.mat'),'data','channel_title','hint_label','r_label','ind_real','ind_null','IM_vect','im','data_ica','data_pca','data_rec_ica','data_rec_pca','-v7.3');
+    fprintf('===> Saved at %s.\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'ICAPCA_components.mat'));
+    %fprintf('Reconstructed Movie computed from %s\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'));
     
 end
 
@@ -1075,9 +1084,9 @@ function custom_button_TagSelection_Callback(hObj,~,ax,handles)
 global DIR_SAVE FILES CUR_FILE;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell');
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 
@@ -1124,9 +1133,9 @@ function custom_button_nextTag_Callback(~,~,ax,handles)
 global DIR_SAVE FILES CUR_FILE;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell');
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 
@@ -1154,9 +1163,9 @@ function custom_button_prevTag_Callback(~,~,ax,handles)
 global DIR_SAVE FILES CUR_FILE;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell');
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 
