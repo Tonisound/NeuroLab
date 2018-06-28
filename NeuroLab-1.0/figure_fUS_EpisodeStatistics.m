@@ -3,15 +3,15 @@ function f2 = figure_fUS_EpisodeStatistics(handles,val,str_group)
 
 global DIR_SAVE FILES CUR_FILE;
 
-if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'file')||~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'file')
-    warning('Missing File Time_Tags.mat or Time_Reference.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus));
+if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')||~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
+    warning('Missing File Time_Tags.mat or Time_Reference.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     return;
 end
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images','TimeTags_strings');
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images','TimeTags_strings');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
 
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
 else
     TimeGroups_name=[];
     TimeGroups_S = [];
@@ -47,7 +47,7 @@ iP = uipanel('FontSize',12,...
 
 str = handles.CenterPanelPopup.String(handles.CenterPanelPopup.Value,:);
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
-    'String',sprintf(' File : %s\n Source : %s',FILES(CUR_FILE).gfus,str),'Tag','Text1');
+    'String',sprintf(' File : %s\n Source : %s',FILES(CUR_FILE).nlab,str),'Tag','Text1');
 e1 = uicontrol('Units','characters','Style','edit','HorizontalAlignment','center',...
     'Tooltipstring','# Episodes','Parent',iP,'String',0,'Tag','Edit1');
 
@@ -576,19 +576,19 @@ initialize_centerPanel(handles);
 handles = guihandles(handles.MainFigure);
 
 %Clear axes
-if ~isempty(findobj(handles.SecondPanel,'Tag','SecondAxes'));
+if ~isempty(findobj(handles.SecondPanel,'Tag','SecondAxes'))
     delete(handles.SecondAxes.Children);
 end
-if ~isempty(findobj(handles.ThirdPanel,'Tag','ThirdAxes'));
+if ~isempty(findobj(handles.ThirdPanel,'Tag','ThirdAxes'))
     delete(handles.ThirdAxes.Children);
 end
-if ~isempty(findobj(handles.FourthPanel,'Tag','FourthAxes'));
+if ~isempty(findobj(handles.FourthPanel,'Tag','FourthAxes'))
     delete(handles.FourthAxes.Children);
 end
-if ~isempty(findobj(handles.FifthPanel,'Tag','FifthAxes'));
+if ~isempty(findobj(handles.FifthPanel,'Tag','FifthAxes'))
     delete(handles.FifthAxes.Children);
 end
-if ~isempty(findobj(handles.SixthPanel,'Tag','SixthAxes'));
+if ~isempty(findobj(handles.SixthPanel,'Tag','SixthAxes'))
     delete(handles.SixthAxes.Children);
 end
 
@@ -736,7 +736,10 @@ TimeTag_Data = NaN(size(Time_indices,1),size(Time_indices,2),n_channels);
 for k=1:n_channels
     l = lines(ind_channels(k));
     data = repmat(l.YData',1,size(Time_indices,2));
-    TimeTag_Data(:,:,k) = data.*Time_indices;
+    % TimeTag_Data(:,:,k) = data.*Time_indices;
+    % modifying this line account for uneven Ydata between Trace_cerep and
+    % Trace_Region
+    TimeTag_Data(1:size(data,1),:,k) = data.*Time_indices(1:size(data,1),:);
 end
 
 % Initialize boxes
@@ -853,12 +856,22 @@ leg.Units = 'normalized';
 if ~isempty(findobj(panel,'Tag','PatchAxes'))
     delete(findobj(panel,'Tag','PatchAxes'));
 end
-f2 = export_patches(handles.MainFigure.UserData.old_handles,0);
-ax_e = findobj(f2,'Tag','AxExport');
-ax_e = copyobj(ax_e,panel);
-ax_e.Position = [.8775 .77 .1 .18];
+selected_lines  = lines(ind_channels);
+ax_e = axes('Parent',panel,'Position',[.8775 .77 .1 .18],...
+    'XTick',[],'YTick',[]);
+im = handles.MainFigure.UserData.old_handles.MainImage;
+copyobj(im,ax_e);
+ax_e.YLim = [.5 size(im.CData,1)+.5];
+ax_e.XLim = [.5 size(im.CData,2)+.5];
+ax_e.YDir = 'reverse';
+for i=1:length(selected_lines)
+    if strcmp(selected_lines(i).Tag,'Trace_Region') || strcmp(selected_lines(i).Tag,'Trace_Pixel') || strcmp(selected_lines(i).Tag,'Trace_Box')
+        p = selected_lines(i).UserData.Graphic;
+        p = copyobj(p,ax_e);
+        p.Visible ='on';
+    end
+end
 ax_e.Tag = 'PatchAxes';
-close(f2);
 
 % Tag reasignement
 ax.Tag = 'SecondAxes';
@@ -950,16 +963,15 @@ leg.Position = [.875*pos(3) .05*pos(4) .1*pos(3) .7*pos(4)];
 panel.Units = 'normalized';
 leg.Units = 'normalized';
 
+
 % Plotting masks
 if ~isempty(findobj(panel,'Tag','PatchAxes'))
     delete(findobj(panel,'Tag','PatchAxes'));
 end
-f2 = export_patches(handles.MainFigure.UserData.old_handles,0);
-ax_e = findobj(f2,'Tag','AxExport');
-ax_e = copyobj(ax_e,panel);
+ax_ref = findobj(handles.SecondPanel,'Tag','PatchAxes');
+ax_e = copyobj(ax_ref,panel);
 ax_e.Position = [.8775 .77 .1 .18];
 ax_e.Tag = 'PatchAxes';
-close(f2);
 
 % Tag reasignement
 ax.Tag = 'ThirdAxes';
@@ -1054,12 +1066,10 @@ leg.Units = 'normalized';
 if ~isempty(findobj(panel,'Tag','PatchAxes'))
     delete(findobj(panel,'Tag','PatchAxes'));
 end
-f2 = export_patches(handles.MainFigure.UserData.old_handles,0);
-ax_e = findobj(f2,'Tag','AxExport');
-ax_e = copyobj(ax_e,panel);
+ax_ref = findobj(handles.SecondPanel,'Tag','PatchAxes');
+ax_e = copyobj(ax_ref,panel);
 ax_e.Position = [.8775 .77 .1 .18];
 ax_e.Tag = 'PatchAxes';
-close(f2);
 
 % Tag reasignement
 ax.Tag = 'FourthAxes';
@@ -1172,12 +1182,10 @@ leg.Units = 'normalized';
 if ~isempty(findobj(panel,'Tag','PatchAxes'))
     delete(findobj(panel,'Tag','PatchAxes'));
 end
-f2 = export_patches(handles.MainFigure.UserData.old_handles,0);
-ax_e = findobj(f2,'Tag','AxExport');
-ax_e = copyobj(ax_e,panel);
+ax_ref = findobj(handles.SecondPanel,'Tag','PatchAxes');
+ax_e = copyobj(ax_ref,panel);
 ax_e.Position = [.8775 .77 .1 .18];
 ax_e.Tag = 'PatchAxes';
-close(f2);
 
 % Tag reasignement
 ax.Tag = 'FifthAxes';
@@ -1253,12 +1261,10 @@ leg.Units = 'normalized';
 if ~isempty(findobj(panel,'Tag','PatchAxes'))
     delete(findobj(panel,'Tag','PatchAxes'));
 end
-f2 = export_patches(handles.MainFigure.UserData.old_handles,0);
-ax_e = findobj(f2,'Tag','AxExport');
-ax_e = copyobj(ax_e,panel);
+ax_ref = findobj(handles.SecondPanel,'Tag','PatchAxes');
+ax_e = copyobj(ax_ref,panel);
 ax_e.Position = [.8775 .77 .1 .18];
 ax_e.Tag = 'PatchAxes';
-close(f2);
 
 % Tag reasignement
 ax.Tag = 'SixthAxes';
@@ -1736,7 +1742,7 @@ global FILES CUR_FILE DIR_FIG;
 load('Preferences.mat','GTraces');
 
 % Creating Save Directory
-save_dir = fullfile(DIR_FIG,'fUS_Statistics',FILES(CUR_FILE).eeg);
+save_dir = fullfile(DIR_FIG,'fUS_Statistics',FILES(CUR_FILE).nlab);
 if ~isdir(save_dir)
     mkdir(save_dir);
 end
@@ -1748,37 +1754,37 @@ grouping = handles.BoxInvert.String;
 
 handles.TabGroup.SelectedTab = handles.SecondTab;
 title = handles.TabGroup.SelectedTab.Title;
-pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).eeg,grouping,title,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).nlab,grouping,title,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.ThirdTab;
 title = handles.TabGroup.SelectedTab.Title;
-pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).eeg,grouping,title,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).nlab,grouping,title,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.FourthTab;
 title = handles.TabGroup.SelectedTab.Title;
-pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).eeg,grouping,title,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).nlab,grouping,title,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.FifthTab;
 title = handles.TabGroup.SelectedTab.Title;
-pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).eeg,grouping,title,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).nlab,grouping,title,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.SixthTab;
 title = handles.TabGroup.SelectedTab.Title;
-pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).eeg,grouping,title,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).nlab,grouping,title,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.SeventhTab;
 title = handles.TabGroup.SelectedTab.Title;
-pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).eeg,grouping,title,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_fUS_Statistics_%s_%s%s',FILES(CUR_FILE).nlab,grouping,title,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
@@ -1804,7 +1810,7 @@ all_rhos = data.all_rhos;
 all_bars = data.all_bars;
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'fUS_Statistics',FILES(CUR_FILE).eeg);
+data_dir = fullfile(DIR_STATS,'fUS_Statistics',FILES(CUR_FILE).nlab);
 if ~isdir(data_dir)
     mkdir(data_dir);
 end
@@ -1826,7 +1832,7 @@ for i =1:n_episodes
     
     % Saving Stats Groups
     % Saving Stats Per Time Group
-    filename = sprintf('%s_fUS_Statistics_%s.mat',FILES(CUR_FILE).eeg,group);
+    filename = sprintf('%s_fUS_Statistics_%s.mat',FILES(CUR_FILE).nlab,group);
     save(fullfile(data_dir,filename),'group','tags','strings','images',...
         't_data','x_data','y_data','label_channels','-v7.3');
     fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
@@ -1851,8 +1857,8 @@ for i =1:n_episodes
     end
 end
 % Saving Stats Whole
-filename = sprintf('%s_fUS_Statistics_WHOLE.mat',FILES(CUR_FILE).eeg);
-recording = FILES(CUR_FILE).eeg;
+filename = sprintf('%s_fUS_Statistics_WHOLE.mat',FILES(CUR_FILE).nlab);
+recording = FILES(CUR_FILE).nlab;
 r_length = LAST_IM;
 save(fullfile(data_dir,filename),'S','recording','r_length','Tag_Selection','Tag_Name',...
     'label_episodes','label_channels','label_ampli','all_rhos','all_bars','-v7.3');
