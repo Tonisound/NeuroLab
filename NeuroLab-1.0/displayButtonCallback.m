@@ -67,11 +67,8 @@ switch strtrim(str(val,:))
         figure_PeriEventHistogramm(handles);
         
     case '(Figure) Global Episode Display'
-        if n_burst > 1
-            figure_GlobalDisplay_RUN(handles,1);
-        else
-            figure_GlobalDisplay_REM(handles,1);
-        end
+        figure_GlobalDisplay(handles,1);
+     
     case '(Synthesis) fUS Episode Statistics'
         synthesis_fUS_Statistics();
         

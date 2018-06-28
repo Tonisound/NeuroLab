@@ -1,13 +1,13 @@
-function f2 = figure_GlobalDisplay_RUN(handles,val,str_group)
+ function f2 = figure_GlobalDisplay(handles,val,str_tag)
 % Global Display REM
 
 global DIR_SAVE FILES CUR_FILE START_IM END_IM;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell');
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat or Time_Reference.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat or Time_Reference.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 
@@ -19,7 +19,7 @@ f2 = figure('Units','characters',...
     'NumberTitle','off',...
     'Tag','MainFigure',...
     'PaperPositionMode','auto',...
-    'Name','Global Episode Display (RUN)');
+    'Name','Global Episode Display');
 colormap(f2,'jet');
 clrmenu(f2);
 
@@ -31,7 +31,7 @@ iP = uipanel('FontSize',12,...
     'Parent',f2);
 
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
-    'String',sprintf('File : %s',FILES(CUR_FILE).gfus),'Tag','Text1');
+    'String',sprintf('File : %s',FILES(CUR_FILE).nlab),'Tag','Text1');
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
     'String',sprintf('Source : %s',handles.CenterPanelPopup.String(handles.CenterPanelPopup.Value,:)),'Tag','Text2');
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center',...
@@ -55,25 +55,21 @@ e2 = uicontrol('Units','characters',...
     'Tag','Edit2');
 e1.String = handles.TimeDisplay.UserData(START_IM,:);
 e2.String = handles.TimeDisplay.UserData(END_IM,:);
-e1.Enable = 'off';
-e2.Enable = 'off';
 
 %Copying Buttons from Main Panel
 copyobj(handles.PlusButton,iP);
 copyobj(handles.MinusButton,iP);
 copyobj(handles.SkipButton,iP);
 copyobj(handles.BackButton,iP);
-nt = copyobj(handles.nextTagButton,iP);
-nt.Enable = 'off';
-pt = copyobj(handles.prevTagButton,iP);
-pt.Enable = 'off';
+copyobj(handles.nextTagButton,iP);
+copyobj(handles.prevTagButton,iP);
 cp = copyobj(handles.RescaleButton,iP);
 cp.UserData.str1 = handles.TimeDisplay.UserData(1,:);
 cp.UserData.str2 = handles.TimeDisplay.UserData(end,:);
-copyobj(handles.TagButton,iP);
-% if length(tb.UserData.Selected)>1
-%     tb.UserData=[];
-% end
+tb = copyobj(handles.TagButton,iP);
+if ~isempty(tb.UserData)&&length(tb.UserData.Selected)>1
+    tb.UserData=[];
+end
 
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Reset','Tag','ButtonReset');
@@ -82,9 +78,9 @@ bc = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Autoscale','Tag','ButtonAutoScale');
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
-    'String','Save Stats','Tag','ButtonSaveStats');
+    'String','Save Data','Tag','ButtonSaveStats');
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
-    'String','Save Image','Tag','ButtonSaveImages');
+    'String','Save Image','Tag','ButtonSaveImage');
 bb = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Batch Save','Tag','ButtonBatchSave');
 
@@ -94,12 +90,6 @@ uicontrol('Units','characters',...
     'TooltipString','Normalized Data',...
     'Tag','BoxNorm',...
     'Value',1);
-uicontrol('Units','characters',...
-    'Style','checkbox',...
-    'Parent',iP,...
-    'TooltipString','Bar Separation',...
-    'Tag','BoxBars',...
-    'Value',0);
 uicontrol('Units','characters',...
     'Style','checkbox',...
     'Parent',iP,...
@@ -139,6 +129,7 @@ lines_1 = [m;l];
 lines_2 = [u;v];
 lines_3 = t1;
 if length(t2)>1
+    %lines_4 = flipud([t2(end);t2(1:end-1)]);
     lines_4 = [t2(end);t2(1:end-1)];
 else
     lines_4 = t2;
@@ -238,18 +229,18 @@ ft = uitable('Units','normalized',...
     'Parent',fPanel);
 ft.UserData.Selection = [];
 
+resetbutton_Callback([],[],guihandles(f2));
 set(f2,'Position',[30 30 200 40]);
-resetbutton_Callback([],[],guihandles(f2),handles);
 tabgp.SelectedTab = tab2;
 
 % If nargin > 3 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
 % str_group contains group names 
 if val==0
-    batchsave_Callback(bb,[],guihandles(f2),handles,str_group,1);
+    batchsave_Callback(bb,[],guihandles(f2),str_tag,1);
 end
 
- end
+end
 
 function resize_Figure(~,~,handles)
 % Main Figure resize function
@@ -285,12 +276,11 @@ handles.ButtonCompute.Position = [7.45*ipos(3)/10+ipos(3)/12     ipos(4)/2-.25  
 handles.ButtonAutoScale.Position = [7.45*ipos(3)/10+ipos(3)/6     ipos(4)/2-.25      ipos(3)/12   ipos(4)/2];
 
 handles.ButtonSaveStats.Position = [7.45*ipos(3)/10     0      ipos(3)/12   ipos(4)/2];
-handles.ButtonSaveImages.Position = [7.45*ipos(3)/10+ipos(3)/12     0      ipos(3)/12   ipos(4)/2];
+handles.ButtonSaveImage.Position = [7.45*ipos(3)/10+ipos(3)/12     0      ipos(3)/12   ipos(4)/2];
 handles.ButtonBatchSave.Position = [7.45*ipos(3)/10+ipos(3)/6     0      ipos(3)/12   ipos(4)/2];
 
-handles.BoxNorm.Position = [6.78*ipos(3)/10     .25      ipos(3)/50   ipos(4)/4];
-handles.BoxBars.Position = [6.78*ipos(3)/10     1.5      ipos(3)/50   ipos(4)/4];
-handles.BoxAuto.Position = [6.78*ipos(3)/10     2.75      ipos(3)/50   ipos(4)/4];
+handles.BoxNorm.Position = [6.78*ipos(3)/10     .5      ipos(3)/50   ipos(4)/4];
+handles.BoxAuto.Position = [6.78*ipos(3)/10     2.5      ipos(3)/50   ipos(4)/4];
 
 end
 
@@ -385,9 +375,8 @@ uicontrol('Units','normalized','Style','edit','HorizontalAlignment','center','Pa
 
 end
 
-function resetbutton_Callback(~,~,handles,old_handles)
+function resetbutton_Callback(~,~,handles)
 
-global START_IM END_IM;
 initialize_centerPanel(handles);
 handles = guihandles(handles.MainFigure);
 
@@ -397,19 +386,20 @@ set(handles.MainPanel,'ResizeFcn',{@resize_MainPanel,handles});
 set(handles.InfoPanel,'ResizeFcn',{@resize_InfoPanel,handles});
 
 % Callback function Attribution
-set(handles.ButtonReset,'Callback',{@resetbutton_Callback,handles,old_handles});
+set(handles.ButtonReset,'Callback',{@resetbutton_Callback,handles});
 set(handles.ButtonCompute,'Callback',{@compute_Callback,handles});
 set(handles.ButtonAutoScale,'Callback',{@buttonAutoScale_Callback,handles});
-set(handles.ButtonSaveImages,'Callback',{@saveimage_Callback,handles});
+set(handles.ButtonSaveImage,'Callback',{@saveimage_Callback,handles});
 set(handles.ButtonSaveStats,'Callback',{@savestats_Callback,handles});
-set(handles.ButtonBatchSave,'Callback',{@batchsave_Callback,handles,old_handles});
-set(handles.BoxBars,'Callback',{@boxbar_Callback,handles});
+set(handles.ButtonBatchSave,'Callback',{@batchsave_Callback,handles});
 
 %Interactive Control
 all_axes = findobj(handles.MainPanel,'Type','axes');
-for i=1:length(all_axes)
-    all_axes(i).XLim = [START_IM END_IM];
-end
+set(handles.Edit1,'Callback',{@edit_Callback,all_axes});
+set(handles.Edit2,'Callback',{@edit_Callback,all_axes});
+%edit_Callback(handles.Edit1,[],all_axes);
+%edit_Callback(handles.Edit2,[],all_axes);
+edit_Callback([handles.Edit1,handles.Edit2],[],all_axes);
 
 %Interactive Control
 edits = [handles.Edit1;handles.Edit2];
@@ -418,15 +408,51 @@ set(handles.PlusButton,'Callback',{@template_buttonPlus_Callback,all_axes,edits}
 set(handles.MinusButton,'Callback',{@template_buttonMinus_Callback,all_axes,edits});
 set(handles.SkipButton,'Callback',{@template_buttonSkip_Callback,all_axes,edits});
 set(handles.BackButton,'Callback',{@template_buttonBack_Callback,all_axes,edits});
-set(handles.RescaleButton,'Callback',{@buttonRescale_Callback,all_axes,edits,old_handles});
-set(handles.TagButton,'Callback',{@button_TagSelection_Callback,all_axes,edits,old_handles});
-% set(handles.prevTagButton,'Callback',{@template_prevTag_Callback,handles.TagButton,all_axes,edits});
-% set(handles.nextTagButton,'Callback',{@template_nextTag_Callback,handles.TagButton,all_axes,edits});
+set(handles.RescaleButton,'Callback',{@buttonRescale_Callback,all_axes,edits});
+set(handles.TagButton,'Callback',{@button_TagSelection_Callback,all_axes,edits});
+set(handles.prevTagButton,'Callback',{@template_prevTag_Callback,handles.TagButton,all_axes,edits});
+set(handles.nextTagButton,'Callback',{@template_nextTag_Callback,handles.TagButton,all_axes,edits});
 
 % Figure Resizing
 resize_Figure(0,0,handles);
 % Fixing non automatic Main Panel resize
 resize_MainPanel([],[],handles);
+
+end
+
+function edit_Callback(hObj,~,ax)
+
+if length(hObj)>1
+    % Reset Mode
+    e1 = hObj(1);
+    A = datenum(e1.String);
+    B = (A - floor(A))*24*3600;
+    e1.String = datestr(B/(24*3600),'HH:MM:SS.FFF');
+    e2 = hObj(2);
+    C = datenum(e2.String);
+    D = (C - floor(C))*24*3600;
+    e2.String = datestr(D/(24*3600),'HH:MM:SS.FFF');
+    
+    for i=1:length(ax)
+        ax(i).XLim = [B,D];
+    end
+else
+    % Callback mode
+    A = datenum(hObj.String);
+    B = (A - floor(A))*24*3600;
+    hObj.String = datestr(B/(24*3600),'HH:MM:SS.FFF');
+    
+    switch hObj.Tag
+        case 'Edit1',
+            for i=1:length(ax)
+                ax(i).XLim(1) = B;
+            end
+        case 'Edit2',
+            for i=1:length(ax)
+                ax(i).XLim(2) = B;
+            end
+    end
+end
 
 end
 
@@ -438,21 +464,6 @@ switch value
         ax.CLim(2) = str2double(hObj.String);
 end
 c.Limits = ax.CLim;
-end
-
-function boxbar_Callback(hObj,~,handles)
-
-bars = findobj(handles.MainPanel,'Tag','SepBar');
-if hObj.Value
-    for k=1:length(bars)
-        bars(k).Visible = 'on';
-    end
-else
-    for k=1:length(bars)
-        bars(k).Visible = 'off';
-    end
-end
-
 end
 
 function buttonAutoScale_Callback(~,~,handles)
@@ -496,33 +507,34 @@ end
 
 end
 
-function buttonRescale_Callback(~,~,ax,edits,handles)
+function buttonRescale_Callback(hObj,~,ax,edits)
 
-global LAST_IM;
-
-str1 = handles.TimeDisplay.UserData(1,:);
-str2 = handles.TimeDisplay.UserData(end,:);
+str1 = hObj.UserData.str1;
+str2 = hObj.UserData.str2;
+A = datenum(str1);
+xlim1 = (A - floor(A))*24*3600;
+A = datenum(str2);
+xlim2 = (A - floor(A))*24*3600;
 for i=1:length(ax)
-    ax(i).XLim =[1,LAST_IM];
+    ax(i).XLim =[xlim1,xlim2];
 end
 if nargin>3
-    edits(1).String = str1;
-    edits(2).String = str2;
+    edits(1).String = datestr(xlim1/(24*3600),'HH:MM:SS.FFF');
+    edits(2).String = datestr(xlim2/(24*3600),'HH:MM:SS.FFF');
 end
 
 end
 
-function button_TagSelection_Callback(hObj,~,ax,edits,handles,ind_tag,v)
+function button_TagSelection_Callback(hObj,~,ax,edits,ind_tag,v)
 % Time Tag Selection Callback (Global Display)
-% If nargin == 6 : opens list dialog to manually select Time Tags
+% If nargin == 4 : opens list dialog to manually select Time Tags
 
 global DIR_SAVE FILES CUR_FILE;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell','TimeTags_strings','TimeTags_images');
-    %fprintf('Successful Time Tags Importation (File %s).\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'));
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_strings','TimeTags_images');
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 
@@ -532,10 +544,10 @@ else
     Selected = hObj.UserData.Selected;
 end
 
-if nargin <6
+if nargin <5
     str_tag = arrayfun(@(i) strjoin(TimeTags_cell(i,2:4),' - '), 2:size(TimeTags_cell,1), 'unif', 0)';
     [ind_tag,v] = listdlg('Name','Tag Selection','PromptString','Select Time Tags',...
-        'SelectionMode','mutiple','ListString',str_tag,...
+        'SelectionMode','single','ListString',str_tag,...
         'InitialValue',Selected,'ListSize',[300 500]);
 end
 
@@ -548,11 +560,16 @@ else
     hObj.UserData.Name = TimeTags_cell(ind_tag+1,2);
     hObj.UserData.TimeTags_strings = TimeTags_strings(ind_tag,:);
     hObj.UserData.TimeTags_images = TimeTags_images(ind_tag,:);
+    min_time = char(TimeTags_cell(ind_tag+1,3));
+    t_start = datenum(min_time);
+    max_time_dur = char(TimeTags_cell(ind_tag+1,4));
+    t_end = datenum(min_time)+datenum(max_time_dur);
+    max_time = datestr(t_end,'HH:MM:SS.FFF');
     
     % Adding TimeGroup Name
     name_Tag = '';
-    if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'file')
-        load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
+    if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
+        load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
         % Test if ind_tags matches TimeGroups_S(i).Selected
         for i =1:length(TimeGroups_name)
             if length(TimeGroups_S(i).Selected)== length(ind_tag) && sum(TimeGroups_S(i).Selected-ind_tag(:))==0
@@ -562,33 +579,31 @@ else
     end
     hObj.UserData.GroupName = name_Tag;
     
-    % Setting limits on RightAxes
-    im1 = min(TimeTags_images(ind_tag,1));
-    im2 = max(TimeTags_images(ind_tag,2));
     for i=1:length(ax)
-        ax(i).XLim = [im1,im2];
+        ax(i).XLim = [(t_start - floor(t_start))*24*3600,(t_end - floor(t_end))*24*3600];
+        if strcmp(ax(i).Tag(1:3),'Ax1')
+            ax(i).Title.String = sprintf('%s (Duration %s)',char(TimeTags_cell(ind_tag+1,2)),char(TimeTags_cell(ind_tag+1,4)));
+        end
     end
-    edits(1).String = handles.TimeDisplay.UserData(im1,:);
-    edits(2).String = handles.TimeDisplay.UserData(im2,:);
+    if nargin>3
+        edits(1).String = min_time;
+        edits(2).String = max_time;
+    end
 end
 
 end
 
 function compute_Callback(hObj,~,handles)
 
-global DIR_SAVE FILES CUR_FILE LAST_IM;
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
-x_burst = [ones(length_burst,n_burst);zeros(1,n_burst)];
-x_burst = x_burst(:);
+global DIR_SAVE FILES CUR_FILE;
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+handles.MainFigure.UserData.success = false;
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch');
 drawnow;
-handles.MainFigure.UserData.success = false;
 
-% Interpolation Frequency
-f_int = 1/(time_ref.Y(2)-time_ref.Y(1));
-bar_color = [.5 .5 .5];
+f_int = 100;    % Interpolation Frequency
 lines_1 = hObj.UserData.lines_1;
 lines_3 = hObj.UserData.lines_3;
 lines_2 = hObj.UserData.lines_2;
@@ -598,6 +613,7 @@ lines_4 = hObj.UserData.lines_4;
 a = datenum(handles.Edit1.String);
 b = datenum(handles.Edit2.String);
 Time_indices = [(a-floor(a))*24*3600,(b-floor(b))*24*3600];
+ref_time = Time_indices(1):1/f_int:Time_indices(2);
 % Tag Selection
 str = datestr((Time_indices(2)-Time_indices(1))/(24*3600),'HH:MM:SS.FFF');
 Tag_Selection = {'CURRENT',handles.Edit1.String,str};
@@ -607,29 +623,21 @@ if round(Time_indices(1)-time_ref.Y(1))==0 && round(Time_indices(2)-time_ref.Y(e
     tag = 'WHOLE';
     Tag_Selection ={tag,handles.Edit1.String,str};
 % Test if axis limits matches tag
-elseif ~isempty(handles.TagButton.UserData)
-    if ~isempty(handles.TagButton.UserData.GroupName)
-        tag = char(handles.TagButton.UserData.GroupName);
+elseif ~isempty(handles.TagButton.UserData) 
+    tts1 = char(handles.TagButton.UserData.TimeTags_strings(1));
+    tts2 = char(handles.TagButton.UserData.TimeTags_strings(2));
+    if strcmp(handles.Edit1.String(1:9),tts1(1:9)) && strcmp(handles.Edit2.String(1:9),tts2(1:9))
+        tag = char(handles.TagButton.UserData.Name);
         Tag_Selection ={tag,handles.Edit1.String,str};
-    else
-        tts1 = char(handles.TagButton.UserData.TimeTags_strings(1));
-        tts2 = char(handles.TagButton.UserData.TimeTags_strings(2));
-        if strcmp(handles.Edit1.String(1:9),tts1(1:9)) && strcmp(handles.Edit2.String(1:9),tts2(1:9))
-            tag = char(handles.TagButton.UserData.Name);
-            Tag_Selection ={tag,handles.Edit1.String,str};
-        end
     end
 end
 
-% Compute Table data
 all_table = [handles.Region_table;handles.Pixel_table;handles.Trace_table;handles.fUS_table];
 all_lines = {lines_1;lines_2;lines_3;lines_4};
-all_ax = [handles.Ax1;handles.Ax2;handles.Ax3;handles.Ax4];
 
 for i=1:4
     table = all_table(i);
     lines = all_lines{i};
-    ax = all_ax(i);
     data = [];
     
     % if Selection not empty fill data
@@ -638,28 +646,79 @@ for i=1:4
         ind = table.UserData.Selection;
         Selection = table.Data(ind,:);
         lines = lines(ind);
-        % Building RData
-        ref_time = max(1,round(ax.XLim(1))):min(LAST_IM,ceil(ax.XLim(2)));
+        
+        % Building Data
         Ydata = NaN(length(ind),length(ref_time));
-        for k=1:length(ind)
-            %data = lines(k).YData(~isnan(lines(k).YData));
-            data = lines(k).YData(x_burst==1);
-            Y = (data)';
-            Ydata(k,:)=Y(ref_time);
+        switch i
+            case {1,2}
+                % Regions and Pixels
+                for k=1:length(ind)
+                    X = time_ref.Y;
+                    %Y = (lines(k).YData(~isnan(lines(k).YData)))';
+                    Y = lines(k).YData(1:end-1);
+                    f_samp = 1./(X(2)-X(1));
+                    % Keeping indices from 1s before start to 1s after end
+                    ind_keep = ((X-(Time_indices(1)-1)).*(X-(Time_indices(2)+1)))<0;
+                    x = X(ind_keep);
+                    y = Y(ind_keep);
+                    % Resampling
+                    y_resamp = resample(y,round(1000*f_int),round(1000*f_samp));
+                    y_resamp = y_resamp(1+round(f_int):end);
+                    %x_resamp = x(1+round(f_samp)):1/f_int:x(end-round(f_samp));
+                    %y_resamp = y_resamp(1+round(f_int):round(f_int)+length(x_resamp));
+                    %y_resamp = resample(y,length(x_resamp),length(y));
+                    ind_first = max(round((x(1+round(f_samp))-(Time_indices(1)))*f_int),1);
+                    if (length(y_resamp)+ind_first-1)>length(ref_time)
+                        y_resamp = y_resamp(1:length(ref_time)-ind_first+1);
+                    end
+                    Ydata(k,ind_first:ind_first+length(y_resamp)-1)=y_resamp';
+                end
+            case 3
+                for k=1:length(ind)
+                    X = lines(k).UserData.X;
+                    Y = lines(k).UserData.Y;
+                    % Keeping indices from 1s before start to 1s after end
+                    ind_keep = ((X-(Time_indices(1)-1)).*(X-(Time_indices(2)+1)))<0;
+                    x = X(ind_keep);
+                    y = Y(ind_keep);
+                    f_samp = round(length(lines(k).UserData.X)/(lines(k).UserData.X(end)));
+                    % Resampling
+                    y_resamp = resample(y,round(1000*f_int),round(1000*f_samp));
+                    x_resamp = x(1+f_samp):1/f_int:x(end-f_samp);
+                    y_resamp = y_resamp(1+f_int:f_int+length(x_resamp));
+                    ind_first = max(round((x(1+f_samp)-(Time_indices(1)))*f_int),1);
+                    Ydata(k,ind_first:ind_first+length(y_resamp)-1)=y_resamp';
+                end
+            case 4
+                for k=1:length(ind)
+                    X = lines(k).UserData.X;
+                    Y = lines(k).UserData.Y;
+                    % Keeping indices from 1s before start to 1s after end
+                    ind_keep = ((X-(Time_indices(1)-.001)).*(X-(Time_indices(2)+.001)))<0;
+                    %x = X(ind_keep);
+                    y = Y(ind_keep);
+                    f_samp = length(lines(k).UserData.X)/(lines(k).UserData.X(end));
+                    % Resampling
+                    y_resamp = resample(y,round(1000*f_int),round(1000*f_samp));
+                    y_resamp = y_resamp(1:min(length(ref_time),end))';
+                    Ydata(k,1:length(y_resamp))=y_resamp;
+                end
         end
+        
         % Normalization
         M = repmat(mean(Ydata,2,'omitnan'),[1,length(ref_time)]);
         s = repmat(std(Ydata,[],2,'omitnan'),[1,length(ref_time)]);
         Ydata_norm = (Ydata-M)./s;
         % Saving data
-        data = struct('ref_time',[],'Ydata',[],'Ydata_norm',[],'labels',[],'Title',[]);
+        data = struct('Title',[],'labels',[],'ref_time',[],'f_samp',[],'Ydata',[],'Ydata_norm',[]);
         data.Title = char(Tag_Selection(1,1));
         data.labels = Selection(:,1);
         data.ref_time = ref_time;
+        data.f_samp = f_samp;
         data.Ydata = Ydata;
         data.Ydata_norm = Ydata_norm;
     end
-        
+    
     % Storing data
     switch i
         case 1,
@@ -718,7 +777,7 @@ for i=1:4
                 'Tag','Image',...
                 'Parent',ax);
         end
-        %ax.XLim = [Data.ref_time(1),Data.ref_time(end)];
+        ax.XLim = [Data.ref_time(1),Data.ref_time(end)];
         ax.YLim = [.5,size(Data.Ydata,1)+.5];
         ax.YTickLabel = Data.labels;
         ax.YTick = 1:length(Data.labels);
@@ -741,14 +800,6 @@ for i=1:4
             cbar.Limits = [c_min,c_max];
         end
         
-        % Plotting bars between burst
-        x_bars = length_burst*(1:n_burst)+.5;
-        for jj=1:length(x_bars)
-            line('XData',[x_bars(jj),x_bars(jj)],'YData',...
-                ax.YLim,'Parent',ax,'Color',bar_color,...
-                'LineWidth',2,'Tag','SepBar');
-        end
-        boxbar_Callback(handles.BoxBars,[],handles);
     else
         ax.Visible = 'off';
         cbar.Visible = 'off';
@@ -760,8 +811,7 @@ end
 % Titles and Axes
 ax_visible = flipud(findobj(handles.MainTab,'Type','axes','-and','Visible','on'));
 for i=2:length(ax_visible)
-    ax_visible(i-1).XTick = x_bars;
-    ax_visible(i-1).XTickLabel = '|';
+    ax_visible(i-1).XTickLabel = '';
     ax_visible(i).Title.String = '';
 end
 
@@ -785,7 +835,7 @@ labels = [];
 Ydata = [];
 Ydata_norm = [];
 t = [];
-%f_samp = [];
+f_samp = [];
 ref_time = [];
 for i=1:4
     Data = all_Data{i};
@@ -794,18 +844,18 @@ for i=1:4
         Ydata = [Ydata;Data.Ydata];
         Ydata_norm = [Ydata_norm;Data.Ydata_norm];
         t = Data.Title;
-        %f_samp = Data.f_samp;
+        f_samp = [f_samp;Data.f_samp];
         ref_time = Data.ref_time;
     end
 end
-%save_data = struct('Title',[],'labels',[],'ref_time',[],'f_samp',[],'Ydata',[],'Ydata_norm',[]);
-save_data = struct('Title',[],'labels',[],'ref_time',[],'Ydata',[],'Ydata_norm',[]);
+save_data = struct('Title',[],'labels',[],'ref_time',[],'f_samp',[],'Ydata',[],'Ydata_norm',[]);
 save_data.Title = t;
 save_data.labels = labels;
 save_data.ref_time = ref_time;
-%save_data.f_samp = f_samp;
+save_data.f_samp = f_samp;
 save_data.Ydata = Ydata;
 save_data.Ydata_norm = Ydata_norm;
+
 end
 
 function saveimage_Callback(~,~,handles)
@@ -814,14 +864,14 @@ global FILES CUR_FILE DIR_FIG;
 load('Preferences.mat','GTraces');
 
 % Creating Save Directory
-save_dir = fullfile(DIR_FIG,'Global_Display',FILES(CUR_FILE).eeg);
+save_dir = fullfile(DIR_FIG,'Global_Display',FILES(CUR_FILE).nlab);
 if ~isdir(save_dir)
     mkdir(save_dir);
 end
 tag = handles.ButtonCompute.UserData.save_data.Title;
 
 % Saving Image
-pic_name = sprintf('%s_Global_Display_%s%s',FILES(CUR_FILE).eeg,tag,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Global_Display_%s%s',FILES(CUR_FILE).nlab,tag,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
@@ -833,7 +883,7 @@ global FILES CUR_FILE DIR_STATS;
 load('Preferences.mat','GTraces');
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'Global_Display',FILES(CUR_FILE).eeg);
+data_dir = fullfile(DIR_STATS,'Global_Display',FILES(CUR_FILE).nlab);
 if ~isdir(data_dir)
     mkdir(data_dir);
 end
@@ -845,61 +895,62 @@ labels = data.labels;
 ref_time = data.ref_time;
 x_start = ref_time(1);
 x_end = ref_time(end);
-%f_samp = data.f_samp;
+f_samp = data.f_samp;
 f_int = data.f_int;
 Ydata = data.Ydata;
 Ydata_norm =  data.Ydata_norm;
 
 % Saving Stats
-filename = sprintf('%s_Global_Display_%s.mat',FILES(CUR_FILE).eeg,Title);
-%save(fullfile(data_dir,filename),'Title','labels','ref_time','f_samp','f_int','Ydata','Ydata_norm','-v7.3');
-save(fullfile(data_dir,filename),'Title','labels','x_start','x_end','ref_time','f_int','Ydata','Ydata_norm','-v7.3');
+filename = sprintf('%s_Global_Display_%s.mat',FILES(CUR_FILE).nlab,Title);
+save(fullfile(data_dir,filename),'Title','labels','x_start','x_end','ref_time','f_samp','f_int','Ydata','Ydata_norm','-v7.3');
 fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
 
 end
 
-function batchsave_Callback(~,~,handles,old_handles,str_group,v)
+function batchsave_Callback(~,~,handles,str_tag,v)
 
 global DIR_SAVE FILES CUR_FILE;
 
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');        
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_strings','TimeTags_images');
+else
+    errordlg(sprintf('Please edit Time_Groups.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
+    return;
 end
 
-if nargin == 4
+if nargin == 3
     % If Manual Callback open inputdlg
-    [ind_group,v] = listdlg('Name','Group Selection','PromptString','Select Time Groups',...
-        'SelectionMode','multiple','ListString',TimeGroups_name,...
+    str_tag = arrayfun(@(i) strjoin(TimeTags_cell(i,2:4),' - '), 2:size(TimeTags_cell,1), 'unif', 0)';
+    [ind_tag,v] = listdlg('Name','Group Selection','PromptString','Select Time Groups',...
+        'SelectionMode','multiple','ListString',str_tag,...
         'InitialValue','','ListSize',[300 500]);
+   if isempty(ind_tag)||v==0
+       return
+   end
 else
-    % If batch mode, keep only elements in str_group
-    ind_group = [];
-    temp = TimeGroups_name;
+    % If batch mode, keep only elements in str_tag    
+    ind_tag = [];
+    temp = TimeTags_cell(2:end,2);
     for i=1:length(temp)
-        ind_keep = ~(cellfun('isempty',strfind(str_group,temp(i))));
+        ind_keep = ~(cellfun('isempty',strfind(str_tag,temp(i))));
         if sum(ind_keep)>0
-            ind_group=[ind_group,i];
+            ind_tag=[ind_tag,i];
         end
     end  
-end
-
-if isempty(ind_group)||v==0
-    return
 end
 
 % Compute for whole recording
 edits = [handles.Edit1,handles.Edit2];
 all_axes = findobj(handles.MainPanel,'type','axes');
-buttonRescale_Callback(handles.RescaleButton,[],all_axes,edits,old_handles);
+buttonRescale_Callback(handles.RescaleButton,[],all_axes,edits);
 compute_Callback(handles.ButtonCompute,[],handles);
 buttonAutoScale_Callback([],[],handles);
 savestats_Callback([],[],handles);
 saveimage_Callback([],[],handles);
 
 % Compute for designated time tags
-for i = 1:length(ind_group)%size(TimeGroups_strings,1)
-    ind_tag = TimeGroups_S(ind_group(i)).Selected;
-    button_TagSelection_Callback(handles.TagButton,[],all_axes,edits,old_handles,ind_tag,v)
+for i = 1:length(ind_tag)%size(TimeTags_strings,1) 
+    button_TagSelection_Callback(handles.TagButton,[],all_axes,edits,ind_tag(i),v)
     %resetbutton_Callback([],[],handles);
     compute_Callback(handles.ButtonCompute,[],handles);
     buttonAutoScale_Callback([],[],handles);

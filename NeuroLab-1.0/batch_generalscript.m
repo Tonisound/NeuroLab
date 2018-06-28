@@ -495,12 +495,7 @@ for i = 1:length(ind_files)
                     success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                     
                 case '(Figure) Global Episode Display'
-                    switch n_burst
-                        case 1
-                            f2=figure_GlobalDisplay_REM(myhandles,0,str_tag);
-                        otherwise
-                            f2=figure_GlobalDisplay_RUN(myhandles,0,str_group);
-                    end
+                    f2=figure_GlobalDisplay(myhandles,0,str_tag);
                     
                 case '(Figure) Correlation Analysis'
                     f2=figure_Correlation_Analysis(myhandles,0,str_group);
