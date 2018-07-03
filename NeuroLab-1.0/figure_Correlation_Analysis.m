@@ -2,18 +2,17 @@ function f2 = figure_Correlation_Analysis(myhandles,val,str_group)
 
 global DIR_SAVE CUR_IM START_IM END_IM FILES CUR_FILE;
 
-try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref');
-catch
-    errordlg(sprintf('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat')));
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
+else
+    errordlg(sprintf('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat')));
     return;
-    %time_ref.Y = 1:LAST_IM;
 end
-try
-    %load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell');
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images','TimeTags_strings');
-catch
-    errordlg(sprintf('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat')));
+
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images','TimeTags_strings');
+else
+    errordlg(sprintf('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat')));
     return;
 end
 
@@ -41,7 +40,7 @@ t1 = uicontrol('Units','normalized',...
     'Style','text',...
     'HorizontalAlignment',...
     'left','Parent',iP,...
-    'String',sprintf('File : %s',FILES(CUR_FILE).gfus),...
+    'String',sprintf('File : %s',FILES(CUR_FILE).nlab),...
     'Tag','Text1');
 t2 = uicontrol('Units','normalized',...
     'Style','text',...
@@ -55,12 +54,14 @@ t3 = uicontrol('Units','normalized',...
     'Parent',iP,...
     'String',sprintf('START_IM = %d (%s)',START_IM,myhandles.TimeDisplay.UserData(START_IM,:)),...
     'Tag','Text3');
+t3.UserData = myhandles.TimeDisplay.UserData(START_IM,:);
 t4 = uicontrol('Units','normalized',...
     'Style','text',...
     'HorizontalAlignment','left',...
     'Parent',iP,...
     'String',sprintf('END_IM = %d (%s)',END_IM,myhandles.TimeDisplay.UserData(END_IM,:)),...
     'Tag','Text4');
+t4.UserData = myhandles.TimeDisplay.UserData(END_IM,:);
 
 p1 = uicontrol('Units','normalized',...
     'Style','popupmenu',...
@@ -295,7 +296,7 @@ e1 = uicontrol('Units','normalized',...
     'Tag','Cmin_2',...
     'Callback', {@update_caxis,ax2,c2,1},...
     'Tooltipstring','CMin 2');
-e2 =uicontrol('Units','normalized',...
+e2 = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',aP1,...
@@ -400,12 +401,22 @@ e2.Position = [19/20     .9      w_button   2*w_button];
 m = findobj(myhandles.RightAxes,'Tag','Trace_Mean');
 l = flipud(findobj(myhandles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
 t = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
+
 lines_1 = [m;l];
 lines_2 = t;
+
+% Adding NaN values 
+for i = 1:length(lines_2)
+    lines_2(i).XData = [lines_2(i).XData,NaN];
+    lines_2(i).YData = [lines_2(i).YData,NaN];
+end
+
 lines = [lines_1;lines_2];
 bc.UserData.lines_1 = lines_1;
 bc.UserData.lines_2 = lines_2;
 p1.UserData.lines = lines;
+
+
 
 %Regions Panel
 rPanel = uipanel('Parent',tab4,...
@@ -484,11 +495,12 @@ t = uitable('Units','normalized',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
     'Parent',taPanel);
-%t.UserData.Selection = [];
-t.UserData.Selection = (myhandles.TagButton.UserData.Selected)';
+%Default Time tags Selection
+% t.UserData.Selection = (myhandles.TagButton.UserData.Selected)';
+t.UserData.Selection = [];
 t.UserData.TimeTags_images = TimeTags_images;
 t.UserData.TimeTags_strings = TimeTags_strings;
-%t.UserData.TimeTags = TimeTags;
+
 
 %Episode Panel
 ePanel = uipanel('FontSize',10,...
@@ -588,9 +600,9 @@ end
 function update_caxis(hObj,~,ax,c,value)
 for i=1:length(ax)
     switch value
-        case 1,
+        case 1
             ax(i).CLim(1) = str2double(hObj.String);
-        case 2,
+        case 2
             ax(i).CLim(2) = str2double(hObj.String);
     end
 end
@@ -616,14 +628,14 @@ function edit_Callback(hObj,~,handles)
 val = hObj.String;
 
 switch hObj.Tag
-    case 'Edit1',
+    case 'Edit1'
         if isempty(str2num(val)) || round(str2num(val))>=0
             hObj.String = hObj.UserData.Previous;
         else
             hObj.String = round(str2num(val));
             hObj.UserData.Previous = hObj.String;
         end
-    case 'Edit2',
+    case 'Edit2'
         if isempty(str2num(val)) || round(str2num(val))<=0
            hObj.String = hObj.UserData.Previous;
         else
@@ -672,7 +684,7 @@ function compute_Callback(hObj,~,handles)
 % Compute Correlogram
 
 global START_IM END_IM IM DIR_SAVE FILES CUR_FILE;
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch')
@@ -706,7 +718,7 @@ fwrite(fid_info,sprintf('Stats type : %s \n',handles.Popup3.String(handles.Popup
 % Adapting slider
 % Getting Lags
 if handles.Checkbox2.Value
-    adapt_slider_batch(n_burst,h_ref.Tag,handles);
+    adapt_slider_batch(h_ref.Tag,handles);
 end
 lags = handles.Slider.Min:handles.Slider.Max;
 fwrite(fid_info,sprintf('Lags : %s \n',mat2str(lags)));
@@ -726,8 +738,11 @@ end
 
 % Selecting Time indices
 if isempty(handles.Tag_table.UserData.Selection)
-    errordlg('Please Select Time Tags.');
-    return;
+    % errordlg('Please Select Time Tags.');
+    % return;
+    TimeTags = [{'CURRENT'},{handles.Text3.UserData},{handles.Text4.UserData}];
+    TimeTags_strings = [{handles.Text3.UserData},{handles.Text4.UserData}];
+    TimeTags_images = [START_IM, END_IM];
 else
     ind_tags = handles.Tag_table.UserData.Selection;
     TimeTags = handles.Tag_table.Data(ind_tags,:);
@@ -959,14 +974,7 @@ end
 
 function reset_Callback(~,~,handles)
 
-global START_IM END_IM DIR_SAVE FILES CUR_FILE;
-
-try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'n_burst');
-catch
-    warning('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'));
-    n_burst =1;
-end
+global START_IM END_IM;
 
 % Update Text
 handles.Text3.String = sprintf('START_IM = %d (%s)',START_IM,handles.TimeDisplay.UserData(START_IM,:));
@@ -974,14 +982,8 @@ handles.Text4.String = sprintf('END_IM = %d (%s)',END_IM,handles.TimeDisplay.Use
 handles.Text9.String = 'Lag (s) : 0';
 
 %Adapting Slider
-switch n_burst
-    case 1,
-        handles.Edit1.String = -5;
-        handles.Edit2.String = 15;
-    otherwise
-        handles.Edit1.String = -5;
-        handles.Edit2.String = 25;
-end
+handles.Edit1.String = -15;
+handles.Edit2.String = 15;
 
 handles.Edit1.UserData.Previous = handles.Edit1.String;
 handles.Edit2.UserData.Previous = handles.Edit2.String;
@@ -989,7 +991,6 @@ handles.Slider.Min = str2double(handles.Edit1.String);
 handles.Slider.Max = str2double(handles.Edit2.String);
 handles.Slider.Value = 0;
 handles.Slider.SliderStep = [1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
-%adapt_slider_batch(n_burst,'Trace_mean',handles);
 
 % Change Image by updating slider
 slider_Callback(handles.Slider,[],handles);
@@ -1001,7 +1002,7 @@ function savestats_Callback(~,~,handles)
 global DIR_SAVE FILES CUR_FILE DIR_STATS;
 load('Preferences.mat','GTraces');
 
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'n_burst');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'n_burst');
 if ~isempty(handles.ButtonBatch.UserData)
     folder_name = handles.ButtonBatch.UserData.folder_name;
 %elseif ~isempty(handles.TagMenu_TimeGroupSelection.UserData)
@@ -1019,7 +1020,7 @@ else
 end
 
 % Creating Stats Directory
-stats_dir = fullfile(DIR_STATS,'fUS_Correlation',FILES(CUR_FILE).eeg);
+stats_dir = fullfile(DIR_STATS,'fUS_Correlation',FILES(CUR_FILE).nlab);
 if ~isdir(stats_dir)
     mkdir(stats_dir);
 end
@@ -1083,8 +1084,23 @@ function saveimage_Callback(~,~,handles)
 global DIR_SAVE FILES CUR_FILE DIR_FIG;
 load('Preferences.mat','GTraces');
 
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'n_burst');
-folder_name = handles.ButtonBatch.UserData.folder_name;
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'n_burst');
+
+if ~isempty(handles.ButtonBatch.UserData)
+    folder_name = handles.ButtonBatch.UserData.folder_name;
+%elseif ~isempty(handles.TagMenu_TimeGroupSelection.UserData)
+%    folder_name = handles.TagMenu_TimeGroupSelection.UserData.Name;
+else
+    prompt={'Saving Directory (Recording Group)'};
+    name = 'Name';
+    defaultans = {'CURRENT'};
+    answer = inputdlg(prompt,name,[1 40],defaultans);
+    if ~isempty(answer)
+        folder_name= char(answer);
+    else
+        return;
+    end
+end
 
 handles.TabGroup.SelectedTab = handles.MainTab;
 val = handles.Slider.Value;
@@ -1092,8 +1108,8 @@ lags = handles.Slider.Min:handles.Slider.Max;
 
 % Saving Video frame
 ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name(1:min(end,20))),'/','-');
-save_dir= fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).eeg,strcat(ref_name,'-',handles.Text2.String),folder_name);
-work_dir = fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).eeg,strcat(ref_name,'-',handles.Text2.String),folder_name,'Frames');
+save_dir= fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,strcat(ref_name,'-',handles.Text2.String),folder_name);
+work_dir = fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,strcat(ref_name,'-',handles.Text2.String),folder_name,'Frames');
 
 
 % Removing old folder
@@ -1110,7 +1126,7 @@ for t = 1:length(lags)
     pic_name = strcat(sprintf('fUSCorrelation_%s_%03d',ref_name,t),GTraces.ImageSaveExtension);
     saveas(handles.MainFigure,fullfile(work_dir,pic_name),GTraces.ImageSaveFormat);
 end
-video_name = strcat(FILES(CUR_FILE).eeg,'-',strcat(ref_name,'-',handles.Text2.String));
+video_name = strcat(FILES(CUR_FILE).nlab,'-',strcat(ref_name,'-',handles.Text2.String));
 save_video(work_dir,save_dir,video_name);
 
 % Saving Tabs
@@ -1139,29 +1155,16 @@ copyfile('_info.txt',save_dir);
 
 end
 
-function adapt_slider_batch(n_burst,tag,handles)
+function adapt_slider_batch(tag,handles)
 
 % Slider step Update
 switch tag
     case {'Trace_Mean';'Trace_Region';'Trace_Box';'Trace_Pixel'}
-        switch n_burst
-            case 1,
-                handles.Edit1.String = -10;
-                handles.Edit2.String = 10;
-            otherwise
-                handles.Edit1.String = -15;
-                handles.Edit2.String = 15;
-        end
+        handles.Edit1.String = -10;
+        handles.Edit2.String = 10;
     case {'Trace_Cerep'}
-        switch n_burst
-            
-            case 1,
-                handles.Edit1.String = -5;
-                handles.Edit2.String = 15;
-            otherwise
-                handles.Edit1.String = -5;
-                handles.Edit2.String = 25;
-        end
+        handles.Edit1.String = -5;
+        handles.Edit2.String = 15;
 end
 
 
@@ -1179,10 +1182,10 @@ function batch_Correlation_Callback(hObj,~,handles,str_group,v)
 
 global DIR_SAVE FILES CUR_FILE;
 
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
 else
-    errordlg(sprintf('Please edit Time_Groups.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Please edit Time_Groups.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 
