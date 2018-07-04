@@ -1,7 +1,7 @@
 function success = load_regions(folder_name,handles)
 
 %global FILES CUR_FILE DIR_SAVE IM LAST_IM CUR_IM;
-%folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).gfus);
+%folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
 
 global IM LAST_IM CUR_IM SEED_REGION;
 success = false;

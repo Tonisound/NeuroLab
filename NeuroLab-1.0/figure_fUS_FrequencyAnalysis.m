@@ -4,10 +4,10 @@
 global DIR_SAVE FILES CUR_FILE START_IM END_IM LAST_IM;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell');
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat or Time_Reference.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat or Time_Reference.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 
@@ -32,7 +32,7 @@ iP = uipanel('FontSize',12,...
     'Parent',f2);
 
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
-    'String',sprintf('File : %s',FILES(CUR_FILE).gfus),'Tag','Text1');
+    'String',sprintf('File : %s',FILES(CUR_FILE).nlab),'Tag','Text1');
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
     'String',sprintf('Source : %s',handles.CenterPanelPopup.String(handles.CenterPanelPopup.Value,:)),...
     'Tag','Text2');
@@ -290,14 +290,14 @@ ft.UserData.Selection = [];
 
 % Loading Time Reference
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
     tfp.UserData.time_ref = time_ref;
     tfp.UserData.n_burst = n_burst;
     tfp.UserData.length_burst = length_burst;
     tsp.UserData = tfp.UserData;
     ttp.UserData = tfp.UserData;
 catch
-    fprintf('(Warning) Missing Reference Time File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus));
+    fprintf('(Warning) Missing Reference Time File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     tfp.UserData.time_ref = [];
     tfp.UserData.n_burst = 1;
     tfp.UserData.length_burst = LAST_IM;
@@ -306,7 +306,7 @@ catch
 end
 
 resetbutton_Callback([],[],guihandles(f2),handles);
-set(f2,'Position',[30 30 200 60]);
+set(f2,'Position',[30 10 200 60]);
 tabgp.SelectedTab = tab0;
 
 end
@@ -592,7 +592,7 @@ end
 function compute_Callback(hObj,~,handles)
 
 global DIR_SAVE FILES CUR_FILE;
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch');
@@ -627,7 +627,8 @@ if ~isempty(handles.Region_table.UserData.Selection)
     
     Ydata = NaN(length(ind_regions),length(ref_time));
     for k=1:length(ind_regions)
-        Y = (lines(k).YData(~isnan(lines(k).YData)))';
+        %Y = (lines(k).YData(~isnan(lines(k).YData)))';
+        Y = (lines(k).YData(1:end-1))';
         y = Y(ind_keep);
         Ydata(k,:)=y';
     end
@@ -1066,9 +1067,9 @@ function button_TagSelection_Callback(hObj,~,ax,edits)
 global DIR_SAVE FILES CUR_FILE;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell');
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 

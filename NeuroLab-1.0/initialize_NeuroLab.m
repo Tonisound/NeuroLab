@@ -132,9 +132,9 @@ uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
 uimenu(m1b,'Label','Import LFP Configuration','Tag','ImportMenu_ImportConfig');
 uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
 uimenu(m1b,'Label','Import Regions','Tag','ImportMenu_Regions');
-%uimenu(m1b,'Label','Load Doppler film','Tag','ImportMenu_ReloadDoppler');
-%uimenu(m1b,'Label','Load Graphics','Tag','ImportMenu_ReloadGraphic');
-uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces','Separator','on');
+uimenu(m1b,'Label','Reload Doppler film','Tag','ImportMenu_ReloadDoppler','Separator','on');
+uimenu(m1b,'Label','Reload Graphics','Tag','ImportMenu_ReloadGraphic');
+uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces');
 uimenu(m1b,'Label','Load Regions','Tag','ImportMenu_LoadRegions');
 
 % handles.EditMenu
@@ -578,8 +578,8 @@ set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhan
 set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
 set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
-%set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
-%set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
+set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LoadRegions,'Callback','load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');

@@ -5,9 +5,9 @@ function template_button_TagSelection_Callback(hObj,~,ax,edits,selection_type,in
 global DIR_SAVE FILES CUR_FILE;
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell','TimeTags_strings','TimeTags_images');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_strings','TimeTags_images');
 catch
-    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus)));
+    errordlg(sprintf('Missing File Time_Tags.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
     return;
 end
 
@@ -47,8 +47,8 @@ else
     
     % Adding TimeGroup Name
     name_Tag = '';
-    if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'file')
-        load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
+    if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
+        load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
         % Test if ind_tags matches TimeGroups_S(i).Selected
         for i =1:length(TimeGroups_name)
             if length(TimeGroups_S(i).Selected)== length(ind_tag) && sum(TimeGroups_S(i).Selected-ind_tag(:))==0
