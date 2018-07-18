@@ -95,7 +95,6 @@ cancelButton.Position = [.825 .05 .15 .05];
 
 
 handles2 = guihandles(f);
-set(newButton,'Callback',{@newButton_callback,handles2});
 set(drawButton,'Callback',{@drawButton_callback,handles2});
 set(applyButton,'Callback',{@applyButton_callback,handles2});
 set(removeButton,'Callback',{@removeButton_callback,handles2});
@@ -131,17 +130,16 @@ table_region.UserData.patches = patches;
 end
 
 
-function newButton_callback(~,~,handles)
+function newButton_callback(hObj,~,handles)
 
-answer = inputdlg('Enter Region Name','Region creation',[1 60]);
+answer = inputdlg('Enter Region Name','Region creation',[1 50]);
 while contains(char(answer),handles.Region_table.Data)
-    answer = inputdlg('Enter Region Name','Invalid name (Region already exists)',[1 60]);
+    answer = inputdlg('Enter Region Name','Invalid name (Region already exists)',[1 50]);
 end
 
-if ~isempty(answer)
-    return
+if isempty(answer)
+    return;
 end
-
 
 %creation
 delete(handles.Region_table.UserData.patches(selection));

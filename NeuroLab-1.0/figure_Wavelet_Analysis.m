@@ -43,8 +43,12 @@ else
 end
 
 %Return if LFP channels are missing
-if sum(ind_1)==0 || sum(ind_2)==0
-    warning('Missing LFP channels. Reload configuration.');
+if sum(ind_1)==0
+    errordlg('Missing LFP channels. Reload configuration.');
+    return;
+end
+if sum(ind_2)==0
+    errordlg('Missing LFP-theta channels. Reload configuration.');
     return;
 end
 traces_name = temp(ind_1);

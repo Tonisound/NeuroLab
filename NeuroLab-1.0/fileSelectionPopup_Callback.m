@@ -26,7 +26,15 @@ CUR_FILE = hObj.Value;
 if ~strcmp(old,new)
     % Saving Previous File if FILES not empty
     if ~(strcmp(old,'') || strcmp(old,'<0>'))
+        % saving graphics
         save_graphicdata(fullfile(DIR_SAVE,old_fus),handles);
+        
+        % deleting cereplex traces
+        if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'),'file')
+            fprintf('Deleting Cereplex_Traces.mat ...');
+            delete(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'));
+            fprintf(' done.\n');
+        end
     end
     
     % Saving Previous File if FILES not empty
@@ -77,8 +85,7 @@ if ~strcmp(old,new)
         menuEdit_DeleteAll_Callback([],[],handles);
         delete(handles.VideoAxes.UserData.Image);
         delete(handles.VideoAxes.UserData.VideoReader);
-        handles.VideoAxes.UserData = [];
-        
+        handles.VideoAxes.UserData = [];        
     end
 else
     if ~isempty(FILES) && exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')

@@ -10,7 +10,7 @@ switch val
     case 2
         l = findobj(handles.RightAxes,'Tag','Trace_Region');
         for i = 1:length(l)
-            delete(l(i).UserData);
+            delete(l(i).UserData.Graphic);
             delete(l(i));
         end
     case 3
@@ -19,4 +19,5 @@ switch val
             delete(l(i));
         end
 end
+
 end

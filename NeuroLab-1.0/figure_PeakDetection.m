@@ -3,17 +3,17 @@ function f2 = figure_PeakDetection(myhandles,val,str_tag)
 global DIR_SAVE FILES CUR_FILE START_IM END_IM;
 
 % Loading Time Reference
-if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'file'))
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file'))
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
 else
-    warning('Missing Reference Time File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus));
+    warning('Missing Reference Time File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     return;
 end
 % Loading Time Tags
-if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'file'))
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags','TimeTags_strings','TimeTags_cell');
+if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file'))
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_strings','TimeTags_cell');
 else
-    warning('Missing Time Tags File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).gfus));
+    warning('Missing Time Tags File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
 end
 
 f2 = figure('Units','normalized',...
@@ -71,7 +71,7 @@ t1 = uicontrol('Units','normalized',...
     'Style','text',...
     'HorizontalAlignment','left',...
     'Parent',iP,...
-    'String',sprintf('File : %s\n (Source : %s) ',FILES(CUR_FILE).gfus,strtrim(myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:))),...
+    'String',sprintf('File : %s\n (Source : %s) ',FILES(CUR_FILE).nlab,strtrim(myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:))),...
     'Tag','Text1');
 
 p = uicontrol('Units','normalized',...
@@ -80,7 +80,7 @@ p = uicontrol('Units','normalized',...
     'ToolTipString','Channel Selection',...
     'Tag','Popup1');
 p.UserData.index=1;
-str = load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Trace_LFP.mat'),'traces');
+str = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Trace_LFP.mat'),'traces');
 str = str.traces(~cellfun('isempty',strfind(str.traces(:,1),'LFP'))==1,1);
 str = regexprep(str,'LFP/','');
 str = regexprep(str,'LFP-theta/','');
@@ -491,6 +491,7 @@ function update_popup_Callback(pu,~,handles)
 
 % Extracting EEG curves
 traces = handles.MainFigure.UserData.traces;
+time_ref = handles.MainFigure.UserData.time_ref;
 ax = handles.Ax1;
 channel = char(pu.String(pu.Value,:));
 str_traces = [];
@@ -502,28 +503,75 @@ for i =1 : length(traces)
     end
 end
 
+% patterns
+pattern_glow = 'Gamma-low/';
+pattern_gmid = 'Gamma-mid/';
+pattern_gmidup = 'Gamma-mid-up/';
+pattern_ghigh = 'Gamma-high/';
+pattern_ghighup = 'Gamma-high-up/';
+pattern_ripple = 'Ripple/';
+pattern_phasictheta = 'Phasic-theta/';
+
+
 traces = traces(ind_keep==1);
-ind_glow = ~(cellfun('isempty',strfind(str_traces,'Gamma-low/')));
-ind_gmid = ~(cellfun('isempty',strfind(str_traces,'Gamma-mid/')));
-ind_gmidup = ~(cellfun('isempty',strfind(str_traces,'Gamma-mid-up')));
-ind_ghigh = ~(cellfun('isempty',strfind(str_traces,'Gamma-high/')));
-ind_ghighup = ~(cellfun('isempty',strfind(str_traces,'Gamma-high-up/')));
-ind_ripple = ~(cellfun('isempty',strfind(str_traces,'Ripple/')));
-ind_theta = ~(cellfun('isempty',strfind(str_traces,'Phasic-theta/')));
-x_glow = traces(ind_glow).UserData.X(:);
-y_glow = traces(ind_glow).UserData.Y(:);
-x_gmid = traces(ind_gmid).UserData.X(:);
-y_gmid = traces(ind_gmid).UserData.Y(:);
-x_gmidup = traces(ind_gmidup).UserData.X(:);
-y_gmidup = traces(ind_gmidup).UserData.Y(:);
-x_ghigh = traces(ind_ghigh).UserData.X(:);
-y_ghigh = traces(ind_ghigh).UserData.Y(:);
-x_ghighup = traces(ind_ghighup).UserData.X(:);
-y_ghighup = traces(ind_ghighup).UserData.Y(:);
-x_ripple = traces(ind_ripple).UserData.X(:);
-y_ripple = traces(ind_ripple).UserData.Y(:);
-x_theta = traces(ind_theta).UserData.X(:);
-y_theta = traces(ind_theta).UserData.Y(:);
+ind_glow = ~(cellfun('isempty',strfind(str_traces,pattern_glow)));
+ind_gmid = ~(cellfun('isempty',strfind(str_traces,pattern_gmid)));
+ind_gmidup = ~(cellfun('isempty',strfind(str_traces,pattern_gmidup)));
+ind_ghigh = ~(cellfun('isempty',strfind(str_traces,pattern_ghigh)));
+ind_ghighup = ~(cellfun('isempty',strfind(str_traces,pattern_ghighup)));
+ind_ripple = ~(cellfun('isempty',strfind(str_traces,pattern_ripple)));
+ind_theta = ~(cellfun('isempty',strfind(str_traces,pattern_phasictheta)));
+
+if sum(ind_glow)>0
+    x_glow = traces(ind_glow).UserData.X(:);
+    y_glow = traces(ind_glow).UserData.Y(:);
+else
+    x_glow = time_ref.Y;
+    y_glow = NaN(size(time_ref.Y));
+end
+if sum(ind_gmid)>0
+    x_gmid = traces(ind_gmid).UserData.X(:);
+    y_gmid = traces(ind_gmid).UserData.Y(:);
+else
+    x_gmid = time_ref.Y;
+    y_gmid = NaN(size(time_ref.Y));
+end
+if sum(ind_gmidup)>0
+    x_gmidup = traces(ind_gmidup).UserData.X(:);
+    y_gmidup = traces(ind_gmidup).UserData.Y(:);
+else
+    x_gmidup = time_ref.Y;
+    y_gmidup = NaN(size(time_ref.Y));
+end
+if sum(ind_ghigh)>0
+    x_ghigh = traces(ind_ghigh).UserData.X(:);
+    y_ghigh = traces(ind_ghigh).UserData.Y(:);
+else
+    x_ghigh = time_ref.Y;
+    y_ghigh = NaN(size(time_ref.Y));
+end
+if sum(ind_ghighup)>0
+    x_ghighup = traces(ind_ghighup).UserData.X(:);
+    y_ghighup = traces(ind_ghighup).UserData.Y(:);
+else
+    x_ghighup = time_ref.Y;
+    y_ghighup = NaN(size(time_ref.Y));
+end
+if sum(ind_ripple)>0
+    x_ripple = traces(ind_ripple).UserData.X(:);
+    y_ripple = traces(ind_ripple).UserData.Y(:);
+else
+    x_ripple = time_ref.Y;
+    y_ripple = NaN(size(time_ref.Y));
+end
+if sum(ind_theta)>0
+    x_theta = traces(ind_theta).UserData.X(:);
+    y_theta = traces(ind_theta).UserData.Y(:);
+else
+    x_theta = time_ref.Y;
+    y_theta = NaN(size(time_ref.Y));
+end
+
 
 % Computing factors & delta
 x_start = ax.XLim(1);
