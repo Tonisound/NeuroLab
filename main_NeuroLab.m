@@ -100,7 +100,14 @@ if ~isempty(FILES)
     end
     
     % Loading Video file
-    import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);
+    % import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);
+    try
+        import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);
+        myhandles.DisplayMenu_Video.Enable = 'on';
+    catch
+        warning('Unable to import video file [%s].',fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video));
+        myhandles.DisplayMenu_Video.Enable = 'off';
+    end
 end
 
 actualize_plot(myhandles);

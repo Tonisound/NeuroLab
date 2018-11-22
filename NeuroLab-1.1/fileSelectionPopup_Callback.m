@@ -74,7 +74,13 @@ if ~strcmp(old,new)
         end
         
     % Loading Video file
-    import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+    try
+        import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+        handles.DisplayMenu_Video.Enable = 'on';
+    catch
+        warning('Unable to import video file [%s].',fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video));
+        handles.DisplayMenu_Video.Enable = 'off';
+    end
         
     else
         IM = zeros(88,169,2);

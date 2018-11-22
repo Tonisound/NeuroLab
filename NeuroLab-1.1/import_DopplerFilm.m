@@ -11,17 +11,16 @@ tag = [];
 if ~isempty(F.acq)
     file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
     % file_mat = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,regexprep(F.acq,'.acq','.mat'));
-    % rename .acq in .mat
-    % movefile(file_acq,file_mat);
-    % data = load(file_mat,'-mat');
-    % rename .mat in .acq
-    % movefile(file_mat,file_acq);
+
+    % case file_acq ends .acq (Verasonics)
     fprintf('Loading Doppler_film...');
     data = load(file_acq,'-mat');
     fprintf(' done.\n');
     Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
-
     
+    % case file_acq ends .mat (Aixplorer)
+    % Here implement Doppler_film loading when file_acq is .mat
+
     % Checking Doppler
     if flag == 1
         d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh');
@@ -41,6 +40,7 @@ if ~isempty(F.acq)
     handles.RightAxes.UserData.ind_remove = ind_remove;
     fprintf(' done.\n');
 else
+    
     warning('File .acq not found %s.\n',F.acq)
     Doppler_film = NaN(0,0,2);
 end
