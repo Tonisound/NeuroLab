@@ -30,7 +30,7 @@ if ~strcmp(old,new)
         save_graphicdata(fullfile(DIR_SAVE,old_fus),handles);
         
         % deleting cereplex traces
-        if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'),'file')
+        if ~isempty(FILES) && exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'),'file')
             fprintf('Deleting Cereplex_Traces.mat ...');
             delete(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'));
             fprintf(' done.\n');
