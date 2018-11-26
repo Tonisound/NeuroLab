@@ -6,8 +6,10 @@ global SEED SEED_SWL DIR_SAVE;
 global CUR_IM START_IM END_IM LAST_IM;
 
 % Initialization
-F = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},'video',{},'dir_fus',{},'acq',{},'biq',{},...
-    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},'nev',{},'ccf',{},'rcf',{},'ncf',{},'nlab',{},'type',{});
+F = struct('session',{},'recording',{},'parent',{},'fullpath',{},...
+    'info',{},'video',{},'dir_fus',{},'acq',{},'dop',{},'biq',{},...
+    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},...
+    'nev',{},'ccf',{},'rcf',{},'ncf',{},'nlab',{},'type',{});
 
 
 if flag == 1
@@ -51,12 +53,12 @@ for i = 1:length(FileList)
     FileName = char(FileList(i));
     FileName_split = regexp(FileName,'/|\','split');
     if contains(FileName_split(end),'_pre') || contains(FileName_split(end),'_per')...
-            || contains(FileName_split(end),'_post') || contains(FileName_split(end),'_nlab')
+            || contains(FileName_split(end),'_post') || contains(FileName_split(end),'_nlab') || contains(FileName_split(end),'_E')
         % Direct importation
         FileList_converted = [FileList_converted;{FileName}];
     elseif contains(FileName_split(end),'_MySession')
         % Searches recording
-        d = [dir(fullfile(FileName,'*_pre'));dir(fullfile(FileName,'*_per'));dir(fullfile(FileName,'*_post'))];
+        d = [dir(fullfile(FileName,'*_pre'));dir(fullfile(FileName,'*_per'));dir(fullfile(FileName,'*_post'));dir(fullfile(FileName,'*_E'))];
         if isempty(d)
             warning('File skipped [No recording in session] %s.\n',FileName);
         else
@@ -86,7 +88,7 @@ for i = 1:length(FileList)
         l = load(fullfile(FileName,'Config.mat'),'File');
         F(ind_file) = l.File;
         continue;
-    elseif index_session(end-1)==1 && contains(FileName_split(end),["pre","per","post"])
+    elseif index_session(end-1)==1 && contains(FileName_split(end),["pre","per","post","E"])
         session = char(FileName_split(end-1));
         % Extracting parent
         temp = regexp(FileName,session,'split');
@@ -127,6 +129,11 @@ for i = 1:length(FileList)
         if ~isempty(dd)
             acq = char(dd(1).name);
             F(ind_file).acq = acq;
+        end
+        dd = dir(fullfile(FileName,dir_fus,'Doppler.mat'));
+        if ~isempty(dd)
+            dop = char(dd(1).name);
+            F(ind_file).dop = dop;
         end
         dd = dir(fullfile(FileName,dir_fus,'*.biq'));
         if ~isempty(dd)

@@ -1,5 +1,5 @@
-function [Doppler_film,tag] = import_DopplerFilm(F,handles,flag)
-% Import Doppler movie from .acq file 
+function [Doppler_film,tag] =  import_DopplerFilm(F,handles,flag)
+% Import Doppler movie from .acq file
 % Generates Configuration file Config.mat
 % flag 0 - first import
 % flag 1 - reimport
@@ -9,41 +9,46 @@ tag = [];
 
 % create Doppler.mat
 if ~isempty(F.acq)
-    file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
-    % file_mat = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,regexprep(F.acq,'.acq','.mat'));
-
     % case file_acq ends .acq (Verasonics)
-    fprintf('Loading Doppler_film...');
+    file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
+    fprintf('Loading Doppler_film [%s] ...',F.acq);
     data = load(file_acq,'-mat');
     fprintf(' done.\n');
     Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
     
+elseif ~isempty(F.dop)
     % case file_acq ends .mat (Aixplorer)
-    % Here implement Doppler_film loading when file_acq is .mat
-
-    % Checking Doppler
-    if flag == 1
-        d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh');
-        [ind_remove,thresh,tag] = check_Doppler(Doppler_film,d.ind_remove,d.thresh);
-    else
-        [ind_remove,thresh,tag] = check_Doppler(Doppler_film);
-    end
-    
-    if isempty(ind_remove)
-        return;
-    end
-    Doppler_film(:,:,ind_remove) = NaN(size(Doppler_film,1),size(Doppler_film,2),sum(ind_remove));
-    
-    % Saving Doppler_film
-    fprintf('Saving Doppler_film ...');
-    save(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'Doppler_film','ind_remove','thresh','-v7.3');
-    handles.RightAxes.UserData.ind_remove = ind_remove;
+    file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.dop);
+    fprintf('Loading Doppler_film [%s] ...',F.dop);
+    data = load(file_acq,'Doppler_film');
+    Doppler_film = data.Doppler_film;
     fprintf(' done.\n');
-else
     
+else
+    % case file_acq ends .mat (Aixplorer)
     warning('File .acq not found %s.\n',F.acq)
     Doppler_film = NaN(0,0,2);
 end
+
+
+% Checking Doppler
+if flag == 1
+    d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh');
+    [ind_remove,thresh,tag] = check_Doppler(Doppler_film,d.ind_remove,d.thresh);
+else
+    [ind_remove,thresh,tag] = check_Doppler(Doppler_film);
+end
+if isempty(ind_remove)
+    return;
+end
+Doppler_film(:,:,ind_remove) = NaN(size(Doppler_film,1),size(Doppler_film,2),sum(ind_remove));
+
+% Saving Doppler_film
+fprintf('Saving Doppler_film ...');
+save(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'Doppler_film','ind_remove','thresh','-v7.3');
+handles.RightAxes.UserData.ind_remove = ind_remove;
+fprintf(' done.\n');
+
 
 % create and save Config.mat
 if flag ==0
@@ -99,7 +104,7 @@ end
 %     if strcmpi(button, 'Cancel')
 %         return;
 %     end
-%     
+%
 %     % Reshaping Doppler_film
 %     temp=[];
 %     Doppler_line = reshape(permute(Doppler_film,[3,1,2]),[size(Doppler_film,3) size(IM,1)*size(Doppler_film,2)]);
@@ -117,15 +122,15 @@ end
 %         temp(i)=[];
 %     end
 %     Doppler_film = Doppler_resample;
-%     
+%
 %     % Reshaping time_ref
 %     time_ref.Y = temp;
 %     time_ref.X = (1:length(temp))';
 %     time_ref.nb_images = length(time_ref.Y);
 %     length_burst = length_burst*rate-1;
-%         
+%
 % end
-% 
+%
 % % Updating global variables
 % IM = Doppler_film;
 % LAST_IM = size(IM,3);
