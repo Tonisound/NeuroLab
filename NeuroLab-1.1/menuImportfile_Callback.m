@@ -7,7 +7,7 @@ global CUR_IM START_IM END_IM LAST_IM;
 
 % Initialization
 F = struct('session',{},'recording',{},'parent',{},'fullpath',{},...
-    'info',{},'video',{},'dir_fus',{},'acq',{},'dop',{},'biq',{},...
+    'info',{},'video',{},'dir_lfp',{},'dir_fus',{},'acq',{},'dop',{},'biq',{},...
     'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},...
     'nev',{},'ccf',{},'rcf',{},'ncf',{},'nlab',{},'type',{});
 
@@ -113,7 +113,7 @@ for i = 1:length(FileList)
         F(ind_file).info = str;
     end
     % Looking for video file
-    d = dir(fullfile(FileName,'*.mpg'));
+    d = [dir(fullfile(FileName,'*.mpg'));dir(fullfile(FileName,'*.avi'))];
     if ~isempty(d)
         str = char(d(1).name);
         F(ind_file).video = str;
@@ -125,16 +125,19 @@ for i = 1:length(FileList)
         dir_fus = char(d(1).name);
         F(ind_file).dir_fus = dir_fus;
         
-        dd = dir(fullfile(FileName,dir_fus,'*.acq'));
+        dd = [dir(fullfile(FileName,dir_fus,'*.acq'));dir(fullfile(FileName,dir_fus,'Doppler.mat'))];
         if ~isempty(dd)
             acq = char(dd(1).name);
             F(ind_file).acq = acq;
+            if contains(acq,'.acq')
+                F(ind_file).dop = 'Verasonics';
+            elseif contains(acq,'.mat')
+                F(ind_file).dop = 'Aixplorer';
+            else
+                F(ind_file).dop = 'unknown';
+            end
         end
-        dd = dir(fullfile(FileName,dir_fus,'Doppler.mat'));
-        if ~isempty(dd)
-            dop = char(dd(1).name);
-            F(ind_file).dop = dop;
-        end
+        
         dd = dir(fullfile(FileName,dir_fus,'*.biq'));
         if ~isempty(dd)
             biq = char(dd(1).name);
@@ -142,52 +145,60 @@ for i = 1:length(FileList)
         end
     end
     
-    % Looking for EEG
-    d = dir(fullfile(FileName,'*.ns1'));
+    % Looking for LFP
+    d = dir(fullfile(FileName,'*_lfp'));
+    
     if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).ns1 = str;
+        dir_lfp = char(d(1).name);
+        F(ind_file).dir_lfp = dir_lfp;
+        
+        dd = dir(fullfile(FileName,dir_lfp,'*.ns1'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).ns1 = str;
+        end
+        dd = dir(fullfile(FileName,dir_lfp,'*.ns2'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).ns2 = str;
+        end
+        dd = dir(fullfile(FileName,dir_lfp,'*.ns3'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).ns3 = str;
+        end
+        dd = dir(fullfile(FileName,dir_lfp,'*.ns4'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).ns4 = str;
+        end
+        dd = dir(fullfile(FileName,dir_lfp,'*.ns5'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).ns5 = str;
+        end
+        dd = dir(fullfile(FileName,dir_lfp,'*.ns6'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).ns6 = str;
+        end
+        dd = dir(fullfile(FileName,dir_lfp,'*.nev'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).nev = str;
+        end
+        dd = dir(fullfile(FileName,dir_lfp,'*.ccf'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).ccf = str;
+        end
+        dd = dir(fullfile(FileName,dir_lfp,'*.rcf'));
+        if ~isempty(dd)
+            str = char(dd(1).name);
+            F(ind_file).rcf = str;
+        end
     end
-    d = dir(fullfile(FileName,'*.ns2'));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).ns2 = str;
-    end
-    d = dir(fullfile(FileName,'*.ns3'));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).ns3 = str;
-    end
-    d = dir(fullfile(FileName,'*.ns4'));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).ns4 = str;
-    end
-    d = dir(fullfile(FileName,'*.ns5'));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).ns5 = str;
-    end
-    d = dir(fullfile(FileName,'*.ns6'));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).ns6 = str;
-    end
-    d = dir(fullfile(FileName,'*.nev'));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).nev = str;
-    end
-    d = dir(fullfile(FileName,'*.ccf'));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).ccf = str;
-    end
-    d = dir(fullfile(FileName,'*.rcf'));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).rcf = str;
-    end
+    
     
     % File type
     if isempty(F(ind_file).acq)

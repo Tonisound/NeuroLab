@@ -16,18 +16,18 @@ end
 fprintf('Loading LFP data (%s)...',GImport.LFP_loading);
 switch GImport.LFP_loading
     case 'ns1'
-        data_ns = openNSx('read',fullfile(F.fullpath,F.ns1));
+        data_ns = openNSx('read',fullfile(F.fullpath,F.dir_lfp,F.ns1));
         %parent = F.ns1;
     case 'ns2'
-        data_ns = openNSx('read',fullfile(F.fullpath,F.ns2));
+        data_ns = openNSx('read',fullfile(F.fullpath,F.dir_lfp,F.ns2));
     case 'ns3'
-        data_ns = openNSx('read',fullfile(F.fullpath,F.ns3));
+        data_ns = openNSx('read',fullfile(F.fullpath,F.dir_lfp,F.ns3));
     case 'ns4'
-        data_ns = openNSx('read',fullfile(F.fullpath,F.ns4));
+        data_ns = openNSx('read',fullfile(F.fullpath,F.dir_lfp,F.ns4));
     case 'ns5'
-        data_ns = openNSx('read',fullfile(F.fullpath,F.ns5));
+        data_ns = openNSx('read',fullfile(F.fullpath,F.dir_lfp,F.ns5));
     case 'ns6'
-        data_ns = openNSx('read',fullfile(F.fullpath,F.ns6));
+        data_ns = openNSx('read',fullfile(F.fullpath,F.dir_lfp,F.ns6));
     otherwise
         data_ns = openNSx('read');
 end

@@ -12,11 +12,11 @@ dir_save = fullfile(DIR_SAVE,F.nlab);
 if ~exist(fullfile(F.fullpath,F.dir_fus,'trigger.txt'), 'file')
     
     % Trigger Importation
-    if exist(fullfile(F.fullpath,F.nev), 'file')
+    if exist(fullfile(F.fullpath,F.dir_lfp,F.nev), 'file')
         % Trigger extraction from NEV file
         [trigger,reference,padding] = extract_trigger_nev(F,Doppler_film);
         
-    elseif exist(fullfile(F.fullpath,F.ns5), 'file')
+    elseif exist(fullfile(F.fullpath,F.dir_lfp,F.ns5), 'file')
         % Trigger extraction from NS5 file
         [trigger,reference,padding] = extract_trigger_ns5(F,Doppler_film);
         
@@ -105,7 +105,7 @@ end
 function [trigger,reference,padding] = extract_trigger_ns5(F,Doppler_film)
 
 fprintf('Loading NS5 file...');
-data_ns5 = openNSx(fullfile(F.fullpath,F.ns5));
+data_ns5 = openNSx(fullfile(F.fullpath,F.dir_lfp,F.ns5));
 fprintf(' done.\n');
 
 f_trig = 30000;
@@ -162,7 +162,7 @@ end
 function [trigger,reference,padding] = extract_trigger_nev(F,Doppler_film)
 
 fprintf('Importing Neural-Event data...');
-data_nev = openNEV(fullfile(F.fullpath,F.nev),'nosave','nomat');
+data_nev = openNEV(fullfile(F.fullpath,F.dir_lfp,F.nev),'nosave','nomat');
 fprintf(' done.\n');
 
 % Asks User to pick trigger chanel if two or more channels detected

@@ -74,13 +74,12 @@ if ~strcmp(old,new)
         end
         
     % Loading Video file
-    try
-        import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
-        handles.DisplayMenu_Video.Enable = 'on';
-    catch
-        warning('Unable to import video file [%s].',fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video));
-        handles.DisplayMenu_Video.Enable = 'off';
-    end
+    import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+%     try
+%         import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+%     catch
+%         warning('Unable to import video file [%s].',fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video));
+%     end
         
     else
         IM = zeros(88,169,2);
@@ -89,9 +88,11 @@ if ~strcmp(old,new)
         END_IM = 2;
         CUR_IM = 1;
         menuEdit_DeleteAll_Callback([],[],handles);
-        delete(handles.VideoAxes.UserData.Image);
-        delete(handles.VideoAxes.UserData.VideoReader);
-        handles.VideoAxes.UserData = [];        
+        if ~isempty(handles.VideoAxes.UserData)
+            delete(handles.VideoAxes.UserData.Image);
+            delete(handles.VideoAxes.UserData.VideoReader);
+            handles.VideoAxes.UserData = [];
+        end
     end
 else
     if ~isempty(FILES) && exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')

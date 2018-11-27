@@ -9,19 +9,18 @@ tag = [];
 
 % create Doppler.mat
 if ~isempty(F.acq)
-    % case file_acq ends .acq (Verasonics)
     file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
-    fprintf('Loading Doppler_film [%s] ...',F.acq);
-    data = load(file_acq,'-mat');
-    fprintf(' done.\n');
-    Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
     
-elseif ~isempty(F.dop)
-    % case file_acq ends .mat (Aixplorer)
-    file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.dop);
-    fprintf('Loading Doppler_film [%s] ...',F.dop);
-    data = load(file_acq,'Doppler_film');
-    Doppler_film = data.Doppler_film;
+    fprintf('Loading Doppler_film [%s] ...',F.acq);
+    if contains(F.acq,'.acq')
+        % case file_acq ends .acq (Verasonics)
+        data = load(file_acq,'-mat');
+        Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
+    elseif contains(F.acq,'.mat')
+        % case file_acq ends .mat (Aixplorer)
+        data = load(file_acq,'Doppler_film');
+        Doppler_film = data.Doppler_film;
+    end
     fprintf(' done.\n');
     
 else
