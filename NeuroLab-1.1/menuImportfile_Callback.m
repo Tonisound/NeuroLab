@@ -152,32 +152,32 @@ for i = 1:length(FileList)
         dir_lfp = char(d(1).name);
         F(ind_file).dir_lfp = dir_lfp;
         
-        dd = dir(fullfile(FileName,dir_lfp,'*.ns1'));
+        dd = [dir(fullfile(FileName,dir_lfp,'*.ns1'));dir(fullfile(FileName,dir_lfp,'*.sk1'))];
         if ~isempty(dd)
             str = char(dd(1).name);
             F(ind_file).ns1 = str;
         end
-        dd = dir(fullfile(FileName,dir_lfp,'*.ns2'));
+        dd = [dir(fullfile(FileName,dir_lfp,'*.ns2'));dir(fullfile(FileName,dir_lfp,'*.sk2'))];
         if ~isempty(dd)
             str = char(dd(1).name);
             F(ind_file).ns2 = str;
         end
-        dd = dir(fullfile(FileName,dir_lfp,'*.ns3'));
+        dd = [dir(fullfile(FileName,dir_lfp,'*.ns3'));dir(fullfile(FileName,dir_lfp,'*.sk3'))];
         if ~isempty(dd)
             str = char(dd(1).name);
             F(ind_file).ns3 = str;
         end
-        dd = dir(fullfile(FileName,dir_lfp,'*.ns4'));
+        dd = [dir(fullfile(FileName,dir_lfp,'*.ns4'));dir(fullfile(FileName,dir_lfp,'*.sk4'))];
         if ~isempty(dd)
             str = char(dd(1).name);
             F(ind_file).ns4 = str;
         end
-        dd = dir(fullfile(FileName,dir_lfp,'*.ns5'));
+        dd = [dir(fullfile(FileName,dir_lfp,'*.ns5'));dir(fullfile(FileName,dir_lfp,'*.sk5'))];
         if ~isempty(dd)
             str = char(dd(1).name);
             F(ind_file).ns5 = str;
         end
-        dd = dir(fullfile(FileName,dir_lfp,'*.ns6'));
+        dd = [dir(fullfile(FileName,dir_lfp,'*.ns6'));dir(fullfile(FileName,dir_lfp,'*.sk6'))];
         if ~isempty(dd)
             str = char(dd(1).name);
             F(ind_file).ns6 = str;

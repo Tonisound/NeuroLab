@@ -27,8 +27,8 @@ end
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
     %sort if lfp configuration is found
     data_lfp = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'channel_type','ind_channel','channel_id');
-    %index_channels = data_lfp.ind_channel(strcmp(data_lfp.channel_type,'LFP'));
     pattern_channels = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
+    %pattern_channels = strcat(data_lfp.channel_type(strcmp(data_lfp.channel_type,'LFP')),'/',data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP')));
     ind_1 = [];
     ind_2 = [];
     for i =1:length(pattern_channels)
@@ -458,10 +458,14 @@ if ~isempty(handles2.TagButton.UserData)&&length(handles2.TagButton.UserData.Sel
 end
 
 %Feeding traces to Button Compute
-bc.UserData.traces = flipud(traces);
-bc.UserData.phases = flipud(phases);
-bc.UserData.traces_name = flipud(traces_name);
-bc.UserData.phases_name = flipud(phases_name);
+% bc.UserData.traces = flipud(traces);
+% bc.UserData.phases = flipud(phases);
+% bc.UserData.traces_name = flipud(traces_name);
+% bc.UserData.phases_name = flipud(phases_name);
+bc.UserData.traces = traces;
+bc.UserData.phases = phases;
+bc.UserData.traces_name = traces_name;
+bc.UserData.phases_name = phases_name;
 bc.UserData.save_data = [];
 
 handles2 = reset_Callback([],[],handles2,myhandles);
