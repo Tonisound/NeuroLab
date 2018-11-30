@@ -21,7 +21,7 @@ load('Preferences.mat','GTraces');
 
 % Load Video File as Video Reader
 if exist(video_file,'file')
-    if contains(video_file,'.mpg')
+    if contains(video_file,'.mpg')||contains(video_file,'.mp4')
         tic
         fprintf('Loading Video file ...\n');
         v = VideoReader(video_file);

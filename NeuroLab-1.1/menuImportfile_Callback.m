@@ -113,7 +113,7 @@ for i = 1:length(FileList)
         F(ind_file).info = str;
     end
     % Looking for video file
-    d = [dir(fullfile(FileName,'*.mpg'));dir(fullfile(FileName,'*.avi'))];
+    d = [dir(fullfile(FileName,'*.mpg'));dir(fullfile(FileName,'*.mp4'));dir(fullfile(FileName,'*.avi'))];
     if ~isempty(d)
         str = char(d(1).name);
         F(ind_file).video = str;
