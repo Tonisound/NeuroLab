@@ -39,10 +39,11 @@ else
     mkdir(fullfile(SEED_REGION,file_session));
     
     % copying
-    fprintf('Copying files in NRegions directory\n.');
+    fprintf('Copying files in NRegions directory...');
     for i =1:length(files_regions)
         copyfile(fullfile(dir_regions,char(files_regions(i).name)),fullfile(SEED_REGION,file_session,char(files_regions(i).name)))
     end
+    fprintf(' done.\n');
 end
 
 
@@ -93,7 +94,7 @@ end
 
 % Saving Regions
 save(fullfile(foldername,'Spikoscope_Regions.mat'),'X','Y','regions');
-fprintf('Spikoscope Regions Imported (%s) \n===> Saved in %s\n',dir_regions,fullfile(foldername,'Spikoscope_Regions.mat'));
+fprintf('Spikoscope Regions Imported [%s] \n===> Saved in %s\n',dir_regions,fullfile(foldername,'Spikoscope_Regions.mat'));
 success = true;
 
 end

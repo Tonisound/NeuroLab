@@ -21,7 +21,7 @@ load('Preferences.mat','GTraces');
 
 % Load Video File as Video Reader
 if exist(video_file,'file')
-    if contains(video_file,'.mpg')||contains(video_file,'.mp4')
+    if contains(video_file,'.mpg')||contains(video_file,'.mp4')||contains(video_file,'.m4v')
         tic
         fprintf('Loading Video file ...\n');
         v = VideoReader(video_file);
@@ -39,6 +39,10 @@ if exist(video_file,'file')
         handles.VideoAxes.YTick = [];
         handles.VideoAxes.XTickLabel = [];
         handles.VideoAxes.YTickLabel = [];
+        
+        %Postion
+%         f=handles.VideoAxes.Parent;
+%         f.Position(4) = f.Position(3)*v.Height/v.Width;
         
         % Storing
         handles.VideoAxes.UserData.VideoFile = video_file;

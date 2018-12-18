@@ -103,7 +103,7 @@ if flag_save
     
     for i = 1:length(patches)
         p = copy(patches(i),ax);
-        p.FaceColor = [0 0 0];
+        p.FaceColor = 'none';
         p.FaceAlpha = 1;
         %p.EdgeColor = 'none';
         %p.LineStyle = 'none';
@@ -131,7 +131,7 @@ if flag_save
             if length(retained)>1
                 for j=1:length(retained)
                     p = patch('XData',retained(j).XData,'YData',retained(j).YData,'Parent',ax);
-                    p.FaceColor = [0 0 0];
+                    p.FaceColor = 'none';
                     p.FaceAlpha = 1;
                     p.EdgeColor = [0.5 0.5 0.5];
                     %p.LineStyle = 'none';

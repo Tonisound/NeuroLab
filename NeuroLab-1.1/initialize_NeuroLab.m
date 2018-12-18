@@ -128,10 +128,13 @@ m1b = uimenu('Label','Import','Tag','ImportMenu','Parent',f);
 uimenu(m1b,'Label','Import File','Tag','FileMenu_Import');
 uimenu(m1b,'Label','Check Doppler film','Tag','ImportMenu_Doppler','Separator','on');
 uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime');
+uimenu(m1b,'Label','Import Time Tags','Tag','ImportMenu_TimeTags');
 uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
 uimenu(m1b,'Label','Import LFP Configuration','Tag','ImportMenu_ImportConfig');
 uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
 uimenu(m1b,'Label','Import Regions','Tag','ImportMenu_Regions');
+uimenu(m1b,'Label','Import External Files','Tag','ImportMenu_ExternalFiles');
+
 uimenu(m1b,'Label','Reload Doppler film','Tag','ImportMenu_ReloadDoppler','Separator','on');
 uimenu(m1b,'Label','Reload Graphics','Tag','ImportMenu_ReloadGraphic');
 uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces');
@@ -167,6 +170,13 @@ uimenu(m2c,'Label','Global Display','Tag','SynthesisMenu_Display');
 uimenu(m2c,'Label','fUS Episode Statistics','Tag','SynthesisMenu_Statistics');
 uimenu(m2c,'Label','Peak Detection','Tag','SynthesisMenu_PeakDetection');
 uimenu(m2c,'Label','Batch Processing','Tag','SynthesisMenu_Batch','Accelerator','B','Separator','on');
+
+% handles.ExportMenu
+m2d = uimenu('Label','Export','Tag','Export Menu','Parent',f);
+uimenu(m2d,'Label','Export Time Tags','Tag','ExportMenu_TimeTags');
+uimenu(m2d,'Label','Export Anatomical Regions','Tag','ExportMenu_Regions');
+uimenu(m2d,'Label','Export IMO file','Tag','ExportMenu_IMOfile');
+
 
 
 % handles.ColorMapsMenu
@@ -558,39 +568,47 @@ set(myhandles.FileMenu_Save,'Callback',{@mainFigure_saveFcn,myhandles});
 set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
 set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE),myhandles,1);');
 set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),IM,myhandles);');
+set(myhandles.ImportMenu_TimeTags,'Callback','import_time_tags(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
 set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),myhandles);');
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording);');
+set(myhandles.ImportMenu_ExternalFiles,'Callback','import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 
-% handles.DisplayMenu
-set(myhandles.DisplayMenu_Video,'Callback',{@menuDisplay_Video_Callback,myhandles});
-set(myhandles.DisplayMenu_TagSelection,'Callback',{@menuDisplay_TimeTagSelection_Callback,myhandles});
-set(myhandles.DisplayMenu_TimeGroupSelection,'Callback',{@menuDisplay_TimeGroupSelection_Callback,myhandles});
-
-% handles.EditMenu
-set(myhandles.EditMenu_Edition,'Callback',{@menuEdit_TracesEdition_Callback,myhandles.RightAxes,myhandles});
-set(myhandles.EditMenu_TimeTagEdition,'Callback','menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.EditMenu_TimeGroupEdition,'Callback','menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.EditMenu_LFPConfig,'Callback','menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-
-set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhandles});
-set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
-set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
-set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
 set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
 set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LoadRegions,'Callback','load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
 
-% handles.ProcessMenu
+% handles.EditMenu
+set(myhandles.EditMenu_Edition,'Callback',{@menuEdit_TracesEdition_Callback,myhandles.RightAxes,myhandles});
+set(myhandles.EditMenu_TimeTagEdition,'Callback','menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.EditMenu_TimeGroupEdition,'Callback','menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.EditMenu_LFPConfig,'Callback','menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhandles});
+set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
+set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
+set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
+
+% handles.DisplayMenu
+set(myhandles.DisplayMenu_Video,'Callback',{@menuDisplay_Video_Callback,myhandles});
+set(myhandles.DisplayMenu_TagSelection,'Callback',{@menuDisplay_TimeTagSelection_Callback,myhandles});
+set(myhandles.DisplayMenu_TimeGroupSelection,'Callback',{@menuDisplay_TimeGroupSelection_Callback,myhandles});
+
+% handles.SynthesisMenu
 set(myhandles.SynthesisMenu_Batch,'Callback',{@batch_generalscript,myhandles});
 set(myhandles.SynthesisMenu_Correlation,'Callback','synthesis_CorrelationAnalysis();');
 set(myhandles.SynthesisMenu_Region,'Callback','synthesis_RegionStatistics();');
 set(myhandles.SynthesisMenu_Display,'Callback','synthesis_Global_Display();');
 set(myhandles.SynthesisMenu_Statistics,'Callback','synthesis_fUS_Statistics();');
 set(myhandles.SynthesisMenu_PeakDetection,'Callback','synthesis_PeakDetection();');
+
+% handles.ExportMenu
+set(myhandles.ExportMenu_IMOfile,'Callback','export_imofile(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),SEED_SPIKO,FILES(CUR_FILE).session);');
+set(myhandles.ExportMenu_Regions,'Callback','export_patches(myhandles);');
+set(myhandles.ExportMenu_TimeTags,'Callback','export_time_tags(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
+
 
 % Control Callback Attribution
 set(myhandles.FileSelectPopup,'Callback', {@fileSelectionPopup_Callback,myhandles});

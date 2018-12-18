@@ -7,7 +7,7 @@ global CUR_IM START_IM END_IM LAST_IM;
 
 % Initialization
 F = struct('session',{},'recording',{},'parent',{},'fullpath',{},...
-    'info',{},'video',{},'dir_lfp',{},'dir_fus',{},'acq',{},'dop',{},'biq',{},...
+    'info',{},'video',{},'dir_lfp',{},'dir_fus',{},'dir_ext',{},'acq',{},'dop',{},'biq',{},...
     'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},...
     'nev',{},'ccf',{},'rcf',{},'ncf',{},'nlab',{},'type',{});
 
@@ -146,8 +146,14 @@ for i = 1:length(FileList)
     end
     
     % Looking for LFP
-    d = dir(fullfile(FileName,'*_lfp'));
+    d = dir(fullfile(FileName,'*_ext'));
+    if ~isempty(d)
+        dir_ext = char(d(1).name);
+        F(ind_file).dir_ext = dir_ext;
+    end
     
+    % Looking for LFP
+    d = dir(fullfile(FileName,'*_lfp'));
     if ~isempty(d)
         dir_lfp = char(d(1).name);
         F(ind_file).dir_lfp = dir_lfp;
@@ -231,9 +237,14 @@ for i = 1:length(FileList)
     else
         %F(ind_file).nlab = regexprep(session,'_MySession','_nlab');
         F(ind_file).nlab = strcat(recording,'_nlab');
-        % ask confirmation before importation   
+        % ask confirmation before importation
+        
+        
+        % Comment for batch
         str_quest = strcat(fieldnames(F(ind_file)),sprintf(' : '),struct2cell(F(ind_file)));
         button = questdlg(str_quest,'New Importation','OK','Cancel','OK');
+        % %Comment for not batch
+        % button = 'ok';
         
         % Creating nlab file if confirmation and
         if isempty(button) || strcmp(button,'Cancel')

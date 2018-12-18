@@ -43,13 +43,14 @@ text4 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
 
 ax2 = axes('Parent',f);
 ax2.XLim = [.5,size(Doppler_film,3)+5];
-ax2.YLim = [min(test),max(test)];
+delta = max(test)-min(test);
+ax2.YLim = [min(test)-.1*delta,max(test)+.1*delta];
 ax2.UserData = [];
 
 line('XData',t,'YData',test,'Color','k','LineWidth',1,'Parent',ax2);
 l_thresh = line('XData',[.5,size(Doppler_film,3)+5],'YData',[thresh,thresh],...
     'Color',[.5 .5 .5],'LineWidth',3,'Parent',ax2,'HitTest','on');
-l_cursor = line('XData',[CUR_IM CUR_IM],'YData',[min(test),max(test)],...
+l_cursor = line('XData',[CUR_IM CUR_IM],'YData',ax2.YLim,...
     'Color',[.5 .5 .5],'LineWidth',1,'Parent',ax2,'HitTest','on');
 l_keep = line('XData',t(ind_keep==1),'YData',test(ind_keep==1),...
     'Color','b','LineStyle','none','Marker','o','Parent',ax2,'HitTest','on');
@@ -273,7 +274,10 @@ set(f,'KeyPressFcn',{@key_pressFcn});
         end
     end
 
+% Comment for batch
 waitfor(f);
 return;
+% %Comment for not batch
+% okButton_callback();
 
 end
