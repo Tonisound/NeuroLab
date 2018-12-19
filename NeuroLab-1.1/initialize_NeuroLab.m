@@ -573,7 +573,7 @@ set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE)
 set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),myhandles);');
 set(myhandles.ImportMenu_Regions,'Callback','import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording);');
-set(myhandles.ImportMenu_ExternalFiles,'Callback','import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
+set(myhandles.ImportMenu_ExternalFiles,'Callback','import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 
 set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
 set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');

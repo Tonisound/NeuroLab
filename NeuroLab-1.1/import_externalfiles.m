@@ -1,4 +1,4 @@
-function import_externalfiles(dir_recording,dir_save)
+function success = import_externalfiles(dir_recording,dir_save,handles)
 
 success = false;
 
@@ -58,7 +58,6 @@ for i=1:length(all_files)
     file_ext = fullfile(dir_recording,F.dir_ext,filename);
     
     fid_ext = fopen(file_ext,'r');
-    %fprintf(fid_ext,'%s',sprintf('<HEADER>\tformat=%s\tnb_samples=%d\tunit=%s</HEADER>\n',T.format,T.nb_samples,T.unit));
     header = fgetl(fid_ext);
     header = regexp(header,'\t+','split');
     
@@ -86,7 +85,7 @@ for i=1:length(all_files)
         Y(k) = fread(fid_ext,1,format);
     end
     fclose(fid_ext);
-    fprintf('Binary File loaded at %s.\n',file_ext);
+    fprintf('External File loaded at %s.\n',file_ext);
 
     % Storing data in traces
     %duration = X(end);
@@ -101,15 +100,57 @@ for i=1:length(all_files)
     traces(i).X_im = data_t.time_ref.Y;
     traces(i).Y_im = interp1(traces(i).X,traces(i).Y,traces(i).X_im);
     traces(i).nb_samples = nb_samples;
-    fprintf('Succesful Importation %s [Parent %s].\n',traces(i).fullname,traces(i).parent);
+    %fprintf('Succesful Importation %s [Parent %s].\n',traces(i).fullname,traces(i).parent);
 end
 
 
-% Save dans SpikoscopeTraces.mat
-if ~isempty(traces)
-    save(fullfile(dir_save,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
+% Direct Trace Loading
+ind_traces = 1:length(traces);
+for i=1:length(ind_traces)
+    %str = lower(char(traces(ind_traces(i)).fullname));
+    color = rand(1,3);
+    hl = line('XData',traces(ind_traces(i)).X_ind,...
+        'YData',traces(ind_traces(i)).Y_im,...
+        'Color',color,...
+        'Tag','Trace_Cerep',...
+        'Visible','off',...
+        'HitTest','off',...
+        'Parent', handles.RightAxes);
+    
+    if handles.RightPanelPopup.Value==4
+        set(hl,'Visible','on');
+    end
+    
+    % Updating UserData
+    t = traces(ind_traces(i)).fullname;
+    %p = traces(ind_traces(i)).parent;
+    %BEHAVIOR
+    t = strrep(t,'BEHAVIOR_0_Position_continuous_estimate__Body_position_X_(m)_B0_B0[B0]','X(m)');
+    t = strrep(t,'BEHAVIOR_0_Position_continuous_estimate__Body_position_Y_(m)_B0_B0[B0]','Y(m)');
+    t = strrep(t,'BEHAVIOR_0_Position_continuous_estimate__Body_speed_(m/s)_B0_B0[B0]','SPEED');
+    %t = regexprep(t,'[B0]','');
+      
+    % ACCEL
+    %t = regexprep(t,'Accelerometer_LFP_','');
+    t = strrep(t,'ACCELEROMETER_0_Posture_power','ACCEL_POWER');
+    t = strrep(t,'ACCELEROMETER_0_Source_filtered_for_posture','ACCEL');
+    
+    % EMG
+    %t = regexprep(t,'MUA_LFP_','');
+    %t = regexprep(t,'MUA_0_Source_filtered_for_mult','EMG');
+    %t = regexprep(t,'MUA_0_Multiunit_frequency__Fas|MUA_0_Multiunit_frequency__Slo','EMG_POWER');
+    
+    % LFP
+    t = strrep(t,'LFP_0_Phasic_theta_power','Phasic_theta');
+    t = strrep(t,'LFP_0_Theta_power','Theta');
+    
+    s.Name = regexprep(t,'_','-');
+    s.X = traces(ind_traces(i)).X;
+    s.Y = traces(ind_traces(i)).Y;
+    hl.UserData = s;
+    
 end
-fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Cereplex_Traces.mat'));
+fprintf('External Trace successfully loaded (%s)\n',traces(ind_traces).fullname);
 
 success = true;
 
