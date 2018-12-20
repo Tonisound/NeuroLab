@@ -22,7 +22,7 @@ iP = uipanel('FontSize',12,...
 
 % Texts and Edits
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
-    'String',sprintf('File : %s',FILES(CUR_FILE).gfus),'Tag','Text1');
+    'String',sprintf('File : %s',FILES(CUR_FILE).nlab),'Tag','Text1');
 uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Parent',iP,...
     'String',sprintf(handles.CenterPanelPopup.String(handles.CenterPanelPopup.Value,:)),...
     'Tag','Text2');
@@ -35,6 +35,8 @@ uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Pa
     'String',0,'Tag','Edit3','Tooltipstring','# CFC Channels');
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
     'String',4,'Tag','Edit4','Tooltipstring','Polar Display');
+uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
+    'String',.5,'Tag','Edit5','Tooltipstring','Gaussian Smoothing (s)');
 
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
     'String',5,'Tag','Edit_Start','Tooltipstring','Time Before Stimulus');
@@ -270,10 +272,19 @@ uitab('Parent',tabgp,...
     'Tag','FifthTab');
 
 % Lines Array
+ax_lines = axes('Parent',f2,'Visible','off');
 m = findobj(handles.RightAxes,'Tag','Trace_Mean');
 l = flipud(findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
 t = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep'));
+l = copyobj(l,ax_lines);
+t = copyobj(t,ax_lines);
+m = copyobj(m,ax_lines);
 lines_channels = [m;l];
+
+
+% Feeding Data
+bc.UserData.lines_channels_0 = lines_channels;
+bc.UserData.lines_electrodes_0 = t;
 bc.UserData.lines_channels = lines_channels;
 bc.UserData.lines_electrodes = t;
 
@@ -340,7 +351,7 @@ uitable('ColumnName',{'Channel','Electrode'},...
 
 resetbutton_Callback([],[],guihandles(f2));
 initialize_eventPanel(guihandles(f2));
-initialize_cfcPanel(guihandles(f2));
+%initialize_cfcPanel(guihandles(f2));
 set(f2,'Position',[30 30 200 50]);
 
 end
@@ -356,34 +367,36 @@ end
 function resize_InfoPanel(hObj,~,handles)
 
 ipos = get(hObj,'Position');
-handles.Text1.Position = [1     2*ipos(4)/3-.25    ipos(3)/4   ipos(4)/3.5];
-handles.Text2.Position = [1     ipos(4)/3+.25             ipos(3)/4   ipos(4)/3.5];
-handles.PopupEpisodeList.Position =[0     .5             ipos(3)/4   ipos(4)/3.5];
+handles.Text1.Position = [1     2*ipos(4)/3-.25    ipos(3)/5   ipos(4)/3.5];
+handles.Text2.Position = [1     ipos(4)/3+.25             ipos(3)/5   ipos(4)/3.5];
+handles.PopupEpisodeList.Position =[0     .5             ipos(3)/5   ipos(4)/3.5];
 
-handles.Popup1.Position = [ipos(3)/4     -.5    ipos(3)/8   ipos(4)/2];
-handles.Popup2.Position = [3*ipos(3)/8     -.5    ipos(3)/8   ipos(4)/2];
-handles.Popup3.Position = [ipos(3)/2     -.5    ipos(3)/8   ipos(4)/2];
-handles.PopupTrials.Position = [5*ipos(3)/8   -.5             ipos(3)/8   ipos(4)/2];
+handles.Popup1.Position = [ipos(3)/5     -.5    ipos(3)/8   ipos(4)/2];
+handles.Popup2.Position = [ipos(3)/5+ipos(3)/8     -.5    ipos(3)/8   ipos(4)/2];
+handles.Popup3.Position = [ipos(3)/5+ipos(3)/4     -.5    ipos(3)/8   ipos(4)/2];
+handles.PopupTrials.Position = [ipos(3)/5+3*ipos(3)/8   -.5  ipos(3)/8   ipos(4)/2];
 
-handles.PopupStart.Position = [29.75*ipos(3)/100     ipos(4)/2+.5             ipos(3)/9   ipos(4)/3.5];
-handles.PopupEnd.Position = [40*ipos(3)/100     ipos(4)/2+.5             ipos(3)/9   ipos(4)/3.5];
-handles.Edit_Start.Position = [ipos(3)/4     ipos(4)/2+0.2      ipos(3)/30   ipos(4)/2.5];
-handles.Edit_End.Position = [52.25*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/30   ipos(4)/2.5];
-handles.Checkbox1.Position = [28.25*ipos(3)/100     ipos(4)/2      ipos(3)/50   ipos(4)/2];
-handles.Checkbox2.Position = [50.5*ipos(3)/100     ipos(4)/2      ipos(3)/50   ipos(4)/2];
+handles.Edit_Start.Position = [ipos(3)/5     ipos(4)/2+0.2      ipos(3)/30   ipos(4)/2.5];
+handles.Checkbox1.Position = [ipos(3)/5+ipos(3)/30     ipos(4)/2      ipos(3)/50   ipos(4)/2];
+handles.PopupStart.Position = [ipos(3)/5+ipos(3)/30+ipos(3)/50     ipos(4)/2+.5     ipos(3)/8   ipos(4)/3.5];
+handles.PopupEnd.Position = [38*ipos(3)/100     ipos(4)/2+.5      ipos(3)/8   ipos(4)/3.5];
+handles.Checkbox2.Position = [50.5*ipos(3)/100     ipos(4)/2      ipos(3)/55   ipos(4)/2];
+handles.Edit_End.Position = [52.5*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/30   ipos(4)/2.5];
 
 handles.Checkbox3.Position = [9*ipos(3)/10-.5     ipos(4)/2      ipos(3)/80   ipos(4)/4];
 handles.Checkbox4.Position = [9*ipos(3)/10-.5     3*ipos(4)/4      ipos(3)/80   ipos(4)/4];
 handles.Edit1.Position = [9*ipos(3)/10+3     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
 handles.Edit2.Position = [9.375*ipos(3)/10+1     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
 handles.Edit3.Position = [9.66*ipos(3)/10+1     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
-handles.Edit4.Position = [56*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/30   ipos(4)/2.5];
+
+handles.Edit4.Position = [58*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/25   ipos(4)/2.5];
+handles.Edit5.Position = [62*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/25   ipos(4)/2.5];
+
 handles.ButtonSave.Position = [8*ipos(3)/10+2     0      ipos(3)/10-2   ipos(4)/2];
 handles.ButtonReset.Position = [8*ipos(3)/10+2     ipos(4)/2      ipos(3)/10-2   ipos(4)/2];
 handles.ButtonBatch.Position = [9*ipos(3)/10+1     0      ipos(3)/10-2   ipos(4)/2];
-
-handles.ButtonCompute.Position = [6*ipos(3)/10+6     ipos(4)/2      ipos(3)/10-2   ipos(4)/2];
-handles.Button_Sort.Position = [7*ipos(3)/10+4     ipos(4)/2      ipos(3)/10-2   ipos(4)/2];
+handles.ButtonCompute.Position = [7*ipos(3)/10+4     ipos(4)/2      ipos(3)/10-2   ipos(4)/2];
+handles.Button_Sort.Position = [7*ipos(3)/10+4     0      ipos(3)/10-2   ipos(4)/2];
 
 end
 
@@ -402,10 +415,10 @@ function initialize_eventPanel(handles)
 
 global SEED DIR_SAVE FILES CUR_FILE;
 
-if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Spikoscope_Episodes.mat'),'file')
-    import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).gfus));
+if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'file')
+    import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
 end
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Spikoscope_Episodes.mat'),'episodes');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'episodes');
 
 handles.EventPanel.UserData = episodes;
 handles.PopupEpisodeList.String = unique({episodes(:).parent});
@@ -418,10 +431,10 @@ function initialize_cfcPanel(handles)
 
 global SEED DIR_SAVE FILES CUR_FILE;
 
-if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Spikoscope_Traces.mat'),'file')
-    import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).gfus));
+if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Traces.mat'),'file')
+    import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
 end
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Spikoscope_Traces.mat'),'traces');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Traces.mat'),'traces');
 handles.CFCPanel.UserData.traces = traces;
 
 temp = {traces.fullname};
@@ -442,17 +455,16 @@ temp = regexprep(temp,'LFP_0_Gamma_mid_background_pow','Gamma_mid_background');
 temp = regexprep(temp,'\d|-|/','');
 handles.CFCTable.Data = cat(1,temp,{traces.shortname})';
 
-
 end
 
 function initialize_mainTab(handles)
 
 global SEED DIR_SAVE FILES CUR_FILE;
 
-if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'file');
-     import_reference_time(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).gfus),handles);
+if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file');
+     import_reference_time(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
 end
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
 handles.ButtonCompute.UserData.time_ref = time_ref;
 
 channels = str2double(handles.Edit1.String);
@@ -832,6 +844,33 @@ handles.EventTable.Data(:,index) = temp;
 end
 
 function compute_Callback(hObj,~,handles)
+
+% Gaussian Smoothing
+t_gauss = str2double(handles.Edit5.String);
+if t_gauss>0
+    l = hObj.UserData.lines_channels_0;
+    t = hObj.UserData.lines_electrodes_0;
+    for i=1:length(l)
+        x = l(i).XData;
+        y = l(i).YData;
+        delta = x(2)-x(1);
+        l(i).YData = imgaussfilt(y,round(t_gauss/delta));
+    end
+    for i=1:length(t)
+        x = t(i).UserData.X;
+        y = t(i).UserData.Y;
+        delta = x(2)-x(1);
+        t(i).UserData.Y = imgaussfilt(y,round(t_gauss/delta));
+    end
+    % Feeding Data
+    hObj.UserData.lines_channels = l;
+    hObj.UserData.lines_electrodes = t;
+    fprintf('Gaussian smoothing [Kernel = %.1f s].\n',t_gauss);
+else
+    fprintf('No smoothing.\n');
+    hObj.UserData.lines_channels = hObj.UserData.lines_channels_0;
+    hObj.UserData.lines_electrodes = hObj.UserData.lines_electrodes_0;
+end
 
 % Return if no selection
 if isempty(handles.fUSTable.UserData)&&isempty(handles.LFPTable.UserData)&&isempty(handles.CFCTable.UserData)
@@ -1305,7 +1344,7 @@ end
         line_width = str2double(ls.String);
         
         switch strtrim(hObj.String(hObj.Value,:))
-            case 'Mean',
+            case 'Mean'
                 for i=1:length(lines)
                     line('XData',1:size(Ydata,1),...
                         'YData',mean(Ydata(:,:,i),2,'omitnan'),...
@@ -1316,7 +1355,7 @@ end
                         'LineWidth',line_width,...
                         'Parent',ax);
                 end
-            case 'Median',
+            case 'Median'
                 for i=1:length(lines)
                     line('XData',1:size(Ydata,1),...
                         'YData',median(Ydata(:,:,i),2,'omitnan'),...
@@ -1327,7 +1366,7 @@ end
                         'LineWidth',line_width,...
                         'Parent',ax);
                 end
-            case 'Mean Norm',
+            case 'Mean Norm'
                 for i=1:length(lines)
                     line('XData',1:size(Ydata,1),...
                         'YData',(mean(Ydata(:,:,i),2,'omitnan')-mean(mean(Ydata(:,:,i),2,'omitnan'),1,'omitnan'))/std(mean(Ydata(:,:,i),2,'omitnan'),[],1,'omitnan'),...
@@ -1338,7 +1377,7 @@ end
                         'Color',lines(i).Color,...
                         'Parent',ax);
                 end
-            case 'Median Norm',
+            case 'Median Norm'
                 for i=1:length(lines)
                     line('XData',1:size(Ydata,1),...
                         'YData',median(Ydata(:,:,i),2,'omitnan')/mean(median(Ydata(:,:,i),2,'omitnan'),1,'omitnan')/std(median(Ydata(:,:,i),2,'omitnan'),[],1,'omitnan'),...
