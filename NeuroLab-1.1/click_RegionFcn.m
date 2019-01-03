@@ -28,8 +28,12 @@ if strcmp(seltype,'normal')
         hObj.UserData.LineWidth=hObj.UserData.LineWidth/coeff_increase;
     end
 else
-    delete(hObj.UserData);
-    delete(hObj);
+    choice = questdlg('Do you wish to discard current graphic object ?',...
+        'User Confirmation','OK','Cancel','Cancel');
+    if ~isempty(choice) && strcmp(choice,'OK')
+        delete(hObj.UserData);
+        delete(hObj);
+    end
 end
 
 end

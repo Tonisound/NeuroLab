@@ -39,6 +39,14 @@ set(hq,'ButtonDownFcn',{@click_PatchFcn,handles});
 hr= findobj(handles.CenterAxes,'Tag','Region');
 set(hr,'ButtonDownFcn',{@click_RegionFcn,handles});
 
+% To ensure HitTest property
+all_lines = findobj(handles.RightAxes,'Type','Line','-not','Tag','Cursor');
+for i=1:length(all_lines)
+    all_lines(i).HitTest='on';
+    all_lines(i).ButtonDownFcn={@click_lineFcn,handles};
+end
+
+
 % Bring cursor on top
 cursor = findobj(handles.RightAxes,'Tag','Cursor');
 uistack(cursor,'top');

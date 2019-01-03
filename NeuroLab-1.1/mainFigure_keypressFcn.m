@@ -6,33 +6,33 @@ global CUR_IM START_IM END_IM;
 
 %evnt.Key
 switch evnt.Key
-    case 'rightarrow',
+    case 'rightarrow'
         CUR_IM = min(CUR_IM+1,END_IM);
         set(handles.CurrentImageDisplay,'String',sprintf('%d/%d',CUR_IM,END_IM));
         set(handles.TimeDisplay,'String',handles.TimeDisplay.UserData(CUR_IM,:));
         actualize_plot(handles);
-    case 'leftarrow',
+    case 'leftarrow'
         CUR_IM = max(CUR_IM-1,START_IM);
         set(handles.CurrentImageDisplay,'String',sprintf('%d/%d',CUR_IM,END_IM));
         set(handles.TimeDisplay,'String',handles.TimeDisplay.UserData(CUR_IM,:));
         actualize_plot(handles);
-    case 'uparrow',
+    case 'uparrow'
         buttonSkip_Callback([],[],handles);
-    case 'downarrow',
+    case 'downarrow'
         buttonBack_Callback([],[],handles);
-    case 'subtract',
+    case 'subtract'
         buttonMinus_Callback([],[],handles);
-    case 'add',
+    case 'add'
         buttonPlus_Callback([],[],handles);
-    case 'multiply',
+    case 'multiply'
         buttonRescale_Callback([],[],handles);
-    case 'space',
+    case 'space'
         val = handles.PlayToggle.Value;
         handles.PlayToggle.Value = abs(val-1);
         buttonPlay_Callback(handles.PlayToggle,[],handles);
-    case 'o',
+    case 'o'
         menuEdit_prevTag_Callback([],[],handles);
-    case 'p',
+    case 'p'
         menuEdit_nextTag_Callback([],[],handles);
 end
     set(hObj,'WindowButtonUpFcn','');

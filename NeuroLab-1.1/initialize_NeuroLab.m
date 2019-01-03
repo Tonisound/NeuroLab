@@ -548,6 +548,7 @@ myhandles.VideoAxes = axes('Parent',f2,'Tag','VideoAxes',...
 
 % Interactive Control
 set(myhandles.MainFigure,'KeyPressFcn',{@mainFigure_keypressFcn,myhandles});
+set(myhandles.MainFigure,'WindowScrollWheelFcn',{@mainFigure_windowscrollwheelFcn,myhandles});
 set(myhandles.RightAxes,'ButtonDownFcn',{@rightPanel_clickFcn,myhandles});
 set(myhandles.CenterAxes,'ButtonDownFcn',{@centerPanel_clickFcn,myhandles});
 set(myhandles.MainFigure,'DeleteFcn',{@mainFigure_closeFcn,myhandles});
