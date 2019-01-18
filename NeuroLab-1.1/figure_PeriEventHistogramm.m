@@ -280,11 +280,15 @@ l = copyobj(l,ax_lines);
 t = copyobj(t,ax_lines);
 m = copyobj(m,ax_lines);
 lines_channels = [m;l];
+% l_0 = copyobj(l,ax_lines);
+% t_0 = copyobj(t,ax_lines);
+% m_0 = copyobj(m,ax_lines);
+% lines_channels_0 = [m_0;l_0];
+% bc.UserData.lines_channels_0 = lines_channels_0;
+% bc.UserData.lines_electrodes_0 = t_0 ;
 
 
 % Feeding Data
-bc.UserData.lines_channels_0 = lines_channels;
-bc.UserData.lines_electrodes_0 = t;
 bc.UserData.lines_channels = lines_channels;
 bc.UserData.lines_electrodes = t;
 
@@ -845,33 +849,6 @@ end
 
 function compute_Callback(hObj,~,handles)
 
-% Gaussian Smoothing
-t_gauss = str2double(handles.Edit5.String);
-if t_gauss>0
-    l = hObj.UserData.lines_channels_0;
-    t = hObj.UserData.lines_electrodes_0;
-    for i=1:length(l)
-        x = l(i).XData;
-        y = l(i).YData;
-        delta = x(2)-x(1);
-        l(i).YData = imgaussfilt(y,round(t_gauss/delta));
-    end
-    for i=1:length(t)
-        x = t(i).UserData.X;
-        y = t(i).UserData.Y;
-        delta = x(2)-x(1);
-        t(i).UserData.Y = imgaussfilt(y,round(t_gauss/delta));
-    end
-    % Feeding Data
-    hObj.UserData.lines_channels = l;
-    hObj.UserData.lines_electrodes = t;
-    fprintf('Gaussian smoothing [Kernel = %.1f s].\n',t_gauss);
-else
-    fprintf('No smoothing.\n');
-    hObj.UserData.lines_channels = hObj.UserData.lines_channels_0;
-    hObj.UserData.lines_electrodes = hObj.UserData.lines_electrodes_0;
-end
-
 % Return if no selection
 if isempty(handles.fUSTable.UserData)&&isempty(handles.LFPTable.UserData)&&isempty(handles.CFCTable.UserData)
     errordlg('Please Select Traces.');
@@ -934,7 +911,7 @@ if channels>0
                 i_start = ind_start(j);
                 i_end = ind_end(j);
                 y = Ydata(j,i_start:i_end,k);
-                if sum(~isnan(y))<(4*length(y)/5);
+                if sum(~isnan(y))<(4*length(y)/5)
                     ind_keep(j) = 0;
                 end
             end

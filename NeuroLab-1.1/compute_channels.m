@@ -51,5 +51,43 @@ for k = 1:length(ind_channels)
     end
 end
 
+% Gaussian Smoothing
+t_gauss = str2double(handles.Edit5.String);
+if t_gauss>0
+
+%     l = hObj.UserData.lines_channels_0;
+%     t = hObj.UserData.lines_electrodes_0;
+%     for i=1:length(l)
+%         x = l(i).XData;
+%         y = l(i).YData;
+%         delta = x(2)-x(1);
+%         l(i).YData = imgaussfilt(y,round(t_gauss/delta));
+%     end
+%     for i=1:length(t)
+%         x = t(i).UserData.X;
+%         y = t(i).UserData.Y;
+%         delta = x(2)-x(1);
+%         t(i).UserData.Y = imgaussfilt(y,round(t_gauss/delta));
+%     end
+    delta = 1/f_int;
+    Ydata_smooth = imgaussfilt3(Ydata,[1,round(t_gauss/delta),1],'FilterDomain','spatial');
+
+%     % Feeding Data to Button Compute
+%     hObj.UserData.lines_channels = l;
+%     hObj.UserData.lines_electrodes = t;
+%     % Passing Data to popup
+%     handles.Popup1.UserData.lines_channels = hObj.UserData.lines_channels;
+%     handles.Popup2.UserData.lines_electrodes = hObj.UserData.lines_electrodes;
+    fprintf('Gaussian smoothing [Kernel = %.1f s].\n',t_gauss);
+else
+    fprintf('No smoothing.\n');
+    Ydata_smooth = Ydata;
+%     hObj.UserData.lines_channels = hObj.UserData.lines_channels_0;
+%     hObj.UserData.lines_electrodes = hObj.UserData.lines_electrodes_0;
+%     % Passing Data to popup
+%     handles.Popup1.UserData.lines_channels = hObj.UserData.lines_channels;
+%     handles.Popup2.UserData.lines_electrodes = hObj.UserData.lines_electrodes;
+end
+
 
 end

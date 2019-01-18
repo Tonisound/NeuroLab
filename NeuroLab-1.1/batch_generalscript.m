@@ -479,7 +479,7 @@ for i = 1:length(ind_files)
                     success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                         
                 case 'Import Spikoscope Regions'
-                    success = import_regions(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording);
+                    success = import_regions(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
                 case 'Import Spikoscope Traces'
                     success = import_traces(fullfile(SEED,FILES(ii).parent,FILES(ii).spiko),fullfile(DIR_SAVE,FILES(ii).nlab));
