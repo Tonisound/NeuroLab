@@ -1,4 +1,4 @@
-function success = import_lfptraces(F,handles)
+function success = import_lfptraces(F,handles,val)
 
 success = false;
 
@@ -136,11 +136,96 @@ for i=1:length(ind_channel)
 end
 
 
-% Save dans SpikoscopeTraces.mat
-if ~isempty(traces)
-    save(fullfile(dir_save,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
+% % Save dans SpikoscopeTraces.mat
+% if ~isempty(traces)
+%     save(fullfile(dir_save,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
+% end
+% fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Cereplex_Traces.mat'));
+
+% Loading LFP traces
+% load_lfptraces(dir_save,handles)
+
+
+% Direct Loading LFP traces
+load('Preferences.mat','GDisp','GTraces');
+g_colors = get(groot,'defaultAxesColorOrder');
+
+if nargin <3
+    [ind_traces,ok] = listdlg('PromptString','Select Traces','SelectionMode','multiple',...
+        'ListString',{traces.fullname},'ListSize',[400 500]);
+else
+    ind_traces = 1:length(traces);
+    ok = true;
 end
-fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Cereplex_Traces.mat'));
+
+if ~ok || isempty(ind_traces)
+    return;
+end
+
+for i=1:length(ind_traces)
+    str = lower(char(traces(ind_traces(i)).fullname));
+    if strfind(str,'lfp')
+        color = 'k';
+    elseif strfind(str,'emg')
+        color = [.5 .5 .5];
+    elseif strfind(str,'acc')
+        color = 'g';
+    elseif strfind(str,'temp')
+        color = 'r';
+    elseif strfind(str,'gyr')
+        color = 'b';
+    else
+        color = rand(1,3);
+    end
+    hl = line('XData',traces(ind_traces(i)).X_ind,...
+        'YData',traces(ind_traces(i)).Y_im,...
+        'Color',color,...
+        'Tag','Trace_Cerep',...
+        'Visible','off',...
+        'HitTest','off',...
+        'Parent', handles.RightAxes);
+    
+    if handles.RightPanelPopup.Value==4
+        set(hl,'Visible','on');
+    end
+    
+    % Updating UserData
+    t = traces(ind_traces(i)).fullname;
+    p = traces(ind_traces(i)).parent;
+    %BEHAVIOR
+    if strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_X_(m)_B0_B0')
+        t = regexprep(t,'BEHAVIOR_0_Position_continuous','X(m)');
+    elseif strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_Y_(m)_B0_B0')
+        t = regexprep(t,'BEHAVIOR_0_Position_continuous','Y(m)');
+    else
+        t = regexprep(t,'BEHAVIOR_0_Position_continuous','SPEED');
+    end
+    t = regexprep(t,'/B0','');
+    
+    %LFP
+    t = regexprep(t,'Source_filtered_for_thet','LFP-theta');
+    t = regexprep(t,'background_pow|background_po','up');
+    t = regexprep(t,'LFP_0_|_power|_po','');
+    t = regexprep(t,'FUS_1_Region_continuous_estima','fUS');
+    t = regexprep(t,'Source_filtered_for_back','LFP');
+    
+    % ACCEL
+    t = regexprep(t,'Accelerometer_LFP_','');
+    t = regexprep(t,'ACCELEROMETER_0_Posture','ACCEL_POWER');
+    t = regexprep(t,'ACCELEROMETER_0_Source_filtere','ACCEL');
+    
+    % EMG
+    t = regexprep(t,'MUA_LFP_','');
+    t = regexprep(t,'MUA_0_Source_filtered_for_mult','EMG');
+    t = regexprep(t,'MUA_0_Multiunit_frequency__Fas|MUA_0_Multiunit_frequency__Slo','EMG_POWER');
+    
+    s.Name = regexprep(t,'_','-');
+    s.X = traces(ind_traces(i)).X;
+    s.Y = traces(ind_traces(i)).Y;
+    hl.UserData = s;
+    
+end
+fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces).fullname);
 
 success = true;
 

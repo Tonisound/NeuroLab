@@ -89,14 +89,14 @@ ot.Units = 'normalized';
 
 % File Panel
 fP = uipanel('Units','normalized',...
-    'Position',[0 h_infoPanel .2 1-h_infoPanel],...
+    'Position',[0 h_infoPanel .25 1-h_infoPanel],...
     'bordertype','etchedin',...
     'Title','Files',...
     'Tag','FilesPanel',...
     'Parent',f2);
 % Process Panel
 pP = uipanel('Units','normalized',...
-    'Position',[.2 h_infoPanel .2 1-h_infoPanel],...
+    'Position',[.25 h_infoPanel .15 1-h_infoPanel],...
     'bordertype','etchedin',...
     'Title','Processes',...
     'Tag','ProcessPanel',...
@@ -155,7 +155,7 @@ ft.UserData.Selection = [];
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
 D = [cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Trace Edition'};{'Actualize Traces'};{'Export IMO file'};{'Save UF Params'}];
+    {'Trace Edition'};{'LFP Config Importation'};{'Actualize Traces'};{'Save UF Params'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -478,20 +478,21 @@ for i = 1:length(ind_files)
                 case 'Edit Time Groups'
                     success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                         
-                case 'Import Spikoscope Regions'
+                case 'Import Regions'
                     success = import_regions(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
-                case 'Import Spikoscope Traces'
-                    success = import_traces(fullfile(SEED,FILES(ii).parent,FILES(ii).spiko),fullfile(DIR_SAVE,FILES(ii).nlab));
+                case 'Import LFP Traces'
+                    success = import_lfptraces(FILES(CUR_FILE),myhandles,0);
                     
-                case 'Load Spikoscope Regions'
-                    success = load_regions(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
-                    
-                case 'Load Spikoscope Traces'
-                    success = load_lfptraces(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
+                case'Import External Files'
+                    success = import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
                     
                 case 'Detect Vascular Surges'
                     success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                    
+                case 'Export LFP bands'
+                % in this case 1 select band manually, else 0 for all bands
+                    success = export_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                     
                 case '(Figure) Global Episode Display'
                     f2=figure_GlobalDisplay(myhandles,0,str_tag);
@@ -510,6 +511,9 @@ for i = 1:length(ind_files)
                    
                 case 'Trace Edition'
                     success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);
+                    
+                case 'LFP Config Importation'
+                    success = import_lfpconfig(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                     
                 case 'Actualize Traces'
                     success = actualize_traces(myhandles);

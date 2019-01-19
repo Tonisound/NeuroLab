@@ -1,6 +1,11 @@
-function success = import_externalfiles(dir_recording,dir_save,handles)
+function success = import_externalfiles(dir_recording,dir_save,handles,val)
 
 success = false;
+
+% Manual mode val = 1; bath mode val =0
+if nargin<4
+    val = 1;
+end
 
 % Loading Config.mat
 if exist(fullfile(dir_save,'Config.mat'),'file')
@@ -28,7 +33,7 @@ if isempty(F.dir_ext)
         save(fullfile(dir_save,'Config.mat'),'File','-append');
         fprintf('File Config.mat appended [%s]',dir_save);
     else
-        errordlg('Missing file Config.mat [%s]',dir_save);
+        errordlg(sprintf('Empty/Missing External Directory [%s]',dir_recording));
         return;
     end
 end
@@ -41,8 +46,15 @@ if isempty(d)
     errordlg('Empty Directory [%s]',fullfile(dir_recording,F.dir_ext));
     return;
 else
-    [ind_ext,ok] = listdlg('PromptString','Select Files',...
-        'SelectionMode','multiple','ListString',{d.name},'ListSize',[300 500]);
+    if val ==1
+        [ind_ext,ok] = listdlg('PromptString','Select Files',...
+            'SelectionMode','multiple','ListString',{d.name}','ListSize',[300 500]);
+    else
+        % batch mode
+        pattern_list = {'ACCELEROMETER_0_Posture_power';'Body_position_X_(m)';'Body_position_Y_(m)';'Body_speed_(m_s)'};
+        ind_ext = find(contains({d.name}',pattern_list)==1);
+        ok = true;
+    end
     if ~ok || isempty(ind_ext)
         return;
     end

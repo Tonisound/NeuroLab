@@ -63,7 +63,10 @@ regions = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});
 % files_regions = files_regions(ind);
 
 % Sorting by name
-pattern_list = {'ac';'s1bf';'lpta';'rs';'neocortex';'dg';'ca3';'ca2';'ca1';'dhpc';'dthal';'vpm';'po';'thalamus';'hypothalrg'};
+pattern_list = {'ac';'s1bf';'lpta';'rs';'antcortex';'amidcortex';'pmidcortex';'postcortex';'neocortex';...
+    'dg';'ca3';'ca2';'ca1';'dhpc';'vhpc';'subiculum';...
+    'dthal';'vthal';'vpm';'po';'thalamus';'cpu';'gp';'hypothalrg'};
+
 files_regions_sorted = [];
 for i =1:length(pattern_list)
     pattern = strcat('_',pattern_list(i),'_');

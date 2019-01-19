@@ -1,13 +1,15 @@
-function export_lfp_bands(foldername,handles,val)
+function success = export_lfp_bands(foldername,handles,val)
 % Export bands in Cereplex_Traces.mat
 % bands frequencies and smoothing defined in the Preferences.mat
 % user can select bands and channels manually
 
+success = false;
+
 global DIR_SAVE FILES CUR_FILE;
 load('Preferences.mat','GFilt');
 
-% if val == 1 (default) user can select which channels to export
-if nargin <4
+% if val undefined, set val = 1 (default) user can select which channels to export
+if nargin <3
     val = 1;
 end
 
@@ -47,13 +49,20 @@ end
 if val == 1
     [ind_lfp,v] = listdlg('Name','LFP Selection','PromptString','Select channels to export',...
         'SelectionMode','multiple','ListString',channel_list,'InitialValue',[],'ListSize',[300 500]);
-    if v==0 || isempty(ind_lfp)
-        warning('No trace selected .\n');
-        return;
-    else
-        channel_list =  channel_list(ind_lfp);
-    end
+else
+    % batch mode
+    ind_lfp = 1:length(channel_list);
+    v = true;
 end
+
+% return if selection empty
+if v==0 || isempty(ind_lfp)
+    warning('No trace selected .\n');
+    return;
+else
+    channel_list =  channel_list(ind_lfp);
+end
+
 
 % Sorting band info in array and vectors
 str_band = {sprintf('Delta [%.1f - %.1f Hz] (%.3f s)',GFilt.delta_inf,GFilt.delta_sup,GFilt.delta_smooth);...
@@ -70,16 +79,25 @@ tband_smooth = [GFilt.delta_smooth;GFilt.theta_smooth;GFilt.gammalow_smooth;GFil
 if val == 1
     [ind_band,v] = listdlg('Name','Band Selection','PromptString','Select bands to export',...
         'SelectionMode','multiple','ListString',str_band,'InitialValue',[],'ListSize',[300 500]);
-    if v==0 || isempty(ind_band)
-        warning('No band selected .\n');
-        return;
-    else 
-        band_list =  band_list(ind_band);
-        fband_inf =  fband_inf(ind_band);
-        fband_sup =  fband_sup(ind_band);
-        tband_smooth =  tband_smooth(ind_band);
-    end
+else
+    % batch mode
+    %pattern_list = {'Theta','Gamma Mid'};
+    pattern_list = {'Theta'};
+    ind_band = contains(str_band,pattern_list);
+    v = true;
 end
+
+% return if selection empty
+if v==0 || isempty(ind_band)
+    warning('No band selected .\n');
+    return;
+else
+    band_list =  band_list(ind_band);
+    fband_inf =  fband_inf(ind_band);
+    fband_sup =  fband_sup(ind_band);
+    tband_smooth =  tband_smooth(ind_band);
+end
+
 
 % Saving struct
 count = 0;
@@ -160,14 +178,106 @@ for i =1:length(band_list)
     end
 end
 
-% Save dans SpikoscopeTraces.mat
-MetaData = [];
-if ~isempty(traces_filter)
-    traces = [traces_filter,traces_envelope];
-    fprintf('Saving Cereplex traces ...\n');
-    save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
-    fprintf('===> Saved at %s.mat\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'));
+% Merging traces
+traces = [traces_filter,traces_envelope];
+
+% % Save dans SpikoscopeTraces.mat
+% MetaData = [];
+% if ~isempty(traces_filter)
+%     traces = [traces_filter,traces_envelope];
+%     fprintf('Saving Cereplex traces ...\n');
+%     save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
+%     fprintf('===> Saved at %s.mat\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'));
+% end
+% success = load_lfptraces(foldername,handles);
+
+% Direct Loading LFP traces
+load('Preferences.mat','GDisp','GTraces');
+g_colors = get(groot,'DefaultAxesColorOrder');
+
+if val == 1
+    [ind_traces,ok] = listdlg('PromptString','Select Traces','SelectionMode','multiple',...
+        'ListString',{traces.fullname}','ListSize',[400 500]);
+else
+    % batch mode
+    pattern_list = {'LFP'};
+    % pattern_list = {'Power'};
+    ind_traces = find(contains({traces.fullname}',pattern_list)==1);
+    ok = true;
 end
 
+if ~ok || isempty(ind_traces)
+    return;
+end
+
+for i=1:length(ind_traces)
+    str = lower(char(traces(ind_traces(i)).fullname));
+    if strfind(str,'delta')
+        color = g_colors(5,:);
+    elseif strfind(str,'theta')
+        color = g_colors(7,:);
+    elseif strfind(str,'gammalow')
+        color = g_colors(1,:);
+    elseif strfind(str,'gammamid')
+        color = g_colors(2,:);
+    elseif strfind(str,'gammahigh')
+        color = g_colors(3,:);
+    elseif strfind(str,'ripple')
+        color = g_colors(4,:);
+    else
+        color = rand(1,3);
+    end
+    hl = line('XData',traces(ind_traces(i)).X_ind,...
+        'YData',traces(ind_traces(i)).Y_im,...
+        'Color',color,...
+        'Tag','Trace_Cerep',...
+        'Visible','off',...
+        'HitTest','off',...
+        'Parent', handles.RightAxes);
+    
+    if handles.RightPanelPopup.Value==4
+        set(hl,'Visible','on');
+    end
+    
+    % Updating UserData
+    t = traces(ind_traces(i)).fullname;
+%     p = traces(ind_traces(i)).parent;
+%     %BEHAVIOR
+%     if strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_X_(m)_B0_B0')
+%         t = regexprep(t,'BEHAVIOR_0_Position_continuous','X(m)');
+%     elseif strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_Y_(m)_B0_B0')
+%         t = regexprep(t,'BEHAVIOR_0_Position_continuous','Y(m)');
+%     else
+%         t = regexprep(t,'BEHAVIOR_0_Position_continuous','SPEED');
+%     end
+%     t = regexprep(t,'/B0','');
+%     
+%     %LFP
+%     t = regexprep(t,'Source_filtered_for_thet','LFP-theta');
+%     t = regexprep(t,'background_pow|background_po','up');
+%     t = regexprep(t,'LFP_0_|_power|_po','');
+%     t = regexprep(t,'FUS_1_Region_continuous_estima','fUS');
+%     t = regexprep(t,'Source_filtered_for_back','LFP');
+%     
+%     % ACCEL
+%     t = regexprep(t,'Accelerometer_LFP_','');
+%     t = regexprep(t,'ACCELEROMETER_0_Posture','ACCEL_POWER');
+%     t = regexprep(t,'ACCELEROMETER_0_Source_filtere','ACCEL');
+%     
+%     % EMG
+%     t = regexprep(t,'MUA_LFP_','');
+%     t = regexprep(t,'MUA_0_Source_filtered_for_mult','EMG');
+%     t = regexprep(t,'MUA_0_Multiunit_frequency__Fas|MUA_0_Multiunit_frequency__Slo','EMG_POWER');
+    
+    s.Name = regexprep(t,'_','-');
+    s.X = traces(ind_traces(i)).X;
+    s.Y = traces(ind_traces(i)).Y;
+    hl.UserData = s;
+    
+end
+fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces).fullname);
+
+
+success = true;
 
 end

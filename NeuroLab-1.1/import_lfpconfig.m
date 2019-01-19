@@ -1,12 +1,14 @@
-function import_lfpconfig(folder_name,handles)
+function success = import_lfpconfig(folder_name,handles)
 % Load LFP Configuration from NConfig
 
 global SEED_CONFIG FILES CUR_FILE
+success = false;
 
 % Pick file
 filter = {'*.txt'};
-title = 'Choose NConfig file';
-defname = SEED_CONFIG;
+title = sprintf('[%s] Choose NConfig file',folder_name);
+%defname = SEED_CONFIG;
+defname = fullfile(SEED_CONFIG,'Phd-fUS-Video');
 [file,path]  = uigetfile(filter,title,defname);
 
 if isempty(file) || sum(path==0)
@@ -50,5 +52,7 @@ fprintf('Files.mat updated.\n');
 save(fullfile(folder_name,'Nconfig.mat'),...
     'ind_channel','channel_id','channel_list','channel_type');
 fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
+
+success = true;
 
 end
