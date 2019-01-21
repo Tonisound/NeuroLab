@@ -119,6 +119,7 @@ GTraces.GraphicLoadFormat = 'Graphic_objects.mat';
 GTraces.GraphicLoadFormat_index = 1;
 GTraces.GraphicSaveFormat = 'Graphic_objects.mat';
 GTraces.GraphicSaveFormat_index = 1;
+GTraces.GaussianSmoothing = 1;
 
 GImport.burst_thresh = 10;
 GImport.resamp_cont = .5;
@@ -132,12 +133,15 @@ GImport.Video_loading = 'full';
 GImport.LFP_loading_index = 2;
 GImport.LFP_loading = 'ns2';
 
-GFilt.theta_inf = 6;
-GFilt.theta_sup = 10;
-GFilt.theta_smooth = .5;
+GFilt.broad_inf = 1;
+GFilt.broad_sup = 250;
+GFilt.broad_smooth = .5;
 GFilt.delta_inf = 1;
 GFilt.delta_sup = 4;
 GFilt.delta_smooth = .5;
+GFilt.theta_inf = 6;
+GFilt.theta_sup = 10;
+GFilt.theta_smooth = .5;
 GFilt.gammalow_inf = 30;
 GFilt.gammalow_sup = 50;
 GFilt.gammalow_smooth = .1;

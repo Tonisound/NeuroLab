@@ -2,7 +2,7 @@ function success = import_externalfiles(dir_recording,dir_save,handles,val)
 
 success = false;
 
-% Manual mode val = 1; bath mode val =0
+% Manual mode val = 1; batch mode val =0
 if nargin<4
     val = 1;
 end
@@ -118,20 +118,15 @@ end
 
 % Direct Trace Loading
 ind_traces = 1:length(traces);
+% getting lines name
+lines = findobj(handles.RightAxes,'Tag','Trace_Cerep');
+lines_name = cell(length(lines),1);
+for i =1:length(lines)
+    lines_name{i} = lines(i).UserData.Name;
+end
+
+
 for i=1:length(ind_traces)
-    %str = lower(char(traces(ind_traces(i)).fullname));
-    color = rand(1,3);
-    hl = line('XData',traces(ind_traces(i)).X_ind,...
-        'YData',traces(ind_traces(i)).Y_im,...
-        'Color',color,...
-        'Tag','Trace_Cerep',...
-        'Visible','off',...
-        'HitTest','off',...
-        'Parent', handles.RightAxes);
-    
-    if handles.RightPanelPopup.Value==4
-        set(hl,'Visible','on');
-    end
     
     % Updating UserData
     t = traces(ind_traces(i)).fullname;
@@ -141,28 +136,51 @@ for i=1:length(ind_traces)
     t = strrep(t,'BEHAVIOR_0_Position_continuous_estimate__Body_position_Y_(m)_B0_B0[B0]','Y(m)');
     t = strrep(t,'BEHAVIOR_0_Position_continuous_estimate__Body_speed_(m/s)_B0_B0[B0]','SPEED');
     %t = regexprep(t,'[B0]','');
-      
     % ACCEL
     %t = regexprep(t,'Accelerometer_LFP_','');
     t = strrep(t,'ACCELEROMETER_0_Posture_power','ACCEL_POWER');
     t = strrep(t,'ACCELEROMETER_0_Source_filtered_for_posture','ACCEL');
-    
     % EMG
     %t = regexprep(t,'MUA_LFP_','');
     %t = regexprep(t,'MUA_0_Source_filtered_for_mult','EMG');
     %t = regexprep(t,'MUA_0_Multiunit_frequency__Fas|MUA_0_Multiunit_frequency__Slo','EMG_POWER');
-    
     % LFP
     t = strrep(t,'LFP_0_Phasic_theta_power','Phasic_theta');
     t = strrep(t,'LFP_0_Theta_power','Theta');
+    t = regexprep(t,'_','-');
     
-    s.Name = regexprep(t,'_','-');
-    s.X = traces(ind_traces(i)).X;
-    s.Y = traces(ind_traces(i)).Y;
-    hl.UserData = s;
+    if contains(t,lines_name)
+        %line already exists overwrite
+        ind_overwrite = find(contains(lines_name,t)==1);
+        for j=1:length(ind_overwrite)
+            lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
+            lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
+            fprintf('External Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
+        end
+    else
+        %line creation
+        %str = lower(char(traces(ind_traces(i)).fullname));
+        color = rand(1,3);
+        hl = line('XData',traces(ind_traces(i)).X_ind,...
+            'YData',traces(ind_traces(i)).Y_im,...
+            'Color',color,...
+            'Tag','Trace_Cerep',...
+            'Visible','off',...
+            'HitTest','off',...
+            'Parent', handles.RightAxes);
+        
+        if handles.RightPanelPopup.Value==4
+            set(hl,'Visible','on');
+        end
+        % Line creation
+        s.Name = t;
+        s.X = traces(ind_traces(i)).X;
+        s.Y = traces(ind_traces(i)).Y;
+        hl.UserData = s;
+        fprintf('External Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);
+    end
     
 end
-fprintf('External Trace successfully loaded (%s)\n',traces(ind_traces).fullname);
 
 success = true;
 

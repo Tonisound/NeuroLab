@@ -123,7 +123,7 @@ for i =1:length(band_list)
         fs = 1/data.f;
         
         % Pass-band filtering
-        fprintf('Filtering LFP for %s [%s]...',band_name,str_channel);
+        fprintf('Filtering LFP for %s [%s] [%.1f Hz; %.1f Hz]...',band_name,str_channel,f1,f2);
         [B,A]  = butter(1,[f1 f2]/(fs/2),'bandpass');
         Y_temp = filtfilt(B,A,Y);
         
@@ -136,16 +136,18 @@ for i =1:length(band_list)
             X_filt = X;
             Y_filt = Y_temp;
         end
-        fprintf(' done;\n');
+        
         
         % Extract envelope
         % fl = max(round(t_smooth/(X_filt(2)-X_filt(1))),1);
-        % [Y_env_up,Y_env_down] = envelope(Y_filt,fl,'analytic');        
+        % [Y_env_up,Y_env_down] = envelope(Y_filt,fl,'analytic');
+        fprintf('Smoothing [%.1f s]...',t_smooth);
         f_filt = 1/(X_filt(2)-X_filt(1));
         [Y_env_up,~] = envelope(Y_filt);
         %Gaussian smoothing
         n = max(round(t_smooth*f_filt),1);
-        Y_power = conv(Y_env_up,gausswin(n)/n,'same');
+        Y_power = conv(Y_env_up,gausswin(n)/n,'same'); 
+        fprintf(' done;\n');
 
         % Saving
         count = count+1;
@@ -210,73 +212,65 @@ if ~ok || isempty(ind_traces)
     return;
 end
 
+% getting lines name
+lines = findobj(handles.RightAxes,'Tag','Trace_Cerep');
+lines_name = cell(length(lines),1);
+for i =1:length(lines)
+    lines_name{i} = lines(i).UserData.Name;
+end
+
 for i=1:length(ind_traces)
-    str = lower(char(traces(ind_traces(i)).fullname));
-    if strfind(str,'delta')
-        color = g_colors(5,:);
-    elseif strfind(str,'theta')
-        color = g_colors(7,:);
-    elseif strfind(str,'gammalow')
-        color = g_colors(1,:);
-    elseif strfind(str,'gammamid')
-        color = g_colors(2,:);
-    elseif strfind(str,'gammahigh')
-        color = g_colors(3,:);
-    elseif strfind(str,'ripple')
-        color = g_colors(4,:);
-    else
-        color = rand(1,3);
-    end
-    hl = line('XData',traces(ind_traces(i)).X_ind,...
-        'YData',traces(ind_traces(i)).Y_im,...
-        'Color',color,...
-        'Tag','Trace_Cerep',...
-        'Visible','off',...
-        'HitTest','off',...
-        'Parent', handles.RightAxes);
     
-    if handles.RightPanelPopup.Value==4
-        set(hl,'Visible','on');
-    end
-    
-    % Updating UserData
+    % finding trace name
     t = traces(ind_traces(i)).fullname;
-%     p = traces(ind_traces(i)).parent;
-%     %BEHAVIOR
-%     if strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_X_(m)_B0_B0')
-%         t = regexprep(t,'BEHAVIOR_0_Position_continuous','X(m)');
-%     elseif strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_Y_(m)_B0_B0')
-%         t = regexprep(t,'BEHAVIOR_0_Position_continuous','Y(m)');
-%     else
-%         t = regexprep(t,'BEHAVIOR_0_Position_continuous','SPEED');
-%     end
-%     t = regexprep(t,'/B0','');
-%     
-%     %LFP
-%     t = regexprep(t,'Source_filtered_for_thet','LFP-theta');
-%     t = regexprep(t,'background_pow|background_po','up');
-%     t = regexprep(t,'LFP_0_|_power|_po','');
-%     t = regexprep(t,'FUS_1_Region_continuous_estima','fUS');
-%     t = regexprep(t,'Source_filtered_for_back','LFP');
-%     
-%     % ACCEL
-%     t = regexprep(t,'Accelerometer_LFP_','');
-%     t = regexprep(t,'ACCELEROMETER_0_Posture','ACCEL_POWER');
-%     t = regexprep(t,'ACCELEROMETER_0_Source_filtere','ACCEL');
-%     
-%     % EMG
-%     t = regexprep(t,'MUA_LFP_','');
-%     t = regexprep(t,'MUA_0_Source_filtered_for_mult','EMG');
-%     t = regexprep(t,'MUA_0_Multiunit_frequency__Fas|MUA_0_Multiunit_frequency__Slo','EMG_POWER');
     
-    s.Name = regexprep(t,'_','-');
-    s.X = traces(ind_traces(i)).X;
-    s.Y = traces(ind_traces(i)).Y;
-    hl.UserData = s;
+    if contains(t,lines_name)
+        %line already exists overwrite
+        ind_overwrite = find(contains(lines_name,t)==1);
+        for j=1:length(ind_overwrite)
+            lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
+            lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
+            fprintf('Cereplex Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
+        end
+    else
+        %line creation
+        str = lower(char(traces(ind_traces(i)).fullname));
+        if strfind(str,'delta')
+            color = g_colors(5,:);
+        elseif strfind(str,'theta')
+            color = g_colors(7,:);
+        elseif strfind(str,'gammalow')
+            color = g_colors(1,:);
+        elseif strfind(str,'gammamid')
+            color = g_colors(2,:);
+        elseif strfind(str,'gammahigh')
+            color = g_colors(3,:);
+        elseif strfind(str,'ripple')
+            color = g_colors(4,:);
+        else
+            color = rand(1,3);
+        end
+        % Line creation
+        hl = line('XData',traces(ind_traces(i)).X_ind,...
+            'YData',traces(ind_traces(i)).Y_im,...
+            'Color',color,...
+            'Tag','Trace_Cerep',...
+            'Visible','off',...
+            'HitTest','off',...
+            'Parent', handles.RightAxes);
+        
+        if handles.RightPanelPopup.Value==4
+            set(hl,'Visible','on');
+        end
+        % Updating UserData
+        s.Name = regexprep(t,'_','-');
+        s.X = traces(ind_traces(i)).X;
+        s.Y = traces(ind_traces(i)).Y;
+        hl.UserData = s;
+        fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);
+    end
     
 end
-fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces).fullname);
-
 
 success = true;
 

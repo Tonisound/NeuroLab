@@ -3,8 +3,13 @@ function success = import_lfptraces(F,handles,val)
 success = false;
 
 global DIR_SAVE DIR_CONFIG;
-load('Preferences.mat','GImport');
+load('Preferences.mat','GImport','GFilt');
 dir_save = fullfile(DIR_SAVE,F.nlab);
+
+% Manual mode val = 1; batch mode val =0
+if nargin<3
+    val=1;
+end
 
 if exist(fullfile(dir_save,'Time_Reference.mat'),'file')
     data_t = load(fullfile(dir_save,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
@@ -132,7 +137,15 @@ for i=1:length(ind_channel)
     traces(i).X_im = data_t.time_ref.Y;
     traces(i).Y_im = interp1(traces(i).X,traces(i).Y,traces(i).X_im);
     traces(i).nb_samples = nb_samples;
-    fprintf('Succesful Importation %s [Parent %s].\n',traces(i).fullname,traces(i).parent);
+    
+    % Filtering LFP
+    f1 = GFilt.broad_inf;
+    f2 = GFilt.broad_sup;
+    [B,A]  = butter(1,[f1 f2]/(f_samp/2),'bandpass');
+    Y_filt = filtfilt(B,A,traces(i).Y);
+    traces(i).Y = Y_filt;
+    
+    fprintf('Succesful Importation %s [Parent %s] [Bandpass: (%.1f Hz,%.1f Hz)].\n',traces(i).fullname,traces(i).parent,f1,f2);
 end
 
 
@@ -141,16 +154,14 @@ end
 %     save(fullfile(dir_save,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
 % end
 % fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Cereplex_Traces.mat'));
-
 % Loading LFP traces
 % load_lfptraces(dir_save,handles)
-
 
 % Direct Loading LFP traces
 load('Preferences.mat','GDisp','GTraces');
 g_colors = get(groot,'defaultAxesColorOrder');
 
-if nargin <3
+if val ==1
     [ind_traces,ok] = listdlg('PromptString','Select Traces','SelectionMode','multiple',...
         'ListString',{traces.fullname},'ListSize',[400 500]);
 else
@@ -162,70 +173,63 @@ if ~ok || isempty(ind_traces)
     return;
 end
 
-for i=1:length(ind_traces)
-    str = lower(char(traces(ind_traces(i)).fullname));
-    if strfind(str,'lfp')
-        color = 'k';
-    elseif strfind(str,'emg')
-        color = [.5 .5 .5];
-    elseif strfind(str,'acc')
-        color = 'g';
-    elseif strfind(str,'temp')
-        color = 'r';
-    elseif strfind(str,'gyr')
-        color = 'b';
-    else
-        color = rand(1,3);
-    end
-    hl = line('XData',traces(ind_traces(i)).X_ind,...
-        'YData',traces(ind_traces(i)).Y_im,...
-        'Color',color,...
-        'Tag','Trace_Cerep',...
-        'Visible','off',...
-        'HitTest','off',...
-        'Parent', handles.RightAxes);
-    
-    if handles.RightPanelPopup.Value==4
-        set(hl,'Visible','on');
-    end
-    
-    % Updating UserData
-    t = traces(ind_traces(i)).fullname;
-    p = traces(ind_traces(i)).parent;
-    %BEHAVIOR
-    if strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_X_(m)_B0_B0')
-        t = regexprep(t,'BEHAVIOR_0_Position_continuous','X(m)');
-    elseif strcmp(p,'BEHAVIOR_0_Position_continuous_estimate__Body_position_Y_(m)_B0_B0')
-        t = regexprep(t,'BEHAVIOR_0_Position_continuous','Y(m)');
-    else
-        t = regexprep(t,'BEHAVIOR_0_Position_continuous','SPEED');
-    end
-    t = regexprep(t,'/B0','');
-    
-    %LFP
-    t = regexprep(t,'Source_filtered_for_thet','LFP-theta');
-    t = regexprep(t,'background_pow|background_po','up');
-    t = regexprep(t,'LFP_0_|_power|_po','');
-    t = regexprep(t,'FUS_1_Region_continuous_estima','fUS');
-    t = regexprep(t,'Source_filtered_for_back','LFP');
-    
-    % ACCEL
-    t = regexprep(t,'Accelerometer_LFP_','');
-    t = regexprep(t,'ACCELEROMETER_0_Posture','ACCEL_POWER');
-    t = regexprep(t,'ACCELEROMETER_0_Source_filtere','ACCEL');
-    
-    % EMG
-    t = regexprep(t,'MUA_LFP_','');
-    t = regexprep(t,'MUA_0_Source_filtered_for_mult','EMG');
-    t = regexprep(t,'MUA_0_Multiunit_frequency__Fas|MUA_0_Multiunit_frequency__Slo','EMG_POWER');
-    
-    s.Name = regexprep(t,'_','-');
-    s.X = traces(ind_traces(i)).X;
-    s.Y = traces(ind_traces(i)).Y;
-    hl.UserData = s;
-    
+% getting lines name
+lines = findobj(handles.RightAxes,'Tag','Trace_Cerep');
+lines_name = cell(length(lines),1);
+for i =1:length(lines)
+    lines_name{i} = lines(i).UserData.Name;
 end
-fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces).fullname);
+
+for i=1:length(ind_traces)
+     
+    % finding trace name
+    t = traces(ind_traces(i)).fullname;
+    
+    if contains(t,lines_name)
+        %line already exists overwrite
+        ind_overwrite = find(contains(lines_name,t)==1);
+        for j=1:length(ind_overwrite)
+            lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
+            lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
+            fprintf('LFP Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
+        end
+    else
+        %line creation
+        str = lower(char(traces(ind_traces(i)).fullname));
+        if strfind(str,'lfp')
+            color = 'k';
+        elseif strfind(str,'emg')
+            color = [.5 .5 .5];
+        elseif strfind(str,'acc')
+            color = 'g';
+        elseif strfind(str,'temp')
+            color = 'r';
+        elseif strfind(str,'gyr')
+            color = 'b';
+        else
+            color = rand(1,3);
+        end
+        % Line creation
+        hl = line('XData',traces(ind_traces(i)).X_ind,...
+            'YData',traces(ind_traces(i)).Y_im,...
+            'Color',color,...
+            'Tag','Trace_Cerep',...
+            'Visible','off',...
+            'HitTest','off',...
+            'Parent', handles.RightAxes);
+        if handles.RightPanelPopup.Value==4
+            set(hl,'Visible','on');
+        end
+        % Updating UserData
+        s.Name = regexprep(t,'_','-');
+        s.X = traces(ind_traces(i)).X;
+        s.Y = traces(ind_traces(i)).Y;
+        hl.UserData = s;
+        fprintf('LFP Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);
+    end
+
+end
+
 
 success = true;
 

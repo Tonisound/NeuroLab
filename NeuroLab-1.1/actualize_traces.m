@@ -2,6 +2,7 @@ function success = actualize_traces(handles)
 % Actualize Right Panel Traces when user modifies IM
 
 global DIR_SAVE FILES CUR_FILE IM ;
+load('Preferences.mat','GTraces');
 success = false;
 
 indexes  = isinf(1./IM);
@@ -40,14 +41,19 @@ tm.YData(1:end-1) = mean(mean(IM,2,'omitnan'),1,'omitnan');
 
 % Update YData for Mean, Lines and Boxes
 graphics = findobj(handles.CenterAxes,'Type','Patch','-or','Type','Line');
+t_gauss = GTraces.GaussianSmoothing;
+    
 for idx =1:length(graphics)
-    fprintf('Actualizing trace %d (%s)\n',idx,graphics(idx).UserData.UserData.Name);
+    fprintf('Actualizing trace %d (%s)... ',idx,graphics(idx).UserData.UserData.Name);
     switch graphics(idx).Tag
         case 'Pixel'
             pt_cp(1,1) = graphics(idx).XData;
             pt_cp(1,2) = graphics(idx).YData;
             %graphics(idx).UserData.YData(~isnan(graphics(idx).UserData.YData)) = IM(pt_cp(1,2),pt_cp(1,1),:);
-            graphics(idx).UserData.YData(1:end-1) = IM(pt_cp(1,2),pt_cp(1,1),:);
+            %graphics(idx).UserData.YData(1:end-1) = IM(pt_cp(1,2),pt_cp(1,1),:);
+            y = IM(pt_cp(1,2),pt_cp(1,1),:);
+            y = squeeze(y);
+        
         case 'Box'
             reg_y = graphics(idx).XData;
             reg_x = graphics(idx).YData;
@@ -56,15 +62,50 @@ for idx =1:length(graphics)
             I = max(reg_x(1),reg_x(2));
             J = max(reg_y(3),reg_y(2));
             %graphics(idx).UserData.YData(~isnan(graphics(idx).UserData.YData)) = mean(mean(IM(i:I,j:J,:),2,'omitnan'),1,'omitnan');
-            graphics(idx).UserData.YData(1:end-1) = mean(mean(IM(i:I,j:J,:),2,'omitnan'),1,'omitnan');
+            %graphics(idx).UserData.YData(1:end-1) = mean(mean(IM(i:I,j:J,:),2,'omitnan'),1,'omitnan');
+            y = mean(mean(IM(i:I,j:J,:),2,'omitnan'),1,'omitnan');
+            y = squeeze(y);
+            
         case 'Region'
             im_mask = graphics(idx).UserData.UserData.Mask;
             im_mask(im_mask==0)=NaN;
             im_mask = IM.*repmat(im_mask,1,1,size(IM,3));
             %graphics(idx).UserData.YData(~isnan(graphics(idx).UserData.YData)) = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
-            graphics(idx).UserData.YData(1:end-1) = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
+            %graphics(idx).UserData.YData(1:end-1) = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
+            y = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
+            y = squeeze(y);
     end
+    
+    % Gaussian smoothing
+    if t_gauss>0
+        fprintf(' Smoothing constant (%.1f s)... ',t_gauss);
+        delta =  time_ref.Y(2)-time_ref.Y(1);
+        %graphics(idx).UserData.YData(1:end-1) = squeeze(imgaussfilt(y,round(t_gauss/delta),'FilterDomain','spatial'));
+        %graphics(idx).UserData.YData(1:end-1) = nanconv(y,w,'same');
+        
+        % gaussian nan convolution + nan padding (only for burst_recording)
+        length_burst = 59;
+        n_burst = length(y)/length_burst;
+        w = gausswin(round(2*t_gauss/delta));
+        w = w/sum(w);
+        y_reshape = [reshape(y,[length_burst,n_burst]);NaN(length(w),n_burst)];
+        y_conv = nanconv(y_reshape(:),w,'same');
+        y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
+        y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
+        graphics(idx).UserData.YData(1:end-1) = y_final;
+    else
+        graphics(idx).UserData.YData(1:end-1)= y;
+    end
+    fprintf('done.\n');
+    
 end
+
+% Smoothing mean
+y_reshape = [reshape(squeeze(tm.YData(1:end-1)),[length_burst,n_burst]);NaN(length(w),n_burst)];
+y_conv = nanconv(y_reshape(:),w,'same');
+y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
+y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
+tm.YData(1:end-1) = y_final;
 
 success = true;
 

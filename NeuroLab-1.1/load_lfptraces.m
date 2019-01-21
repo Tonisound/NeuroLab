@@ -82,20 +82,17 @@ for i=1:length(ind_traces)
     else
         t = regexprep(t,'BEHAVIOR_0_Position_continuous','SPEED');
     end
-    t = regexprep(t,'/B0','');
-    
+    t = regexprep(t,'/B0','');    
     %LFP
     t = regexprep(t,'Source_filtered_for_thet','LFP-theta');
     t = regexprep(t,'background_pow|background_po','up');
     t = regexprep(t,'LFP_0_|_power|_po','');
     t = regexprep(t,'FUS_1_Region_continuous_estima','fUS');
     t = regexprep(t,'Source_filtered_for_back','LFP');
-    
     % ACCEL
     t = regexprep(t,'Accelerometer_LFP_','');
     t = regexprep(t,'ACCELEROMETER_0_Posture','ACCEL_POWER');
     t = regexprep(t,'ACCELEROMETER_0_Source_filtere','ACCEL');
-    
     % EMG
     t = regexprep(t,'MUA_LFP_','');
     t = regexprep(t,'MUA_0_Source_filtered_for_mult','EMG');

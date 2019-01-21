@@ -458,14 +458,14 @@ if ~isempty(handles2.TagButton.UserData)&&length(handles2.TagButton.UserData.Sel
 end
 
 %Feeding traces to Button Compute
-% bc.UserData.traces = flipud(traces);
-% bc.UserData.phases = flipud(phases);
-% bc.UserData.traces_name = flipud(traces_name);
-% bc.UserData.phases_name = flipud(phases_name);
-bc.UserData.traces = traces;
-bc.UserData.phases = phases;
-bc.UserData.traces_name = traces_name;
-bc.UserData.phases_name = phases_name;
+bc.UserData.traces = flipud(traces);
+bc.UserData.phases = flipud(phases);
+bc.UserData.traces_name = flipud(traces_name);
+bc.UserData.phases_name = flipud(phases_name);
+% bc.UserData.traces = traces;
+% bc.UserData.phases = phases;
+% bc.UserData.traces_name = traces_name;
+% bc.UserData.phases_name = phases_name;
 bc.UserData.save_data = [];
 
 handles2 = reset_Callback([],[],handles2,myhandles);
