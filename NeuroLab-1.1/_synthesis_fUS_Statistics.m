@@ -737,14 +737,18 @@ TimeTag_Data_full = [];
 recording_full = [];
 str_recordings = [];
 RHO = NaN(length(str_channels),length(str_channels),length(str_groups),length(str_files));
+IC_INF = NaN(size(RHO));
+IC_SUP = NaN(size(RHO));
+N_DOTS = NaN(length(str_groups),length(str_files));
 %BDATA = NaN(3,length(str_channels),length(str_files));
 BDATA = [];
     
 for i=1:length(ft_sel)
     ii = ft_sel(i);
     filename = fullfile(folder,char(all_files(ii)));
-    data = load(filename,'S','r_length','label_ampli','label_episodes',...
-        'label_channels','all_rhos','all_bars','recording');
+    % data = load(filename,'S','r_length','label_ampli','label_episodes',...
+    %     'label_channels','all_rhos','all_bars','recording');
+    data = load(filename);
     
     % TimeTag_Data
     TimeTag_Data = NaN(data.r_length,length(tt_sel),length(gt_sel));
@@ -779,26 +783,44 @@ for i=1:length(ft_sel)
     end
     % all_rhos_Data
     all_rhos_Data = NaN(length(str_channels),length(str_channels),length(str_groups));
+    all_icinf_Data = NaN(length(str_channels),length(str_channels),length(str_groups));
+    all_icsup_Data = NaN(length(str_channels),length(str_channels),length(str_groups));
     all_rhos = data.all_rhos;
+    
     for k=1:length(str_groups)
         pattern2 = char(str_groups(k));
         ind_group = find(strcmp(data.label_episodes,pattern2)==1);
         if length(ind_group)==1
             rho = all_rhos(indexes_in,indexes_in,ind_group);
             all_rhos_Data(indexes_out,indexes_out,k) = rho;
+            % Confidence intervals
+            n_dots = length(data.S(k,1).x_data);
+            z = .5*(log(1+rho)-log(1-rho));
+            s_z = sqrt(1/(n_dots-3));
+            z_inf = z-1.96*s_z;
+            z_sup = z+1.96*s_z;
+            ic_inf = (exp(2*z_inf)-1)./(exp(2*z_inf)+1);
+            ic_sup = (exp(2*z_sup)-1)./(exp(2*z_sup)+1);
+            % aggregate
+            all_icinf_Data(indexes_out,indexes_out,k) = ic_inf; 
+            all_icsup_Data(indexes_out,indexes_out,k) = ic_sup;
+            N_DOTS(k,i) = n_dots;
         end
     end
+    
     RHO(:,:,:,i) = all_rhos_Data;
+    IC_INF(:,:,:,i) = all_icinf_Data;
+    IC_SUP(:,:,:,i) = all_icsup_Data;
     % all_bars_Data
     all_bars_Data = NaN(size(data.all_bars,1),length(str_channels));
     all_bars_Data(:,indexes_out) = data.all_bars(:,indexes_in);
     %BDATA(:,:,i) = all_bars_Data;
     BDATA = cat(3,BDATA,all_bars_Data);
     fprintf('Data loaded %s \n',filename);
+    
 end
 tt_full = TimeTag_Data_full;
 TimeTag_Data_full = permute(TimeTag_Data_full,[1,3,2]);
-
 
 % First Panel
 % Initialize boxes
@@ -1233,7 +1255,7 @@ end
 
 % Keeping only specified episodes
 %str_ampli = {'QW';'AW';'REM';'REM-PHASIC'};
-str_ampli = {'AW';'REM';'REM-PHASIC'};
+str_ampli = {'AW';'REM';' -PHASIC'};
 ind_keep = false(size(data.label_ampli));
 for i =1:length(str_ampli)
     ind_keep(strcmp(data.label_ampli,char(str_ampli(i))))=true;
@@ -1335,7 +1357,31 @@ all_axes = [];
 all_cbars = [];
 %all_rhos = NaN(n_channels,n_channels,n_episodes);
 rho_mean = mean(RHO,4,'omitnan');
-rho_std = std(RHO,[],4,'omitnan');
+%rho_std = std(RHO,[],4,'omitnan');
+ic_inf_mean = mean(IC_INF,4,'omitnan');
+ic_sup_mean = mean(IC_SUP,4,'omitnan');
+% Statistics
+ind_qw = find(strcmp(str_groups,'QW'));
+N_MEAN = mean(N_DOTS,2,'omitnan');
+Z = .5*(log(1+rho_mean)-log(1-rho_mean));
+s_d = sqrt(1/(N_MEAN(ind_qw)-3)+1./(N_MEAN-3));
+S_D = repmat(permute(s_d,[3,2,1]),[size(Z,1),size(Z,2),1]);
+Z_0 = repmat(Z(:,:,ind_qw),[1,1,size(Z,3)]);
+Z_score = (Z-Z_0)./S_D;
+%Z_score = (Z-Z_0)/sqrt(1/(mean(N_MEAN,'omitnan')));
+
+
+figure;
+colormap('parula');
+for ii = 1:length(str_groups)
+    ax = subplot(2,3,ii);
+    imagesc(Z_score(:,:,ii));
+imagesc(.5*(ic_inf_mean(:,:,ii)+ic_sup_mean(:,:,ii)));
+    title(char(str_groups(ii)));
+    ax.CLim = [0,1];
+    colorbar;
+end
+
 for i=1:n_episodes
     %data = permute(TimeTag_Data(:,i,:),[1,3,2]);
     %rho = corr(data,'rows','pairwise');
@@ -1417,6 +1463,25 @@ for i = 1:size(rho_mean,3)
     fprintf('Data saved in file %s\n',filename_out);
 end
 
+% Confidence Intervals Separate files
+for i = 1:size(rho_mean,3)
+    filename_out = fullfile(folder,sprintf('IC_%s.txt',char(str_groups(i))));
+    fid = fopen(filename_out,'w');
+    for k = 1:size(RHO,4)
+        fwrite(fid,sprintf('%s \t ', char(str_recordings(k,:))));
+        fwrite(fid,sprintf('%s \t ',str_channels{:}));
+        fwrite(fid,newline);
+        for l = 1: size(RHO,1)
+            fwrite(fid,sprintf('%s \t ', char(str_channels(l,:))));
+            fwrite(fid,sprintf('[%.3f,%.3f] \t ', IC_INF(l,:,i,k),IC_SUP(l,:,i,k)));
+            fwrite(fid,newline);
+        end
+        fwrite(fid,newline);
+    end  
+    fclose(fid);
+    fprintf('Data saved in file %s\n',filename_out);
+end
+
 % Synthesis
 filename_synt = fullfile(folder,'Synthesis.txt');
 fid2 = fopen(filename_synt,'w');
@@ -1473,7 +1538,9 @@ for i = 1:size(rho_mean,3)
     fwrite(fid2,sprintf('%s \t ',char(str_groups(i,:))));
     fwrite(fid2,sprintf('%s \t ',str_channels{:}));
     
-    fwrite(fid2,sprintf('%s \t ','std'));
+%     fwrite(fid2,sprintf('%s \t ','std'));
+%     fwrite(fid2,sprintf('%s \t ',str_channels{:}));
+    fwrite(fid2,sprintf('%s \t ','Z_score'));
     fwrite(fid2,sprintf('%s \t ',str_channels{:}));
     
     fwrite(fid2,newline);
@@ -1481,8 +1548,28 @@ for i = 1:size(rho_mean,3)
         fwrite(fid2,sprintf('%s \t ', char(str_channels(k,:))));
         fwrite(fid2,sprintf('%.3f \t ', rho_mean(k,:,i)));
         
+%         fwrite(fid2,sprintf('%s \t ',' '));
+%         fwrite(fid2,sprintf('%.3f \t ', rho_std(k,:,i)));
         fwrite(fid2,sprintf('%s \t ',' '));
-        fwrite(fid2,sprintf('%.3f \t ', rho_std(k,:,i)));
+        fwrite(fid2,sprintf('%.3f \t ', Z_score(k,:,i)));
+        fwrite(fid2,newline);
+    end
+    fwrite(fid2,newline);
+end
+% Confidence Intervals
+fwrite(fid2,newline);
+fwrite(fid2,sprintf('CONFIDENCE INTERVALS \n'));   
+for i = 1:size(ic_inf_mean,3)
+    %fwrite(fid2,newline);
+    fwrite(fid2,sprintf('%s \t ',char(str_groups(i,:))));
+    fwrite(fid2,sprintf('%s \t ',str_channels{:}));
+    
+    fwrite(fid2,newline);
+    for k = 1: size(rho_mean,1)
+        fwrite(fid2,sprintf('%s \t ', char(str_channels(k,:))));
+        for jj=1:length(ic_inf_mean(k,:,i))
+            fwrite(fid2,sprintf('[%.3f,%.3f] \t ',ic_inf_mean(k,jj,i),ic_sup_mean(k,jj,i)));
+        end
         fwrite(fid2,newline);
     end
     fwrite(fid2,newline);

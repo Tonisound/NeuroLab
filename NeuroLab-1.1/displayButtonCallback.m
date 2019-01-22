@@ -68,12 +68,9 @@ switch strtrim(str(val,:))
         
     case '(Figure) Global Episode Display'
         figure_GlobalDisplay(handles,1);
-     
-    case '(Synthesis) fUS Episode Statistics'
-        synthesis_fUS_Statistics();
         
-    case '(Synthesis) Peak Detection'
-        synthesis_PeakDetection();
+    case '(Figure) Cross-Correlation LFP-fUS'
+        figure_CrossCorrelation(handles,1);
         
 end
 

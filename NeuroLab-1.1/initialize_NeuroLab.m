@@ -169,6 +169,9 @@ uimenu(m2c,'Label','Region Statistics','Tag','SynthesisMenu_Region');
 uimenu(m2c,'Label','Global Display','Tag','SynthesisMenu_Display');
 uimenu(m2c,'Label','fUS Episode Statistics','Tag','SynthesisMenu_Statistics');
 uimenu(m2c,'Label','Peak Detection','Tag','SynthesisMenu_PeakDetection');
+uimenu(m2c,'Label','Cross-Correlation LFP-fUS','Tag','SynthesisMenu_CrossCorrelation');
+uimenu(m2c,'Label','Vascular Surge','Tag','SynthesisMenu_VascularSurge');
+uimenu(m2c,'Label','Peak Count','Tag','SynthesisMenu_PeakCount');
 uimenu(m2c,'Label','Batch Processing','Tag','SynthesisMenu_Batch','Accelerator','B','Separator','on');
 
 % handles.ExportMenu
@@ -321,8 +324,7 @@ fl = uicontrol(f,'Style','popup',...
 fl_str = '(Movie) Normalized Movie|(Movie) Deformation Field|(Movie) Data Reconstruction';
 fl_str = strcat(fl_str,'|(Figure) Principal and Independent Component Analysis|(Figure) Global Episode Display|(Figure) fUS Episode Statistics');
 fl_str = strcat(fl_str,'|(Figure) Correlation Analysis|(Figure) LFP Wavelet Analysis|(Figure) fUS Fourier Analysis');
-fl_str = strcat(fl_str,'|(Figure) Peak Detection|(Figure) Peri-Event Time Histogram');
-fl_str = strcat(fl_str,'|(Synthesis) fUS Episode Statistics|(Synthesis) Peak Detection');
+fl_str = strcat(fl_str,'|(Figure) Peak Detection|(Figure) Peri-Event Time Histogram|(Figure) Cross-Correlation LFP-fUS');
 fl.String = fl_str;    
 % Process Button
 % handles.DisplayButton
@@ -605,6 +607,9 @@ set(myhandles.SynthesisMenu_Region,'Callback','synthesis_RegionStatistics();');
 set(myhandles.SynthesisMenu_Display,'Callback','synthesis_Global_Display();');
 set(myhandles.SynthesisMenu_Statistics,'Callback','synthesis_fUS_Statistics();');
 set(myhandles.SynthesisMenu_PeakDetection,'Callback','synthesis_PeakDetection();');
+set(myhandles.SynthesisMenu_CrossCorrelation,'Callback','synthesis_CrossCorrelation();');
+set(myhandles.SynthesisMenu_VascularSurge,'Callback','synthesis_VascularSurges();');
+set(myhandles.SynthesisMenu_PeakCount,'Callback','synthesis_PeakCount();');
 
 % handles.ExportMenu
 set(myhandles.ExportMenu_IMOfile,'Callback','export_imofile(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),SEED_SPIKO,FILES(CUR_FILE).session);');

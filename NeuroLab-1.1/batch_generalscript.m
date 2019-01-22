@@ -508,6 +508,9 @@ for i = 1:length(ind_files)
                     
                 case '(Figure) Peak Detection'
                     f2 = figure_PeakDetection(myhandles,0,str_tag);
+                    
+                case '(Figure) Cross-Correlation LFP-fUS'
+                    f2 = figure_CrossCorrelation(myhandles,0,str_tag);
                    
                 case 'Trace Edition'
                     success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);

@@ -53,6 +53,7 @@ if sum(ind_2)==0
     errordlg('Missing LFP-theta channels. Reload configuration.');
     return;
 end
+
 traces_name = temp(ind_1);
 phases_name = temp(ind_2);
 traces = all_traces(ind_1);
@@ -90,8 +91,8 @@ cb1_def = 1;                 % freq correction
 cb2_def = 0;                 % log scale
 cb3_def = 1;                 % linkaxes all channels
 cb4_def = 1;                 % early break (spectrogramm only)
-cb11_def = 0;                % lfp display
-cb12_def = 1;                % lfp filtered
+cb11_def = 1;                % lfp display
+cb12_def = 0;                % lfp filtered
 cb21_def = 1;                % Hold on for spectrogram
 cb31_def = 1;                % Hold on frequency coupling
 cb32_def = 1;                % Ascend/Descend frequency coupling
@@ -145,7 +146,7 @@ efr = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',iP,...
-    'String',.1,...
+    'String',1,...
     'Tag','EditGaussian',...
     'Tooltipstring','Gaussian smoothing (s)');
 exc = uicontrol('Units','normalized',...
@@ -458,14 +459,14 @@ if ~isempty(handles2.TagButton.UserData)&&length(handles2.TagButton.UserData.Sel
 end
 
 %Feeding traces to Button Compute
-bc.UserData.traces = flipud(traces);
-bc.UserData.phases = flipud(phases);
-bc.UserData.traces_name = flipud(traces_name);
-bc.UserData.phases_name = flipud(phases_name);
-% bc.UserData.traces = traces;
-% bc.UserData.phases = phases;
-% bc.UserData.traces_name = traces_name;
-% bc.UserData.phases_name = phases_name;
+% bc.UserData.traces = flipud(traces);
+% bc.UserData.phases = flipud(phases);
+% bc.UserData.traces_name = flipud(traces_name);
+% bc.UserData.phases_name = flipud(phases_name);
+bc.UserData.traces = traces;
+bc.UserData.phases = phases;
+bc.UserData.traces_name = traces_name;
+bc.UserData.phases_name = phases_name;
 bc.UserData.save_data = [];
 
 handles2 = reset_Callback([],[],handles2,myhandles);

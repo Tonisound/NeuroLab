@@ -2,6 +2,7 @@ function success = detect_vascular_surges(folder_name,handles,val)
 % Surge Detection
 
 success = false;
+%global FILES CUR_FILE;
 
 % If nargin > 2 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
@@ -143,8 +144,11 @@ STD_REM = std(Doppler_film(:,:,REM_images==1),[],3).*whole_mask;
 n_whole = sum(sum(whole_mask==1));
 ind_surge = zeros(last_im,1);
 ratio_surge = zeros(last_im,1);
+intensity_surge = zeros(last_im,1);
 
 %IM_DIFF = sign(Doppler_REM-(IM_AW+n_aw*STD_AW));
+%IM_DIFF_Q = Doppler_REM-(IM_AW+n_aw*STD_AW);
+IM_DIFF_Q = Doppler_REM;
 IM_DIFF = (Doppler_REM-(IM_AW+n_aw*STD_AW))>0;
 for i=1:last_im
     temp = IM_DIFF(:,:,i)==1;
@@ -157,6 +161,7 @@ IM_DIFF_ALL = sign(Doppler_film-(IM_AW+n_aw*STD_AW));
 for i=1:last_im
     temp = IM_DIFF_ALL(:,:,i)==1;
     ratio_surge(i) = sum(temp(:))/n_whole;
+    intensity_surge(i) = mean(mean(IM_DIFF_Q(:,:,i),'omitnan'),'omitnan');
 end
 
 % Converting ind_surge in TimeTags_images & TimeTags_strings
@@ -204,6 +209,12 @@ ind_tonic = (ind_tonic+ind_add)>0;
 TimeTags_images_tonic = [];
 TimeTags_strings_tonic = [];
 count = 1;
+
+% Avoiding bug if ind_tonic(end)==1
+if ind_tonic(end)==1
+    ind_tonic(end)=0;
+end
+
 while count<length(ind_tonic)
     if ind_tonic(count) == 0 
         count = count+1;
@@ -325,7 +336,7 @@ end
 
 % Option Erase Previous Data
 if flag_tag
-    l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
+    l = findobj(handles.RightAxes,'Tag','Trace_Spiko');
     for i = 1:length(l)
         if ~isempty(strfind(l(i).UserData.Name,'Index-Surge'))||~isempty(strfind(l(i).UserData.Name,'Ratio-Surge'))...
                 ||~isempty(strfind(l(i).UserData.Name,'IndexSurge'))||~isempty(strfind(l(i).UserData.Name,'RatioSurge'))
@@ -339,7 +350,7 @@ hl = line('XData',1:last_im,...
     'YData',ind_surge*thresh_surge,...
     'Color','k',...
     'LineWidth',2,...
-    'Tag','Trace_Cerep',...
+    'Tag','Trace_Spiko',...
     'Visible','on',...
     'HitTest','off',...
     'Parent', handles.RightAxes);
@@ -356,7 +367,7 @@ hr = line('XData',1:last_im,...
     'YData',ratio_surge,...
     'Color',[.5 .5 .5],...
     'LineWidth',2,...
-    'Tag','Trace_Cerep',...
+    'Tag','Trace_Spiko',...
     'Visible','on',...
     'HitTest','off',...
     'Parent', handles.RightAxes);
@@ -369,16 +380,45 @@ s.X = [X_sup;s.X];
 s.Y = [NaN(size(X_sup));s.Y];
 hr.UserData = s;
 
+% Saving Surges info in struct
+S_surges  = struct('name',[],'recording',[],'episode',[],'animal',[],...
+    'im_start',[],'im_end',[],'duration',[],...
+    'mean_intensity',[],'max_intensity',[],'mean_ratio',[],'max_ratio',[]);
+for i=1:n_phasic
+    temp = regexp(folder_name,filesep,'split');
+    im_start = TimeTags_images_phasic(i,1);
+    im_end = TimeTags_images_phasic(i,2);
+    ind_keep = (im_start>=tt_data.TimeTags_images(:,1))&(im_end<=tt_data.TimeTags_images(:,2))&(contains({tt_data.TimeTags(:).Tag}','REM'));
+    tags = {TimeTags(ind_keep==1).Tag}';
+    if length(tags)==1
+        episode = char(tags);
+    elseif length(tags)>1
+        episode = char(tags(1));
+    else
+        episode = '';
+    end
+    S_surges(i).name = TimeTags_phasic(i).Tag;
+    S_surges(i).recording = strrep(char(temp(end)),'_gfus','');
+    S_surges(i).episode = episode;
+    S_surges(i).animal = '';
+    S_surges(i).im_start = im_start;
+    S_surges(i).im_end = im_end;
+    S_surges(i).duration = TimeTags_seconds_phasic(i,2)-TimeTags_seconds_phasic(i,1);
+    S_surges(i).mean_intensity = mean(intensity_surge(im_start:im_end));
+    S_surges(i).max_intensity = max(intensity_surge(im_start:im_end));
+    S_surges(i).mean_ratio = mean(ratio_surge(im_start:im_end));
+    S_surges(i).max_ratio = max(ratio_surge(im_start:im_end));
+end
+
 % Saving Time_Surges.mat
 if flag_surge
     %IM_DIFF = IM_DIFF(:,:,REM_images==1);
     Doppler_Surge = IM_DIFF_ALL;
     save(fullfile(folder_name,'Time_Surges.mat'),'n_aw','thresh_surge','thresh_second',...
         'AW_images','IM_AW','STD_AW','REM_images','IM_REM','STD_REM',...
-        'ind_surge','ind_tonic','n_phasic','n_tonic',...
-        'ratio_surge','whole_mask','n_whole','Doppler_Surge','-v7.3');
+        'ind_surge','ind_tonic','n_phasic','n_tonic','S_surges',...
+        'ratio_surge','intensity_surge','whole_mask','n_whole','Doppler_Surge','-v7.3');
     fprintf('===> Saved at %s.mat\n',fullfile(folder_name,'Time_Surges.mat'));
-
 end
 
 success = true;
