@@ -262,6 +262,14 @@ handles.Edit2.Position = [ipos(3)/3     ipos(4)/10           ipos(3)/8   ipos(4)
 handles.Edit3.Position = [7*ipos(3)/10     2.75*ipos(4)/5   4*ipos(3)/100   ipos(4)/3];
 handles.Edit4.Position = [7*ipos(3)/10     ipos(4)/10       4*ipos(3)/100   ipos(4)/3];
 
+handles.PlusButton.Units = 'characters';
+handles.MinusButton.Units = 'characters';
+handles.SkipButton.Units = 'characters';
+handles.BackButton.Units = 'characters';
+handles.nextTagButton.Units = 'characters';
+handles.prevTagButton.Units = 'characters';
+handles.RescaleButton.Units = 'characters';
+handles.TagButton.Units = 'characters';
 handles.PlusButton.Position = [4.75*ipos(3)/10     ipos(4)/2-.25   ipos(3)/20   ipos(4)/2];
 handles.MinusButton.Position = [4.75*ipos(3)/10     0   ipos(3)/20   ipos(4)/2];
 handles.SkipButton.Position = [5.25*ipos(3)/10     ipos(4)/2-.25   ipos(3)/20   ipos(4)/2];

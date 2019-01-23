@@ -465,8 +465,9 @@ function initialize_mainTab(handles)
 
 global SEED DIR_SAVE FILES CUR_FILE;
 
-if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file');
-     import_reference_time(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
+     errordlg('Missing File [%s]',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
+     return;
 end
 load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
 handles.ButtonCompute.UserData.time_ref = time_ref;

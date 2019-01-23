@@ -7,8 +7,8 @@ success = false;
 % Pick file
 filter = {'*.txt'};
 title = sprintf('[%s] Choose NConfig file',folder_name);
-%defname = SEED_CONFIG;
-defname = fullfile(SEED_CONFIG,'Phd-fUS-Video');
+defname = SEED_CONFIG;
+%defname = fullfile(SEED_CONFIG,'Phd-fUS-Video');
 [file,path]  = uigetfile(filter,title,defname);
 
 if isempty(file) || sum(path==0)
@@ -45,10 +45,18 @@ while ~feof(fileID)
 end
 fclose(fileID);
 
-%Saving config file
+% Update Files;mat
 FILES(CUR_FILE).ncf = file;
 save('Files.mat','FILES','-append');
 fprintf('Files.mat updated.\n');
+% Update Config.mat
+data_c = load(fullfile(folder_name,'Config.mat'),'File');
+File = data_c.File;
+File.ncf = file;
+save(fullfile(folder_name,'Config.mat'),'File','-append');
+fprintf('File Config.mat appended [%s]',folder_name);
+
+% Save Nconfig.mat
 save(fullfile(folder_name,'Nconfig.mat'),...
     'ind_channel','channel_id','channel_list','channel_type');
 fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));

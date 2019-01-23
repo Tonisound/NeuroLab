@@ -155,7 +155,7 @@ ft.UserData.Selection = [];
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
 D = [cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Trace Edition'};{'LFP Config Importation'};{'Actualize Traces'};{'Save UF Params'}];
+    {'Trace Edition'};{'Import Reference Time'};{'Import LFP Configuration'};{'Actualize Traces'};{'Save UF Params'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -515,7 +515,10 @@ for i = 1:length(ind_files)
                 case 'Trace Edition'
                     success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);
                     
-                case 'LFP Config Importation'
+                case 'Import Reference Time'
+                    success = import_reference_time(FILES(ii),myhandles);
+                
+                case 'Import LFP Configuration'
                     success = import_lfpconfig(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                     
                 case 'Actualize Traces'
@@ -523,7 +526,7 @@ for i = 1:length(ind_files)
                     
                 case 'Save UF Params'
                     success = saving_UFParams(fullfile(FILES(ii).fullpath,FILES(ii).dir_fus),fullfile(DIR_SAVE,FILES(ii).nlab));
-                    
+                      
                 case 'Export IMO file'
                     success = export_imofile(fullfile(DIR_SAVE,FILES(ii).nlab),SEED_SPIKO,FILES(ii).session);
                                     

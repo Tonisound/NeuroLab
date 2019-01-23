@@ -33,7 +33,7 @@ else
     %Sorting LFP channels according to configuration
     if exist(fullfile(foldername,'Nconfig.mat'),'file')
         %sort if lfp configuration is found
-        data_lfp = load(fullfile(foldername,'Nconfig.mat'),'channel_type','ind_channel','channel_id');
+        data_lfp = load(fullfile(foldername,'Nconfig.mat'),'channel_type','channel_id');
         pattern_channels = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
         ind_1 = [];
         for i =1:length(pattern_channels)

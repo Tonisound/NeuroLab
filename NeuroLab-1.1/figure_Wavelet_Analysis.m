@@ -26,7 +26,7 @@ end
 %Sorting LFP channels according to configuration
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
     %sort if lfp configuration is found
-    data_lfp = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'channel_type','ind_channel','channel_id');
+    data_lfp = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'channel_type','channel_id');
     pattern_channels = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
     %pattern_channels = strcat(data_lfp.channel_type(strcmp(data_lfp.channel_type,'LFP')),'/',data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP')));
     ind_1 = [];

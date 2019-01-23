@@ -57,12 +57,13 @@ if flag ==0
     LAST_IM = size(Doppler_film,3);
     X = size(Doppler_film,1);
     Y = size(Doppler_film,2);
+    n_frames = size(Doppler_film,3);
     Current_Image = Doppler_film(X,Y,1);
     File = F;
     l = load('Files.mat','UiValues_default');
     UiValues = l.UiValues_default;
     save(fullfile(DIR_SAVE,F.nlab,'Config.mat'),...
-        'START_IM','CUR_IM','END_IM','LAST_IM','X','Y','Current_Image','File','UiValues','-v7.3');
+        'START_IM','CUR_IM','END_IM','LAST_IM','X','Y','n_frames','Current_Image','File','UiValues','-v7.3');
     fprintf('Config.mat saved.\n');
 else
     % Updating global variables

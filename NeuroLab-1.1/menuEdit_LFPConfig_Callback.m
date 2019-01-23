@@ -7,8 +7,7 @@ success = false;
 % Loading Channel Config
 if exist(fullfile(folder_name,'Nconfig.mat'),'file')
     d_ncf = load(fullfile(folder_name,'Nconfig.mat'),...
-        'ind_channel','channel_id','channel_list','channel_type');
-    ind_channel = d_ncf.ind_channel;
+        'channel_id','channel_list','channel_type');
     channel_id = d_ncf.channel_id(:);
     channel_type = d_ncf.channel_type(:);
     channel_list = d_ncf.channel_list(:);
@@ -111,10 +110,9 @@ t1.Data = D;
         
         channel_id = t1.Data(:,1);
         channel_type = t1.Data(:,2);
-        ind_channel = str2double(channel_id);
         channel_list = cell(size(channel_id));
-        for i =1:length(ind_channel)
-            channel_list(i) = {sprintf('%s/%03d',char(channel_type(i)),ind_channel(i))};
+        for i =1:length(channel_id)
+            channel_list(i) = {sprintf('%s/%s',char(channel_type(i)),char(channel_id(i)))};
         end
         
         % Saving
@@ -126,7 +124,7 @@ t1.Data = D;
             fprintf('Files.mat updated.\n');
         else
             save(fullfile(folder_name,'Nconfig.mat'),...
-                'ind_channel','channel_id','channel_list','channel_type');
+                'channel_id','channel_list','channel_type','-append');
             fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
         end
         close(f2);

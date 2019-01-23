@@ -145,7 +145,7 @@ for i = 1:length(FileList)
         end
     end
     
-    % Looking for LFP
+    % Looking for external folder
     d = dir(fullfile(FileName,'*_ext'));
     if ~isempty(d)
         dir_ext = char(d(1).name);
@@ -258,7 +258,7 @@ for i = 1:length(FileList)
                 [Doppler_film,tag] = import_DopplerFilm(F(ind_file),handles,0);
                 
                 % Detect trigger
-                import_reference_time(F(ind_file),Doppler_film,handles);
+                import_reference_time(F(ind_file),handles);
                 
                 % Save UF Params
                 saving_UFParams(fullfile(F(ind_file).fullpath,F(ind_file).dir_fus),fullfile(DIR_SAVE,F(ind_file).nlab));

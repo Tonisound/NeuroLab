@@ -23,26 +23,49 @@ if size(IM,1)*size(IM,2)*(size(IM,3)-1) == sum(indexes(:))
                     GImport.Doppler_loading_index = 1;
                     save('Preferences.mat','GImport','-append');
             end
+        else
+            warning('Actualize traces canceled.\n');
+            return;           
         end
 end
 
+%loading Time Reference
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
+        'time_ref','length_burst','n_burst','rec_mode');
 else
-    warning('Missing File Time_Reference.mat');
-    length_burst = size(IM,3);
-    n_burst =1;
+    errordlg('Missing File [%s]',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
+    return;
 end
+
+% Gaussian window
+t_gauss = GTraces.GaussianSmoothing;
+delta =  time_ref.Y(2)-time_ref.Y(1);
+w = gausswin(round(2*t_gauss/delta));
+w = w/sum(w);
 
 % Update XData, YData for Mean
 tm = findobj(handles.RightAxes,'Tag','Trace_Mean');
 %tm.YData(~isnan(tm.YData)) = mean(mean(IM,2,'omitnan'),1,'omitnan');
-tm.YData(1:end-1) = mean(mean(IM,2,'omitnan'),1,'omitnan');
+
+% Smoothing mean
+if strcmp(rec_mode,'BURST')
+    tm.YData(1:end-1) = mean(mean(IM,2,'omitnan'),1,'omitnan');
+    y_reshape = [reshape(squeeze(tm.YData(1:end-1)),[length_burst,n_burst]);NaN(length(w),n_burst)];
+    y_conv = nanconv(y_reshape(:),w,'same');
+    y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
+    y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
+    tm.YData(1:end-1) = y_final;
+else
+    y_smooth =  squeeze(mean(mean(IM,2,'omitnan'),1,'omitnan'));
+    y_conv = nanconv(y_smooth,w,'same');
+    tm.YData(1:end-1) = y_conv';
+    success = true;
+end
 
 % Update YData for Mean, Lines and Boxes
 graphics = findobj(handles.CenterAxes,'Type','Patch','-or','Type','Line');
-t_gauss = GTraces.GaussianSmoothing;
-    
+
 for idx =1:length(graphics)
     fprintf('Actualizing trace %d (%s)... ',idx,graphics(idx).UserData.UserData.Name);
     switch graphics(idx).Tag
@@ -79,34 +102,26 @@ for idx =1:length(graphics)
     % Gaussian smoothing
     if t_gauss>0
         fprintf(' Smoothing constant (%.1f s)... ',t_gauss);
-        delta =  time_ref.Y(2)-time_ref.Y(1);
         %graphics(idx).UserData.YData(1:end-1) = squeeze(imgaussfilt(y,round(t_gauss/delta),'FilterDomain','spatial'));
-        %graphics(idx).UserData.YData(1:end-1) = nanconv(y,w,'same');
         
-        % gaussian nan convolution + nan padding (only for burst_recording)
-        length_burst = 59;
-        n_burst = length(y)/length_burst;
-        w = gausswin(round(2*t_gauss/delta));
-        w = w/sum(w);
-        y_reshape = [reshape(y,[length_burst,n_burst]);NaN(length(w),n_burst)];
-        y_conv = nanconv(y_reshape(:),w,'same');
-        y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
-        y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
-        graphics(idx).UserData.YData(1:end-1) = y_final;
+        if strcmp(rec_mode,'BURST')
+            % gaussian nan convolution + nan padding (only for burst_recording)
+            length_burst = 59;
+            n_burst = length(y)/length_burst;
+            y_reshape = [reshape(y,[length_burst,n_burst]);NaN(length(w),n_burst)];
+            y_conv = nanconv(y_reshape(:),w,'same');
+            y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
+            y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
+            graphics(idx).UserData.YData(1:end-1) = y_final;
+        else
+            graphics(idx).UserData.YData(1:end-1) = nanconv(y,w,'same');
+        end
+
     else
         graphics(idx).UserData.YData(1:end-1)= y;
     end
     fprintf('done.\n');
     
 end
-
-% Smoothing mean
-y_reshape = [reshape(squeeze(tm.YData(1:end-1)),[length_burst,n_burst]);NaN(length(w),n_burst)];
-y_conv = nanconv(y_reshape(:),w,'same');
-y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
-y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
-tm.YData(1:end-1) = y_final;
-
-success = true;
 
 end

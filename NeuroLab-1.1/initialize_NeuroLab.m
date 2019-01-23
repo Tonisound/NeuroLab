@@ -126,7 +126,7 @@ uimenu(m1,'Label','Save Configuration','Tag','FileMenu_Save','Accelerator','S');
 % handles.ImportMenu
 m1b = uimenu('Label','Import','Tag','ImportMenu','Parent',f);
 uimenu(m1b,'Label','Import File','Tag','FileMenu_Import');
-uimenu(m1b,'Label','Check Doppler film','Tag','ImportMenu_Doppler','Separator','on');
+uimenu(m1b,'Label','Import Doppler film','Tag','ImportMenu_Doppler','Separator','on');
 uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime');
 uimenu(m1b,'Label','Import Time Tags','Tag','ImportMenu_TimeTags');
 uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
@@ -571,7 +571,7 @@ set(myhandles.FileMenu_Save,'Callback',{@mainFigure_saveFcn,myhandles});
 % handles.ImportMenu
 set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
 set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE),myhandles,1);');
-set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),IM,myhandles);');
+set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),myhandles);');
 set(myhandles.ImportMenu_TimeTags,'Callback','import_time_tags(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
 set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
