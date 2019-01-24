@@ -69,12 +69,14 @@ str_band = {sprintf('Delta [%.1f - %.1f Hz] (%.3f s)',GFilt.delta_inf,GFilt.delt
     sprintf('Theta [%.1f - %.1f Hz] (%.3f s)',GFilt.theta_inf,GFilt.theta_sup,GFilt.theta_smooth);...
     sprintf('Gamma Low [%.1f - %.1f Hz] (%.3f s)',GFilt.gammalow_inf,GFilt.gammalow_sup,GFilt.gammalow_smooth);...
     sprintf('Gamma Mid [%.1f - %.1f Hz] (%.3f s)',GFilt.gammamid_inf,GFilt.gammamid_sup,GFilt.gammamid_smooth);...
+    sprintf('Gamma Mid Up [%.1f - %.1f Hz] (%.3f s)',GFilt.gammamidup_inf,GFilt.gammamidup_sup,GFilt.gammamidup_smooth);...
     sprintf('Gamma High [%.1f - %.1f Hz] (%.3f s)',GFilt.gammahigh_inf,GFilt.gammahigh_sup,GFilt.gammahigh_smooth);...
+    sprintf('Gamma High Up [%.1f - %.1f Hz] (%.3f s)',GFilt.gammahighup_inf,GFilt.gammahighup_sup,GFilt.gammahighup_smooth);...
     sprintf('Ripple [%.1f - %.1f Hz] (%.3f s)',GFilt.ripple_inf,GFilt.ripple_sup,GFilt.ripple_smooth)};
-band_list = {'delta';'theta';'gammalow';'gammamid';'gammahigh';'ripple'};
-fband_inf = [GFilt.delta_inf;GFilt.theta_inf;GFilt.gammalow_inf;GFilt.gammamid_inf;GFilt.gammahigh_inf;GFilt.ripple_inf];
-fband_sup = [GFilt.delta_sup;GFilt.theta_sup;GFilt.gammalow_sup;GFilt.gammamid_sup;GFilt.gammahigh_sup;GFilt.ripple_sup];
-tband_smooth = [GFilt.delta_smooth;GFilt.theta_smooth;GFilt.gammalow_smooth;GFilt.gammamid_smooth;GFilt.gammahigh_smooth;GFilt.ripple_smooth];
+band_list = {'delta';'theta';'gammalow';'gammamid';'gammamidup';'gammahigh';'gammahighup';'ripple'};
+fband_inf = [GFilt.delta_inf;GFilt.theta_inf;GFilt.gammalow_inf;GFilt.gammamid_inf;GFilt.gammamidup_inf;GFilt.gammahigh_inf;GFilt.gammahighup_inf;GFilt.ripple_inf];
+fband_sup = [GFilt.delta_sup;GFilt.theta_sup;GFilt.gammalow_sup;GFilt.gammamid_sup;GFilt.gammamidup_sup;GFilt.gammahigh_sup;GFilt.gammahighup_sup;GFilt.ripple_sup];
+tband_smooth = [GFilt.delta_smooth;GFilt.theta_smooth;GFilt.gammalow_smooth;GFilt.gammamid_smooth;GFilt.gammamidup_smooth;GFilt.gammahigh_smooth;GFilt.gammahighup_smooth;GFilt.ripple_smooth];
         
 if val == 1
     [ind_band,v] = listdlg('Name','Band Selection','PromptString','Select bands to export',...
@@ -127,7 +129,7 @@ for i =1:length(band_list)
         [B,A]  = butter(1,[f1 f2]/(fs/2),'bandpass');
         Y_temp = filtfilt(B,A,Y);
         
-        % Subsampling
+        % Subsampling filter
         ftemp = 10*f2;
         if ftemp < fs
             X_filt = (X(1):1/ftemp:X(end))';
@@ -137,18 +139,6 @@ for i =1:length(band_list)
             Y_filt = Y_temp;
         end
         
-        
-        % Extract envelope
-        % fl = max(round(t_smooth/(X_filt(2)-X_filt(1))),1);
-        % [Y_env_up,Y_env_down] = envelope(Y_filt,fl,'analytic');
-        fprintf('Smoothing [%.1f s]...',t_smooth);
-        f_filt = 1/(X_filt(2)-X_filt(1));
-        [Y_env_up,~] = envelope(Y_filt);
-        %Gaussian smoothing
-        n = max(round(t_smooth*f_filt),1);
-        Y_power = conv(Y_env_up,gausswin(n)/n,'same'); 
-        fprintf(' done;\n');
-
         % Saving
         count = count+1;
         temp = regexp(strrep(str_channel,'.mat',''),'_','split');
@@ -163,6 +153,27 @@ for i =1:length(band_list)
         traces_filter(count).Y_im = interp1(traces_filter(count).X,traces_filter(count).Y,traces_filter(count).X_im);
         traces_filter(count).nb_samples = length(Y_filt);
         %fprintf('Succesful Importation %s [Parent %s].\n',traces_filter(i).fullname,traces_filter(i).parent);
+        
+        % Extract envelope
+        % fl = max(round(t_smooth/(X_filt(2)-X_filt(1))),1);
+        % [Y_env_up,Y_env_down] = envelope(Y_filt,fl,'analytic');
+        fprintf('Smoothing [%.1f s]...',t_smooth);
+        f_filt = 1/(X_filt(2)-X_filt(1));
+        [Y_env_up,~] = envelope(Y_filt);
+        %Gaussian smoothing
+        n = max(round(t_smooth*f_filt),1);
+        Y_power = conv(Y_env_up,gausswin(n)/n,'same'); 
+        fprintf(' done;\n');
+        
+%         % Subsampling envelope
+%         ftemp = 5/t_smooth;
+%         if ftemp < f_filt
+%             X_power = (X_filt(1):1/ftemp:X_filt(end))';
+%             Y_power = interp1(X_filt,Y_power,X_power);
+%         else
+%             X_power = X_filt;
+%             %Y_power = Y_power;
+%         end
         
         % Saving
         traces_envelope(count).ID = char(temp(2));

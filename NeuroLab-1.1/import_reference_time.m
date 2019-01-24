@@ -22,20 +22,47 @@ end
 if ~exist(fullfile(F.fullpath,F.dir_fus,'trigger.txt'),'file')
     
     % Trigger Importation
-    if exist(fullfile(F.fullpath,F.dir_lfp,F.nev),'file') && ~isempty(F.nev)
-        % Trigger extraction from NEV file
-        [trigger,reference,padding] = extract_trigger_nev(F,n_frames);
-        
-    elseif exist(fullfile(F.fullpath,F.dir_lfp,F.ns5),'file') && ~isempty(F.ns5)
-        % Trigger extraction from NS5 file
-        [trigger,reference,padding] = extract_trigger_ns5(F,n_frames);
-        
-    else
-        % Missing NEV : template trigger
-        warning('Missing NEV file.\n');
-        [trigger,reference,padding] = extract_trigger_void(n_frames);
-        %return;
+    switch GImport.Trigger_loading
+        % ns5 priority
+        case 'ns5'
+            if exist(fullfile(F.fullpath,F.dir_lfp,F.ns5),'file') && ~isempty(F.ns5)
+                % Trigger extraction from NS5 file
+                [trigger,reference,padding] = extract_trigger_ns5(F,n_frames);
+                
+            elseif exist(fullfile(F.fullpath,F.dir_lfp,F.nev),'file') && ~isempty(F.nev)
+                % Trigger extraction from NEV file
+                [trigger,reference,padding] = extract_trigger_nev(F,n_frames);
+                
+            else
+                % Missing NEV : template trigger
+                warning('Missing NEV file.\n');
+                [trigger,reference,padding] = extract_trigger_void(n_frames);
+                %return;
+            end
+            
+        % nev priority
+        case 'nev'
+            if exist(fullfile(F.fullpath,F.dir_lfp,F.nev),'file') && ~isempty(F.nev)
+                % Trigger extraction from NEV file
+                [trigger,reference,padding] = extract_trigger_nev(F,n_frames);
+                
+            elseif exist(fullfile(F.fullpath,F.dir_lfp,F.ns5),'file') && ~isempty(F.ns5)
+                % Trigger extraction from NS5 file
+                [trigger,reference,padding] = extract_trigger_ns5(F,n_frames);
+                
+            else
+                % Missing NEV : template trigger
+                warning('Missing NEV file.\n');
+                [trigger,reference,padding] = extract_trigger_void(n_frames);
+                %return;
+            end
+            
+        % default priority
+        otherwise
+            errordlg('Unrecognized Trigger Importation format')
+            return;
     end
+    
     
     % Trigger Exportation
     file_txt = fullfile(F.fullpath,F.dir_fus,'trigger.txt');
@@ -174,7 +201,7 @@ else
     discrepant = 0;
     padding = 'exact';
     trigger = trigger_raw;
-    time_stamp = time_stamp_raw;
+    %time_stamp = time_stamp_raw;
 end
 
 end
@@ -230,7 +257,7 @@ if n_images~= length(trigger_raw)
         delta_trig = trigger_raw(2)-trigger_raw(1);
         additional_trigs = (1:discrepant)'*delta_trig;
         trigger = [trigger_raw; trigger_raw(end)+additional_trigs];
-        time_stamp = [time_stamp_raw; time_stamp_raw(end)+time_stamp_raw(2)-time_stamp_raw(1)];
+        %time_stamp = [time_stamp_raw; time_stamp_raw(end)+time_stamp_raw(2)-time_stamp_raw(1)];
         
     elseif length(trigger_raw) > n_images
         
@@ -240,14 +267,14 @@ if n_images~= length(trigger_raw)
         % keep only first triggers
         trigger = trigger_raw(end-n_images+1:end);
         %trigger = trigger_raw(1:n_images);
-        time_stamp = time_stamp_raw(1:n_images);
+        %time_stamp = time_stamp_raw(1:n_images);
             
     end
 else
     discrepant = 0;
     padding = 'exact';
     trigger = trigger_raw;
-    time_stamp = time_stamp_raw;
+    %time_stamp = time_stamp_raw;
 end
 
 end
