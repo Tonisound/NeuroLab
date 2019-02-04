@@ -114,6 +114,8 @@ im.AlphaData = ones(size(main_im));
 
 % Building str_popup
 patches = flipud(findobj(ax,'Tag','Region'));
+
+
 str_popup = [];
 for i = 1:length(patches)
     str_popup = [str_popup;{patches(i).UserData.UserData.Name}];

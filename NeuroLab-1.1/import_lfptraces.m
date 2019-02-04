@@ -149,13 +149,35 @@ for i=1:length(ind_channel)
 end
 
 
-% % Save dans SpikoscopeTraces.mat
-% if ~isempty(traces)
-%     save(fullfile(dir_save,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');
-% end
-% fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Cereplex_Traces.mat'));
-% Loading LFP traces
-% load_lfptraces(dir_save,handles)
+% Building traces_diff_lfp
+ind_lfp = strcmp(channel_type,'LFP');
+traces_lfp = traces(ind_lfp==1);
+traces_remainder = traces(ind_lfp==0);
+traces_diff_lfp = struct('ID',{},'shortname',{},'fullname',{},'parent',{},...
+    'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{},'nb_samples',{});
+for i = 1:length(traces_lfp)-1
+    traces_diff_lfp(i).ID = strcat(char(channel_id(i)),'---',char(channel_id(i+1)));
+    traces_diff_lfp(i).shortname = char(channel_type(i));
+    traces_diff_lfp(i).parent = parent;
+    traces_diff_lfp(i).fullname = sprintf('%s/%s',traces_diff_lfp(i).shortname,traces_diff_lfp(i).ID);
+    traces_diff_lfp(i).X = traces_lfp(i).X;
+    traces_diff_lfp(i).Y = traces_lfp(i).Y-traces_lfp(i+1).Y;
+    traces_diff_lfp(i).X_ind = data_t.time_ref.X;
+    traces_diff_lfp(i).X_im = data_t.time_ref.Y;
+    traces_diff_lfp(i).Y_im = interp1(traces_diff_lfp(i).X,traces_diff_lfp(i).Y,traces_diff_lfp(i).X_im);
+    traces_diff_lfp(i).nb_samples = traces_lfp(:).nb_samples;
+    
+end
+% Modyfing traces according to GImport.Channel_loading
+switch GImport.Channel_loading
+    case 'differential'
+        traces = [traces_diff_lfp,traces_remainder];
+    case 'full'
+        traces = [traces_lfp,traces_diff_lfp,traces_remainder];
+    otherwise
+        traces = [traces_lfp,traces_remainder];
+        
+end
 
 % Direct Loading LFP traces
 load('Preferences.mat','GDisp','GTraces');
@@ -185,7 +207,7 @@ for i=1:length(ind_traces)
     % finding trace name
     t = traces(ind_traces(i)).fullname;
     
-    if contains(t,lines_name)
+    if contains(t,lines_name) && ~isempty(find(contains(lines_name,t),1))
         %line already exists overwrite
         ind_overwrite = find(contains(lines_name,t)==1);
         for j=1:length(ind_overwrite)

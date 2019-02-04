@@ -506,7 +506,7 @@ y = y_glow;
 [~,ind_2_glow] = min((x-x_end).^2);
 factor_glow = max(y(ind_1_glow:ind_2_glow));
 delta_glow = x_glow(2)-x_glow(1);
-%y_glow = imgaussfilt(y_glow/factor_glow,round(t_gauss/delta_glow));
+y_glow = imgaussfilt(y_glow/factor_glow,round(t_gauss/delta_glow));
 
 x = x_gmid;
 y = y_gmid;
@@ -514,7 +514,7 @@ y = y_gmid;
 [~,ind_2_gmid] = min((x-x_end).^2);
 factor_gmid = max(y(ind_1_gmid:ind_2_gmid));
 delta_gmid = x_gmid(2)-x_gmid(1);
-%y_gmid = imgaussfilt(y_gmid/factor_gmid,round(t_gauss/delta_gmid));
+y_gmid = imgaussfilt(y_gmid/factor_gmid,round(t_gauss/delta_gmid));
 
 x = x_gmidup;
 y = y_gmidup;
@@ -522,7 +522,7 @@ y = y_gmidup;
 [~,ind_2_gmidup] = min((x-x_end).^2);
 factor_gmidup = max(y(ind_1_gmidup:ind_2_gmidup));
 delta_gmidup = x_gmidup(2)-x_gmidup(1);
-%y_gmidup = imgaussfilt(y_gmidup/factor_gmidup,round(t_gauss/delta_gmidup));
+y_gmidup = imgaussfilt(y_gmidup/factor_gmidup,round(t_gauss/delta_gmidup));
 
 x = x_ghigh;
 y = y_ghigh;
@@ -530,7 +530,7 @@ y = y_ghigh;
 [~,ind_2_ghigh] = min((x-x_end).^2);
 factor_ghigh = max(y(ind_1_ghigh:ind_2_ghigh));
 delta_ghigh = x_ghigh(2)-x_ghigh(1);
-%y_ghigh = imgaussfilt(y_ghigh/factor_ghigh,round(t_gauss/delta_ghigh));
+y_ghigh = imgaussfilt(y_ghigh/factor_ghigh,round(t_gauss/delta_ghigh));
 
 x = x_ghighup;
 y = y_ghighup;
@@ -538,7 +538,7 @@ y = y_ghighup;
 [~,ind_2_ghighup] = min((x-x_end).^2);
 factor_ghighup = max(y(ind_1_ghighup:ind_2_ghighup));
 delta_ghighup = x_ghighup(2)-x_ghighup(1);
-%y_ghighup = imgaussfilt(y_ghighup/factor_ghighup,round(t_gauss/delta_ghighup));
+y_ghighup = imgaussfilt(y_ghighup/factor_ghighup,round(t_gauss/delta_ghighup));
 
 x = x_ripple;
 y = y_ripple;
@@ -546,7 +546,7 @@ y = y_ripple;
 [~,ind_2_ripple] = min((x-x_end).^2);
 factor_ripple = max(y(ind_1_ripple:ind_2_ripple));
 delta_ripple = x_ripple(2)-x_ripple(1);
-%y_ripple = imgaussfilt(y_ripple/factor_ripple,round(t_gauss/delta_ripple));
+y_ripple = imgaussfilt(y_ripple/factor_ripple,round(t_gauss/delta_ripple));
 
 x = x_theta;
 y = y_theta;
@@ -554,7 +554,7 @@ y = y_theta;
 [~,ind_2_theta] = min((x-x_end).^2);
 factor_theta = max(y(ind_1_theta:ind_2_theta));
 delta_theta = x_theta(2)-x_theta(1);
-%y_theta = imgaussfilt(y_theta/factor_theta,round(t_gauss/delta_theta));
+y_theta = imgaussfilt(y_theta/factor_theta,round(t_gauss/delta_theta));
 
 % Plotting
 g_colors = handles.MainFigure.UserData.g_colors;

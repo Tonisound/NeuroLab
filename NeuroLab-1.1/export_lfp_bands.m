@@ -29,7 +29,11 @@ if isempty(dir_t)
     return;
 else
     
+    % removing differential channels
     channel_list = {dir_t(:).name}';
+    ind_keep = contains(channel_list,'---');
+    channel_list_diff = channel_list(ind_keep==1);
+    channel_list(ind_keep)=[];
     %Sorting LFP channels according to configuration
     if exist(fullfile(foldername,'Nconfig.mat'),'file')
         %sort if lfp configuration is found
@@ -41,8 +45,10 @@ else
             ind_1 = [ind_1;find(~(cellfun('isempty',strfind(channel_list,pattern)))==1)];
         end
         ind_1 = flipud(ind_1);
-        channel_list = {dir_t(ind_1).name}';
+        channel_list = channel_list(ind_1);
     end
+    % adding back differential channels
+    channel_list = [channel_list;channel_list_diff];
 end
 
 % asks for user input if val == 1
@@ -162,25 +168,25 @@ for i =1:length(band_list)
         [Y_env_up,~] = envelope(Y_filt);
         %Gaussian smoothing
         n = max(round(t_smooth*f_filt),1);
-        Y_power = conv(Y_env_up,gausswin(n)/n,'same'); 
+        Y_env = conv(Y_env_up,gausswin(n)/n,'same'); 
         fprintf(' done;\n');
         
-%         % Subsampling envelope
-%         ftemp = 5/t_smooth;
-%         if ftemp < f_filt
-%             X_power = (X_filt(1):1/ftemp:X_filt(end))';
-%             Y_power = interp1(X_filt,Y_power,X_power);
-%         else
-%             X_power = X_filt;
-%             %Y_power = Y_power;
-%         end
+        % Subsampling envelope
+        ftemp = 5/t_smooth;
+        if ftemp < f_filt
+            X_power = (X_filt(1):1/ftemp:X_filt(end))';
+            Y_power = interp1(X_filt,Y_env,X_power);
+        else
+            X_power = X_filt;
+            Y_power = Y_env;
+        end
         
         % Saving
         traces_envelope(count).ID = char(temp(2));
         traces_envelope(count).shortname = sprintf('Power-%s',band_name);
         traces_envelope(count).parent = 'Cereplex-Traces';
         traces_envelope(count).fullname = strcat(traces_envelope(count).shortname,'/',traces_envelope(count).ID);
-        traces_envelope(count).X = X_filt;
+        traces_envelope(count).X = X_power;
         traces_envelope(count).Y = Y_power;
         traces_envelope(count).X_ind = data_t.time_ref.X;
         traces_envelope(count).X_im = data_t.time_ref.Y;
@@ -239,6 +245,7 @@ for i=1:length(ind_traces)
         %line already exists overwrite
         ind_overwrite = find(contains(lines_name,t)==1);
         for j=1:length(ind_overwrite)
+            lines(ind_overwrite).UserData.X = traces(ind_traces(i)).X;
             lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
             lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
             fprintf('Cereplex Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);

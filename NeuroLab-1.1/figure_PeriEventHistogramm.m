@@ -1,7 +1,7 @@
 function f2 = figure_PeriEventHistogramm(handles)
 % Time Tag Selection Callback
 
-global FILES CUR_FILE;
+global DIR_SAVE FILES CUR_FILE;
 
 f2 = figure('Units','characters',...
     'HandleVisibility','callback',...
@@ -30,7 +30,7 @@ uicontrol('Units','characters','Style','text','HorizontalAlignment','left','Pare
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
     'String',6,'Tag','Edit1','Tooltipstring','# fUS Traces');
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
-    'String',2,'Tag','Edit2','Tooltipstring','# Spikoscope Traces');
+    'String',2,'Tag','Edit2','Tooltipstring','# Cereplex Traces');
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
     'String',0,'Tag','Edit3','Tooltipstring','# CFC Channels');
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
@@ -128,7 +128,7 @@ tracePanel = uipanel('Parent',tab2,...
 lfpPanel = uipanel('Parent',tab2,...
     'Units','normalized',...
     'Position',[.5 0 .25 1],...
-    'Title','Spikoscope Traces',...
+    'Title','Cereplex Traces',...
     'Tag','LFPPanel');
 cfcPanel = uipanel('Parent',tab2,...
     'Units','normalized',...
@@ -136,6 +136,11 @@ cfcPanel = uipanel('Parent',tab2,...
     'Title','CFC Channels',...
     'Tag','CFCPanel');
 tabgp.SelectedTab = tab2;
+
+%Sixth Tab
+tab6 = uitab('Parent',tabgp,...
+    'Title','Average Response',...
+    'Tag','SixthTab');
 
 % ThirdTab
 tab3 = uitab('Parent',tabgp,...
@@ -159,7 +164,7 @@ uicontrol('style','popup',...
     'Units','normalized',...
     'Position',[.65 .93 .2 .05],...
     'Tag','PopupHR',...
-    'Value',5,...
+    'Value',3,...
     'Parent',tab3);
 
 % FourthTab
@@ -287,6 +292,29 @@ lines_channels = [m;l];
 % bc.UserData.lines_channels_0 = lines_channels_0;
 % bc.UserData.lines_electrodes_0 = t_0 ;
 
+% Loading Traces
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
+xlim1 = time_ref.Y(1);
+xlim2 = time_ref.Y(end);
+traces_name=[];
+traces = struct('X',[],'Y',[],'f_samp',[]);
+for i =1:length(t)
+    traces_name = [traces_name;{t(i).UserData.Name}];
+    X=t(i).UserData.X;
+    Y=t(i).UserData.Y;
+    f_samp = 1/(X(2)-X(1));
+%    X = X(floor(xlim1*f_samp):ceil(xlim2*f_samp));
+%    Y = Y(floor(xlim1*f_samp):ceil(xlim2*f_samp));
+    X = X(floor(xlim1*f_samp):min(end,ceil(xlim2*f_samp)));
+    Y = Y(floor(xlim1*f_samp):min(end,ceil(xlim2*f_samp)));
+    traces(i).X = X;
+    traces(i).Y = Y;
+    traces(i).f_samp = f_samp;
+    traces(i).fullname = t(i).UserData.Name;
+end
+%Feeding Data
+cfcPanel.UserData.traces = traces;
+cfcPanel.UserData.traces_name = traces_name;
 
 % Feeding Data
 bc.UserData.lines_channels = lines_channels;
@@ -306,15 +334,16 @@ uitable('ColumnName',{'',''},...
     'Parent',eventPanel);
 
 % Table Data
-D={'Whole', m.Tag};
+D={'Whole','Trace_Mean'};
 for i =1:length(l)
     D=[D;{l(i).UserData.Name, l(i).Tag}];
+    %D=[D;{l(i).UserData.Name}];
 end
 % UiTable fUSTable
-uitable('ColumnName',{'Name','Tag'},...
-    'ColumnFormat',{'char','char'},...
-    'ColumnEditable',[false,false],...
-    'ColumnWidth',{120 120},...
+uitable('ColumnName',{'Name'},...
+    'ColumnFormat',{'char'},...
+    'ColumnEditable',false,...
+    'ColumnWidth',{240},...
     'Data',D,...
     'Tag','fUSTable',...
     'Units','normalized',...
@@ -327,11 +356,12 @@ uitable('ColumnName',{'Name','Tag'},...
 D = {};
 for i =1:length(t)
     D=[D;{t(i).UserData.Name, t(i).Tag}];
+    %D=[D;{t(i).UserData.Name}];
 end
-uitable('ColumnName',{'Name','Tag'},...
-    'ColumnFormat',{'char','char'},...
-    'ColumnEditable',[false,false],...
-    'ColumnWidth',{120 120},...
+uitable('ColumnName',{'Name'},...
+    'ColumnFormat',{'char'},...
+    'ColumnEditable',false,...
+    'ColumnWidth',{240},...
     'Data',D,...
     'Tag','LFPTable',...
     'Units','normalized',...
@@ -353,9 +383,10 @@ uitable('ColumnName',{'Channel','Electrode'},...
     'RowStriping','on',...
     'Parent',cfcPanel);
 
+
 resetbutton_Callback([],[],guihandles(f2));
 initialize_eventPanel(guihandles(f2));
-%initialize_cfcPanel(guihandles(f2));
+initialize_cfcPanel(guihandles(f2));
 set(f2,'Position',[30 30 200 50]);
 
 end
@@ -431,33 +462,39 @@ update_episode_list(handles.PopupEpisodeList,[],handles);
 
 end
 
-function initialize_cfcPanel(handles)
+function initialize_cfcPanel(handles,traces)
 
-global SEED DIR_SAVE FILES CUR_FILE;
+traces = handles.CFCPanel.UserData.traces;
+temp = handles.CFCPanel.UserData.traces_name;
 
-if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Traces.mat'),'file')
-    import_traces(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
-end
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Traces.mat'),'traces');
-handles.CFCPanel.UserData.traces = traces;
-
-temp = {traces.fullname};
-ind_1 = ~(cellfun('isempty',strfind(temp,'Gamma_low_power')));
-ind_2 = ~(cellfun('isempty',strfind(temp,'Gamma_mid_power')));
-ind_3 = ~(cellfun('isempty',strfind(temp,'Gamma_mid_back')));
-ind_4 = ~(cellfun('isempty',strfind(temp,'Gamma_high_power')));
-ind_5 = ~(cellfun('isempty',strfind(temp,'Gamma_high_back')));
+%temp = {traces.fullname};
+ind_1 = ~(cellfun('isempty',strfind(temp,'Power-gammalow')));
+ind_2 = ~(cellfun('isempty',strfind(temp,'Power-gammamid')));
+ind_3 = ~(cellfun('isempty',strfind(temp,'Power-gammamidup')));
+ind_4 = ~(cellfun('isempty',strfind(temp,'Power-gammahigh')));
+ind_5 = ~(cellfun('isempty',strfind(temp,'Power-gammamidup')));
 ind_keep = find(ind_1|ind_2|ind_3|ind_4|ind_5==1);
 
 traces = traces(ind_keep);
-temp = {traces.fullname};
-temp = regexprep(temp,'LFP_0_Gamma_mid_power','Gamma_mid_power');
-temp = regexprep(temp,'LFP_0_Gamma_high_power','Gamma_high_power');
-temp = regexprep(temp,'LFP_0_Gamma_low_power','Gamma_low_power');
-temp = regexprep(temp,'LFP_0_Gamma_high_background_po','Gamma_high_background');
-temp = regexprep(temp,'LFP_0_Gamma_mid_background_pow','Gamma_mid_background');
-temp = regexprep(temp,'\d|-|/','');
-handles.CFCTable.Data = cat(1,temp,{traces.shortname})';
+traces_name = temp(ind_keep);
+
+channel = [];
+electrode = [];
+for i = 1:length(traces_name)
+    temp = regexp(char(traces_name(i)),'/','split');
+    channel = [channel ;temp(1)];
+    electrode = [electrode ;temp(2)];
+end
+handles.CFCTable.Data = [channel,electrode];
+
+% temp = {traces.fullname};
+% temp = regexprep(temp,'LFP_0_Gamma_mid_power','Gamma_mid_power');
+% temp = regexprep(temp,'LFP_0_Gamma_high_power','Gamma_high_power');
+% temp = regexprep(temp,'LFP_0_Gamma_low_power','Gamma_low_power');
+% temp = regexprep(temp,'LFP_0_Gamma_high_background_po','Gamma_high_background');
+% temp = regexprep(temp,'LFP_0_Gamma_mid_background_pow','Gamma_mid_background');
+% temp = regexprep(temp,'\d|-|/','');
+% handles.CFCTable.Data = cat(1,temp,{traces.fullname})';
 
 end
 
@@ -1238,7 +1275,6 @@ l = lsline(ax2);
 
 end
 
-
 function adaptation_Callback(handles)
 
 channels = str2double(handles.Edit1.String);
@@ -1471,14 +1507,14 @@ handles.ButtonBatch.UserData.labels= labels;
         
         cla(ax2);
         switch hObj.Value
-            case 1,
+            case 1
                 m = mean(Ydata(:,:,:),1,'omitnan');
-            case 2,
+            case 2
                 m = median(Ydata(:,:,:),1,'omitnan');
-            case 3,
+            case 3
                 m = mean(Ydata(:,:,:),1,'omitnan');
                 s = std(Ydata(:,:,:),1,'omitnan');
-            case 4,
+            case 4
                 m = median(Ydata(:,:,:),1,'omitnan');
                 s = std(Ydata(:,:,:),1,'omitnan');
             case 5
@@ -1497,6 +1533,7 @@ handles.ButtonBatch.UserData.labels= labels;
                 'LineWidth',2,...
                 'Parent',ax2)
         end
+        
         if hObj.Value>2 && hObj.Value<5
             for i=1:length(lines)
                 line('XData',ref_time,...
@@ -1525,6 +1562,62 @@ handles.ButtonBatch.UserData.labels= labels;
                 'YData',[8.5*ax2.YLim(2)/10 9.5*ax2.YLim(2)/10],...
                 'LineWidth',.5,'Tag','Ticks','Color','k','Parent',ax2);
         end
+        
+        % Sixth tab
+        tab = handles.SixthTab;
+        delete(tab.Children);
+        n_axes = ceil(sqrt(length(lines)));
+        % Main line
+        all_axes = [];
+        for k=1:length(lines)
+            ax = subplot(n_axes,n_axes,k,'parent',tab);
+            all_axes = [all_axes;ax];
+            line('XData',ref_time,...
+                'YData',m(:,:,k),...
+                'Color',lines(k).Color,...
+                'LineWidth',1,...
+                'Parent',ax)
+            title(ax,labels(k))
+            grid(ax,'on');
+            
+            % std
+            if hObj.Value>2 && hObj.Value<5
+                line('XData',ref_time,...
+                    'YData',m(:,:,k)+s(:,:,k),...
+                    'Color',lines(k).Color,...
+                    'LineWidth',.5,...
+                    'Parent',ax)
+                line('XData',ref_time,...
+                    'YData',m(:,:,k)-s(:,:,k),...
+                    'Color',lines(k).Color,...
+                    'LineWidth',.5,...
+                    'Parent',ax)
+            end
+            
+            % axes limits
+            ax.XLim = [ref_time(1) ref_time(end)];
+            ax.YLim = [min(m(:,:,k)-s(:,:,k),[],'omitnan') max(m(:,:,k)+s(:,:,k),[],'omitnan')];
+            %ax.YLim = [0;40];
+            
+            % ticks on graph
+            for l=1:size(Ydata,1)
+                val1 = .8;
+                val2 = 1;
+                line('XData',[ref_time(ind_start(l)),ref_time(ind_start(l))],...
+                    'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
+                    'LineWidth',.2,'Tag','Ticks','Color','k','Parent',ax);
+                line('XData',[ref_time(ind_end(l)),ref_time(ind_end(l))],...
+                    'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
+                    'LineWidth',.2,'Tag','Ticks','Color','k','Parent',ax);
+            end
+            
+            
+            
+            
+        end
+       
+        
+        
     end
 
     function popup_response(hObj,~,ax1,cmap_pearson,cmap_spearman,labels,labs)

@@ -133,6 +133,8 @@ GImport.Video_loading_index = 1;
 GImport.Video_loading = 'full';
 GImport.LFP_loading_index = 2;
 GImport.LFP_loading = 'ns2';
+GImport.Channel_loading_index = 1;
+GImport.Channel_loading = 'raw';
 GImport.Trigger_loading_index = 2;
 GImport.Trigger_loading = 'nev';
 
