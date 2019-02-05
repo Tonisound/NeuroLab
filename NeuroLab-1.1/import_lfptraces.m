@@ -135,17 +135,28 @@ for i=1:length(ind_channel)
     traces(i).Y = double(Data(i,:)');
     traces(i).X_ind = data_t.time_ref.X;
     traces(i).X_im = data_t.time_ref.Y;
-    traces(i).Y_im = interp1(traces(i).X,traces(i).Y,traces(i).X_im);
     traces(i).nb_samples = nb_samples;
     
     % Filtering LFP
-    f1 = GFilt.broad_inf;
-    f2 = GFilt.broad_sup;
+    str = lower(traces(i).fullname);
+    if contains(str,'temp')
+        f1 = GFilt.temp_inf;
+        f2 = GFilt.temp_sup;
+    elseif contains(str,{'acc';'gyr'})
+        f1 = GFilt.acc_inf;
+        f2 = GFilt.acc_sup;
+    elseif contains(str,'emg')
+        f1 = GFilt.emg_inf;
+        f2 = GFilt.emg_sup;
+    else 
+        f1 = GFilt.broad_inf;
+        f2 = GFilt.broad_sup;
+    end
     [B,A]  = butter(1,[f1 f2]/(f_samp/2),'bandpass');
     Y_filt = filtfilt(B,A,traces(i).Y);
     traces(i).Y = Y_filt;
-    
-    fprintf('Succesful Importation %s [Parent %s] [Bandpass: (%.1f Hz,%.1f Hz)].\n',traces(i).fullname,traces(i).parent,f1,f2);
+    traces(i).Y_im = interp1(traces(i).X,traces(i).Y,traces(i).X_im);  
+    fprintf('Succesful Importation %s [Parent %s] [Bandpass: (%.2f Hz,%.2f Hz)].\n',traces(i).fullname,traces(i).parent,f1,f2);
 end
 
 
@@ -175,8 +186,7 @@ switch GImport.Channel_loading
     case 'full'
         traces = [traces_lfp,traces_diff_lfp,traces_remainder];
     otherwise
-        traces = [traces_lfp,traces_remainder];
-        
+        traces = [traces_lfp,traces_remainder];   
 end
 
 % Direct Loading LFP traces

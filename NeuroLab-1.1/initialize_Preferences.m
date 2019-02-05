@@ -141,6 +141,16 @@ GImport.Trigger_loading = 'nev';
 GFilt.broad_inf = 1;
 GFilt.broad_sup = 250;
 GFilt.broad_smooth = .5;
+GFilt.temp_inf = .01;
+GFilt.temp_sup = .2;
+GFilt.temp_smooth = .5;
+GFilt.acc_inf = 1;
+GFilt.acc_sup = 10;
+GFilt.acc_smooth = .5;
+GFilt.emg_inf = 1;
+GFilt.emg_sup = 250;
+GFilt.emg_smooth = .5;
+
 GFilt.delta_inf = 1;
 GFilt.delta_sup = 4;
 GFilt.delta_smooth = .5;

@@ -111,7 +111,7 @@ suffix = largest_suffix(C);
 for i=1:length(files_regions)
     %root = regexp(char(C(i)),prefix,'split');
     %root = regexp(char(root(2)),suffix,'split');
-    root=char(C(i));
+    root =  char(C(i));
     regions(i).name = root(length(prefix)+1:end-length(suffix));
 end
 
@@ -121,7 +121,6 @@ fprintf('Spikoscope Regions Imported [%s] \n===> Saved in %s\n',dir_regions,full
 
 
 % Direct Region Loading
-
 load('Preferences.mat','GDisp','GTraces');
 if exist(fullfile(foldername,'Time_Reference.mat'),'file')
     load(fullfile(foldername,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
@@ -132,6 +131,11 @@ end
 
 % Choising regions
 lines = findobj(handles.RightAxes,'Tag','Trace_Region');
+% getting lines name
+lines_name = cell(length(lines),1);
+for i =1:length(lines)
+    lines_name{i} = lines(i).UserData.Name;
+end
 count=length(lines);
 
 if nargin <4
@@ -144,12 +148,27 @@ end
 if ~ok || isempty(ind_regions)
     return;
 end
+ 
 
 for i=1:length(ind_regions)
     
+    % finding trace name
     str = lower(char(regions(ind_regions(i)).name));
-    fprintf('Importing Region %s (%d/%d) ...\n',str,i,length(ind_regions));
+    %fprintf('Importing Region %s (%d/%d) ...\n',str,i,length(ind_regions));
     
+    %     if contains(t,lines_name) && ~isempty(find(contains(lines_name,t),1))
+    %         %line already exists overwrite
+    %         ind_overwrite = find(contains(lines_name,t)==1);
+    %         for j=1:length(ind_overwrite)
+    %             lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
+    %             lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
+    %             fprintf('LFP Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
+    %         end
+    %     else
+    %     end
+    
+    % Color counter
+    count = count+1;
     if ~isempty(strfind(str,'hpc'))||...
             ~isempty(strfind(str,'ca1'))||...
             ~isempty(strfind(str,'ca2'))||...
@@ -157,14 +176,14 @@ for i=1:length(ind_regions)
             ~isempty(strfind(str,'dg'))||...
             ~isempty(strfind(str,'subic'))||...
             ~isempty(strfind(str,'lent-'))
-        delta =10;
+        delta = 10;
     elseif ~isempty(strfind(str,'thal'))||...
             ~isempty(strfind(str,'vpm-'))||...
             ~isempty(strfind(str,'po-'))||...
             ~isempty(strfind(str,'cpu-'))||...
             ~isempty(strfind(str,'gp-'))||...
             ~isempty(strfind(str,'septal'))
-        delta =20;
+        delta = 20;
     elseif ~isempty(strfind(str,'cortex'))||...
             ~isempty(strfind(str,'rs-'))||...
             ~isempty(strfind(str,'ac-'))||...
@@ -176,16 +195,13 @@ for i=1:length(ind_regions)
             ~isempty(strfind(str,'cg-'))||...
             ~isempty(strfind(str,'cx-'))||...
             ~isempty(strfind(str,'ptp'))
-        delta =0;
+        delta = 0;
     else
-        delta =30;
+        delta = 30;
     end
-    
-    count = count+1;
     ind_color = min(delta+count,length(handles.MainFigure.Colormap));
     color = handles.MainFigure.Colormap(ind_color,:);
-    fprintf('i = %d, ind_color %d, color [%.2f %.2f %.2f]\n',i,ind_color,...
-        handles.MainFigure.Colormap(ind_color,1),handles.MainFigure.Colormap(ind_color,2),handles.MainFigure.Colormap(ind_color,3));
+    %fprintf('i = %d, ind_color %d, color [%.2f %.2f %.2f]\n',i,ind_color,color(:,1),color(:,2),color(:,3));
     
     % Checking if region name is whole
     l_width = 1;
@@ -212,6 +228,7 @@ for i=1:length(ind_regions)
     Y = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
     Y = [reshape(Y,[length_burst,n_burst]);NaN(1,n_burst)];
     
+    % line creation
     hl = line('XData',X(:),...
         'YData',Y(:),...
         'Color',color,...
