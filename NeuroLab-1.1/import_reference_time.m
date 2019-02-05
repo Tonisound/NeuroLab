@@ -63,12 +63,15 @@ if ~exist(fullfile(F.fullpath,F.dir_fus,'trigger.txt'),'file')
             return;
     end
     
+    % Trigger Offset (Default: 0)
+    offset = 0;
     
     % Trigger Exportation
     file_txt = fullfile(F.fullpath,F.dir_fus,'trigger.txt');
     fid_txt = fopen(file_txt,'w');
     fprintf(fid_txt,'%s',sprintf('<REF>\n%s</REF>\n',reference));
     fprintf(fid_txt,'%s',sprintf('<PAD>\n%s</PAD>\n',padding));
+    fprintf(fid_txt,'%s',sprintf('<OFFSET>\n%.3f</OFFSET>\n',offset));
     fprintf(fid_txt,'%s',sprintf('<TRIG>\n'));
     %fprintf(fid_txt,'%s',sprintf('n=%d \n',length(trigger)));
     for k = 1:length(trigger)
@@ -82,6 +85,7 @@ else
     % Trigger Readout
     reference = 'default';
     padding = 'none';
+    offset = 0; % default
     trigger = [];
     
     file_txt = fullfile(F.fullpath,F.dir_fus,'trigger.txt');
@@ -99,7 +103,7 @@ else
         D = C(~cellfun('isempty',C));
         reference = char(D);
     end
-    % pAD
+    % PAD
     delim1 = '<PAD>';
     delim2 = '</PAD>';
     if strfind(A,delim1)
@@ -108,10 +112,18 @@ else
         D = C(~cellfun('isempty',C));
         padding = char(D);
     end
+    % OFFSET
+    delim1 = '<OFFSET>';
+    delim2 = '</OFFSET>';
+    if strfind(A,delim1)
+        B = regexp(A,'<OFFSET>|</OFFSET>','split');
+        C = char(B(2));
+        D = textscan(C,'%f');
+        offset = D{1,1};
+    end
     % TRIG
     B = regexp(A,'<TRIG>|</TRIG>','split');
     C = char(B(2));
-
     D = textscan(C,'%f');
     trigger = D{1,1};
 end
@@ -120,7 +132,7 @@ end
 % Trigger Importation  
 n_images = length(trigger);
 time_ref.X = (1:n_images)';
-time_ref.Y = trigger;
+time_ref.Y = trigger+offset;
 time_ref.nb_images = length(trigger);
 n_burst = 1;
 length_burst = length(trigger);
