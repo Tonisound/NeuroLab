@@ -49,18 +49,22 @@ tm = findobj(handles.RightAxes,'Tag','Trace_Mean');
 %tm.YData(~isnan(tm.YData)) = mean(mean(IM,2,'omitnan'),1,'omitnan');
 
 % Smoothing mean
-if strcmp(rec_mode,'BURST')
-    tm.YData(1:end-1) = mean(mean(IM,2,'omitnan'),1,'omitnan');
-    y_reshape = [reshape(squeeze(tm.YData(1:end-1)),[length_burst,n_burst]);NaN(length(w),n_burst)];
-    y_conv = nanconv(y_reshape(:),w,'same');
-    y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
-    y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
-    tm.YData(1:end-1) = y_final;
+if t_gauss>0
+    if strcmp(rec_mode,'BURST')
+        tm.YData(1:end-1) = mean(mean(IM,2,'omitnan'),1,'omitnan');
+        y_reshape = [reshape(squeeze(tm.YData(1:end-1)),[length_burst,n_burst]);NaN(length(w),n_burst)];
+        y_conv = nanconv(y_reshape(:),w,'same');
+        y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
+        y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
+        tm.YData(1:end-1) = y_final;
+    else
+        y_smooth =  squeeze(mean(mean(IM,2,'omitnan'),1,'omitnan'));
+        y_conv = nanconv(y_smooth,w,'same');
+        tm.YData(1:end-1) = y_conv';
+        success = true;
+    end
 else
-    y_smooth =  squeeze(mean(mean(IM,2,'omitnan'),1,'omitnan'));
-    y_conv = nanconv(y_smooth,w,'same');
-    tm.YData(1:end-1) = y_conv';
-    success = true;
+    tm.YData(1:end-1) = mean(mean(IM,2,'omitnan'),1,'omitnan');
 end
 
 % Update YData for Mean, Lines and Boxes

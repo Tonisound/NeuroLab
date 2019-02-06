@@ -5,7 +5,7 @@ function [f,myhandles] = initialize_NeuroLab(str,UiValues)
 
 global IM CUR_IM START_IM END_IM LAST_IM CUR_FILE FILES DIR_SAVE ;
 
-load('Preferences.mat','GDisp');
+load('Preferences.mat','GDisp','GTraces');
 
 %% GUI layout
 % Display Parameters for GUI initialization
@@ -27,7 +27,7 @@ set(0, 'DefaultUiControlFontName',fontname);
 
 % Time Reference Loading
 if ~isempty(FILES) && exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
 else
     %warning('Missing File Time_Reference.mat');
     length_burst = size(IM,3);
@@ -253,6 +253,28 @@ hl = line('XData',xdata(:),...
     'Parent', b);
 s.Name = 'Whole';
 hl.UserData = s;
+
+% Gaussian window
+t_gauss = GTraces.GaussianSmoothing;
+delta =  time_ref.Y(2)-time_ref.Y(1);
+w = gausswin(round(2*t_gauss/delta));
+w = w/sum(w);
+% Gaussian smoothing
+if t_gauss>0
+    y = hl.YData(1:end-1);
+    if strcmp(rec_mode,'BURST')
+        % gaussian nan convolution + nan padding (only for burst_recording)
+        length_burst_smooth = 59;
+        n_burst_smooth = length(y)/length_burst_smooth;
+        y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
+        y_conv = nanconv(y_reshape(:),w,'same');
+        y_reshaped = reshape(y_conv,[length_burst_smooth+length(w),n_burst_smooth]);
+        y_final = reshape(y_reshaped(1:length_burst_smooth,:),[length_burst_smooth*n_burst_smooth,1]);
+        hl.YData(1:end-1) = y_final';
+    else
+        hl.YData(1:end-1) = nanconv(y,w,'same');
+    end
+end
 
 
 %% Main UiControls

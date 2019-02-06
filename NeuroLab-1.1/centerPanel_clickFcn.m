@@ -11,12 +11,19 @@ n_pixels = length(findobj(handles.CenterAxes,'Tag','Pixel'));
 n_boxes = length(findobj(handles.CenterAxes,'Tag','Box'));
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
 catch
     warning('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
     length_burst = size(IM,3);
     n_burst =1;
+    rec_mode = 'CONTINUOUS';
 end
+
+% Gaussian window
+t_gauss = GTraces.GaussianSmoothing;
+delta =  time_ref.Y(2)-time_ref.Y(1);
+w = gausswin(round(2*t_gauss/delta));
+w = w/sum(w);
 
 if pt_cp(1,1)>Xlim(1) && pt_cp(1,1)<Xlim(2) && pt_cp(1,2)>Ylim(1) && pt_cp(1,2)<Ylim(2)
     set(handles.MainFigure,'Pointer','crosshair');            
@@ -47,6 +54,23 @@ if pt_cp(1,1)>Xlim(1) && pt_cp(1,1)<Xlim(2) && pt_cp(1,2)>Ylim(1) && pt_cp(1,2)<
                 s.Name = sprintf('Pixel-%d',n_pixels+1);
                 hp.UserData = hl;
                 hl.UserData = s;
+                % Gaussian smoothing
+                if t_gauss>0
+                    y = hl.YData(1:end-1);
+                    if strcmp(rec_mode,'BURST')
+                        % gaussian nan convolution + nan padding (only for burst_recording)
+                        length_burst_smooth = 59;
+                        n_burst_smooth = length(y)/length_burst_smooth;
+                        y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
+                        y_conv = nanconv(y_reshape(:),w,'same');
+                        y_reshaped = reshape(y_conv,[length_burst_smooth+length(w),n_burst_smooth]);
+                        y_final = reshape(y_reshaped(1:length_burst_smooth,:),[length_burst_smooth*n_burst_smooth,1]);
+                        hl.YData(1:end-1) = y_final';
+                    else
+                        hl.YData(1:end-1) = nanconv(y,w,'same');
+                    end
+                end
+                
             else
                 errordlg(sprintf('Maximum Number of Pixels Reached : %d \n Consider changing Preferences.',n_pixels));
             end
@@ -75,6 +99,22 @@ if pt_cp(1,1)>Xlim(1) && pt_cp(1,1)<Xlim(2) && pt_cp(1,2)>Ylim(1) && pt_cp(1,2)<
                 s.Name = sprintf('Box-%d',n_boxes+1);
                 hq.UserData = hr;
                 hr.UserData = s;
+                % Gaussian smoothing
+                if t_gauss>0
+                    y = hr.YData(1:end-1);
+                    if strcmp(rec_mode,'BURST')
+                        % gaussian nan convolution + nan padding (only for burst_recording)
+                        length_burst_smooth = 59;
+                        n_burst_smooth = length(y)/length_burst_smooth;
+                        y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
+                        y_conv = nanconv(y_reshape(:),w,'same');
+                        y_reshaped = reshape(y_conv,[length_burst_smooth+length(w),n_burst_smooth]);
+                        y_final = reshape(y_reshaped(1:length_burst_smooth,:),[length_burst_smooth*n_burst_smooth,1]);
+                        hr.YData(1:end-1) = y_final';
+                    else
+                        hr.YData(1:end-1) = nanconv(y,w,'same');
+                    end
+                end
             else
                 errordlg(sprintf('Maximum Number of Boxs Reached : %d \n Consider changing Preferences.',n_pixels));
             end

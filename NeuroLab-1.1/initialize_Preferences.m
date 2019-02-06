@@ -5,15 +5,16 @@ success = false;
 
 % Default options
 str_disk_1 = fullfile('G:','DATA');
-str_disk_2 = fullfile(filesep,'Volumes','ETNA','DATA');
-str_disk_3 = fullfile(filesep,'Volumes','Toni_HD2','DATA_NLAB');
-str_disk_4 = fullfile(filesep,'Users','tonio','Documents','DATA_NLAB');
+str_disk_2 = fullfile('D:','DATA');
+str_disk_3 = fullfile(filesep,'Volumes','ETNA','DATA');
+str_disk_4 = fullfile(filesep,'Volumes','Toni_HD2','DATA_NLAB');
+str_disk_5 = fullfile(filesep,'Users','tonio','Documents','DATA_NLAB');
 
 str_save_1 = fullfile('D:','NEUROLAB');
 str_save_2 = fullfile(filesep,'Users','tonio','Documents','NEUROLAB');
 
 % Inputdlg to choose booting options
-prompt={sprintf('(1) %s \n(2) %s \n(3) %s \n(4) %s',str_disk_1,str_disk_2,str_disk_3,str_disk_4);
+prompt={sprintf('(1) %s \n(2) %s \n(3) %s \n(4) %s\n(5) %s',str_disk_1,str_disk_2,str_disk_3,str_disk_4,str_disk_5);
     sprintf('(1) %s \n(2) %s',str_save_1,str_save_2)};
 name = 'Booting options';
 defaultans = {'1';'1'};
@@ -33,6 +34,8 @@ switch strtrim(char(answer(1)))
         str_disk = str_disk_3;
     case '4'
         str_disk = str_disk_4;
+    case '5'
+        str_disk = str_disk_5;
     case ''
         return;
     otherwise
@@ -135,8 +138,10 @@ GImport.LFP_loading_index = 2;
 GImport.LFP_loading = 'ns2';
 GImport.Channel_loading_index = 1;
 GImport.Channel_loading = 'raw';
-GImport.Trigger_loading_index = 2;
-GImport.Trigger_loading = 'nev';
+GImport.Trigger_loading_index = 1;
+GImport.Trigger_loading = 'ns5';
+GImport.Region_loading_index = 1;
+GImport.Region_loading = 'unilateral';
 
 GFilt.broad_inf = 1;
 GFilt.broad_sup = 250;

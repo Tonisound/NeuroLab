@@ -2,7 +2,7 @@ function fileSelectionPopup_Callback(hObj,~,handles)
 % 101 - File Selection Popup
 
 global FILES CUR_FILE IM CUR_IM LAST_IM START_IM END_IM DIR_SAVE;
-load('Preferences.mat','GDisp');
+load('Preferences.mat','GDisp','GTraces');
 load('Files.mat','UiValues');
 
 % Pointer Watch
@@ -58,11 +58,12 @@ if ~strcmp(old,new)
             
             % Recreate Mean and Mean Label
             try
-                load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+                load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
             catch
                 warning('Missing File Time_Reference.mat');
                 length_burst = size(IM,3);
-                n_burst =1;
+                n_burst = 1;
+                rec_mode = 'CONTINUOUS';
             end
             xdata = [reshape(1:LAST_IM,[length_burst,n_burst]);NaN(1,n_burst)];
             ydata = [reshape(mean(mean(IM,2,'omitnan'),1,'omitnan'),[length_burst,n_burst]);NaN(1,n_burst)];
@@ -71,6 +72,29 @@ if ~strcmp(old,new)
                 'HitTest','off','Parent',handles.RightAxes);
             s.Name = 'Whole';
             hl.UserData = s;
+            
+            % Gaussian window
+            t_gauss = GTraces.GaussianSmoothing;
+            delta =  time_ref.Y(2)-time_ref.Y(1);
+            w = gausswin(round(2*t_gauss/delta));
+            w = w/sum(w);
+            % Gaussian smoothing
+            if t_gauss>0
+                y = hl.YData(1:end-1);
+                if strcmp(rec_mode,'BURST')
+                    % gaussian nan convolution + nan padding (only for burst_recording)
+                    length_burst_smooth = 59;
+                    n_burst_smooth = length(y)/length_burst_smooth;
+                    y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
+                    y_conv = nanconv(y_reshape(:),w,'same');
+                    y_reshaped = reshape(y_conv,[length_burst_smooth+length(w),n_burst_smooth]);
+                    y_final = reshape(y_reshaped(1:length_burst_smooth,:),[length_burst_smooth*n_burst_smooth,1]);
+                    hl.YData(1:end-1) = y_final';
+                else
+                    hl.YData(1:end-1) = nanconv(y,w,'same');
+                end
+            end
+            
         end
         
     % Loading Video file

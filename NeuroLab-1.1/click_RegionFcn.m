@@ -10,9 +10,10 @@ load('Preferences.mat','GDisp');
 coeff_increase = GDisp.coeff_increase;
 
 if strcmp(seltype,'normal')
-    if hObj.EdgeColor == char2rgb('k')
+    if strcmp(hObj.EdgeColor,'none') %hObj.EdgeColor == char2rgb('k')
         others = findobj(handles.CenterAxes,'Visible','on','-and','EdgeColor',char2rgb('w'));
-        set(others,'EdgeColor',char2rgb('k'),'LineWidth',1);
+        %set(others,'EdgeColor',char2rgb('k'),'LineWidth',1);
+        set(others,'EdgeColor','none','LineWidth',1);
         for i =1:length(others) 
             others(i).UserData.LineWidth = others(i).UserData.LineWidth/coeff_increase;
         end
@@ -22,7 +23,8 @@ if strcmp(seltype,'normal')
         hObj.Selected ='on';
         hObj.UserData.LineWidth=coeff_increase*hObj.UserData.LineWidth;
     else
-        hObj.EdgeColor = char2rgb('k');
+        %hObj.EdgeColor = char2rgb('k');
+        hObj.EdgeColor = 'none';
         hObj.LineWidth = 1;
         hObj.Selected ='off';
         hObj.UserData.LineWidth=hObj.UserData.LineWidth/coeff_increase;

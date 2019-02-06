@@ -64,7 +64,7 @@ regions = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});
 
 % Sorting by name
 pattern_list = {'ac';'s1bf';'lpta';'rs';'v2';'antcortex';'amidcortex';'pmidcortex';'postcortex';'neocortex';...
-    'dg';'ca3';'ca2';'ca1';'dhpc';'vhpc';'subiculum';...
+    'dg';'ca3';'ca2';'ca1';'fc';'subiculum';'dhpc';'vhpc';...
     'dthal';'vthal';'vpm';'po';'thalamus';'cpu';'gp';'hypothalrg'};
 
 files_regions_sorted = [];
@@ -108,26 +108,69 @@ C = regexprep(C,'_','-');
 prefix = largest_prefix(C);
 suffix = largest_suffix(C);
 
+regions_name = [];
 for i=1:length(files_regions)
-    %root = regexp(char(C(i)),prefix,'split');
-    %root = regexp(char(root(2)),suffix,'split');
     root =  char(C(i));
     regions(i).name = root(length(prefix)+1:end-length(suffix));
+    regions_name = [regions_name;{regions(i).name}];
 end
 
-% Saving Regions
-save(fullfile(foldername,'Spikoscope_Regions.mat'),'X','Y','regions');
-fprintf('Spikoscope Regions Imported [%s] \n===> Saved in %s\n',dir_regions,fullfile(foldername,'Spikoscope_Regions.mat'));
+% Unilateral/Bilateral Importation
+load('Preferences.mat','GDisp','GTraces','GImport');
+switch GImport.Region_loading 
+    case 'unilateral'
+        fprintf('=== Unilateral Importation ===\n');
+    case 'bilateral'
+        fprintf('=== Bilateral Importation ===\n');
+        %regions_unilateral = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});
+        regions_bilateral = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});
+        patterns = regexprep(regions_name,'-L|-R|-A|-P','');
+        unique_patterns = unique(regexprep(regions_name,'-L|-R|-A|-P',''),'stable');
+        
+        % loop across unique patterns
+        for i=1:length(unique_patterns)
+            ind_merge = find(strcmp(patterns,unique_patterns(i))==1);
+            if length(ind_merge)==1
+                regions_bilateral(i)= regions(ind_merge);
+                regions_bilateral(i).name = char(unique_patterns(i));
+            else
+                name_merge = char(unique_patterns(i));
+                mask_merge = zeros(size(regions(1).mask));
+                patch_x_merge = [];
+                patch_y_merge = [];
+                for j=1:length(ind_merge)
+                    mask_merge = mask_merge+regions(ind_merge(j)).mask;
+                    patch_x_merge = [patch_x_merge;regions(ind_merge(j)).patch_x];
+                    patch_y_merge = [patch_y_merge;regions(ind_merge(j)).patch_y];
+                end
+                regions_bilateral(i).name = name_merge;
+                regions_bilateral(i).mask = double(mask_merge>0);
+                regions_bilateral(i).patch_x = patch_x_merge;
+                regions_bilateral(i).patch_y = patch_y_merge;
+            end
+        end
+        regions = regions_bilateral;
+end
+
+
+% % Saving Regions
+% save(fullfile(foldername,'Spikoscope_Regions.mat'),'X','Y','regions');
+% fprintf('Spikoscope Regions Imported [%s] \n===> Saved in %s\n',dir_regions,fullfile(foldername,'Spikoscope_Regions.mat'));
 
 
 % Direct Region Loading
-load('Preferences.mat','GDisp','GTraces');
 if exist(fullfile(foldername,'Time_Reference.mat'),'file')
-    load(fullfile(foldername,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+    load(fullfile(foldername,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
 else
     errordlg(sprintf('Missing File %s',fullfile(folder_name,'Time_Reference.mat')));
     return;
 end
+
+% Gaussian window
+t_gauss = GTraces.GaussianSmoothing;
+delta =  time_ref.Y(2)-time_ref.Y(1);
+w = gausswin(round(2*t_gauss/delta));
+w = w/sum(w);
 
 % Choising regions
 lines = findobj(handles.RightAxes,'Tag','Trace_Region');
@@ -139,7 +182,8 @@ end
 count=length(lines);
 
 if nargin <4
-    [ind_regions,ok] = listdlg('PromptString','Select Regions','SelectionMode','multiple','ListString',{regions.name},'ListSize',[300 500]);
+    [ind_regions,ok] = listdlg('PromptString','Select Regions','SelectionMode','multiple',...
+        'ListString',{regions.name},'ListSize',[300 500]);
 else
     ind_regions = 1:length(regions);
     ok = true;
@@ -153,109 +197,125 @@ end
 for i=1:length(ind_regions)
     
     % finding trace name
-    str = lower(char(regions(ind_regions(i)).name));
-    %fprintf('Importing Region %s (%d/%d) ...\n',str,i,length(ind_regions));
+    t = char(regions(ind_regions(i)).name);
+    str = lower(t);
     
-    %     if contains(t,lines_name) && ~isempty(find(contains(lines_name,t),1))
-    %         %line already exists overwrite
-    %         ind_overwrite = find(contains(lines_name,t)==1);
-    %         for j=1:length(ind_overwrite)
-    %             lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
-    %             lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
-    %             fprintf('LFP Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
-    %         end
-    %     else
-    %     end
-    
-    % Color counter
-    count = count+1;
-    if ~isempty(strfind(str,'hpc'))||...
-            ~isempty(strfind(str,'ca1'))||...
-            ~isempty(strfind(str,'ca2'))||...
-            ~isempty(strfind(str,'ca3'))||...
-            ~isempty(strfind(str,'dg'))||...
-            ~isempty(strfind(str,'subic'))||...
-            ~isempty(strfind(str,'lent-'))
-        delta = 10;
-    elseif ~isempty(strfind(str,'thal'))||...
-            ~isempty(strfind(str,'vpm-'))||...
-            ~isempty(strfind(str,'po-'))||...
-            ~isempty(strfind(str,'cpu-'))||...
-            ~isempty(strfind(str,'gp-'))||...
-            ~isempty(strfind(str,'septal'))
-        delta = 20;
-    elseif ~isempty(strfind(str,'cortex'))||...
-            ~isempty(strfind(str,'rs-'))||...
-            ~isempty(strfind(str,'ac-'))||...
-            ~isempty(strfind(str,'s1'))||...
-            ~isempty(strfind(str,'lpta'))||...
-            ~isempty(strfind(str,'m12'))||...
-            ~isempty(strfind(str,'v1'))||...
-            ~isempty(strfind(str,'v2'))||...
-            ~isempty(strfind(str,'cg-'))||...
-            ~isempty(strfind(str,'cx-'))||...
-            ~isempty(strfind(str,'ptp'))
-        delta = 0;
+    if contains(t,lines_name) && ~isempty(find(contains(lines_name,t),1))
+        %line already exists overwrite
+        ind_overwrite = find(contains(lines_name,t)==1);
+        hq = lines(ind_overwrite).UserData.Graphic;
+        hl = lines(ind_overwrite);
+        
+        % patch update
+        hq.XData = regions(ind_regions(i)).patch_x;
+        hq.YData = regions(ind_regions(i)).patch_y;
+        % mask update
+        hl.UserData.Mask = regions(ind_regions(i)).mask;
+        % line update
+        im_mask = regions(ind_regions(i)).mask;
+        im_mask(im_mask==0)=NaN;
+        im_mask = IM.*repmat(im_mask,1,1,size(IM,3));
+        Y = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
+        Y = [reshape(Y,[length_burst,n_burst]);NaN(1,n_burst)];
+        hl.YData = Y;
+        fprintf('Region %s Successfully Updated (%d/%d).\n',t,i,length(ind_regions));
+        
     else
-        delta = 30;
+        
+        % Color counter
+        count = count+1;
+        %if contains(str,{'hpc';'ca1';'ca2';'ca3';'dg';'fc-';'subic';'lent-'})
+        if contains(str,{'hpc';'ca1';'ca2';'ca3';'dg';'fc';'subic';'lent'})
+            delta = 10;
+        %elseif contains(str,{'thal';'vpm-';'po-';'cpu-';'gp-';'septal'})
+        elseif contains(str,{'thal';'vpm';'po';'cpu-';'gp';'septal'})
+            delta = 20;
+        %elseif contains(str,{'cortex';'rs-';'ac';'s1';'lpta';'m12';'v1';'v2';'cg-';'cx-';'ptp'})
+        elseif contains(str,{'cortex';'rs';'ac';'s1';'lpta';'m12';'v1';'v2';'cg';'cx';'ptp'})
+            delta = 0;
+        else
+            delta = 30;
+        end
+        ind_color = min(delta+count,length(handles.MainFigure.Colormap));
+        color = handles.MainFigure.Colormap(ind_color,:);
+        %fprintf('i = %d, ind_color %d, color [%.2f %.2f %.2f]\n',i,ind_color,color(:,1),color(:,2),color(:,3));
+        
+        % Checking if region name is whole
+        l_width = 1;
+        if contains(str,'whole')
+            color = [.5 .5 .5];
+            l_width = 2;
+        end
+        
+        % patch creation
+        hq = patch(regions(ind_regions(i)).patch_x,regions(ind_regions(i)).patch_y,color,...
+            'EdgeColor','none',...
+            'Tag','Region',...
+            'FaceAlpha',.5,...
+            'LineWidth',.5,...
+            'ButtonDownFcn',{@click_RegionFcn,handles},...
+            'Visible','off',...
+            'Parent',handles.CenterAxes);
+        % mask creation
+        X = [reshape(1:LAST_IM,[length_burst,n_burst]);NaN(1,n_burst)];
+        im_mask = regions(ind_regions(i)).mask;
+        im_mask(im_mask==0)=NaN;
+        im_mask = IM.*repmat(im_mask,1,1,size(IM,3));
+        %im_mask = IM(:,:,:).*repmat(regions(ind_regions(i)).mask,1,1,size(IM,3));
+        %im_mask(im_mask==0)=NaN;
+        Y = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
+        Y = [reshape(Y,[length_burst,n_burst]);NaN(1,n_burst)];
+        
+        % line creation
+        hl = line('XData',X(:),...
+            'YData',Y(:),...
+            'Color',color,...
+            'Tag','Trace_Region',...
+            'HitTest','on',...
+            'Visible','off',...
+            'LineWidth',l_width,...
+            'Parent',handles.RightAxes);
+        set(hl,'ButtonDownFcn',{@click_lineFcn,handles});
+        
+        % Updating UserData
+        s.Name = regions(ind_regions(i)).name;
+        s.Mask = regions(ind_regions(i)).mask;
+        s.Graphic = hq;
+        hq.UserData = hl;
+        hl.UserData = s;
+        
+        fprintf('Region %s Successfully Imported (%d/%d).\n',t,i,length(ind_regions));
     end
-    ind_color = min(delta+count,length(handles.MainFigure.Colormap));
-    color = handles.MainFigure.Colormap(ind_color,:);
-    %fprintf('i = %d, ind_color %d, color [%.2f %.2f %.2f]\n',i,ind_color,color(:,1),color(:,2),color(:,3));
     
-    % Checking if region name is whole
-    l_width = 1;
-    if ~isempty(strfind(str,'whole'))
-        color = [.5 .5 .5];
-        l_width = 2;
-    end
-    
-    hq = patch(regions(ind_regions(i)).patch_x,regions(ind_regions(i)).patch_y,color,...
-        'EdgeColor','k',...
-        'Tag','Region',...
-        'FaceAlpha',.5,...
-        'LineWidth',.5,...
-        'ButtonDownFcn',{@click_RegionFcn,handles},...
-        'Visible','off',...
-        'Parent',handles.CenterAxes);
-    
-    X = [reshape(1:LAST_IM,[length_burst,n_burst]);NaN(1,n_burst)];
-    im_mask = regions(ind_regions(i)).mask;
-    im_mask(im_mask==0)=NaN;
-    im_mask = IM.*repmat(im_mask,1,1,size(IM,3));
-    %im_mask = IM(:,:,:).*repmat(regions(ind_regions(i)).mask,1,1,size(IM,3));
-    %im_mask(im_mask==0)=NaN;
-    Y = mean(mean(im_mask,2,'omitnan'),1,'omitnan');
-    Y = [reshape(Y,[length_burst,n_burst]);NaN(1,n_burst)];
-    
-    % line creation
-    hl = line('XData',X(:),...
-        'YData',Y(:),...
-        'Color',color,...
-        'Tag','Trace_Region',...
-        'HitTest','on',...
-        'Visible','off',...
-        'LineWidth',l_width,...
-        'Parent',handles.RightAxes);
-    set(hl,'ButtonDownFcn',{@click_lineFcn,handles});
-    
+    % Line Visibility
     if handles.RightPanelPopup.Value ==3
         %set([hq;hl],'Visible','on');
         set(hl,'Visible','on');
     end
-    boxLabel_Callback(handles.LabelBox,[],handles);
-    boxPatch_Callback(handles.PatchBox,[],handles);
     
-    % Updating UserData
-    s.Name = regions(ind_regions(i)).name;
-    s.Mask = regions(ind_regions(i)).mask;
-    s.Graphic = hq;
-    hq.UserData = hl;
-    hl.UserData = s;
+    % Gaussian smoothing
+    if t_gauss>0
+        %fprintf(' Smoothing constant (%.1f s)... ',t_gauss);
+        y = hl.YData(1:end-1); 
+        if strcmp(rec_mode,'BURST')
+            % gaussian nan convolution + nan padding (only for burst_recording)
+            length_burst_smooth = 59;
+            n_burst_smooth = length(y)/length_burst_smooth;
+            y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
+            y_conv = nanconv(y_reshape(:),w,'same');
+            y_reshaped = reshape(y_conv,[length_burst_smooth+length(w),n_burst_smooth]);
+            y_final = reshape(y_reshaped(1:length_burst_smooth,:),[length_burst_smooth*n_burst_smooth,1]);
+            hl.YData(1:end-1) = y_final';
+        else
+            hl.YData(1:end-1) = nanconv(y,w,'same');
+        end
+    end
     
-    fprintf('Region %s Successfully Imported (%d/%d).\n',str,i,length(ind_regions));
 end
 
+% Checkbox Update
+boxLabel_Callback(handles.LabelBox,[],handles);
+boxPatch_Callback(handles.PatchBox,[],handles);        
 actualize_plot(handles);
 success = true;
 
