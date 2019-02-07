@@ -22,8 +22,8 @@ else
     return;
 end
 
-% Searching LFP channels in Traces_Cerep folder
-dir_t = dir(fullfile(foldername,'Traces_Cerep','LFP_*.mat'));
+% Searching LFP channels in Sources_LFP folder
+dir_t = dir(fullfile(foldername,'Sources_LFP','LFP_*.mat'));
 if isempty(dir_t)
     errordlg(sprintf('No LFP traces_filter found in %s',foldername));
     return;
@@ -125,7 +125,7 @@ for i =1:length(band_list)
     for j =1:length(channel_list)
         % loading
         str_channel = char(channel_list(j));
-        data  = load(fullfile(foldername,'Traces_Cerep',str_channel));
+        data  = load(fullfile(foldername,'Sources_LFP',str_channel));
         Y = data.Y;
         X = (data.x_start:data.f:data.x_end)';
         fs = 1/data.f;

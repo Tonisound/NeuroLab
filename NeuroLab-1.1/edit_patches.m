@@ -105,7 +105,9 @@ set(boxMask,'Callback',{@boxMask_Callback,handles2});
 
 
 % Changing main image
-main_im = mean(IM(:,:,START_IM:END_IM),3);
+%main_im = mean(IM(:,:,START_IM:END_IM),3,'omitnan');
+n_images = 100;
+main_im = mean(IM(:,:,START_IM:min(START_IM+n_images,END_IM)),3,'omitnan');
 im = findobj(ax,'Tag','MainImage');
 im.CData = main_im;
 
@@ -142,8 +144,14 @@ for i = 1:length(patches)
     patches(i).UserData.Mask = mask;
 
 end
-table_region.Data = cellstr(str_popup);
-table_region.UserData.patches = patches;
+
+if ~isempty(str_popup)
+    table_region.Data = cellstr(str_popup);
+    table_region.UserData.patches = patches;
+else
+    table_region.Data = [];
+    table_region.UserData.patches = [];
+end
 
 end
 
@@ -152,8 +160,10 @@ function newButton_callback(~,~,handles)
 global IM;
 
 answer = inputdlg('Enter Region Name','Region creation',[1 60]);
-while contains(char(answer),handles.Region_table.Data)
-    answer = inputdlg('Enter Region Name','Invalid name (Region already exists)',[1 60]);
+if ~isempty(handles.Region_table.Data)
+    while contains(char(answer),handles.Region_table.Data)
+        answer = inputdlg('Enter Region Name','Invalid name (Region already exists)',[1 60]);
+    end
 end
 
 if isempty(answer)

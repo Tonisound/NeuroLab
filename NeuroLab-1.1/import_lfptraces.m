@@ -223,8 +223,9 @@ for i=1:length(ind_traces)
         for j=1:length(ind_overwrite)
             lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
             lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
-            fprintf('LFP Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
+            fprintf('LFP Trace successfully updated (%s) ',traces(ind_traces(i)).fullname);
         end
+        save_name = strrep(t,'/','_');
     else
         %line creation
         str = lower(char(traces(ind_traces(i)).fullname));
@@ -257,9 +258,22 @@ for i=1:length(ind_traces)
         s.X = traces(ind_traces(i)).X;
         s.Y = traces(ind_traces(i)).Y;
         hl.UserData = s;
-        fprintf('LFP Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);
+        fprintf('LFP Trace successfully loaded (%s) ',traces(ind_traces(i)).fullname);
+        save_name = strrep(s.Name,'/','_');
     end
-
+    
+    % Save LFP source
+    dir_source = fullfile(dir_save,'Sources_LFP');
+    if ~exist(dir_source,'dir')
+        mkdir(dir_source);
+    end
+    X = traces(ind_traces(i)).X;
+    Y = traces(ind_traces(i)).Y;
+    f = X(2)-X(1);
+    x_start = X(1);
+    x_end = X(end);
+    save(fullfile(dir_source,strcat(save_name,'.mat')),'Y','f','x_start','x_end','-v7.3');
+    fprintf('- Saved [%s]\n',fullfile(dir_source,strcat(save_name,'.mat')));
 end
 
 success = true;

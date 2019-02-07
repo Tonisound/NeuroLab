@@ -49,7 +49,7 @@ for i=length(h_line):-1:1
         
         case {'Trace_Cerep'}
             s.Name = h_line(i).UserData.Name;
-            dir_save = fullfile(save_dir,'Traces_Cerep');
+            dir_save = fullfile(save_dir,'Sources_LFP');
             name = regexprep(s.Name,'/|\','_');
                     
             switch mode
@@ -82,7 +82,7 @@ for i=length(h_line):-1:1
             h_line(i).UserData = s;
             
         case {'Trace_Region'}
-            dir_save = fullfile(save_dir,'Traces_Region');
+            dir_save = fullfile(save_dir,'Sources_fUS');
                     
             switch mode
                 case 'loading'

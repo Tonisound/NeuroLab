@@ -50,8 +50,14 @@ if sum(ind_1)==0
     return;
 end
 if sum(ind_2)==0
-    errordlg('Missing LFP-theta channels. Reload configuration.');
-    return;
+    % errordlg('Missing LFP-theta channels. Reload configuration.');
+    % return;
+    warning('Missing LFP-theta channels. Mode spectrogramm only.');
+    cb4_enable = 'off';
+    cb12_enable = 'off';
+else
+    cb4_enable = 'on';
+    cb12_enable = 'on';
 end
 
 traces_name = temp(ind_1);
@@ -117,14 +123,14 @@ efc = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',iP,...
-    'String',3,...
+    'String',2,...
     'Tag','Fc',...
     'Tooltipstring','Center Frequency');
 efb = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',iP,...
-    'String',4,...
+    'String',2,...
     'Tag','Fb',...
     'Tooltipstring','Bandwidth');
 efd = uicontrol('Units','normalized',...
@@ -236,6 +242,7 @@ cb4 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'Parent',iP,...
     'Value',cb4_def,...
+    'Enable',cb4_enable,...
     'Tag','Checkbox4',...
     'Tooltipstring','Early break (spectrogramm only)');
 
@@ -424,6 +431,7 @@ cb12 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'Parent',bP,...
     'Value',cb12_def,...
+    'Enable',cb12_enable,...
     'Tag','Checkbox12',...
     'Tooltipstring','LFP filtered');
 cb21 = uicontrol('Units','normalized',...
@@ -967,7 +975,6 @@ for i =1:length(all_pu)
         Cdata = imgaussfilt(Cdata,[1 step]);
         %correction = repmat(sqrt(data.freqdom(:)),1,size(Cdata,2));
         correction = repmat((data.freqdom(:).^exp_cor),1,size(Cdata,2));
-        
         correction = correction/correction(end,1);
         if handles.Checkbox1.Value
             im = imagesc('XData',X_temp,...
@@ -1004,6 +1011,12 @@ end
 function checkbox1_Callback(hObj,~,handles)
 % Multiply by n
 
+handles.MainFigure.Pointer = 'watch';
+drawnow;
+
+%Building correction
+exp_cor = str2double(handles.EditExpCor.String);
+
 all_firstaxes = findobj(handles.FirstBotPanel,'Type','Axes');
 all_secondaxes = findobj(handles.SecondBotPanel,'Type','Axes');
 all_botaxes = [all_firstaxes;all_secondaxes];
@@ -1011,8 +1024,14 @@ images = findobj(all_botaxes,'Type','Image','-and','Visible','on');
 
 for j=1:length(images)
     im = images(j);
-    correction = im.UserData.correction;
+    %correction = im.UserData.correction;
+    % Updating correction
     Cdata = im.UserData.Cdata;
+    freqdom = im.UserData.Ydata;
+    correction = repmat((freqdom(:).^exp_cor),1,size(Cdata,2));
+    correction = correction/correction(end,1);
+    im.UserData.correction = correction;
+    % X_temp = im.UserData.Xdata;
     %Mutltiply by n if box checked
      
     if hObj.Value
@@ -1024,11 +1043,15 @@ for j=1:length(images)
 end
 checkbox2_Callback(handles.Checkbox2,[],handles);
 buttonAutoScale_Callback([],[],handles);
+handles.MainFigure.Pointer = 'arrow';
 
 end
 
 function checkbox2_Callback(hObj,~,handles)
 % Logarithmic display
+
+handles.MainFigure.Pointer = 'watch';
+drawnow;
 
 all_firstaxes = findobj(handles.FirstBotPanel,'Type','Axes');
 all_secondaxes = findobj(handles.SecondBotPanel,'Type','Axes');
@@ -1063,6 +1086,7 @@ else
     end
 end
 buttonAutoScale_Callback([],[],handles);
+handles.MainFigure.Pointer = 'arrow';
 
 end
 
@@ -1169,16 +1193,24 @@ val = hObj.Value;
 traces = handles.ButtonCompute.UserData.traces;
 phases = handles.ButtonCompute.UserData.phases;
 traces_name = handles.ButtonCompute.UserData.traces_name;
-X = traces(val).X;
-Y = traces(val).Y;
-X_p = phases(val).X;
-Y_p = phases(val).Y;
 
 delete(findobj(ax,'type','line'));
+% drawing trace
+X = traces(val).X;
+Y = traces(val).Y;
 line('XData',X,'YData',Y,'Parent',ax,...
     'HitTest','off','Tag','Trace','Color','k');
-line('XData',X_p,'YData',Y_p,'Parent',ax,...
-    'HitTest','off','Tag','Phase','Color',[.5 .5 .5]);
+hObj.UserData.trace = traces(val);
+hObj.UserData.name = traces_name(val);
+
+if ~isempty(phases)
+    % drawing phase
+    X_p = phases(val).X;
+    Y_p = phases(val).Y;
+    line('XData',X_p,'YData',Y_p,'Parent',ax,...
+        'HitTest','off','Tag','Phase','Color',[.5 .5 .5]);
+    hObj.UserData.phase = phases(val);
+end
 ax.YLimMode = 'auto';
 
 index = hObj.UserData.index;
@@ -1187,9 +1219,7 @@ for i =1:length(all_ax)
     all_ax(i).YLabel.String = traces_name(val);
 end
 
-hObj.UserData.trace = traces(val);
-hObj.UserData.phase = phases(val);
-hObj.UserData.name = traces_name(val);
+
 
 checkbox11_Callback(handles.Checkbox11,[],handles);
 checkbox12_Callback(handles.Checkbox12,[],handles);
@@ -1227,11 +1257,11 @@ end
 
 function update_caxis(hObj,~,ax,c,value)
 switch value
-    case 1,
+    case 1
         for i =1:length(ax)
             ax(i).CLim(1) = str2double(hObj.String);
         end
-    case 2,
+    case 2
         for i =1:length(ax)
             ax(i).CLim(2) = str2double(hObj.String);
         end
@@ -1245,9 +1275,9 @@ if length(hObj)>1
     ax.YLim = [str2double(hObj(1).String) str2double(hObj(2).String)];
 else
     switch value
-        case 1,
+        case 1
             ax.YLim(1) = str2double(hObj.String);
-        case 2,
+        case 2
             ax.YLim(2) = str2double(hObj.String);
     end
 end
@@ -1275,6 +1305,7 @@ function compute_wavelet_Callback(hObj,~,handles)
 
 tic;
 handles.MainFigure.Pointer = 'watch';
+drawnow;
 handles.MainFigure.UserData.success = false;
 
 global DIR_SAVE FILES CUR_FILE;
@@ -1395,11 +1426,6 @@ for k=1:bands
     
     % Case of early break
     early_break = handles.Checkbox4.Value;
-%     if handles.Checkbox4.Value ==1
-%         early_break = true;
-%     else
-%         early_break = false;
-%     end
     if early_break
         %Saving data
         save_data(k).trace_name = trace_name;
@@ -1777,7 +1803,7 @@ hObj.UserData.Tag_Selection = Tag_Selection;
 handles.TabGroup.SelectedTab = handles.FirstTab;
 
 % Multiply b n
-%checkbox1_Callback(handles.Checkbox1,[],handles);
+% checkbox1_Callback(handles.Checkbox1,[],handles);
 
 % Apply log correction
 if handles.Checkbox2.Value
