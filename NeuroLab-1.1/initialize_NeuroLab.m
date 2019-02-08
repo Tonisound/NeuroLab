@@ -254,13 +254,13 @@ hl = line('XData',xdata(:),...
 s.Name = 'Whole';
 hl.UserData = s;
 
-% Gaussian window
 t_gauss = GTraces.GaussianSmoothing;
-delta =  time_ref.Y(2)-time_ref.Y(1);
-w = gausswin(round(2*t_gauss/delta));
-w = w/sum(w);
-% Gaussian smoothing
-if t_gauss>0
+if t_gauss>0 && length(hl.YData)>3
+    % Gaussian window
+    delta =  time_ref.Y(2)-time_ref.Y(1);
+    w = gausswin(round(2*t_gauss/delta));
+    w = w/sum(w);
+    % Gaussian smoothing
     y = hl.YData(1:end-1);
     if strcmp(rec_mode,'BURST')
         % gaussian nan convolution + nan padding (only for burst_recording)

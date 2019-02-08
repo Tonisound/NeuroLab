@@ -573,6 +573,6 @@ fileSelectionPopup_Callback(myhandles.FileSelectPopup,[],myhandles);
 
 fprintf('Done !\n');
 handles.MainFigure.Pointer = 'arrow';
-close(handles.MainFigure);
+% close(handles.MainFigure);
 
 end

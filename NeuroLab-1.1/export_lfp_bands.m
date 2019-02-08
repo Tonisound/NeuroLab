@@ -243,15 +243,13 @@ for i=1:length(ind_traces)
     % finding trace name
     t = traces(ind_traces(i)).fullname;
     
-    if contains(t,lines_name)
+    if sum(strcmp(t,lines_name))>0
         %line already exists overwrite
-        ind_overwrite = find(contains(lines_name,t)==1);
-        for j=1:length(ind_overwrite)
-            lines(ind_overwrite).UserData.X = traces(ind_traces(i)).X;
-            lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
-            lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
-            fprintf('Cereplex Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
-        end
+        ind_overwrite = find(strcmp(t,lines_name)==1);
+        lines(ind_overwrite).UserData.X = traces(ind_traces(i)).X;
+        lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
+        lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
+        fprintf('Cereplex Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
     else
         %line creation
         str = lower(char(traces(ind_traces(i)).fullname));

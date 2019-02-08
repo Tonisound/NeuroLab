@@ -31,6 +31,8 @@ clrmenu(f2);
 
 % Storing Time reference
 f2.UserData.time_ref = time_ref;
+f2.UserData.x_start = time_ref.Y(1);
+f2.UserData.x_end = time_ref.Y(end);
 f2.UserData.n_burst = n_burst;
 f2.UserData.length_burst = length_burst;
 f2.UserData.TimeTags = TimeTags;
@@ -324,8 +326,8 @@ if ~isempty(handles2.TagButton.UserData)&&length(handles2.TagButton.UserData.Sel
 end
 
 handles2 = reset_Callback([],[],handles2,myhandles);
-colormap(f2,'jet');
 edit_Callback([handles2.Edit1 handles2.Edit2],[],handles2.CenterAxes);
+colormap(f2,'jet');
 
 % If nargin > 3 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
@@ -452,53 +454,104 @@ function update_popup_Callback(pu,~,handles)
 
 % Extracting EEG curves
 traces = handles.MainFigure.UserData.traces;
+x_start = handles.MainFigure.UserData.x_start;
+x_end = handles.MainFigure.UserData.x_end;
+t_gauss = str2double(handles.Edit3.String);
+
 ax = handles.Ax_LFP;
 channel = char(pu.String(pu.Value,:));
 str_traces = [];
 ind_keep = zeros(length(traces),1);
 for i =1 : length(traces)
-    if ~isempty(strfind(traces(i).UserData.Name,channel))
+    
+    temp = regexp(traces(i).UserData.Name,'/','split');
+    if length(temp)>1 && strcmp(char(temp(2)),channel)
         ind_keep(i) = 1;
         str_traces =[str_traces;{traces(i).UserData.Name}];
     end
 end
 
 traces = traces(ind_keep==1);
-% ind_glow = ~(cellfun('isempty',strfind(str_traces,'Gamma-low/')));
-% ind_gmid = ~(cellfun('isempty',strfind(str_traces,'Gamma-mid/')));
-% ind_gmidup = ~(cellfun('isempty',strfind(str_traces,'Gamma-mid-up')));
-% ind_ghigh = ~(cellfun('isempty',strfind(str_traces,'Gamma-high/')));
-% ind_ghighup = ~(cellfun('isempty',strfind(str_traces,'Gamma-high-up/')));
-% ind_ripple = ~(cellfun('isempty',strfind(str_traces,'Ripple/')));
-% ind_theta = ~(cellfun('isempty',strfind(str_traces,'Phasic-theta/')));
 ind_glow = contains(str_traces,{'Gamma-low/';'Power-gammalow/'});
 ind_gmid = contains(str_traces,{'Gamma-mid/';'Power-gammamid/'});
-ind_gmidup = contains(str_traces,{'Gamma-mid-up/';'Power-gammamid/'});
+ind_gmidup = contains(str_traces,{'Gamma-mid-up/';'Power-gammamidup/'});
 ind_ghigh = contains(str_traces,{'Gamma-high/';'Power-gammahigh/'});
-ind_ghighup = contains(str_traces,{'Gamma-high-up/';'Power-gammahigh/'});
+ind_ghighup = contains(str_traces,{'Gamma-high-up/';'Power-gammahighup/'});
 ind_ripple = contains(str_traces,{'Ripple/';'Power-ripple/'});
 ind_theta = contains(str_traces,{'Phasic-theta/';'Power-theta/'});
 
-
-x_glow = traces(ind_glow).UserData.X(:);
-y_glow = traces(ind_glow).UserData.Y(:);
-x_gmid = traces(ind_gmid).UserData.X(:);
-y_gmid = traces(ind_gmid).UserData.Y(:);
-x_gmidup = traces(ind_gmidup).UserData.X(:);
-y_gmidup = traces(ind_gmidup).UserData.Y(:);
-x_ghigh = traces(ind_ghigh).UserData.X(:);
-y_ghigh = traces(ind_ghigh).UserData.Y(:);
-x_ghighup = traces(ind_ghighup).UserData.X(:);
-y_ghighup = traces(ind_ghighup).UserData.Y(:);
-x_ripple = traces(ind_ripple).UserData.X(:);
-y_ripple = traces(ind_ripple).UserData.Y(:);
-x_theta = traces(ind_theta).UserData.X(:);
-y_theta = traces(ind_theta).UserData.Y(:);
-
 % Computing factors & delta
-x_start = ax.XLim(1);
-x_end = ax.XLim(2);
-t_gauss = str2double(handles.Edit3.String);
+label_lfp = {'gamma low';'gamma mid';'gamma mid up';'gamma high';'gamma high up';'ripple';'theta'};
+
+if sum(ind_glow)>0
+    x_glow = traces(ind_glow).UserData.X(:);
+    y_glow = traces(ind_glow).UserData.Y(:);
+else
+    x_glow = ceil(x_start):floor(x_end);
+    % y_glow = NaN(size(x_glow));
+    y_glow = rand(size(x_glow));
+%     label_lfp{1} = 'rand';
+end
+
+if sum(ind_gmid)>0
+    x_gmid = traces(ind_gmid).UserData.X(:);
+    y_gmid = traces(ind_gmid).UserData.Y(:);
+else
+    x_gmid = ceil(x_start):floor(x_end);
+    % y_gmid = NaN(size(x_gmid));
+    y_gmid = rand(size(x_gmid));
+%     label_lfp{2} = 'rand';
+end
+
+if sum(ind_gmidup)>0
+    x_gmidup = traces(ind_gmidup).UserData.X(:);
+    y_gmidup = traces(ind_gmidup).UserData.Y(:);
+else
+    x_gmidup = ceil(x_start):floor(x_end);
+    % y_gmidup = NaN(size(x_gmidup));
+    y_gmidup = rand(size(x_gmidup));
+%     label_lfp{3} = 'rand';
+end
+
+if sum(ind_ghigh)>0
+    x_ghigh = traces(ind_ghigh).UserData.X(:);
+    y_ghigh = traces(ind_ghigh).UserData.Y(:);
+else
+    x_ghigh = ceil(x_start):floor(x_end);
+    % y_ghigh = NaN(size(x_ghigh));
+    y_ghigh = rand(size(x_ghigh));
+%      label_lfp{4} = 'rand';
+end
+
+if sum(ind_ghighup)>0
+    x_ghighup = traces(ind_ghighup).UserData.X(:);
+    y_ghighup = traces(ind_ghighup).UserData.Y(:);
+else
+    x_ghighup = ceil(x_start):floor(x_end);
+    % y_ghighup = NaN(size(x_ghighup));
+    y_ghighup = rand(size(x_ghighup));
+%      label_lfp{5} = 'rand';
+end
+
+if sum(ind_ripple)>0
+    x_ripple = traces(ind_ripple).UserData.X(:);
+    y_ripple = traces(ind_ripple).UserData.Y(:);
+else
+    x_ripple = ceil(x_start):floor(x_end);
+    % y_ripple = NaN(size(x_ripple));
+    y_ripple = rand(size(x_ripple));
+%      label_lfp{6} = 'rand';
+end
+
+if sum(ind_theta)>0
+    x_theta = traces(ind_theta).UserData.X(:);
+    y_theta = traces(ind_theta).UserData.Y(:);
+else
+    x_theta = ceil(x_start):floor(x_end);
+    % y_theta = NaN(size(x_theta));
+    y_theta = rand(size(x_theta));
+%      label_lfp{7} = 'rand';
+end
 
 x = x_glow;
 y = y_glow;
@@ -568,7 +621,6 @@ plot(x_ghighup,y_ghighup,'Tag','ghighup','LineWidth',2,'Parent',ax,'Color',g_col
 plot(x_ripple,y_ripple,'Tag','ripple','LineWidth',2,'Parent',ax,'Color',g_colors(6,:));
 plot(x_theta,y_theta,'k','Tag','theta','LineWidth',.5,'Parent',ax);
 ax.YLabel.String = 'LFP filtered';
-label_lfp = {'gamma low';'gamma mid';'gamma mid up';'gamma high';'gamma high up';'ripple';'theta'};
 legend(ax,label_lfp,'Tag','Legend');
 hold(ax,'off');
 
@@ -1122,7 +1174,7 @@ load('Preferences.mat','GTraces');
 tag = char(handles.MainFigure.UserData.Tag_Selection(1));
 channel = handles.MainFigure.UserData.channel;
 % Creating Save Directory
-save_dir = fullfile(DIR_FIG,'Cross_Correlation',FILES(CUR_FILE).eeg);
+save_dir = fullfile(DIR_FIG,'Cross_Correlation',FILES(CUR_FILE).recording);
 if ~isdir(save_dir)
     mkdir(save_dir);
 end
@@ -1130,22 +1182,22 @@ end
 % Saving Image
 cur_tab = handles.TabGroup.SelectedTab;
 handles.TabGroup.SelectedTab = handles.MainTab;
-pic_name = sprintf('%s_Cross_Correlation_traces_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Cross_Correlation_traces_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.FirstTab;
-pic_name = sprintf('%s_Cross_Correlation_Full_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Cross_Correlation_Full_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.SecondTab;
-pic_name = sprintf('%s_Cross_Correlation_LFP-Synthesis_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Cross_Correlation_LFP-Synthesis_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.ThirdTab;
-pic_name = sprintf('%s_Cross_Correlation_fUS-Synthesis_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Cross_Correlation_fUS-Synthesis_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
@@ -1157,10 +1209,9 @@ function savestats_Callback(~,~,handles)
 global FILES CUR_FILE DIR_STATS;
 load('Preferences.mat','GTraces');
 
-
 tag = char(handles.MainFigure.UserData.Tag_Selection(1));
 channel = handles.MainFigure.UserData.channel;
-recording = FILES(CUR_FILE).eeg;
+recording = FILES(CUR_FILE).recording;
 % Storing parameters
 label_fus = handles.MainFigure.UserData.label_fus;
 label_lfp = handles.MainFigure.UserData.label_lfp;
@@ -1180,13 +1231,13 @@ S_fus = handles.MainFigure.UserData.S_fus;
 
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'Cross_Correlation',FILES(CUR_FILE).eeg);
+data_dir = fullfile(DIR_STATS,'Cross_Correlation',FILES(CUR_FILE).recording);
 if ~isdir(data_dir)
     mkdir(data_dir);
 end
 
 % Saving data
-filename = sprintf('%s_Cross_Correlation_%s_%s.mat',FILES(CUR_FILE).eeg,channel,tag);
+filename = sprintf('%s_Cross_Correlation_%s_%s.mat',FILES(CUR_FILE).recording,channel,tag);
 save(fullfile(data_dir,filename),'recording','tag','channel','label_lfp','label_fus','Tag_Selection',...
     'thresh_inf','thresh_sup','thresh_step','t_gauss_lfp','t_gauss_cbv',...
     'S_lfp','S_fus','R_peak','T_peak','X_corr','-v7.3');

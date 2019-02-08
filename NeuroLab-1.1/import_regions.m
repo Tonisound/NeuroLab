@@ -200,9 +200,9 @@ for i=1:length(ind_regions)
     t = char(regions(ind_regions(i)).name);
     str = lower(t);
     
-    if contains(t,lines_name) && ~isempty(find(contains(lines_name,t),1))
+    if sum(strcmp(t,lines_name))>0
         %line already exists overwrite
-        ind_overwrite = find(contains(lines_name,t)==1);
+        ind_overwrite = find(strcmp(t,lines_name)==1);
         hq = lines(ind_overwrite).UserData.Graphic;
         hl = lines(ind_overwrite);
         
