@@ -137,8 +137,8 @@ uimenu(m1b,'Label','Import LFP Configuration','Tag','ImportMenu_ImportConfig');
 
 uimenu(m1b,'Label','Reload Doppler film','Tag','ImportMenu_ReloadDoppler','Separator','on');
 uimenu(m1b,'Label','Reload Graphics','Tag','ImportMenu_ReloadGraphic');
-uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces','Enable','on');
-uimenu(m1b,'Label','Load Regions','Tag','ImportMenu_LoadRegions','Enable','on');
+% uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces','Enable','on');
+% uimenu(m1b,'Label','Load Regions','Tag','ImportMenu_LoadRegions','Enable','on');
 
 % handles.EditMenu
 m2 = uimenu('Label','Edit','Tag','EditMenu','Parent',f);
@@ -603,8 +603,8 @@ set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_
 
 set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
 set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.ImportMenu_LoadRegions,'Callback','load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+% set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+% set(myhandles.ImportMenu_LoadRegions,'Callback','load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
 
 % handles.EditMenu

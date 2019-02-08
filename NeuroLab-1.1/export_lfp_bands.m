@@ -28,27 +28,29 @@ if isempty(dir_t)
     errordlg(sprintf('No LFP traces_filter found in %s',foldername));
     return;
 else
-    
-    % removing differential channels
-    channel_list = {dir_t(:).name}';
-    ind_keep = contains(channel_list,'---');
-    channel_list_diff = channel_list(ind_keep==1);
-    channel_list(ind_keep)=[];
-    %Sorting LFP channels according to configuration
-    if exist(fullfile(foldername,'Nconfig.mat'),'file')
+
+    temp = {dir_t(:).name}';
+    if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
         %sort if lfp configuration is found
-        data_lfp = load(fullfile(foldername,'Nconfig.mat'),'channel_type','channel_id');
-        pattern_channels = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
+        data_lfp = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'channel_type','channel_id');
+        channel_id = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
+        channel_id_diff = strcat(channel_id(1:end-1),'$',channel_id(2:end)); 
+        % sorting LFP
+        pattern_lfp = strcat('LFP_',[channel_id;channel_id_diff],'.mat');
         ind_1 = [];
-        for i =1:length(pattern_channels)
-            pattern = char(pattern_channels(i));
-            ind_1 = [ind_1;find(~(cellfun('isempty',strfind(channel_list,pattern)))==1)];
+        ind_all = zeros(size(temp));
+        for i =1:length(pattern_lfp)
+            ind_keep = strcmp(temp,pattern_lfp(i));
+            ind_all = ind_all+ind_keep;
+            ind_1 = [ind_1;find(ind_keep==1)];
         end
-        ind_1 = flipud(ind_1);
-        channel_list = channel_list(ind_1);
+        ind_remainder = ~ind_all;
+        ind_1=[ind_1;find(ind_remainder==1)];
+        
+    else
+        ind_1 = ones(size(temp));
     end
-    % adding back differential channels
-    channel_list = [channel_list;channel_list_diff];
+    channel_list = temp(ind_1);
 end
 
 % asks for user input if val == 1

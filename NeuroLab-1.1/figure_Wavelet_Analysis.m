@@ -27,22 +27,38 @@ end
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
     %sort if lfp configuration is found
     data_lfp = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'channel_type','channel_id');
-    pattern_channels = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
-    %pattern_channels = strcat(data_lfp.channel_type(strcmp(data_lfp.channel_type,'LFP')),'/',data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP')));
+    channel_id = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
+    channel_id_diff = strcat(channel_id(1:end-1),'$',channel_id(2:end));
+    
+    % sorting LFP
+    pattern_lfp = strcat('LFP/',[channel_id;channel_id_diff]);
     ind_1 = [];
-    ind_2 = [];
-    for i =1:length(pattern_channels)
-        pattern = char(pattern_channels(i));
-        ind_1 = [ind_1;find((~(cellfun('isempty',strfind(temp,'LFP/')))).*(~(cellfun('isempty',strfind(temp,pattern))))==1)];
-        ind_2 = [ind_2;find((~(cellfun('isempty',strfind(temp,'LFP-theta/')))).*(~(cellfun('isempty',strfind(temp,pattern))))==1)];
+    ind_all = zeros(size(temp));
+    for i =1:length(pattern_lfp)
+        ind_keep = strcmp(temp,pattern_lfp(i));
+        ind_all = ind_all+ind_keep;
+        ind_1 = [ind_1;find(ind_keep==1)];
     end
-    ind_1 = flipud(ind_1);
-    ind_2 = flipud(ind_2);
+    ind_remainder = ~ind_all.*contains(temp,'LFP/');
+    ind_1=[ind_1;find(ind_remainder==1)];
+    
+    % sorting LFP-theta
+    pattern_theta = strcat('LFP-theta/',[channel_id;channel_id_diff]);
+    ind_2 = [];
+    ind_all = zeros(size(temp));
+    for i =1:length(pattern_theta)
+        ind_keep = strcmp(temp,pattern_theta(i));
+        ind_all = ind_all+ind_keep;
+        ind_2 = [ind_2;find(ind_keep==1)];
+    end
+    ind_remainder = ~ind_all.*contains(temp,'LFP_theta/');
+    ind_2=[ind_2;find(ind_remainder==1)];
 else
     %unsorted
     ind_1 = find(~(cellfun('isempty',strfind(temp,'LFP/')))==1);
     ind_2 = find(~(cellfun('isempty',strfind(temp,'LFP-theta/')))==1);
 end
+
 
 %Return if LFP channels are missing
 if sum(ind_1)==0
@@ -90,7 +106,7 @@ clrmenu(f2);
 
 %Parameters
 channels = 1;                % # channels (top) 
-bands = length(traces);      % # lfp (bottom)
+bands = min(length(traces),8);      % # lfp (bottom)
 L = 10;                      % Height top panels
 l = 1;                       % Height info panel
 cb1_def = 1;                 % freq correction
@@ -217,7 +233,7 @@ e6 = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',iP,...
-    'String','0.04',...
+    'String','0.1',...
     'Tag','Edit6',...
     'Tooltipstring','Button Size');
 cb1 = uicontrol('Units','normalized',...
@@ -545,11 +561,13 @@ end
 tpos = [0 0 1 1];
 margin = 3*str2double(handles.Edit5.String);
 N = length(findobj(handles.TopPanel,'Type','axes'));
+h_button = 3*str2double(handles.Edit6.String)/N;
 for k = 1:N
     ax = findobj(handles.TopPanel,'Tag',sprintf('Ax%d',k));
     ax.Position = [.075 ((N-k)/N)+margin .85 (1/N)-(2*margin)];
     button = findobj(handles.TopPanel,'Tag',sprintf('Button%d',k));
-    button.Position = [tpos(3)*.25/60 ((N-k+1)/N*tpos(4))-tpos(4)/(6*N) tpos(3)*2/60 tpos(4)/(8*N)];
+    button.Position = [tpos(3)*.25/60 ((N-k+1)/N*tpos(4))-h_button tpos(3)*2/60 h_button];
+    % button.Position = [tpos(3)*.25/60 ((N-k+1)/N*tpos(4))-tpos(4)/(6*N) tpos(3)*2/60 tpos(4)/(8*N)];
 end
 
 end
@@ -744,7 +762,7 @@ end
 bpos = [0 0 1 1];
 N = length(findobj(handles.BotPanel,'Type','axes'));
 margin = str2double(handles.Edit5.String);
-w_button = .04;
+w_button = .03;
 h_button = 3*str2double(handles.Edit6.String)/N;
 %w_button = str2double(handles.Edit6.String);
 %h_button = 2*w_button;
@@ -998,7 +1016,8 @@ for i =1:length(all_pu)
         im.UserData.Xdata = X_temp;
         % Title
         str_band = sprintf('Band %d - %d Hz',data.fdom_min,data.fdom_max);
-        ax.Title.String = sprintf('%s (Duration %s) - %s',char(data.Tag_Selection(1)),char(data.Tag_Selection(3)),str_band);
+        %ax.Title.String = sprintf('%s (Duration %s) - %s',char(data.Tag_Selection(1)),char(data.Tag_Selection(3)),str_band);
+        ax.Title.String = '';
         fprintf(' done.\n');
     end
     
@@ -1212,14 +1231,15 @@ if ~isempty(phases)
     hObj.UserData.phase = phases(val);
 end
 ax.YLimMode = 'auto';
+ax.FontSize = 7;
+%ax.YTick = '';
 
 index = hObj.UserData.index;
 all_ax = findobj(handles.MainBotPanel,'Tag',sprintf('Ax%d',index));
 for i =1:length(all_ax)
     all_ax(i).YLabel.String = traces_name(val);
+    all_ax(i).YLabel.FontSize=8;
 end
-
-
 
 checkbox11_Callback(handles.Checkbox11,[],handles);
 checkbox12_Callback(handles.Checkbox12,[],handles);
@@ -1421,7 +1441,8 @@ for k=1:bands
     im.UserData.Xdata = X_temp;
 
     str_band = sprintf('Band %d - %d Hz',fdom_min,fdom_max);
-    ax.Title.String = sprintf('%s (Duration %s) - %s',char(Tag_Selection(1)),char(Tag_Selection(3)),str_band);
+    % ax.Title.String = sprintf('%s (Duration %s) - %s',char(Tag_Selection(1)),char(Tag_Selection(3)),str_band);
+    ax.Title.String = '';
     %ax.YLim = [fdom_min,fdom_max];
     
     % Case of early break

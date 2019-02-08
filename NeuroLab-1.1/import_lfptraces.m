@@ -167,7 +167,8 @@ traces_remainder = traces(ind_lfp==0);
 traces_diff_lfp = struct('ID',{},'shortname',{},'fullname',{},'parent',{},...
     'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{},'nb_samples',{});
 for i = 1:length(traces_lfp)-1
-    traces_diff_lfp(i).ID = strcat(char(channel_id(i)),'---',char(channel_id(i+1)));
+    % traces_diff_lfp(i).ID = strcat(char(channel_id(i)),'---',char(channel_id(i+1)));
+    traces_diff_lfp(i).ID = strcat(char(channel_id(i)),'$',char(channel_id(i+1)));
     traces_diff_lfp(i).shortname = char(channel_type(i));
     traces_diff_lfp(i).parent = parent;
     traces_diff_lfp(i).fullname = sprintf('%s/%s',traces_diff_lfp(i).shortname,traces_diff_lfp(i).ID);
@@ -183,7 +184,7 @@ end
 switch GImport.Channel_loading
     case 'differential'
         traces = [traces_diff_lfp,traces_remainder];
-    case 'full'
+    case 'all'
         traces = [traces_lfp,traces_diff_lfp,traces_remainder];
     otherwise
         traces = [traces_lfp,traces_remainder];   
