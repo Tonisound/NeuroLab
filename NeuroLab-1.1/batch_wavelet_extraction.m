@@ -17,14 +17,14 @@ for i=1:length(files)
     % Loading Episodes
     % Works with any time array
     
-%     t_episode = load(fullfile(DIR_SAVE,files(i).gfus,'Time_Surges.mat'));
+%     t_episode = load(fullfile(DIR_SAVE,files(i).nlab,'Time_Surges.mat'));
 %     episode_strings = t_episode.T_whole_strings;
 %     episode_name = cell(size(episode_strings,1),1);
 %     for ii=1:size(episode_strings,1)
 %         episode_name(ii) = {sprintf('Surge-%.2d',ii)};
 %     end
     
-    t_episode = load(fullfile(DIR_SAVE,files(i).gfus,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
+    t_episode = load(fullfile(DIR_SAVE,files(i).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
     ind = find(~cellfun('isempty',strfind(t_episode.TimeGroups_name,'REM'))==1);
     episode_strings = t_episode.TimeGroups_S(ind).TimeTags_strings;
     episode_name = t_episode.TimeGroups_S(ind).Name;
@@ -35,8 +35,8 @@ for i=1:length(files)
     t_end = (temp-floor(temp))*24*3600-.1;
     
     % Loading corresponding Wavelet data
-    folder_wav = fullfile(DIR_STATS,'Wavelet_Analysis',files(i).eeg);
-    d = dir(fullfile(folder_wav,'LFP*.mat'));
+    folder_wav = fullfile(DIR_STATS,'Wavelet_Analysis',files(i).nlab);
+    d = dir(fullfile(folder_wav,'*.mat'));
     
     % Counting channels and episodes
     all_traces = [];
@@ -123,7 +123,7 @@ for i=1:length(files)
     end
     
     % Loading corresponding traces
-    folder_dis = fullfile(DIR_STATS,'Global_Episode_Display',files(i).eeg);
+    folder_dis = fullfile(DIR_STATS,'Global_Episode_Display',files(i).recording);
     d = dir(fullfile(folder_dis,'*WHOLE.mat'));
     T  = struct('ref_time',[],'Ydata',[]);
     T(size(episode_strings,1)).Ydata = [];
@@ -154,14 +154,14 @@ for i=1:length(files)
         s  = S(j,:);
         ref_time = T(j).ref_time;
         Ydata = T(j).Ydata;
-        parent = files(i).gfus;
-        fprintf('Saving data (%s)...',sprintf('%s_%s.mat',files(i).eeg,name));
-        save(fullfile(dir_name,sprintf('%s_%s.mat',files(i).eeg,name)),'x_start','x_end','tag','name','s','ref_time','labels','Ydata','parent');
+        parent = files(i).nlab;
+        fprintf('Saving data (%s)...',sprintf('%s_%s.mat',files(i).recording,name));
+        save(fullfile(dir_name,sprintf('%s_%s.mat',files(i).recording,name)),'x_start','x_end','tag','name','s','ref_time','labels','Ydata','parent');
         fprintf(' done.\n');
     end
     
-    %save(fullfile(dir_name,sprintf('%s_Wavelet_Surges',files(i).eeg)),'S');
-    %fprintf('==> Saving structure %s.\n',fullfile(dir_name,sprintf('%s_Wavelet_Surges',files(i).eeg)));
+    %save(fullfile(dir_name,sprintf('%s_Wavelet_Surges',files(i).recording)),'S');
+    %fprintf('==> Saving structure %s.\n',fullfile(dir_name,sprintf('%s_Wavelet_Surges',files(i).recording)));
    
 end
 

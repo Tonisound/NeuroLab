@@ -50,6 +50,7 @@ mkdir(folder_list);
 for i =1:length(rec_list)
     fprintf('Moving file %s\n',filename);
     filename = char(rec_list(i));
+    %filename = char(file_list(i));
     status = copyfile(fullfile(DIR_STATS,'fUS_Statistics',char(file_list(i)),filename),fullfile(folder_list,filename));
     if ~status
         warning('Problem copying file %s',filename);

@@ -1,18 +1,85 @@
 function synthesis_PeakDetection()
 
-global DIR_SYNT;
+global DIR_SYNT DIR_STATS DIR_FIG;
 
-d = dir(fullfile(DIR_SYNT,'Peak_Detection'));
-ind_rm = ~(cellfun('isempty',strfind({d(:).name}','.')));
-d(ind_rm) = [];
-[ind,v] = listdlg('Name','Folder Selection','PromptString','Select Folder',...
+d = dir(fullfile(DIR_SYNT,'Peak_Detection','*.txt'));
+[ind_list,v] = listdlg('Name','Folder Selection','PromptString','Select Folder',...
     'SelectionMode','single','ListString',{d(:).name}','InitialValue','','ListSize',[300 500]);
-if v==0 || isempty(ind)
+if v==0 || isempty(ind_list)
     return
 else
-    folder = fullfile(DIR_SYNT,'Peak_Detection',char(d(ind).name));
+    folder_synt = fullfile(DIR_SYNT,'Peak_Detection');
+    list_name_txt = char(d(ind_list).name);
+    list_name = strrep(list_name_txt,'.txt','');
+    folder = fullfile(DIR_SYNT,'Peak_Detection',list_name);
 end
 
+% Selection recording list via listdlg
+% list_name = 'CORONAL_SORTED';
+% list_name_txt = strcat(list_name,'.txt');
+
+% Open file
+filename = fullfile(folder_synt,list_name_txt);
+fileID = fopen(filename);
+rec_list = [];
+while ~feof(fileID)
+    hline = fgetl(fileID);
+    rec_list = [rec_list;{hline}];
+end
+fclose(fileID);
+
+%Extracting file channel and episode from rec_list
+file_list = [];
+channel_list = [];
+episode_list = [];
+for i =1:length(rec_list)
+    pattern = strrep(char(rec_list(i)),'.mat','');
+    temp = regexp(pattern,'_Peak_Detection_|_REM','split');
+    file_list = [file_list;temp(1)];
+    channel_list = [channel_list;temp(2)];
+    episode_list = [episode_list;{strcat('REM',char(temp(3)))}];
+end
+
+%Clearing folder synthesis
+folder_list = fullfile(folder_synt,list_name);
+if exist(folder_list,'dir')
+    fprintf('Clearing folder %s\n',folder_list);
+    rmdir(folder_list,'s');
+end
+mkdir(folder_list);
+
+%Moving stats 
+for i =1:length(rec_list)
+    fprintf('Moving file %s\n',filename);
+    filename = char(rec_list(i));
+    status = copyfile(fullfile(DIR_STATS,'Peak_Detection',char(file_list(i)),filename),fullfile(folder_list,filename));
+    if ~status
+        warning('Problem copying file %s',filename);
+    end
+end
+
+%Moving figures
+for i =1:length(rec_list) 
+    channel = char(channel_list(i));
+    episode = char(episode_list(i));
+    tag = 'RasterY';
+    %tag = '';
+    d = dir(fullfile(DIR_FIG,'Peak_Detection',char(file_list(i)),'*.jpg'));
+    all_files = {d(:).name}';
+    ind_keep = contains(all_files,channel).*contains(all_files,episode).*contains(all_files,tag);
+    files_keep = all_files(ind_keep==1);
+    
+    for ii =1:length(files_keep)
+        filename = char(files_keep(ii));
+        fprintf('Moving file %s\n',filename);
+        status = copyfile(fullfile(DIR_FIG,'Peak_Detection',char(file_list(i)),filename),fullfile(folder_list,filename));
+        if ~status
+            warning('Problem copying file %s',filename);
+        end
+    end
+end
+
+%%
 d = dir(fullfile(folder,'*.mat'));
 all_files = {d(:).name}';
 

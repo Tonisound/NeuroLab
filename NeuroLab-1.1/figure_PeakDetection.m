@@ -496,31 +496,44 @@ ax = handles.Ax1;
 channel = char(pu.String(pu.Value,:));
 str_traces = [];
 ind_keep = zeros(length(traces),1);
-for i =1 : length(traces)
-    if ~isempty(strfind(traces(i).UserData.Name,channel))
+% for i =1 : length(traces)
+%     if ~isempty(strfind(traces(i).UserData.Name,channel))
+%         ind_keep(i) = 1;
+%         str_traces =[str_traces;{traces(i).UserData.Name}];
+%     end
+% end
+for i =1 : length(traces) 
+    temp = regexp(traces(i).UserData.Name,'/','split');
+    if length(temp)>1 && strcmp(char(temp(2)),channel)
         ind_keep(i) = 1;
         str_traces =[str_traces;{traces(i).UserData.Name}];
     end
 end
 
 % patterns
-pattern_glow = 'Gamma-low/';
-pattern_gmid = 'Gamma-mid/';
-pattern_gmidup = 'Gamma-mid-up/';
-pattern_ghigh = 'Gamma-high/';
-pattern_ghighup = 'Gamma-high-up/';
-pattern_ripple = 'Ripple/';
-pattern_phasictheta = 'Phasic-theta/';
-
+pattern_glow = {'Gamma-low/';'Power-gammalow/'};
+pattern_gmid = {'Gamma-mid/';'Power-gammamid/'};
+pattern_gmidup = {'Gamma-mid-up/';'Power-gammamidup/'};
+pattern_ghigh = {'Gamma-high/';'Power-gammahigh/'};
+pattern_ghighup = {'Gamma-high-up/';'Power-gammahighup/'};
+pattern_ripple = {'Ripple/';'Power-ripple/'};
+pattern_theta = {'Phasic-theta/';'Power-theta/'};
 
 traces = traces(ind_keep==1);
-ind_glow = ~(cellfun('isempty',strfind(str_traces,pattern_glow)));
-ind_gmid = ~(cellfun('isempty',strfind(str_traces,pattern_gmid)));
-ind_gmidup = ~(cellfun('isempty',strfind(str_traces,pattern_gmidup)));
-ind_ghigh = ~(cellfun('isempty',strfind(str_traces,pattern_ghigh)));
-ind_ghighup = ~(cellfun('isempty',strfind(str_traces,pattern_ghighup)));
-ind_ripple = ~(cellfun('isempty',strfind(str_traces,pattern_ripple)));
-ind_theta = ~(cellfun('isempty',strfind(str_traces,pattern_phasictheta)));
+% ind_glow = ~(cellfun('isempty',strfind(str_traces,pattern_glow)));
+% ind_gmid = ~(cellfun('isempty',strfind(str_traces,pattern_gmid)));
+% ind_gmidup = ~(cellfun('isempty',strfind(str_traces,pattern_gmidup)));
+% ind_ghigh = ~(cellfun('isempty',strfind(str_traces,pattern_ghigh)));
+% ind_ghighup = ~(cellfun('isempty',strfind(str_traces,pattern_ghighup)));
+% ind_ripple = ~(cellfun('isempty',strfind(str_traces,pattern_ripple)));
+% ind_theta = ~(cellfun('isempty',strfind(str_traces,pattern_theta)));
+ind_glow = contains(str_traces,pattern_glow);
+ind_gmid = contains(str_traces,pattern_gmid);
+ind_gmidup = contains(str_traces,pattern_gmidup);
+ind_ghigh = contains(str_traces,pattern_ghigh);
+ind_ghighup = contains(str_traces,pattern_ghighup);
+ind_ripple = contains(str_traces,pattern_ripple);
+ind_theta = contains(str_traces,pattern_theta);
 
 if sum(ind_glow)>0
     x_glow = traces(ind_glow).UserData.X(:);
@@ -1668,10 +1681,10 @@ fprintf('Extracting peaks...');
 % Synthesis Continuous
 % Fetching correlogram
 global DIR_STATS FILES CUR_FILE;
-folder = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).eeg);
+folder = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).nlab);
 tag = char(Tag_Selection(1));
 channel = char(handles.Popup1.String(handles.Popup1.Value,:));
-d = dir(folder);
+d = dir(fullfile(folder,'*.mat'));
 str = {d(:).name}';
 ind_1 = ~(cellfun('isempty',strfind(str,tag)));
 ind_2 = ~(cellfun('isempty',strfind(str,channel)));
@@ -1679,6 +1692,10 @@ if ~isempty(d(ind_1.*ind_2==1))
     filename = d(ind_2.*ind_1==1).name;
     data_eeg = load(fullfile(folder,filename),'Cdata_sub','Xdata_sub','x_start','x_end',...
         'step_sub','f_sub','fdom_min','fdom_max','fdom_step');
+else
+    fprintf(' done\n');
+    warning('LFP data not found [tag: %s; folder: %s].',tag,folder);
+    return;
 end
 freqdom = data_eeg.fdom_min:data_eeg.fdom_step:data_eeg.fdom_max;
 Cdata = data_eeg.Cdata_sub;
@@ -1952,7 +1969,7 @@ load('Preferences.mat','GTraces');
 tag = char(handles.MainFigure.UserData.Tag_Selection(1));
 channel = handles.MainFigure.UserData.channel;
 % Creating Save Directory
-save_dir = fullfile(DIR_FIG,'Peak_Detection',FILES(CUR_FILE).eeg);
+save_dir = fullfile(DIR_FIG,'Peak_Detection',FILES(CUR_FILE).recording);
 if ~isdir(save_dir)
     mkdir(save_dir);
 end
@@ -1960,37 +1977,37 @@ end
 % Saving Image
 cur_tab = handles.TabGroup.SelectedTab;
 handles.TabGroup.SelectedTab = handles.MainTab;
-pic_name = sprintf('%s_Peak_Detection_traces_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Peak_Detection_traces_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.FirstTab;
-pic_name = sprintf('%s_Peak_Detection_RasterY_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Peak_Detection_RasterY_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.SecondTab;
-pic_name = sprintf('%s_Peak_Detection_TimingY_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Peak_Detection_TimingY_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.ThirdTab;
-pic_name = sprintf('%s_Peak_Detection_RasterdYdt_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Peak_Detection_RasterdYdt_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.FourthTab;
-pic_name = sprintf('%s_Peak_Detection_TimingdYdt_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Peak_Detection_TimingdYdt_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.FifthTab;
-pic_name = sprintf('%s_Peak_Detection_Synthesis_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Peak_Detection_Synthesis_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.SixthTab;
-pic_name = sprintf('%s_Peak_Detection_Continuous_%s_%s%s',FILES(CUR_FILE).eeg,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Peak_Detection_Continuous_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
@@ -2005,7 +2022,7 @@ load('Preferences.mat','GTraces');
 %Loading data
 tag = char(handles.MainFigure.UserData.Tag_Selection(1));
 channel = handles.MainFigure.UserData.channel;
-recording = FILES(CUR_FILE).eeg;
+recording = FILES(CUR_FILE).recording;
 % Storing parameters
 Tag_Selection = handles.MainFigure.UserData.Tag_Selection;
 thresh_inf = handles.MainFigure.UserData.thresh_inf;
@@ -2036,13 +2053,13 @@ R_cont = handles.MainFigure.UserData.R_cont;
 R_dcont = handles.MainFigure.UserData.R_dcont;
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'Peak_Detection',FILES(CUR_FILE).eeg);
+data_dir = fullfile(DIR_STATS,'Peak_Detection',FILES(CUR_FILE).recording);
 if ~isdir(data_dir)
     mkdir(data_dir);
 end
 
 % Saving data
-filename = sprintf('%s_Peak_Detection_%s_%s.mat',FILES(CUR_FILE).eeg,channel,tag);
+filename = sprintf('%s_Peak_Detection_%s_%s.mat',FILES(CUR_FILE).recording,channel,tag);
 save(fullfile(data_dir,filename),'recording','tag','channel','label_channels','Tag_Selection',...
     'thresh_inf','thresh_sup','t_gauss_lfp','t_gauss_cbv','freqdom',...
     'S_lfp','S_lfp_cont','S_fus','S_dfusdt','S_cbv','S_dcbvdt',...

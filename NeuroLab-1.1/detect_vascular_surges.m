@@ -120,8 +120,8 @@ for i =1:size(TimeTags_images,1)
     end 
 end
 %Doppler_AW = Doppler_film(:,:,AW_images).*whole_mask;
-IM_AW = mean(Doppler_film(:,:,AW_images==1),3).*whole_mask;
-STD_AW = std(Doppler_film(:,:,AW_images==1),[],3).*whole_mask;
+IM_AW = mean(Doppler_film(:,:,AW_images==1),3,'omitnan').*whole_mask;
+STD_AW = std(Doppler_film(:,:,AW_images==1),[],3,'omitnan').*whole_mask;
 
 
 % Extracting REM movie
@@ -136,8 +136,8 @@ for i =1:size(TimeTags_images,1)
         end
     end 
 end
-IM_REM = mean(Doppler_film(:,:,REM_images==1),3).*whole_mask;
-STD_REM = std(Doppler_film(:,:,REM_images==1),[],3).*whole_mask;
+IM_REM = mean(Doppler_film(:,:,REM_images==1),3,'omitnan').*whole_mask;
+STD_REM = std(Doppler_film(:,:,REM_images==1),[],3,'omitnan').*whole_mask;
 
 
 % Computing Differential Movie

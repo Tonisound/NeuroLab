@@ -1016,8 +1016,8 @@ for i =1:length(all_pu)
         im.UserData.Xdata = X_temp;
         % Title
         str_band = sprintf('Band %d - %d Hz',data.fdom_min,data.fdom_max);
-        %ax.Title.String = sprintf('%s (Duration %s) - %s',char(data.Tag_Selection(1)),char(data.Tag_Selection(3)),str_band);
-        ax.Title.String = '';
+        ax.Title.String = sprintf('%s (Duration %s) - %s',char(data.Tag_Selection(1)),char(data.Tag_Selection(3)),str_band);
+        ax.Title.Visible = 'off';
         fprintf(' done.\n');
     end
     
@@ -1441,8 +1441,8 @@ for k=1:bands
     im.UserData.Xdata = X_temp;
 
     str_band = sprintf('Band %d - %d Hz',fdom_min,fdom_max);
-    % ax.Title.String = sprintf('%s (Duration %s) - %s',char(Tag_Selection(1)),char(Tag_Selection(3)),str_band);
-    ax.Title.String = '';
+    ax.Title.String = sprintf('%s (Duration %s) - %s',char(Tag_Selection(1)),char(Tag_Selection(3)),str_band);
+    ax.Title.Visible = 'off';
     %ax.YLim = [fdom_min,fdom_max];
     
     % Case of early break
@@ -2187,7 +2187,7 @@ for i =1:length(data)
     labels = data(i).labels;
     
     %subsampling Cdata to save
-    step_sub = max(floor(f_sub/50));
+    step_sub = max(floor(f_sub/50),1);
     Cdata_sub = Cdata(:,1:step_sub:end);
     Xdata_sub  = X_trace(1:step_sub:end);
     

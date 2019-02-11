@@ -164,14 +164,14 @@ uimenu(m1c,'Label','Select Time Groups','Tag','DisplayMenu_TimeGroupSelection');
 
 % handles.SynthesisMenu
 m2c = uimenu('Label','Synthesis','Tag','SynthesisMenu','Parent',f);
-uimenu(m2c,'Label','Correlation Analysis','Tag','SynthesisMenu_Correlation');
-uimenu(m2c,'Label','Region Statistics','Tag','SynthesisMenu_Region');
-uimenu(m2c,'Label','Global Display','Tag','SynthesisMenu_Display');
-uimenu(m2c,'Label','fUS Episode Statistics','Tag','SynthesisMenu_Statistics');
-uimenu(m2c,'Label','Peak Detection','Tag','SynthesisMenu_PeakDetection');
-uimenu(m2c,'Label','Cross-Correlation LFP-fUS','Tag','SynthesisMenu_CrossCorrelation');
-uimenu(m2c,'Label','Vascular Surge','Tag','SynthesisMenu_VascularSurge');
-uimenu(m2c,'Label','Peak Count','Tag','SynthesisMenu_PeakCount');
+uimenu(m2c,'Label','Correlation Analysis','Tag','SynthesisMenu_Correlation','Enable','off');
+uimenu(m2c,'Label','Region Statistics','Tag','SynthesisMenu_Region','Enable','off');
+uimenu(m2c,'Label','Global Display','Tag','SynthesisMenu_Display','Enable','off');
+uimenu(m2c,'Label','fUS Episode Statistics','Tag','SynthesisMenu_Statistics','Enable','on');
+uimenu(m2c,'Label','Peak Detection','Tag','SynthesisMenu_PeakDetection','Enable','on');
+uimenu(m2c,'Label','Cross-Correlation LFP-fUS','Tag','SynthesisMenu_CrossCorrelation','Enable','on');
+uimenu(m2c,'Label','Vascular Surge','Tag','SynthesisMenu_VascularSurge','Enable','on');
+uimenu(m2c,'Label','Peak Count','Tag','SynthesisMenu_PeakCount','Enable','on');
 uimenu(m2c,'Label','Batch Processing','Tag','SynthesisMenu_Batch','Accelerator','B','Separator','on');
 
 % handles.ExportMenu
