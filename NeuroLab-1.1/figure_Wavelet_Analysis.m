@@ -938,7 +938,7 @@ set(handles.ScaleButton,'Callback',{@template_buttonScale_Callback,all_topaxes})
 for i=1:length(all_topaxes)
     ax = findobj(handles.TopPanel,'Tag',sprintf('Ax%d',i));
     button = findobj(handles.TopPanel,'Tag',sprintf('Button%d',i));
-    button.Callback = {@menuEdit_TracesEdition_Callback,ax};
+    button.Callback = {@menuEdit_TracesEdition_Callback,ax,old_handles};
 end
 
 % Linking axes x

@@ -115,23 +115,37 @@ l = [l1;l2;l3];
 t = flipud(findobj(ax,'Tag','Trace_Cerep'));
 lines = [m;l;t];
 
+% f_samp
+t_1 = datenum(handles.TimeDisplay.UserData(1,:));
+t_1 = (t_1-floor(t_1))*24*3600;
+t_2 = datenum(handles.TimeDisplay.UserData(2,:));
+t_2 = (t_2-floor(t_2))*24*3600;
+f_samp_fus = 1/(t_2-t_1);
+f_samp = ones(size(l,1)+1,1)*f_samp_fus;
+for i =1:length(t)
+    t_1 = t(i).UserData.X(1);
+    t_2 = t(i).UserData.X(2);
+    f_samp = [f_samp;1/(t_2-t_1)];
+end
+
 % Table Data
 D = [];
 stack_pos = get_stackposition(lines,ax);
 for i =1:length(lines)
-    D=[D;{lines(i).UserData.Name, lines(i).Tag, rgb2char(lines(i).Color),lines(i).LineStyle,sprintf('%.2f',lines(i).LineWidth),lines(i).Visible,sprintf('%d',stack_pos(i))}];
+    D=[D;{lines(i).UserData.Name, lines(i).Tag, rgb2char(lines(i).Color),lines(i).LineStyle,...
+        sprintf('%.2f',lines(i).LineWidth),lines(i).Visible,sprintf('%d',stack_pos(i)),sprintf('%.1f',f_samp(i))}];
 end
 
 
 % UiTable 
-ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visible','Position'},...
-    'ColumnFormat',{'char','char','char','char','char','char','numeric'},...
-    'ColumnEditable',[true,false,true,true,true,true,false],...
-    'ColumnWidth',{200 120 120 100 100 100 100},...
+ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visible','Position','Sampling'},...
+    'ColumnFormat',{'char','char','char','char','char','char','numeric','char'},...
+    'ColumnEditable',[true,false,true,true,true,true,false,false],...
+    'ColumnWidth',{200 120 120 80 80 80 80 80},...
     'Data',D,...
     'Tag','Trace_uitable',...
     'Units','characters',...
-    'FontSize',13,...
+    'FontSize',12,...
     'Position',[0 0 pos(3) pos(4)],...
     'RowStriping','on',...
     'CellEditCallback',@trace_uitable_edit,...
@@ -171,7 +185,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
             r = evnt.Indices(1);
             c = evnt.Indices(2);
             switch c
-                case 6,
+                case 6
                     if strcmp(hObj.Data{r,c},'on')
                         hObj.Data{r,c} = 'off';
                     else
@@ -327,9 +341,9 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
             for k =1:length(ind_rm)
                 switch lines(ind_rm(k)).Tag
                     case {'Trace_Pixel','Trace_Box','Trace_Region'}
-                        ui_T.Data(ind_rm(k),:) = {'','.','','','','',''};
+                        ui_T.Data(ind_rm(k),:) = {'','.','','','','','',''};
                     case 'Trace_Cerep'
-                        ui_T.Data(ind_rm(k),:) = {'','..','','','','',''};
+                        ui_T.Data(ind_rm(k),:) = {'','..','','','','','',''};
                 end
             end
         end  

@@ -51,8 +51,10 @@ tm = findobj(handles.RightAxes,'Tag','Trace_Mean');
 % Smoothing mean
 if t_gauss>0
     if strcmp(rec_mode,'BURST')
-        tm.YData(1:end-1) = mean(mean(IM,2,'omitnan'),1,'omitnan');
-        y_reshape = [reshape(squeeze(tm.YData(1:end-1)),[length_burst,n_burst]);NaN(length(w),n_burst)];
+        y = mean(mean(IM,2,'omitnan'),1,'omitnan');
+        length_burst = 59;
+        n_burst = length(y)/length_burst;
+        y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
         y_conv = nanconv(y_reshape(:),w,'same');
         y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
         y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
