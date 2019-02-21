@@ -19,7 +19,13 @@ prompt={sprintf('(1) %s \n(2) %s \n(3) %s \n(4) %s\n(5) %s',str_disk_1,str_disk_
 name = 'Booting options';
 defaultans = {'1';'1'};
 options.Interpreter = 'tex';
-answer = inputdlg(prompt,name,[1 80],defaultans,options);
+%answer = inputdlg(prompt,name,[1 80],defaultans,options);
+
+data.str1 = char(prompt(1));
+data.str2 = '1';
+data.str3 = char(prompt(2));
+data.str4 = '1';
+answer = modal_Preferences(data);
 
 if isempty(answer)
     return;
@@ -78,18 +84,20 @@ if ~exist(str_save,'dir')
         'User confirmation required','Proceed', 'Cancel', 'Proceed');
     if strcmp(h,'Cancel')
         return;
-    else
-        folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;GParams.DIR_SYNT;...
-            GParams.SEED_SPIKO;GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
-        for j= 1:length(folder_list)
-            folder = char(folder_list(j));
-            if ~exist(folder,'dir')
-                mkdir(folder);
-                fprintf('New save folder created [%s].\n',folder);
-            end
-        end
     end
 end
+% Creating folders
+folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;GParams.DIR_SYNT;...
+    GParams.SEED_SPIKO;GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
+for j= 1:length(folder_list)
+    folder = char(folder_list(j));
+    if ~exist(folder,'dir')
+        mkdir(folder);
+        fprintf('New Save folder created [%s].\n',folder);
+    end
+end
+
+
 
 GDisp.W = .80;
 GDisp.H = .80;
