@@ -299,8 +299,8 @@ for i=1:length(ind_regions)
         y = hl.YData(1:end-1); 
         if strcmp(rec_mode,'BURST')
             % gaussian nan convolution + nan padding (only for burst_recording)
-            length_burst_smooth = 30;
-            % length_burst_smooth = 59;
+            % length_burst_smooth = 30;
+            length_burst_smooth = 59;
             n_burst_smooth = length(y)/length_burst_smooth;
             y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
             y_conv = nanconv(y_reshape(:),w,'same');

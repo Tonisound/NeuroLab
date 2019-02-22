@@ -54,8 +54,8 @@ if t_gauss>0
         for i=1:size(IM,1)
             for j=1:size(IM,2)
                 y = IM(i,j,:);
-                % length_burst = 59;
-                length_burst = 30;
+                length_burst = 59;
+                % length_burst = 30;
                 n_burst = length(y)/length_burst;
                 y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
                 y_conv = nanconv(y_reshape(:),w,'same');

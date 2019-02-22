@@ -52,8 +52,8 @@ tm = findobj(handles.RightAxes,'Tag','Trace_Mean');
 if t_gauss>0
     if strcmp(rec_mode,'BURST')
         y = mean(mean(IM,2,'omitnan'),1,'omitnan');
-        length_burst = 30;
-        % length_burst = 59;
+        % length_burst = 30;
+        length_burst = 59;
         n_burst = length(y)/length_burst;
         y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
         y_conv = nanconv(y_reshape(:),w,'same');
@@ -113,8 +113,8 @@ for idx =1:length(graphics)
         
         if strcmp(rec_mode,'BURST')
             % gaussian nan convolution + nan padding (only for burst_recording)
-            length_burst = 30;
-            % length_burst = 59;
+            % length_burst = 30;
+            length_burst = 59;
             n_burst = length(y)/length_burst;
             y_reshape = [reshape(y,[length_burst,n_burst]);NaN(length(w),n_burst)];
             y_conv = nanconv(y_reshape(:),w,'same');
