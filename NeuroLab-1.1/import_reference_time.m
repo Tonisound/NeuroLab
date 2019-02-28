@@ -238,12 +238,25 @@ switch length(trig_list)
         reference = sprintf('Channel %d [nev]',trig_list(ind_trig));
         fprintf('Trigger channel detected : %d.\n',reference);
 
-    otherwise
-        [ind_trig,v] = listdlg('Name','Tag Selection','PromptString','Select Trigger',...
-            'SelectionMode','single','ListString',trig_list,'InitialValue',1,'ListSize',[300 500]);
+    otherwise 
+       
+        if sum(trig_list==97)>0
+            % channel 97 by default
+            ind_trig = find(trig_list==97);
+            v = true;
+        else
+            % manual selection
+            trig_list_name =[];
+            for i=1:length(trig_list)
+                trig_list_name =[trig_list_name;sprintf('Channel %3d',trig_list(i))];
+            end
+            [ind_trig,v] = listdlg('Name','Tag Selection','PromptString','Select Trigger',...
+                'SelectionMode','single','ListString',trig_list_name,'InitialValue',1,'ListSize',[300 500]);
+        end
+        
         if v==0
             return;
-        elseif isempty(ind_tag)
+        elseif isempty(ind_trig)
             return;
         else
             %trigger = trig_list(ind_trig);

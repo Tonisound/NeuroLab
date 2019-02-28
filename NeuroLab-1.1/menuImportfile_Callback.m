@@ -53,12 +53,13 @@ for i = 1:length(FileList)
     FileName = char(FileList(i));
     FileName_split = regexp(FileName,'/|\','split');
     if contains(FileName_split(end),'_pre') || contains(FileName_split(end),'_per')...
-            || contains(FileName_split(end),'_post') || contains(FileName_split(end),'_nlab') || contains(FileName_split(end),'_E')
+            || contains(FileName_split(end),'_post') || contains(FileName_split(end),'_nlab')...
+            || contains(FileName_split(end),'_E') || contains(FileName_split(end),'_R')
         % Direct importation
         FileList_converted = [FileList_converted;{FileName}];
     elseif contains(FileName_split(end),'_MySession')
         % Searches recording
-        d = [dir(fullfile(FileName,'*_pre'));dir(fullfile(FileName,'*_per'));dir(fullfile(FileName,'*_post'));dir(fullfile(FileName,'*_E'))];
+        d = [dir(fullfile(FileName,'*_pre'));dir(fullfile(FileName,'*_per'));dir(fullfile(FileName,'*_post'));dir(fullfile(FileName,'*_E'));dir(fullfile(FileName,'*_R'))];
         if isempty(d)
             warning('File skipped [No recording in session] %s.\n',FileName);
         else
@@ -88,7 +89,7 @@ for i = 1:length(FileList)
         l = load(fullfile(FileName,'Config.mat'),'File');
         F(ind_file) = l.File;
         continue;
-    elseif index_session(end-1)==1 && contains(FileName_split(end),["pre","per","post","E"])
+    elseif index_session(end-1)==1 && contains(FileName_split(end),["pre","per","post","E","R"])
         session = char(FileName_split(end-1));
         % Extracting parent
         temp = regexp(FileName,session,'split');
