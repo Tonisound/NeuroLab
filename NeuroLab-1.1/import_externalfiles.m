@@ -31,7 +31,7 @@ if isempty(F.dir_ext)
         F.dir_ext = char(d(1).name);
         File = F;
         save(fullfile(dir_save,'Config.mat'),'File','-append');
-        fprintf('File Config.mat appended [%s]',dir_save);
+        fprintf('File Config.mat appended [%s].\n',dir_save);
     else
         errordlg(sprintf('Empty/Missing External Directory [%s]',dir_recording));
         return;

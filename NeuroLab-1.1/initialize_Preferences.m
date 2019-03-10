@@ -22,9 +22,9 @@ options.Interpreter = 'tex';
 %answer = inputdlg(prompt,name,[1 80],defaultans,options);
 
 data.str1 = char(prompt(1));
-data.str2 = '1';
+data.str2 = str_disk_1;
 data.str3 = char(prompt(2));
-data.str4 = '1';
+data.str4 = str_save_1;
 answer = modal_Preferences(data);
 
 if isempty(answer)

@@ -27,7 +27,7 @@ switch normalization
     case 'mean'
         im_mean = mean(Doppler_film,3,'omitnan');
         M = repmat(im_mean,1,1,size(Doppler_film,3));
-        Doppler_normalized = (Doppler_film-M)./M;
+        Doppler_normalized = 100*(Doppler_film-M)./M;
     case 'baseline'
 %         load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_S');
 %         ind_base = strcmp(TimeGroups_name,'BASELINE');

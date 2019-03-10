@@ -54,7 +54,7 @@ data_c = load(fullfile(folder_name,'Config.mat'),'File');
 File = data_c.File;
 File.ncf = file;
 save(fullfile(folder_name,'Config.mat'),'File','-append');
-fprintf('File Config.mat appended [%s]',folder_name);
+fprintf('File Config.mat appended [%s].\n',folder_name);
 
 % Save Nconfig.mat
 save(fullfile(folder_name,'Nconfig.mat'),...

@@ -154,6 +154,15 @@ for i=1:length(ind_channel)
     end
     [B,A]  = butter(1,[f1 f2]/(f_samp/2),'bandpass');
     Y_filt = filtfilt(B,A,traces(i).Y);
+    
+    % LFP band cut
+    if contains(str,'lfp')
+        f1 = 49;
+        f2 = 51;
+        [B,A]  = butter(1,[f1 f2]/(f_samp/2),'stop');
+        Y_filt = filtfilt(B,A,traces(i).Y);
+    end
+    
     traces(i).Y = Y_filt;
     traces(i).Y_im = interp1(traces(i).X,traces(i).Y,traces(i).X_im);  
     fprintf('Succesful Importation %s [Parent %s] [Bandpass: (%.2f Hz,%.2f Hz)].\n',traces(i).fullname,traces(i).parent,f1,f2);

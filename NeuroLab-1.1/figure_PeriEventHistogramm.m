@@ -69,6 +69,8 @@ uicontrol('Units','characters','Style','checkbox','Parent',iP,...
     'Tag','Checkbox3','Value',1,'Tooltipstring','Link/Unlink Axes');
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
     'Tag','Checkbox4','Value',1,'Tooltipstring','Remove NaN trials');
+uicontrol('Units','characters','Style','checkbox','Parent',iP,...
+    'Tag','Checkbox5','Value',1,'Tooltipstring','Gather left/right regions');
 
 % Buttons 
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
@@ -418,14 +420,15 @@ handles.PopupEnd.Position = [38*ipos(3)/100     ipos(4)/2+.5      ipos(3)/8   ip
 handles.Checkbox2.Position = [50.5*ipos(3)/100     ipos(4)/2      ipos(3)/55   ipos(4)/2];
 handles.Edit_End.Position = [52.5*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/30   ipos(4)/2.5];
 
-handles.Checkbox3.Position = [9*ipos(3)/10-.5     ipos(4)/2      ipos(3)/80   ipos(4)/4];
-handles.Checkbox4.Position = [9*ipos(3)/10-.5     3*ipos(4)/4      ipos(3)/80   ipos(4)/4];
 handles.Edit1.Position = [9*ipos(3)/10+3     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
 handles.Edit2.Position = [9.375*ipos(3)/10+1     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
 handles.Edit3.Position = [9.66*ipos(3)/10+1     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
 
 handles.Edit4.Position = [58*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/25   ipos(4)/2.5];
 handles.Edit5.Position = [62*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/25   ipos(4)/2.5];
+handles.Checkbox3.Position = [66.5*ipos(3)/100    ipos(4)/2      ipos(3)/80   ipos(4)/4];
+handles.Checkbox4.Position = [68*ipos(3)/100      ipos(4)/2      ipos(3)/80   ipos(4)/4];
+handles.Checkbox5.Position = [69.5*ipos(3)/100    ipos(4)/2      ipos(3)/80   ipos(4)/4];
 
 handles.ButtonSave.Position = [8*ipos(3)/10+2     0      ipos(3)/10-2   ipos(4)/2];
 handles.ButtonReset.Position = [8*ipos(3)/10+2     ipos(4)/2      ipos(3)/10-2   ipos(4)/2];
@@ -1418,6 +1421,10 @@ end
 
 function correlation_Callback(handles)
 
+global DIR_SAVE FILES CUR_FILE;
+load('Preferences.mat','GTraces');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
+
 channels = str2double(handles.Edit1.String);
 electrodes = str2double(handles.Edit2.String);
 crossfreq = str2double(handles.Edit3.String);
@@ -1526,6 +1533,24 @@ handles.ButtonBatch.UserData.labels= labels;
                     m(:,:,kk) = (m(:,:,kk)-a(:,:,kk))/b(:,:,kk);
                 end
         end
+        
+        % Removing missing values in average response
+        thresh_prop = .25;
+        ind_set_nan = mean(isnan(Ydata(:,:,1)),1)>thresh_prop;
+        modifier = ones(size(m));
+        modifier(:,ind_set_nan,:) = NaN;
+        m = m.*modifier;
+        s = s.*modifier;
+%         % gaussian smoothing
+%         t_gauss = GTraces.GaussianSmoothing;
+%         delta =  time_ref.Y(2)-time_ref.Y(1);
+%         w = gausswin(round(2*t_gauss/delta));
+%         w = w/sum(w);
+%         for i=1:size(m,3)
+%             m(:,:,i) = nanconv(m(:,:,i),w,'same');
+%             s(:,:,i) = nanconv(s(:,:,i),w,'same');
+%         end
+        
         for i=1:length(lines)
             line('XData',ref_time,...
                 'YData',m(:,:,i),...
@@ -1565,39 +1590,103 @@ handles.ButtonBatch.UserData.labels= labels;
         
         % Sixth tab
         tab = handles.SixthTab;
-        delete(tab.Children);
-        n_axes = ceil(sqrt(length(lines)));
-        % Main line
+        delete(tab.Children);        
         all_axes = [];
-        for k=1:length(lines)
-            ax = subplot(n_axes,n_axes,k,'parent',tab);
-            all_axes = [all_axes;ax];
-            line('XData',ref_time,...
-                'YData',m(:,:,k),...
-                'Color',lines(k).Color,...
-                'LineWidth',1,...
-                'Parent',ax)
-            title(ax,labels(k))
+        margin_w=.02;
+        margin_h=.02;
+        n_columns = 6;
+        n_rows = ceil(length(lines)/n_columns);
+        % Creating axes
+        for ii = 1:n_rows
+            for jj = 1:n_columns
+                index = (ii-1)*n_columns+jj;
+                if index>length(lines)
+                    continue;
+                end
+                x = mod(index-1,n_columns)/n_columns;
+                y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+                ax = axes('Parent',tab);
+                ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+                ax.XAxisLocation ='origin';
+                ax.Title.String = sprintf('Ax-%02d',index);
+                ax.Title.Visible = 'on';
+                all_axes = [all_axes;ax];
+            end
+        end
+        
+        gather_regions = handles.Checkbox5.Value;
+        if gather_regions
+            labels_gathered = strrep(labels,'-L','');
+            labels_gathered = strrep(labels_gathered,'-R','');
+            [C, ~, ic] = unique(labels_gathered,'stable');
+            % Reposition axes
+            delete(all_axes(length(C)+1:end));
+            n_rows = ceil(length(C)/n_columns);
+            for ii = 1:n_rows
+                for jj = 1:n_columns
+                    index = (ii-1)*n_columns+jj;
+                    if index>length(C)
+                        continue;
+                    end
+                    x = mod(index-1,n_columns)/n_columns;
+                    y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+                    ax = all_axes(index);
+                    ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+                    
+                end
+            end
+            all_axes = all_axes(ic);
+        else
+            labels_gathered=labels;
+        end
+        
+        % Plotting
+        for index = 1:length(lines)
+            ax = all_axes(index);
+            if contains(labels(index),'-L')
+                marker = 'none';
+                linestyle = '--';
+            elseif contains(labels(index),'-R')
+                marker = 'none';
+                linestyle = '-.';
+            else
+                marker = 'none';
+                linestyle = '-';
+            end
+            % Main line 
+            line('XData',ref_time,'YData',m(:,:,index),...
+                'Color',lines(index).Color,'LineWidth',1,'Linestyle',linestyle,...
+                'Marker',marker','MarkerSize',1,'MarkerFaceColor','none','MarkerEdgeColor',lines(index).Color,'Parent',ax)
+            title(ax,labels_gathered(index))
             grid(ax,'on');
             
-            % std
-            if hObj.Value>2 && hObj.Value<5
-                line('XData',ref_time,...
-                    'YData',m(:,:,k)+s(:,:,k),...
-                    'Color',lines(k).Color,...
-                    'LineWidth',.5,...
-                    'Parent',ax)
-                line('XData',ref_time,...
-                    'YData',m(:,:,k)-s(:,:,k),...
-                    'Color',lines(k).Color,...
-                    'LineWidth',.5,...
-                    'Parent',ax)
-            end
-            
             % axes limits
-            ax.XLim = [ref_time(1) ref_time(end)];
-            ax.YLim = [min(m(:,:,k)-s(:,:,k),[],'omitnan') max(m(:,:,k)+s(:,:,k),[],'omitnan')];
-            %ax.YLim = [0;40];
+            %ax.XLim = [ref_time(1) ref_time(end)];
+            ax.YLim = [min(m(:,:,index)-s(:,:,index),[],'omitnan') max(m(:,:,index)+s(:,:,index),[],'omitnan')];
+            xlim = ref_time(~isnan(m(:,:,index)));
+            ax.XLim = [min(xlim(1),-.1), xlim(end)];
+            ax.YLim = [-5;30];
+%             %Lines
+%             if hObj.Value>2 && hObj.Value<5
+%                 line('XData',ref_time,...
+%                     'YData',m(:,:,index)+s(:,:,index),...
+%                     'Color',lines(index).Color,...
+%                     'LineWidth',.25,...
+%                     'Parent',ax)
+%                 line('XData',ref_time,...
+%                     'YData',m(:,:,index)-s(:,:,index),...
+%                     'Color',lines(index).Color,...
+%                     'LineWidth',.25,...
+%                     'Parent',ax)
+%             end
+            %Patch
+            if hObj.Value>2 && hObj.Value<5
+                p_xdat = [ref_time,fliplr(ref_time)];
+                p_ydat = [m(:,:,index)-s(:,:,index),fliplr(m(:,:,index)+s(:,:,index))];
+                patch('XData',p_xdat(~isnan(p_ydat)),'YData',p_ydat(~isnan(p_ydat)),...
+                    'FaceColor',lines(index).Color,'FaceAlpha',.25,'EdgeColor',lines(index).Color,...
+                    'LineWidth',.25,'Parent',ax);
+            end
             
             % ticks on graph
             for l=1:size(Ydata,1)
@@ -1610,21 +1699,14 @@ handles.ButtonBatch.UserData.labels= labels;
                     'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
                     'LineWidth',.2,'Tag','Ticks','Color','k','Parent',ax);
             end
-            
-            
-            
-            
         end
-       
-        
-        
     end
 
     function popup_response(hObj,~,ax1,cmap_pearson,cmap_spearman,labels,labs)
         switch hObj.Value
-            case 1,
+            case 1
                 imagesc(cmap_pearson,'Parent',ax1);
-            case 2,
+            case 2
                 imagesc(cmap_spearman,'Parent',ax1);
         end
         colorbar(ax1);
