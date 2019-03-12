@@ -36,7 +36,7 @@ if ~exist(fullfile(F.fullpath,F.dir_fus,'trigger.txt'),'file')
             else
                 % Missing NEV : template trigger
                 warning('Missing NEV file.\n');
-                [trigger,reference,padding] = extract_trigger_void(n_frames);
+                [trigger,reference,padding] = extract_trigger_void(F,n_frames);
                 %return;
             end
             
@@ -53,7 +53,7 @@ if ~exist(fullfile(F.fullpath,F.dir_fus,'trigger.txt'),'file')
             else
                 % Missing NEV : template trigger
                 warning('Missing NEV file.\n');
-                [trigger,reference,padding] = extract_trigger_void(n_frames);
+                [trigger,reference,padding] = extract_trigger_void(F,n_frames);
                 %return;
             end
             
@@ -230,7 +230,7 @@ switch length(trig_list)
     case 0
         % Missing NEV : template trigger
         warning('No trigger channel found: using template trigger.\n');
-        [trigger,reference,padding] = extract_trigger_void(n_frames);
+        [trigger,reference,padding] = extract_trigger_void(F,n_frames);
         return;
         
     case 1
@@ -304,10 +304,19 @@ end
 
 end
 
-function [trigger,reference,padding] = extract_trigger_void(n_frames)
+function [trigger,reference,padding] = extract_trigger_void(F,n_frames)
 
 reference = 'default';
 padding = 'none';
-trigger = (1:n_frames)'/2.5;
+% loading .acq
+if exist(fullfile(F.fullpath,F.dir_fus,F.acq),'file')
+    data_acq = load(fullfile(F.fullpath,F.dir_fus,F.acq),'Acquisition','-mat');
+    f_acq = 1/median(diff(data_acq.Acquisition.T));
+else
+    f_acq = 2.5;
+    warning('Impossible to load acq file [%s].',fullfile(F.fullpath,F.dir_fus,F.acq));
+end
+
+trigger = (0:n_frames-1)'/f_acq;
 
 end

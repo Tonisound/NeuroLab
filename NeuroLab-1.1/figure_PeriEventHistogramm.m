@@ -162,7 +162,7 @@ subplot(1,2,2,...
     'Tag','AxHR',...
     'Parent',tab3);
 uicontrol('style','popup',...
-    'String','Mean|Median|Mean+/-SD|Median+/-SD|Normalized',...
+    'String','Mean|Mean+/-SD|Mean+/-SEM|Median|Median+/-SD|Median+/-SEM|Normalized',...
     'Units','normalized',...
     'Position',[.65 .93 .2 .05],...
     'Tag','PopupHR',...
@@ -1513,18 +1513,24 @@ handles.ButtonBatch.UserData.labels= labels;
         end
         
         cla(ax2);
-        switch hObj.Value
-            case 1
-                m = mean(Ydata(:,:,:),1,'omitnan');
-            case 2
-                m = median(Ydata(:,:,:),1,'omitnan');
-            case 3
+        switch strtrim(hObj.String(hObj.Value,:))
+            case {'Mean','Mean+/-SD'}
                 m = mean(Ydata(:,:,:),1,'omitnan');
                 s = std(Ydata(:,:,:),1,'omitnan');
-            case 4
-                m = median(Ydata(:,:,:),1,'omitnan');
+            case 'Mean+/-SEM'
+                m = mean(Ydata(:,:,:),1,'omitnan');
                 s = std(Ydata(:,:,:),1,'omitnan');
-            case 5
+                A = sum(~isnan(Ydata),1);
+                s = s./sqrt(A);
+            case {'Median','Median+/-SD'}
+                m = mean(Ydata(:,:,:),1,'omitnan');
+                s = std(Ydata(:,:,:),1,'omitnan');
+            case 'Median+/-SEM'
+                m = mean(Ydata(:,:,:),1,'omitnan');
+                s = std(Ydata(:,:,:),1,'omitnan');
+                A = sum(~isnan(Ydata),1);
+                s = s./sqrt(A);
+            case 'Normalized'
                 m = mean(Ydata(:,:,:),1,'omitnan');
                 s = std(Ydata(:,:,:),1,'omitnan');
                 a = mean(m,2,'omitnan');
@@ -1559,34 +1565,47 @@ handles.ButtonBatch.UserData.labels= labels;
                 'Parent',ax2)
         end
         
-        if hObj.Value>2 && hObj.Value<5
+        if hObj.Value==2 || hObj.Value==3 || hObj.Value==5 || hObj.Value==6
             for i=1:length(lines)
-                line('XData',ref_time,...
-                    'YData',m(:,:,i)+s(:,:,i),...
-                    'Color',lines(i).Color,...
-                    'LineWidth',.5,...
-                    'Parent',ax2)
-                line('XData',ref_time,...
-                    'YData',m(:,:,i)-s(:,:,i),...
-                    'Color',lines(i).Color,...
-                    'LineWidth',.5,...
-                    'Parent',ax2)
+%                 line('XData',ref_time,...
+%                     'YData',m(:,:,i)+s(:,:,i),...
+%                     'Color',lines(i).Color,...
+%                     'LineWidth',.5,...
+%                     'Parent',ax2)
+%                 line('XData',ref_time,...
+%                     'YData',m(:,:,i)-s(:,:,i),...
+%                     'Color',lines(i).Color,...
+%                     'LineWidth',.5,...
+%                     'Parent',ax2)
+                %Patch
+                p_xdat = [ref_time,fliplr(ref_time)];
+                p_ydat = [m(:,:,i)-s(:,:,i),fliplr(m(:,:,i)+s(:,:,i))];
+                patch('XData',p_xdat(~isnan(p_ydat)),'YData',p_ydat(~isnan(p_ydat)),...
+                    'FaceColor',lines(i).Color,'FaceAlpha',.25,'EdgeColor','none',...
+                    'LineWidth',.25,'Parent',ax2);
             end
         end
         %ax2.Title.String = 'Normalized Responses';
-        ax2.XLim = [ref_time(1),ref_time(end)];
+        %ax2.XLim = [ref_time(1),ref_time(end)];
+        ax2.XLim = [0,ref_time(end)];
         thick_lines = findobj(ax2,'LineWidth',2);
         legend(thick_lines,flip(labels),'Location','eastoutside');
         
         % ticks on graph
+        val1=.9;
+        val2=1;
         for k=1:size(Ydata,1)
             line('XData',[ref_time(ind_start(k)),ref_time(ind_start(k))],...
-                'YData',[8.5*ax2.YLim(2)/10 9.5*ax2.YLim(2)/10],...
+                'YData',[val1*ax2.YLim(2) val2*ax2.YLim(2)],...
                 'LineWidth',.5,'Tag','Ticks','Color','k','Parent',ax2);
             line('XData',[ref_time(ind_end(k)),ref_time(ind_end(k))],...
-                'YData',[8.5*ax2.YLim(2)/10 9.5*ax2.YLim(2)/10],...
+                'YData',[val1*ax2.YLim(2) val2*ax2.YLim(2)],...
                 'LineWidth',.5,'Tag','Ticks','Color','k','Parent',ax2);
+            
         end
+        grid(ax2,'on');
+        ax2.XAxisLocation = 'origin';
+        ax2.YAxisLocation = 'origin';
         
         % Sixth tab
         tab = handles.SixthTab;
@@ -1594,7 +1613,7 @@ handles.ButtonBatch.UserData.labels= labels;
         all_axes = [];
         margin_w=.02;
         margin_h=.02;
-        n_columns = 6;
+        n_columns = 4;
         n_rows = ceil(length(lines)/n_columns);
         % Creating axes
         for ii = 1:n_rows
@@ -1656,7 +1675,8 @@ handles.ButtonBatch.UserData.labels= labels;
             % Main line 
             line('XData',ref_time,'YData',m(:,:,index),...
                 'Color',lines(index).Color,'LineWidth',1,'Linestyle',linestyle,...
-                'Marker',marker','MarkerSize',1,'MarkerFaceColor','none','MarkerEdgeColor',lines(index).Color,'Parent',ax)
+                'Marker',marker','MarkerSize',1,'MarkerFaceColor','none',...
+                'MarkerEdgeColor',lines(index).Color,'Parent',ax)
             title(ax,labels_gathered(index))
             grid(ax,'on');
             
@@ -1665,9 +1685,9 @@ handles.ButtonBatch.UserData.labels= labels;
             ax.YLim = [min(m(:,:,index)-s(:,:,index),[],'omitnan') max(m(:,:,index)+s(:,:,index),[],'omitnan')];
             xlim = ref_time(~isnan(m(:,:,index)));
             ax.XLim = [min(xlim(1),-.1), xlim(end)];
-            ax.YLim = [-5;30];
+            ax.YLim = [-5;20];
 %             %Lines
-%             if hObj.Value>2 && hObj.Value<5
+%             if hObj.Value==2 || hObj.Value==3 || hObj.Value==5 || hObj.Value==6
 %                 line('XData',ref_time,...
 %                     'YData',m(:,:,index)+s(:,:,index),...
 %                     'Color',lines(index).Color,...
@@ -1680,7 +1700,7 @@ handles.ButtonBatch.UserData.labels= labels;
 %                     'Parent',ax)
 %             end
             %Patch
-            if hObj.Value>2 && hObj.Value<5
+            if hObj.Value==2 || hObj.Value==3 || hObj.Value==5 || hObj.Value==6
                 p_xdat = [ref_time,fliplr(ref_time)];
                 p_ydat = [m(:,:,index)-s(:,:,index),fliplr(m(:,:,index)+s(:,:,index))];
                 patch('XData',p_xdat(~isnan(p_ydat)),'YData',p_ydat(~isnan(p_ydat)),...
@@ -1690,14 +1710,14 @@ handles.ButtonBatch.UserData.labels= labels;
             
             % ticks on graph
             for l=1:size(Ydata,1)
-                val1 = .8;
+                val1 = .9;
                 val2 = 1;
                 line('XData',[ref_time(ind_start(l)),ref_time(ind_start(l))],...
                     'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
-                    'LineWidth',.2,'Tag','Ticks','Color','k','Parent',ax);
+                    'LineWidth',.2,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
                 line('XData',[ref_time(ind_end(l)),ref_time(ind_end(l))],...
                     'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
-                    'LineWidth',.2,'Tag','Ticks','Color','k','Parent',ax);
+                    'LineWidth',.2,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
             end
         end
     end
@@ -2231,12 +2251,14 @@ for i=1:channels
         end
         
         % ticks on graph
+        val1 = .9;
+        val2 = 1;
         for k=1:size(Ydata,1)
             line('XData',[ref_time(ind_start(k)),ref_time(ind_start(k))],...
-                'YData',[8.5*ax2.YLim(2)/10 9.5*ax2.YLim(2)/10],...
+                'YData',[val1*ax2.YLim(2) val2*ax2.YLim(2)],...
                 'LineWidth',.5,'Tag','Ticks','Color','k','Parent',ax2);
             line('XData',[ref_time(ind_end(k)),ref_time(ind_end(k))],...
-                'YData',[8.5*ax2.YLim(2)/10 9.5*ax2.YLim(2)/10],...
+                'YData',[val1*ax2.YLim(2) val2*ax2.YLim(2)],...
                 'LineWidth',.5,'Tag','Ticks','Color','k','Parent',ax2);
         end
         % update controls
@@ -2259,7 +2281,7 @@ for i=1:channels
         %for ticks
         all_ticks = findobj(ax2,'Tag','Ticks');
         for ii =1:length(all_ticks)
-            all_ticks(ii).YData = [ax2.YLim(1)+.85*(ax2.YLim(2)-ax2.YLim(1)),ax2.YLim(1)+.95*(ax2.YLim(2)-ax2.YLim(1))];
+            all_ticks(ii).YData = [ax2.YLim(1)+val1*(ax2.YLim(2)-ax2.YLim(1)),ax2.YLim(1)+val2*(ax2.YLim(2)-ax2.YLim(1))];
         end
     end
 end
@@ -2345,12 +2367,14 @@ for i=1:electrodes
         end
         
         % ticks on graph
+        val1 = .9;
+        val2 = 1;
         for k=1:size(Ydata,1)
             line('XData',[ref_time(ind_start(k)),ref_time(ind_start(k))],...
-                'YData',[8.5*ax2.YLim(2)/10 9.5*ax2.YLim(2)/10],...
+                'YData',[val1*ax2.YLim(2) val2*ax2.YLim(2)],...
                 'LineWidth',.5,'Tag','Ticks','Color','k','Parent',ax2);
             line('XData',[ref_time(ind_end(k)),ref_time(ind_end(k))],...
-                'YData',[8.5*ax2.YLim(2)/10 9.5*ax2.YLim(2)/10],...
+                'YData',[val1*ax2.YLim(2) val2*ax2.YLim(2)],...
                 'LineWidth',.5,'Tag','Ticks','Color','k','Parent',ax2);
         end
         % update controls
@@ -2373,7 +2397,7 @@ for i=1:electrodes
         %for ticks
         all_ticks = findobj(ax2,'Tag','Ticks');
         for ii =1:length(all_ticks)
-            all_ticks(ii).YData = [ax2.YLim(1)+.85*(ax2.YLim(2)-ax2.YLim(1)),ax2.YLim(1)+.95*(ax2.YLim(2)-ax2.YLim(1))];
+            all_ticks(ii).YData = [ax2.YLim(1)+val1*(ax2.YLim(2)-ax2.YLim(1)),ax2.YLim(1)+val2*(ax2.YLim(2)-ax2.YLim(1))];
         end
     end
 end
