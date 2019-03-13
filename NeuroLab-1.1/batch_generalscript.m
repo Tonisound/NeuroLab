@@ -490,6 +490,9 @@ for i = 1:length(ind_files)
                 case 'Detect Vascular Surges'
                     success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                     
+                case 'Detect Left-Right Runs'
+                    success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                    
                 case 'Export LFP bands'
                 % in this case 1 select band manually, else 0 for all bands
                     success = export_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
