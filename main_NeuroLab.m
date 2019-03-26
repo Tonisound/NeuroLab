@@ -8,8 +8,6 @@ clear;
 close;
 
 % Addpath
-%addpath(genpath('NeuroLab-1.0/'));
-%addpath('NPMK-4.5.2.0/');
 d = dir('NeuroLab*');
 for i = 1:length(d)
     addpath(genpath(char(d(i).name)));
@@ -18,6 +16,7 @@ d = dir('NPMK*');
 for i = 1:length(d)
     addpath(genpath(char(d(i).name)));
 end
+addpath(genpath('Quick_scripts'));
 addpath('IQ_Loading');
 addpath('FastICA_25');
 

@@ -496,6 +496,9 @@ for i = 1:length(ind_files)
                 case 'Export LFP bands'
                 % in this case 1 select band manually, else 0 for all bands
                     success = export_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+                case 'Export Binary Masks'
+                    success = export_binary_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii),myhandles,0);
                     
                 case '(Figure) Global Episode Display'
                     f2=figure_GlobalDisplay(myhandles,0,str_tag);

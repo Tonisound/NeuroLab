@@ -19,28 +19,33 @@ file_E = strcat(file_session,'_spiko_region_archive');
 dir_regions = dir(fullfile(seed_region,file_E,'Mask*'));
 
 %Sorting by datenum
-S = [];
-for i =1:length(dir_regions)
-    d = dir(fullfile(seed_region,file_E,char(dir_regions(i).name),'fUS*.U8'));
-    if isempty(d)
-        S = [S;dir_regions(i).datenum];
-    else
-        S = [S;d(1).datenum];
+if length(dir_regions)>1
+    S = [];
+    for i =1:length(dir_regions)
+        d = dir(fullfile(seed_region,file_E,char(dir_regions(i).name),'fUS*.U8'));
+        if isempty(d)
+            S = [S;dir_regions(i).datenum];
+        else
+            S = [S;d(1).datenum];
+        end
     end
+    %S = [dir_regions(:).datenum]';
+    [~,ind] = sort(S);
+    dir_regions = dir_regions(ind);
+    
+    % Selecting most recent one
+    dir_regions = fullfile(seed_region,file_E,char(dir_regions(end).name));
+elseif    length(dir_regions)==1
+    dir_regions = fullfile(seed_region,file_E,char(dir_regions.name));
 end
-%S = [dir_regions(:).datenum]';
-[~,ind] = sort(S);
-dir_regions = dir_regions(ind);
 
-% Selecting most recent one
-dir_regions = fullfile(seed_region,file_E,char(dir_regions(end).name));
-% be careful to remove all hidden files (.fUS_plane*.U8)
-files_regions = dir(fullfile(dir_regions,'fUS*.U8'));
-
-if isempty(files_regions)
-    warning('No Mask Regions found under binary format [%s].',dir_regions);
+if isempty(dir_regions)
+    warning('No Mask Regions found under binary format [%s].',fullfile(seed_region,file_E));
     return;
 else
+    % be careful to remove all hidden files (.fUS_plane*.U8)
+    files_regions = dir(fullfile(dir_regions,'fUS*.U8'));
+    
     % creating saving folder
     if exist(fullfile(SEED_REGION,file_session),'dir')
         rmdir(fullfile(SEED_REGION,file_session),'s');
@@ -106,7 +111,8 @@ C = permute(struct2cell(regions),[3,1,2]);
 C = C(:,1);
 C = regexprep(C,'_','-');
 prefix = largest_prefix(C);
-suffix = largest_suffix(C);
+%suffix = largest_suffix(C);
+suffix ='.U8';
 
 regions_name = [];
 for i=1:length(files_regions)
