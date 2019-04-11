@@ -132,8 +132,8 @@ GTraces.GraphicSaveFormat = 'Graphic_objects.mat';
 GTraces.GraphicSaveFormat_index = 1;
 GTraces.GaussianSmoothing = 1;
 
-GImport.burst_thresh = 10;
-GImport.jump_thresh = 1;
+GImport.burst_thresh = 30;
+GImport.jump_thresh = 5;
 GImport.resamp_cont = .5;
 GImport.resamp_burst = .2;
 GImport.Doppler_normalization_index = 1;

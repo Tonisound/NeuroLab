@@ -134,18 +134,38 @@ n_images = length(trigger);
 time_ref.X = (1:n_images)';
 time_ref.Y = trigger+offset;
 time_ref.nb_images = length(trigger);
-n_burst = 1;
-length_burst = length(trigger);
+
 
 % Detecting trigger jumps
 ind_bursts = find([0;diff(trigger(:))]>GImport.burst_thresh);
 ind_jumps = find([0;diff(trigger(:))]>GImport.jump_thresh);
-if ~isempty(ind_bursts)
+
+
+% if ~isempty(ind_bursts)
+%     rec_mode = 'BURST';
+% else
+%     rec_mode = 'CONTINUOUS';
+% end
+jump_value = length(ind_jumps);
+if length(unique(diff(ind_bursts)))==1
     rec_mode = 'BURST';
+%     n_burst = 1+length(ind_bursts);
+%     length_burst = unique(diff(ind_bursts));
+    n_burst = 1;
+    length_burst = length(trigger); 
+elseif ~isempty(ind_bursts)
+    rec_mode = 'BURST-IRREGULAR';
+    n_burst = 1;
+    length_burst = length(trigger); 
+elseif ~isempty(ind_jumps)
+    rec_mode = 'JUMP-IRREGULAR';
+    n_burst = 1;
+    length_burst = length(trigger); 
 else
     rec_mode = 'CONTINUOUS';
+    n_burst = 1;
+    length_burst = length(trigger); 
 end
-jump_value = length(ind_jumps);
 
 % Save dans ReferenceTime.mat
 time_str = cellstr(datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF'));

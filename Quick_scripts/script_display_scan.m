@@ -1,25 +1,24 @@
 function script_display_scan(subfolder)
 
-% folder = 'E:\DATA\ATLAS_NLAB\20190228_SD025\scan_coro_100';
-% folder = 'E:\DATA\ATLAS_NLAB\20190228_SD025\scan_sag_100';
-% folder = 'E:\DATA\ATLAS_NLAB\20190228_SD025\scan1';
-folder = fullfile('E:\DATA\ATLAS_NLAB\20190228_SD025_scan',subfolder);
+
+%folder = fullfile('E:\DATA\ATLAS_NLAB\20190228_SD025_scan',subfolder);
+%folder = fullfile('E:\DATA\ATLAS_NLAB\20190307_SD025_scan',subfolder);
+folder = fullfile('E:\DATA\ATLAS_NLAB\20190307_SD025_tomo',subfolder);
 
 d = dir(fullfile(folder,'*.acq'));
 load(fullfile(folder,char(d.name)),'-mat');
 
 % %tomo
-% Doppler_film= permute(squeeze(Acquisition.Data),[3 1 2 4]);
-% Doppler_film= Doppler_film(:,:,:,10);
-% %Doppler_film = squeeze(permute(Acquisition.Data,[3,1,4,2]));
+Doppler_film= permute(squeeze(Acquisition.Data),[3 1 2 4]);
+Doppler_film= Doppler_film(:,:,:,10);
+%Doppler_film = squeeze(permute(Acquisition.Data,[3,1,4,2]));
 
 %scan
 % Doppler_film= permute(squeeze(Acquisition.Data),[3 1 2]);
 
-
-% bug fix accumulation
-Doppler_film=permute(Acquisition.Data,[3 1 4 2]);
-Doppler_film = Doppler_film(:,:,1:4:end);
+% % bug fix accumulation
+% Doppler_film=permute(Acquisition.Data,[3 1 4 2]);
+% Doppler_film = Doppler_film(:,:,1:4:end);
 
 % slider display
 f = figure('Units','normalized');

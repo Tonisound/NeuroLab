@@ -515,6 +515,9 @@ for i = 1:length(ind_files)
                 case '(Figure) Peak Detection'
                     f2 = figure_PeakDetection(myhandles,0,str_tag);
                     
+                case '(Figure) Peri-Event Time Histogram'
+                    f2 = figure_PeriEventHistogramm(myhandles,0,str_group);
+                    
                 case '(Figure) Cross-Correlation LFP-fUS'
                     f2 = figure_CrossCorrelation(myhandles,0,str_tag);
                    

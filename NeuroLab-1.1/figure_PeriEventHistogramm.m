@@ -1,4 +1,4 @@
-function f2 = figure_PeriEventHistogramm(handles)
+function f2 = figure_PeriEventHistogramm(handles,val,str_group)
 % Time Tag Selection Callback
 
 global DIR_SAVE FILES CUR_FILE;
@@ -78,7 +78,7 @@ uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
 bc = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Compute','Tag','ButtonCompute');
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
-    'String','Save','Tag','ButtonSave');
+    'String','Save Image','Tag','ButtonSaveImage');
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Batch Save','Tag','ButtonBatch');
 
@@ -97,9 +97,42 @@ tabgp = uitabgroup('Units','normalized',...
     'Position',[0 0 1 1],...
     'Parent',mP,...
     'Tag','TabGroup');
+
+% Selection Tab
+tab0 = uitab('Parent',tabgp,...
+    'Title','Traces & Episodes',...
+    'Tag','SelectionTab');
+eventPanel = uipanel('Parent',tab0,...
+    'Units','normalized',...
+    'Position',[0 0 .2 1],...
+    'Title','Episodes',...
+    'Tag','EventPanel');
+tracePanel = uipanel('Parent',tab0,...
+    'Units','normalized',...
+    'Position',[.2 0 .2 1],...
+    'Title','fUS Traces',...
+    'Tag','fUSPanel');
+lfpPanel = uipanel('Parent',tab0,...
+    'Units','normalized',...
+    'Position',[.4 0 .2 1],...
+    'Title','Cereplex Traces',...
+    'Tag','LFPPanel');
+cfcPanel = uipanel('Parent',tab0,...
+    'Units','normalized',...
+    'Position',[.6 0 .2 1],...
+    'Title','CFC Channels',...
+    'Tag','CFCPanel');
+tgPanel = uipanel('Parent',tab0,...
+    'Units','normalized',...
+    'Position',[.8 0 .2 1],...
+    'Title','Time Groups',...
+    'Tag','TimeGroupsPanel');
+tabgp.SelectedTab = tab0;
+
+% FirstTab
 tab1 = uitab('Parent',tabgp,...
-    'Title','General',...
-    'Tag','MainTab');
+    'Title','Event Display',...
+    'Tag','FirstTab');
 uipanel('FontSize',12,...
     'Units','normalized',...
     'Tag','MainPanel',...
@@ -113,36 +146,10 @@ uipanel('FontSize',12,...
     'Tag','ThirdPanel',...
     'Parent',tab1);
 
-%Second Tab
-tab2 = uitab('Parent',tabgp,...
-    'Title','Traces & Episodes',...
-    'Tag','SecondTab');
-eventPanel = uipanel('Parent',tab2,...
-    'Units','normalized',...
-    'Position',[0 0 .25 1],...
-    'Title','Episodes',...
-    'Tag','EventPanel');
-tracePanel = uipanel('Parent',tab2,...
-    'Units','normalized',...
-    'Position',[.25 0 .25 1],...
-    'Title','fUS Traces',...
-    'Tag','fUSPanel');
-lfpPanel = uipanel('Parent',tab2,...
-    'Units','normalized',...
-    'Position',[.5 0 .25 1],...
-    'Title','Cereplex Traces',...
-    'Tag','LFPPanel');
-cfcPanel = uipanel('Parent',tab2,...
-    'Units','normalized',...
-    'Position',[.75 0 .25 1],...
-    'Title','CFC Channels',...
-    'Tag','CFCPanel');
-tabgp.SelectedTab = tab2;
-
-%Sixth Tab
-tab6 = uitab('Parent',tabgp,...
+% Second Tab
+uitab('Parent',tabgp,...
     'Title','Average Response',...
-    'Tag','SixthTab');
+    'Tag','SecondTab');
 
 % ThirdTab
 tab3 = uitab('Parent',tabgp,...
@@ -385,11 +392,31 @@ uitable('ColumnName',{'Channel','Electrode'},...
     'RowStriping','on',...
     'Parent',cfcPanel);
 
+% UiTable TimeGroupsTable
+uitable('ColumnName',{'Name','Duration'},...
+    'ColumnFormat',{'char','char'},...
+    'ColumnEditable',[false,false],...
+    'ColumnWidth',{120 120},...
+    'Data','',...
+    'Tag','TimeGroupsTable',...
+    'Units','normalized',...
+    'Position',[0 0 1 1],...
+    'CellSelectionCallback',@uitable_select,...
+    'RowStriping','on',...
+    'Parent',tgPanel);
 
 resetbutton_Callback([],[],guihandles(f2));
 initialize_eventPanel(guihandles(f2));
 initialize_cfcPanel(guihandles(f2));
+initialize_tgPanel(guihandles(f2))
 set(f2,'Position',[30 30 200 50]);
+
+% If nargin > 3 batch processing
+% val indicates callback provenance (0 : batch mode - 1 : user mode)
+% str_group contains group names 
+if val==0
+    batch_Callback([],[],guihandles(f2),str_group,1);
+end
 
 end
 
@@ -420,9 +447,12 @@ handles.PopupEnd.Position = [38*ipos(3)/100     ipos(4)/2+.5      ipos(3)/8   ip
 handles.Checkbox2.Position = [50.5*ipos(3)/100     ipos(4)/2      ipos(3)/55   ipos(4)/2];
 handles.Edit_End.Position = [52.5*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/30   ipos(4)/2.5];
 
-handles.Edit1.Position = [9*ipos(3)/10+3     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
-handles.Edit2.Position = [9.375*ipos(3)/10+1     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
-handles.Edit3.Position = [9.66*ipos(3)/10+1     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
+%handles.Edit1.Position = [9*ipos(3)/10+3     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
+%handles.Edit2.Position = [9.375*ipos(3)/10+1     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
+%handles.Edit3.Position = [9.66*ipos(3)/10+1     ipos(4)/2      ipos(3)/30-1.5   ipos(4)/2-.25];
+handles.Edit1.Position = [9.5*ipos(3)/10+1     2*ipos(4)/3      ipos(3)/20-1.5   ipos(4)/3-.25];
+handles.Edit2.Position = [9.5*ipos(3)/10+1     ipos(4)/3      ipos(3)/20-1.5   ipos(4)/3-.25];
+handles.Edit3.Position = [9.5*ipos(3)/10+1     0      ipos(3)/20-1.5   ipos(4)/3-.25];
 
 handles.Edit4.Position = [58*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/25   ipos(4)/2.5];
 handles.Edit5.Position = [62*ipos(3)/100     ipos(4)/2+0.2      ipos(3)/25   ipos(4)/2.5];
@@ -430,22 +460,34 @@ handles.Checkbox3.Position = [66.5*ipos(3)/100    ipos(4)/2      ipos(3)/80   ip
 handles.Checkbox4.Position = [68*ipos(3)/100      ipos(4)/2      ipos(3)/80   ipos(4)/4];
 handles.Checkbox5.Position = [69.5*ipos(3)/100    ipos(4)/2      ipos(3)/80   ipos(4)/4];
 
-handles.ButtonSave.Position = [8*ipos(3)/10+2     0      ipos(3)/10-2   ipos(4)/2];
-handles.ButtonReset.Position = [8*ipos(3)/10+2     ipos(4)/2      ipos(3)/10-2   ipos(4)/2];
-handles.ButtonBatch.Position = [9*ipos(3)/10+1     0      ipos(3)/10-2   ipos(4)/2];
-handles.ButtonCompute.Position = [7*ipos(3)/10+4     ipos(4)/2      ipos(3)/10-2   ipos(4)/2];
-handles.Button_Sort.Position = [7*ipos(3)/10+4     0      ipos(3)/10-2   ipos(4)/2];
+handles.ButtonCompute.Position = [8.5*ipos(3)/12+4     ipos(4)/2      ipos(3)/12-2   ipos(4)/2];
+handles.ButtonReset.Position = [9.5*ipos(3)/12+2     ipos(4)/2      ipos(3)/12-2   ipos(4)/2];
+handles.Button_Sort.Position = [10.5*ipos(3)/12     ipos(4)/2      ipos(3)/12-2   ipos(4)/2];
+handles.ButtonSaveImage.Position = [8.5*ipos(3)/12+4     0      ipos(3)/12-2   ipos(4)/2];
+handles.ButtonSaveImage.Position = [9.5*ipos(3)/12+2     0      ipos(3)/12-2   ipos(4)/2];
+handles.ButtonBatch.Position = [10.5*ipos(3)/12     0      ipos(3)/12-2   ipos(4)/2];
 
 end
 
 function uitable_select(hObj,evnt)
+
 if ~isempty(evnt.Indices)
     hObj.UserData.Selection = unique(evnt.Indices(:,1));
 end
+
 % Exclude NaN from selection
 A = strfind((hObj.Data(hObj.UserData.Selection,:)),'NaN');
 ind = cellfun('isempty',A);
 hObj.UserData.Selection(sum(ind,2)<size(ind,2))=[];
+
+switch hObj.Tag
+    case 'EventTable'
+        t = findobj(hObj.Parent.Parent,'Tag','TimeGroupsTable');
+        t.UserData = [];
+    case 'TimeGroupsTable'
+        t = findobj(hObj.Parent.Parent,'Tag','EventTable');
+        t.UserData = [];
+end
 
 end
 
@@ -501,6 +543,22 @@ handles.CFCTable.Data = [channel,electrode];
 
 end
 
+function initialize_tgPanel(handles)
+
+global DIR_SAVE FILES CUR_FILE;
+
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
+    data_tg = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'));
+end
+
+handles.TimeGroupsTable.Data= [data_tg.TimeGroups_name,data_tg.TimeGroups_duration];
+handles.TimeGroupsPanel.UserData.TimeGroups_name = data_tg.TimeGroups_name;
+handles.TimeGroupsPanel.UserData.TimeGroups_duration = data_tg.TimeGroups_duration;
+handles.TimeGroupsPanel.UserData.TimeGroups_frames = data_tg.TimeGroups_frames;
+handles.TimeGroupsPanel.UserData.TimeGroups_S = data_tg.TimeGroups_S;
+
+end
+
 function initialize_mainTab(handles)
 
 global SEED DIR_SAVE FILES CUR_FILE;
@@ -516,7 +574,7 @@ channels = str2double(handles.Edit1.String);
 electrodes = str2double(handles.Edit2.String);
 crossfreq = str2double(handles.Edit3.String);
 N = channels+electrodes+crossfreq;
-%delete(handles.MainTab.Children);
+%delete(handles.FirstTab.Children);
 
 handles.MainPanel.Position = [0 0 channels/N 1];
 delete(handles.MainPanel.Children);
@@ -708,7 +766,7 @@ end
 % Callback function Attribution
 set(handles.ButtonReset,'Callback',{@resetbutton_Callback,handles});
 set(handles.ButtonCompute,'Callback',{@compute_Callback,handles});
-set(handles.ButtonSave,'Callback',{@save_Callback,handles});
+set(handles.ButtonSaveImage,'Callback',{@saveImage_Callback,handles});
 set(handles.ButtonBatch,'Callback',{@batch_Callback,handles});
 handles.ButtonBatch.UserData.flag=0;
 set(handles.Button_Sort,'Callback',{@buttonsort_Callback,handles});
@@ -723,7 +781,7 @@ set(handles.PopupEnd,'Callback',{@update_episode,handles});
 
 % Resetting Button_Sort
 handles.Button_Sort.Enable = 'off';
-handles.ButtonSave.Enable = 'off';
+handles.ButtonSaveImage.Enable = 'off';
 handles.ButtonBatch.Enable = 'off';
 handles.PopupTrials.Enable = 'off';    
 handles.Button_Sort.UserData.Selected = '';
@@ -769,7 +827,7 @@ end
 
 function checkbox3_Callback(hObj,~,axes)
     switch hObj.Value
-        case 0,
+        case 0
             linkaxes(axes,'off');
         case 1
             linkaxes(axes,'x');
@@ -819,10 +877,10 @@ end
 
 function update_caxis(hObj,~,ax1,ax2,value)
 switch value
-    case 1,
+    case 1
         ax1.CLim(1) = str2double(hObj.String);
         ax2.YLim(1) = str2double(hObj.String);
-    case 2,
+    case 2
         ax1.CLim(2) = str2double(hObj.String);
         ax2.YLim(2) = str2double(hObj.String);
 end
@@ -836,9 +894,9 @@ end
 function update_xaxis(hObj,~,ax,value)
 for i=1:length(ax)
     switch value
-        case 1,
+        case 1
             ax(i).XLim(1) = str2double(hObj.String);
-        case 2,
+        case 2
             ax(i).XLim(2) = str2double(hObj.String);
     end
 end
@@ -868,9 +926,9 @@ function update_episode(hObj,~,handles)
 
 val = hObj.Value;
 switch hObj.Tag
-    case 'PopupStart',
+    case 'PopupStart'
         index =1;
-    case 'PopupEnd',
+    case 'PopupEnd'
         index =2;
 end
 
@@ -890,14 +948,50 @@ end
 
 function compute_Callback(hObj,~,handles)
 
-% Return if no selection
+% Return if empty selection
 if isempty(handles.fUSTable.UserData)&&isempty(handles.LFPTable.UserData)&&isempty(handles.CFCTable.UserData)
     errordlg('Please Select Traces.');
     return;
-elseif isempty(handles.EventTable.UserData)
-    errordlg('Please Select Events.');
-    return;
-elseif isempty(handles.fUSTable.UserData)
+end
+
+% Event Selection
+if isempty(handles.EventTable.UserData)  
+    if isempty(handles.TimeGroupsTable.UserData)
+        errordlg('Please Select Events or Time Groups.');
+        return;
+    else
+        % Select Episodes corresponding to Time Groups
+        tg_selection = handles.TimeGroupsTable.UserData.Selection(1);
+        TimeGroups_S = handles.TimeGroupsPanel.UserData.TimeGroups_S(tg_selection);
+        temp = datenum(TimeGroups_S.TimeTags_strings(:,1));
+        t_start = (temp - floor(temp))*24*3600;
+        temp = datenum(TimeGroups_S.TimeTags_strings(:,2));
+        t_end = (temp - floor(temp))*24*3600;
+        
+        % Episodes
+        t_margin = 1; % Margin at start to include episodes not fully included in Time Groups
+        episodes = handles.EventTable.Data;
+        temp = datenum(episodes(:,1));
+        t_e1 = (temp - floor(temp))*24*3600;
+        temp = datenum(episodes(:,2));
+        t_e2 = (temp - floor(temp))*24*3600;
+        ind_keep = [];
+        for i =1:size(episodes,1)
+            ind_start = (t_start - t_e1(i))<0+t_margin;
+            ind_end = (t_end - t_e2(i))>0;
+            if sum(ind_start.*ind_end)>0
+                ind_keep = [ind_keep;i];
+            end
+        end
+        handles.EventTable.UserData.Selection = ind_keep;
+        hObj.UserData.TimeGroup = handles.TimeGroupsTable.Data(tg_selection,1);
+    end
+else
+     hObj.UserData.TimeGroup = {'CURRENT'};
+end
+
+% Resetting if empty selection in fUSTable, LFPTable or CFCTable
+if isempty(handles.fUSTable.UserData)
     handles.Edit1.String=0;
     resetbutton_Callback([],[],handles);
 end
@@ -1072,7 +1166,7 @@ end
 
 % Feeding Data to control buttons
 handles.PopupTrials.Enable = 'on';    
-handles.ButtonSave.Enable = 'on';
+handles.ButtonSaveImage.Enable = 'on';
 handles.ButtonBatch.Enable = 'on';
 handles.Button_Sort.Enable = 'on';
 handles.Button_Sort.UserData.Selected = '';
@@ -1080,7 +1174,7 @@ handles.Button_Sort.UserData.permutation = '';
 
 % Display results
 set(handles.MainFigure, 'pointer', 'arrow');
-handles.TabGroup.SelectedTab = handles.MainTab;
+handles.TabGroup.SelectedTab = handles.FirstTab;
 
 % Update Correlation Panel
 correlation_Callback(handles);
@@ -1608,7 +1702,7 @@ handles.ButtonBatch.UserData.labels= labels;
         ax2.YAxisLocation = 'origin';
         
         % Sixth tab
-        tab = handles.SixthTab;
+        tab = handles.SecondTab;
         delete(tab.Children);        
         all_axes = [];
         margin_w=.02;
@@ -2514,43 +2608,22 @@ if crossfreq>0
 end
 end
 
-function save_Callback(~,~,handles)
-
-global FILES CUR_FILE DIR_FIG;
-load('Preferences.mat','GTraces');
-
-% Creating Save Directory
-save_dir = fullfile(DIR_FIG,FILES(CUR_FILE).eeg,'fUS_PeriEventHistogram');
-if ~isdir(save_dir)
-    mkdir(save_dir);
-end
-
-d = dir(save_dir);
-s = sprintf('%s',handles.TabGroup.SelectedTab.Title);
-t = sum(~(cellfun('isempty',strfind({d.name},s))));
-pic_name = sprintf('%s_fUSPeriEventHistogram_%s_%03d%s',FILES(CUR_FILE).eeg,s,t+1,GTraces.ImageSaveExtension);
-saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
-fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
-
-end
-
-function batch_Callback(hObj,~,handles)
-
-global FILES CUR_FILE DIR_FIG DIR_STATS;
-load('Preferences.mat','GTraces');
-
-data = hObj.UserData.data;
-labels = hObj.UserData.labels;
-%Ydata = hObj.UserData.Ydata;
-%Zdata = hObj.UserData.Zdata;
-%ref_time = hObj.UserData.ref_time;
-%ind_start = hObj.UserData.ind_start;
-%ind_end = hObj.UserData.ind_end;
+function saveImage_Callback(hObj,~,handles)
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch');
 drawnow;
 
+global FILES CUR_FILE DIR_FIG;
+load('Preferences.mat','GTraces');
+
+%data = hObj.UserData.data;
+%labels = hObj.UserData.labels;
+%Ydata = hObj.UserData.Ydata;
+%Zdata = hObj.UserData.Zdata;
+%ref_time = hObj.UserData.ref_time;
+%ind_start = hObj.UserData.ind_start;
+%ind_end = hObj.UserData.ind_end;
 channels = str2double(handles.Edit1.String);
 electrodes = str2double(handles.Edit2.String);
 crossfreq = str2double(handles.Edit3.String);
@@ -2559,80 +2632,99 @@ if strcmp(handles.PopupStart.String(handles.PopupStart.Value,:),handles.PopupEnd
 else
     str_ref = strcat(strtrim(char(handles.PopupStart.String(handles.PopupStart.Value,:))),'|',strtrim(char(handles.PopupEnd.String(handles.PopupEnd.Value,:))));
 end
+time_group = handles.ButtonCompute.UserData.TimeGroup;
 
 % Creating Save Directory
-save_dir = 'template';
-handles.TabGroup.SelectedTab = handles.MainTab;
-save_Callback([],[],handles);
-%save_dir = fullfile(DIR_FIG,FILES(CUR_FILE).eeg,'fUS_PeriEventHistogram',strcat(handles.Text2.String,'|','Event_',str_ref));
-%if ~isdir(save_dir) mkdir(save_dir);end
+folder_save = fullfile(DIR_FIG,'fUS_PeriEventHistogram',FILES(CUR_FILE).recording,char(time_group));
+if ~isdir(folder_save)
+    mkdir(folder_save);
+end
 
+s = sprintf('%s',handles.TabGroup.SelectedTab.Title);
+d = dir(folder_save);
+t = sum(~(cellfun('isempty',strfind({d.name},s))));
+pic_name = sprintf('%s_fUSPeriEventHistogram_%s_%03d%s',FILES(CUR_FILE).recording,s,t+1,GTraces.ImageSaveExtension);
+saveas(handles.MainFigure,fullfile(folder_save,pic_name),GTraces.ImageSaveFormat);
+fprintf('Image saved at %s.\n',fullfile(folder_save,pic_name));
+
+% Creating Save Directory
+handles.TabGroup.SelectedTab = handles.FirstTab;
 if channels>0 && size(handles.Popup1.String,1)>1
-    save_dir = fullfile(DIR_FIG,FILES(CUR_FILE).eeg,'fUS_PeriEventHistogram',strcat(handles.Text2.String,'_fUS'));
-    if ~isdir(save_dir) mkdir(save_dir);end
-
+    save_dir = fullfile(folder_save,strcat(handles.Text2.String,'_fUS'));
+    if ~isdir(save_dir) 
+        mkdir(save_dir);
+    end
     t=0;
     % Saving all channels
-    for i = 1:size(handles.Popup1.String,1);
+    for i = 1:size(handles.Popup1.String,1)
         t=t+1;
         handles.Popup1.Value = i;
         update_popup1_Callback(handles.Popup1,[],handles);
-        pic_name = sprintf('%s_fUSPeriEventHistogram_%03d%s',FILES(CUR_FILE).eeg,t,GTraces.ImageSaveExtension);
+        pic_name = sprintf('%s_fUSPeriEventHistogram_%03d%s',FILES(CUR_FILE).recording,t,GTraces.ImageSaveExtension);
         saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
         fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
     end
 elseif electrodes>0 && size(handles.Popup2.String,1)>1
-    save_dir = fullfile(DIR_FIG,FILES(CUR_FILE).eeg,'fUS_PeriEventHistogram',strcat(handles.Text2.String,'_LFP'));
-    if ~isdir(save_dir) mkdir(save_dir);end
+    save_dir = fullfile(folder_save,strcat(handles.Text2.String,'_LFP'));
+    if ~isdir(save_dir) 
+        mkdir(save_dir);
+    end
     
     t=0;
     % Saving all electrodes
-    for i = 1:size(handles.Popup2.String,1);
+    for i = 1:size(handles.Popup2.String,1)
         t=t+1;
         handles.Popup2.Value = i;
         update_popup2_Callback(handles.Popup2,[],handles);
-        pic_name = sprintf('%s_fUSPeriEventHistogram_%03d%s',FILES(CUR_FILE).eeg,t,GTraces.ImageSaveExtension);
+        pic_name = sprintf('%s_fUSPeriEventHistogram_%03d%s',FILES(CUR_FILE).recording,t,GTraces.ImageSaveExtension);
         saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
         fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
     end
 elseif crossfreq>0 && size(handles.Popup3.String,1)>1
-    save_dir = fullfile(DIR_FIG,FILES(CUR_FILE).eeg,'fUS_PeriEventHistogram',strcat(handles.Text2.String,'_CFC'));
-    if ~isdir(save_dir) mkdir(save_dir);end
+    save_dir = fullfile(folder_save,strcat(handles.Text2.String,'_CFC'));
+    if ~isdir(save_dir) 
+        mkdir(save_dir);
+    end
     
     t=0;
-    for i = 1:size(handles.Popup3.String,1);
+    for i = 1:size(handles.Popup3.String,1)
         t=t+1;
         handles.Popup3.Value = i;
         update_popup3_Callback(handles.Popup3,[],handles);
-        pic_name = sprintf('%s_fUSPeriEventHistogram_%03d%s',FILES(CUR_FILE).eeg,t,GTraces.ImageSaveExtension);
+        pic_name = sprintf('%s_fUSPeriEventHistogram_%03d%s',FILES(CUR_FILE).recording,t,GTraces.ImageSaveExtension);
         saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
         fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
     end
 end
 
-% Saving all tabs
-handles.TabGroup.SelectedTab = handles.SecondTab;
-save_Callback([],[],handles);
-handles.TabGroup.SelectedTab = handles.ThirdTab;
-save_Callback([],[],handles);
-handles.TabGroup.SelectedTab = handles.MainTab;
-
-% Saving Data for Statitics
-% Creating Save Directory
-stats_name = strcat(handles.Text2.String,save_dir(end-3:end));
-stats_dir = fullfile(DIR_STATS,FILES(CUR_FILE).eeg,'fUS_PeriEventHistogram',strcat(handles.Text2.String,'|','Event_',str_ref));
-if ~isdir(stats_dir)
-    mkdir(stats_dir);
-end
-save(fullfile(stats_dir,stats_name),'data','labels','-mat');
-fprintf('Data saved at %s.\n',fullfile(stats_dir,stats_name));
-
 % Saving video
 work_dir = save_dir;
-video_dir = fullfile(DIR_FIG,FILES(CUR_FILE).eeg,'fUS_PeriEventHistogram');
-%video_name = strcat(FILES(CUR_FILE).eeg,'-',handles.Text2.String,'|','Event_',str_ref);
-video_name = strcat(FILES(CUR_FILE).eeg,'-',handles.Text2.String,save_dir(end-3:end));
+video_dir = folder_save;
+%video_name = strcat(FILES(CUR_FILE).recording,'-',handles.Text2.String,'|','Event_',str_ref);
+video_name = strcat(FILES(CUR_FILE).recording,'-',handles.Text2.String,save_dir(end-3:end));
 save_video(work_dir,video_dir,video_name);
 set(handles.MainFigure, 'pointer', 'arrow');
+
+% Saving all tabs
+all_tabs = [handles.SecondTab;handles.ThirdTab;handles.FourthTab;handles.FifthTab];
+for i =1:length(all_tabs)
+    handles.TabGroup.SelectedTab = all_tabs(i);
+    s = sprintf('%s',handles.TabGroup.SelectedTab.Title);
+    pic_name = sprintf('%s_fUSPeriEventHistogram_%s_%03d%s',FILES(CUR_FILE).recording,s,GTraces.ImageSaveExtension);
+    saveas(handles.MainFigure,fullfile(folder_save,pic_name),GTraces.ImageSaveFormat);
+    fprintf('Image saved at %s.\n',fullfile(folder_save,pic_name));
+end
+
+handles.TabGroup.SelectedTab = handles.FirstTab;
+
+% % Saving Data for Statitics
+% % Creating Save Directory
+% stats_name = strcat(handles.Text2.String,save_dir(end-3:end));
+% stats_dir = fullfile(DIR_STATS,FILES(CUR_FILE).recording,'fUS_PeriEventHistogram',strcat(handles.Text2.String,'|','Event_',str_ref));
+% if ~isdir(stats_dir)
+%     mkdir(stats_dir);
+% end
+% save(fullfile(stats_dir,stats_name),'data','labels','-mat');
+% fprintf('Data saved at %s.\n',fullfile(stats_dir,stats_name));
 
 end

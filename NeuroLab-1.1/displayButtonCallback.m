@@ -64,7 +64,7 @@ switch strtrim(str(val,:))
         figure_PeakDetection(handles,1);
 
     case '(Figure) Peri-Event Time Histogram'
-        figure_PeriEventHistogramm(handles);
+        figure_PeriEventHistogramm(handles,1);
         
     case '(Figure) Global Episode Display'
         figure_GlobalDisplay(handles,1);

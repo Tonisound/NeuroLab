@@ -111,8 +111,8 @@ C = permute(struct2cell(regions),[3,1,2]);
 C = C(:,1);
 C = regexprep(C,'_','-');
 prefix = largest_prefix(C);
-%suffix = largest_suffix(C);
-suffix ='.U8';
+suffix = largest_suffix(C);
+%suffix ='.U8';
 
 regions_name = [];
 for i=1:length(files_regions)

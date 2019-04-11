@@ -50,7 +50,8 @@ w = gausswin(round(2*t_gauss/delta));
 w = w/sum(w);
 % Smoothing Doopler
 if t_gauss>0
-    if strcmp(rec_mode,'BURST')
+    %if strcmp(rec_mode,'BURST')
+    try
         for i=1:size(IM,1)
             for j=1:size(IM,2)
                 y = IM(i,j,:);
@@ -66,7 +67,8 @@ if t_gauss>0
             fprintf('Smoothing Doppler [%.1f s] - %d/%d\n',t_gauss,i,size(IM,1));
         end
 
-    else
+    %else
+    catch
         for i=1:size(IM,1)
             for j=1:size(IM,2)
                 y_smooth =  squeeze(IM(i,j,:));
