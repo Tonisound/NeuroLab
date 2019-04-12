@@ -80,7 +80,12 @@ bc = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Save Image','Tag','ButtonSaveImage');
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
+    'String','Save Stats','Tag','ButtonSaveStats');
+bb = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Batch Save','Tag','ButtonBatch');
+bb.UserData.fUSData = [];
+bb.UserData.LFPData = [];
+bb.UserData.CFCData = [];
 
 bs = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Sort','Tag','Button_Sort','TooltipString','Sorting Episodes','Enable','off');
@@ -463,7 +468,7 @@ handles.Checkbox5.Position = [69.5*ipos(3)/100    ipos(4)/2      ipos(3)/80   ip
 handles.ButtonCompute.Position = [8.5*ipos(3)/12+4     ipos(4)/2      ipos(3)/12-2   ipos(4)/2];
 handles.ButtonReset.Position = [9.5*ipos(3)/12+2     ipos(4)/2      ipos(3)/12-2   ipos(4)/2];
 handles.Button_Sort.Position = [10.5*ipos(3)/12     ipos(4)/2      ipos(3)/12-2   ipos(4)/2];
-handles.ButtonSaveImage.Position = [8.5*ipos(3)/12+4     0      ipos(3)/12-2   ipos(4)/2];
+handles.ButtonSaveStats.Position = [8.5*ipos(3)/12+4     0      ipos(3)/12-2   ipos(4)/2];
 handles.ButtonSaveImage.Position = [9.5*ipos(3)/12+2     0      ipos(3)/12-2   ipos(4)/2];
 handles.ButtonBatch.Position = [10.5*ipos(3)/12     0      ipos(3)/12-2   ipos(4)/2];
 
@@ -767,6 +772,7 @@ end
 set(handles.ButtonReset,'Callback',{@resetbutton_Callback,handles});
 set(handles.ButtonCompute,'Callback',{@compute_Callback,handles});
 set(handles.ButtonSaveImage,'Callback',{@saveImage_Callback,handles});
+set(handles.ButtonSaveStats,'Callback',{@saveStats_Callback,handles});
 set(handles.ButtonBatch,'Callback',{@batch_Callback,handles});
 handles.ButtonBatch.UserData.flag=0;
 set(handles.Button_Sort,'Callback',{@buttonsort_Callback,handles});
@@ -782,6 +788,7 @@ set(handles.PopupEnd,'Callback',{@update_episode,handles});
 % Resetting Button_Sort
 handles.Button_Sort.Enable = 'off';
 handles.ButtonSaveImage.Enable = 'off';
+handles.ButtonSaveStats.Enable = 'off';
 handles.ButtonBatch.Enable = 'off';
 handles.PopupTrials.Enable = 'off';    
 handles.Button_Sort.UserData.Selected = '';
@@ -991,16 +998,20 @@ else
 end
 
 % Resetting if empty selection in fUSTable, LFPTable or CFCTable
+flag_reset = false;
 if isempty(handles.fUSTable.UserData)
     handles.Edit1.String=0;
-    resetbutton_Callback([],[],handles);
+    flag_reset = true;
 end
 if isempty(handles.LFPTable.UserData)
     handles.Edit2.String=0;
-    resetbutton_Callback([],[],handles);
+    flag_reset = true;
 end
 if isempty(handles.CFCTable.UserData)
     handles.Edit3.String=0;
+    flag_reset = true;
+end
+if flag_reset
     resetbutton_Callback([],[],handles);
 end
 
@@ -1167,6 +1178,7 @@ end
 % Feeding Data to control buttons
 handles.PopupTrials.Enable = 'on';    
 handles.ButtonSaveImage.Enable = 'on';
+handles.ButtonSaveStats.Enable = 'on';
 handles.ButtonBatch.Enable = 'on';
 handles.Button_Sort.Enable = 'on';
 handles.Button_Sort.UserData.Selected = '';
@@ -1184,6 +1196,14 @@ adaptation_Callback(handles);
 
 % Update Polar Plot Panel
 %display_regression([],[],handles);
+
+% Store Data
+% handles.ButtonBatch.UserData.Zdata = Zdata;
+% handles.ButtonBatch.UserData.ref_time= ref_time;
+% handles.ButtonBatch.UserData.ind_start= ind_start;
+% handles.ButtonBatch.UserData.ind_end= ind_end;
+% handles.ButtonBatch.UserData.labels= labels;
+
 end
 
 function display_regression(~,~,handles)
@@ -1588,16 +1608,12 @@ pu2 = handles.PopupHR;
 ax2 = handles.AxHR;
 pu2.Callback={@popup_response2,ax2,labels,Ydata,ref_time,lines,ind_start,ind_end};
 if channels+electrodes>0
-popup_response2(pu2,[],ax2,labels,Ydata,ref_time,lines,ind_start,ind_end);
+    popup_response2(pu2,[],ax2,labels,Ydata,ref_time,lines,ind_start,ind_end);
 end
 
-handles.ButtonBatch.UserData.data = data;
-%handles.ButtonBatch.UserData.Ydata = Ydata;
-%handles.ButtonBatch.UserData.Zdata = Zdata;
-%handles.ButtonBatch.UserData.ref_time= ref_time;
-%handles.ButtonBatch.UserData.ind_start= ind_start;
-%handles.ButtonBatch.UserData.ind_end= ind_end;
-handles.ButtonBatch.UserData.labels= labels;
+
+handles.ButtonBatch.UserData.labels = labels;
+handles.ButtonBatch.UserData.data= data;
 
     function popup_response2(hObj,~,ax2,labels,Ydata,ref_time,lines,ind_start,ind_end)
         if isempty(lines)
@@ -1833,6 +1849,7 @@ handles.ButtonBatch.UserData.labels= labels;
         %ax1.CLim = [-1,1];
         %ax1.Title.String = 'Pearson';
     end
+
 end
 
 function update_popup1_Callback(~,~,handles)
@@ -2004,6 +2021,16 @@ end
 
 % Update_channels
 update_channels(handles,handles.PopupTrials);
+
+S.Ydata = handles.Popup1.UserData.Ydata;
+S.ind_start = handles.Popup1.UserData.ind_start;
+S.ind_end = handles.Popup1.UserData.ind_end;
+S.ref_time = handles.Popup1.UserData.ref_time;
+S.label_events = label_events;
+S.fUS_Selection = fUS_Selection;
+S.align1 = align1;
+S.align2 = align2;
+handles.ButtonBatch.UserData.fUSData = S;
 
 end
 
@@ -2177,6 +2204,16 @@ end
 % Update_electrodes
 update_electrodes(handles,handles.PopupTrials);
 
+S.Ydata = handles.Popup2.UserData.Ydata;
+S.ind_start = handles.Popup2.UserData.ind_start;
+S.ind_end = handles.Popup2.UserData.ind_end;
+S.ref_time = handles.Popup2.UserData.ref_time;
+S.label_events = label_events;
+S.LFP_Selection = LFP_Selection;
+S.align1 = align1;
+S.align2 = align2;
+handles.ButtonBatch.UserData.LFPData = S;
+
 end
 
 function update_popup3_Callback(~,~,handles)
@@ -2266,6 +2303,16 @@ end
 handles.Popup3.UserData.bins = bins;
 handles.Popup3.UserData.Zdata = Zdata;
 update_crossfreq(handles,handles.PopupTrials);
+
+S.Ydata = handles.Popup3.UserData.Ydata;
+S.ind_start = handles.Popup3.UserData.ind_start;
+S.ind_end = handles.Popup3.UserData.ind_end;
+S.ref_time = handles.Popup3.UserData.ref_time;
+S.label_events = label_events;
+S.CFC_Selection = CFC_Selection;
+S.align1 = align1;
+S.align2 = align2;
+handles.ButtonBatch.UserData.CFCData = S;
 
 end
 
@@ -2608,7 +2655,7 @@ if crossfreq>0
 end
 end
 
-function saveImage_Callback(hObj,~,handles)
+function saveImage_Callback(~,~,handles)
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch');
@@ -2617,45 +2664,27 @@ drawnow;
 global FILES CUR_FILE DIR_FIG;
 load('Preferences.mat','GTraces');
 
-%data = hObj.UserData.data;
-%labels = hObj.UserData.labels;
-%Ydata = hObj.UserData.Ydata;
-%Zdata = hObj.UserData.Zdata;
-%ref_time = hObj.UserData.ref_time;
-%ind_start = hObj.UserData.ind_start;
-%ind_end = hObj.UserData.ind_end;
 channels = str2double(handles.Edit1.String);
 electrodes = str2double(handles.Edit2.String);
 crossfreq = str2double(handles.Edit3.String);
-if strcmp(handles.PopupStart.String(handles.PopupStart.Value,:),handles.PopupEnd.String(handles.PopupEnd.Value,:))
-    str_ref = strcat(strtrim(char(handles.PopupEnd.String(handles.PopupEnd.Value,:))));
-else
-    str_ref = strcat(strtrim(char(handles.PopupStart.String(handles.PopupStart.Value,:))),'|',strtrim(char(handles.PopupEnd.String(handles.PopupEnd.Value,:))));
-end
 time_group = handles.ButtonCompute.UserData.TimeGroup;
 
 % Creating Save Directory
 folder_save = fullfile(DIR_FIG,'fUS_PeriEventHistogram',FILES(CUR_FILE).recording,char(time_group));
-if ~isdir(folder_save)
-    mkdir(folder_save);
+if isdir(folder_save)
+    rmdir(folder_save,'s');
 end
+mkdir(folder_save);
 
-s = sprintf('%s',handles.TabGroup.SelectedTab.Title);
-d = dir(folder_save);
-t = sum(~(cellfun('isempty',strfind({d.name},s))));
-pic_name = sprintf('%s_fUSPeriEventHistogram_%s_%03d%s',FILES(CUR_FILE).recording,s,t+1,GTraces.ImageSaveExtension);
-saveas(handles.MainFigure,fullfile(folder_save,pic_name),GTraces.ImageSaveFormat);
-fprintf('Image saved at %s.\n',fullfile(folder_save,pic_name));
-
-% Creating Save Directory
+% Saving frames for video
 handles.TabGroup.SelectedTab = handles.FirstTab;
-if channels>0 && size(handles.Popup1.String,1)>1
+if channels>0
     save_dir = fullfile(folder_save,strcat(handles.Text2.String,'_fUS'));
     if ~isdir(save_dir) 
         mkdir(save_dir);
     end
-    t=0;
     % Saving all channels
+    t=0;
     for i = 1:size(handles.Popup1.String,1)
         t=t+1;
         handles.Popup1.Value = i;
@@ -2669,9 +2698,8 @@ elseif electrodes>0 && size(handles.Popup2.String,1)>1
     if ~isdir(save_dir) 
         mkdir(save_dir);
     end
-    
-    t=0;
     % Saving all electrodes
+    t=0;
     for i = 1:size(handles.Popup2.String,1)
         t=t+1;
         handles.Popup2.Value = i;
@@ -2685,7 +2713,7 @@ elseif crossfreq>0 && size(handles.Popup3.String,1)>1
     if ~isdir(save_dir) 
         mkdir(save_dir);
     end
-    
+    % Saving all cfc channels
     t=0;
     for i = 1:size(handles.Popup3.String,1)
         t=t+1;
@@ -2700,7 +2728,6 @@ end
 % Saving video
 work_dir = save_dir;
 video_dir = folder_save;
-%video_name = strcat(FILES(CUR_FILE).recording,'-',handles.Text2.String,'|','Event_',str_ref);
 video_name = strcat(FILES(CUR_FILE).recording,'-',handles.Text2.String,save_dir(end-3:end));
 save_video(work_dir,video_dir,video_name);
 set(handles.MainFigure, 'pointer', 'arrow');
@@ -2717,14 +2744,94 @@ end
 
 handles.TabGroup.SelectedTab = handles.FirstTab;
 
-% % Saving Data for Statitics
-% % Creating Save Directory
-% stats_name = strcat(handles.Text2.String,save_dir(end-3:end));
-% stats_dir = fullfile(DIR_STATS,FILES(CUR_FILE).recording,'fUS_PeriEventHistogram',strcat(handles.Text2.String,'|','Event_',str_ref));
-% if ~isdir(stats_dir)
-%     mkdir(stats_dir);
-% end
-% save(fullfile(stats_dir,stats_name),'data','labels','-mat');
-% fprintf('Data saved at %s.\n',fullfile(stats_dir,stats_name));
+end
+
+function saveStats_Callback(~,~,handles)
+
+% Pointer Watch
+set(handles.MainFigure, 'pointer', 'watch');
+drawnow;
+
+global FILES CUR_FILE DIR_STATS;
+load('Preferences.mat','GTraces');
+
+% Creating Save Directory
+time_group = handles.ButtonCompute.UserData.TimeGroup;
+folder_save = fullfile(DIR_STATS,'fUS_PeriEventHistogram',FILES(CUR_FILE).recording,char(time_group));
+if isdir(folder_save)
+    rmdir(folder_save,'s');
+end
+mkdir(folder_save);
+
+% General
+align1 = handles.Checkbox1.Value;
+align2 = handles.Checkbox2.Value;
+data = handles.ButtonBatch.UserData.data;
+labels = handles.ButtonBatch.UserData.labels;
+channels = str2double(handles.Edit1.String);
+electrodes = str2double(handles.Edit2.String);
+crossfreq = str2double(handles.Edit3.String);
+time_group = handles.ButtonCompute.UserData.TimeGroup;
+if strcmp(handles.PopupStart.String(handles.PopupStart.Value,:),handles.PopupEnd.String(handles.PopupEnd.Value,:))
+    str_ref = strcat(strtrim(char(handles.PopupEnd.String(handles.PopupEnd.Value,:))));
+else
+    str_ref = strcat(strtrim(char(handles.PopupStart.String(handles.PopupStart.Value,:))),'|',strtrim(char(handles.PopupEnd.String(handles.PopupEnd.Value,:))));
+end
+Doppler_ref = handles.Text2.String;
+% Save
+save(fullfile(folder_save,'EventDisplay.mat'),'data','labels','time_group','str_ref','Doppler_ref',...
+    'channels','electrodes','crossfreq','align1','align2','-v7.3');
+fprintf('Data saved at [%s].\n',fullfile(folder_save,'EventDisplay.mat'));
+
+% fUS_Data
+S = handles.ButtonBatch.UserData.fUSData;
+if ~isempty(S)
+    Ydata = S.Ydata;
+    ind_start = S.ind_start;
+    ind_end = S.ind_end;
+    ref_time = S.ref_time;
+    label_events = S.label_events;
+    fUS_Selection = S.fUS_Selection;
+    align1 = S.align1;
+    align2 = S.align2;
+    % Save
+    save(fullfile(folder_save,'fUS_Data.mat'),'Ydata','ind_start','ind_end','ref_time','time_group',...
+        'label_events','fUS_Selection','align1','align2','-v7.3');
+    fprintf('Data saved at [%s].\n',fullfile(folder_save,'fUS_Data.mat'));
+end
+
+% LFP_Data
+S = handles.ButtonBatch.UserData.LFPData;
+if ~isempty(S)
+    Ydata = S.Ydata;
+    ind_start = S.ind_start;
+    ind_end = S.ind_end;
+    ref_time = S.ref_time;
+    label_events = S.label_events;
+    LFP_Selection = S.fUS_Selection;
+    align1 = S.align1;
+    align2 = S.align2;
+    % Save
+    save(fullfile(folder_save,'LFP_Data.mat'),'Ydata','ind_start','ind_end','ref_time','time_group',...
+        'label_events','LFP_Selection','align1','align2','-v7.3');
+    fprintf('Data saved at [%s].\n',fullfile(folder_save,'fUS_Data.mat'));
+end
+
+% CFC_Data
+S = handles.ButtonBatch.UserData.CFCData;
+if ~isempty(S)
+    Ydata = S.Ydata;
+    ind_start = S.ind_start;
+    ind_end = S.ind_end;
+    ref_time = S.ref_time;
+    label_events = S.label_events;
+    CFC_Selection = S.CFC_Selection;
+    align1 = S.align1;
+    align2 = S.align2;
+    % Save
+    save(fullfile(folder_save,'CFC_Data.mat'),'Ydata','ind_start','ind_end','ref_time','time_group',...
+        'label_events','CFC_Selection','align1','align2','-v7.3');
+    fprintf('Data saved at [%s].\n',fullfile(folder_save,'fUS_Data.mat'));
+end
 
 end
