@@ -448,6 +448,16 @@ str_group = handles.Group_table.Data(ind_group,:);
 str_tag = handles.Tag_table.Data(ind_tag,:);
 str_processes = handles.Process_table.Data;
 
+% Building str_regions and str_traces
+str_regions = [];
+if ~isempty(handles.Region_table.UserData)
+    str_regions = handles.Region_table.Data(handles.Region_table.UserData.Selection,1);
+end
+str_traces = [];
+if ~isempty(handles.Spiko_table.UserData)
+    str_traces = handles.Spiko_table.Data(handles.Spiko_table.UserData.Selection,1);
+end
+
 % Looping on files
 cur_file =  myhandles.FileSelectPopup.Value;
 for i = 1:length(ind_files)
@@ -494,7 +504,7 @@ for i = 1:length(ind_files)
                     success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                     
                 case 'Export LFP bands'
-                % in this case 1 select band manually, else 0 for all bands
+                    % in this case 1 select band manually, else 0 for all bands
                     success = export_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
                 case 'Export Binary Masks'
@@ -516,7 +526,7 @@ for i = 1:length(ind_files)
                     f2 = figure_PeakDetection(myhandles,0,str_tag);
                     
                 case '(Figure) Peri-Event Time Histogram'
-                    f2 = figure_PeriEventHistogramm(myhandles,0,str_group);
+                    f2 = figure_PeriEventHistogramm(myhandles,0,str_group,str_regions,str_traces);
                     
                 case '(Figure) Cross-Correlation LFP-fUS'
                     f2 = figure_CrossCorrelation(myhandles,0,str_tag);

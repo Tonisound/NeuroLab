@@ -1,4 +1,4 @@
-function f2 = figure_PeriEventHistogramm(handles,val,str_group)
+function f2 = figure_PeriEventHistogramm(handles,val,str_group,str_regions,str_traces)
 % Time Tag Selection Callback
 
 global DIR_SAVE FILES CUR_FILE;
@@ -14,6 +14,7 @@ f2 = figure('Units','characters',...
     'Name','Peri Event Histogramm');
 clrmenu(f2);
 colormap(f2,'jet');
+f2.UserData.success = false;
 
 iP = uipanel('FontSize',12,...
     'Units','normalized',...
@@ -82,7 +83,7 @@ uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
 uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Save Stats','Tag','ButtonSaveStats');
 bb = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
-    'String','Batch Save','Tag','ButtonBatch');
+    'String','Batch Mode','Tag','ButtonBatch');
 bb.UserData.fUSData = [];
 bb.UserData.LFPData = [];
 bb.UserData.CFCData = [];
@@ -420,7 +421,7 @@ set(f2,'Position',[30 30 200 50]);
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
 % str_group contains group names 
 if val==0
-    batch_Callback([],[],guihandles(f2),str_group,1);
+    batch_Callback([],[],guihandles(f2),str_group,str_regions,str_traces);
 end
 
 end
@@ -789,7 +790,7 @@ set(handles.PopupEnd,'Callback',{@update_episode,handles});
 handles.Button_Sort.Enable = 'off';
 handles.ButtonSaveImage.Enable = 'off';
 handles.ButtonSaveStats.Enable = 'off';
-handles.ButtonBatch.Enable = 'off';
+%handles.ButtonBatch.Enable = 'off';
 handles.PopupTrials.Enable = 'off';    
 handles.Button_Sort.UserData.Selected = '';
 handles.Button_Sort.UserData.str_sort = {''};
@@ -954,6 +955,8 @@ handles.EventTable.Data(:,index) = temp;
 end
 
 function compute_Callback(hObj,~,handles)
+
+handles.MainFigure.UserData.success = false;
 
 % Return if empty selection
 if isempty(handles.fUSTable.UserData)&&isempty(handles.LFPTable.UserData)&&isempty(handles.CFCTable.UserData)
@@ -1203,6 +1206,8 @@ adaptation_Callback(handles);
 % handles.ButtonBatch.UserData.ind_start= ind_start;
 % handles.ButtonBatch.UserData.ind_end= ind_end;
 % handles.ButtonBatch.UserData.labels= labels;
+
+handles.MainFigure.UserData.success = true;
 
 end
 
@@ -2832,6 +2837,59 @@ if ~isempty(S)
     save(fullfile(folder_save,'CFC_Data.mat'),'Ydata','ind_start','ind_end','ref_time','time_group',...
         'label_events','CFC_Selection','align1','align2','-v7.3');
     fprintf('Data saved at [%s].\n',fullfile(folder_save,'fUS_Data.mat'));
+end
+
+end
+
+function batch_Callback(~,~,handles,str_group,str_regions,str_traces)
+
+if nargin<4
+    % user mode
+    if isempty(handles.TimeGroupsTable.UserData)
+        %errordlg('Please Select Time Groups')
+        %return;
+        compute_Callback(handles.ButtonCompute,[],handles);
+        saveStats_Callback([],[],handles);
+        saveImage_Callback([],[],handles);
+    else
+        selection = handles.TimeGroupsTable.UserData.Selection;
+        for i =1:length(selection)
+            handles.TimeGroupsTable.UserData.Selection = selection(i);
+            handles.EventTable.UserData = [];
+            compute_Callback(handles.ButtonCompute,[],handles);
+            saveStats_Callback([],[],handles);
+            saveImage_Callback([],[],handles);
+        end
+        handles.TimeGroupsTable.UserData.Selection = selection;
+    end
+else
+    % batch mode
+
+    % Selecting regions and traces
+    if ~isempty(str_traces)||~isempty(str_regions)
+        % str_regions
+        selection = find(contains(handles.fUSTable.Data(:,1),str_regions)==1);
+        handles.fUSTable.UserData.Selection = selection;
+        % str_traces
+        selection = find(contains(handles.LFPTable.Data(:,1),str_traces)==1);
+        handles.LFPTable.UserData.Selection = selection;
+    else
+        %warning('No traces or regions matching selection [].\n')
+        % Selecting all by default
+        handles.fUSTable.UserData.Selection = (1:size(handles.fUSTable.Data,1))';
+        % handles.LFPTable.UserData.Selection = (1:size(handles.LFPTable.Data,1))';
+    end
+    
+    % Selecting Time Groups
+    selection = find(contains(handles.TimeGroupsTable.Data(:,1),str_group)==1);
+    for i =1:length(selection)
+        handles.TimeGroupsTable.UserData.Selection = selection(i);
+        handles.EventTable.UserData = [];
+        compute_Callback(handles.ButtonCompute,[],handles);
+        saveStats_Callback([],[],handles);
+        saveImage_Callback([],[],handles);
+    end
+    
 end
 
 end
