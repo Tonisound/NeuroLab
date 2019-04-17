@@ -5,6 +5,10 @@
 
 function script_Figure1B(myhandles)
 
+% paper mode
+matlab.graphics.internal.setPrintPreferences('DefaultPaperPositionMode','manual');
+set(groot,'defaultFigurePaperPositionMode','manual');
+
 %baseline
 global DIR_SAVE FILES CUR_FILE IM;
 load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'Doppler_film');
@@ -121,7 +125,11 @@ for i = 1:length(l)
 end
 ind_whole = contains(l_name,'Whole');
 l_whole = l(ind_whole);
-mask_whole =  l_whole.UserData.Mask;
+if isempty(l_whole)
+    mask_whole =  ones(size(IM,1),size(IM,2));
+else
+    mask_whole =  l_whole.UserData.Mask;
+end
 
 % lines
 l  = findobj(myhandles.RightAxes,'Tag','Trace_Cerep');
@@ -156,7 +164,7 @@ temp = mean(mean(IM,'omitnan'),'omitnan');
 clim1 = round(min(temp),-1);
 clim2 = round(4*max(temp),-1);
 thresh = clim1+.4*(clim2-clim1);
-thresh=10;
+thresh=5;
 clim2 = 40;
 
 % Figure
@@ -167,6 +175,13 @@ n_columns = 4;
 margin_w=.01;
 margin_h=.02;
 alpha_value = .75;
+color_s = 'g';
+marker_s = 'o';
+color_p = 'b';
+marker_p = 'o';
+color_e = 'r';
+marker_e = 'o';
+marker_size = 3;
 
 for i = 1:n_rows
     for j = 1:n_columns
@@ -179,16 +194,17 @@ for i = 1:n_rows
         ax = axes('Parent',f2);
         colormap(ax,'gray')
         ax2 = axes('Parent',f2);
-        
-        colormap(ax2,'jet')
+        colormap(ax2,'parula')
         %background
         im = imagesc(im_baseline,'Parent',ax);
         im.AlphaData = alpha_value*mask_whole;
-        p = copyobj(l_whole.UserData.Graphic,ax);
-        p.Visible = 'on';
-        p.FaceColor= 'none';
-        p.EdgeColor= 'k';
-        p.LineWidth = 1;
+        if ~isempty(l_whole)
+            p = copyobj(l_whole.UserData.Graphic,ax);
+            p.Visible = 'on';
+            p.FaceColor= 'none';
+            p.EdgeColor= 'k';
+            p.LineWidth = 1;
+        end
         ax.Visible='off';
         ax.Title.String = sprintf('t = %.1f',t_from_e1(im_sequence(index)));
         % ax.Title.String = sprintf('X=%.1f [t=%.1f / %.1f / %.1f s]',l_x.YData(im_sequence(index)),t_from_e1(im_sequence(index)),t_from_e2(im_sequence(index)),t_from_e3(im_sequence(index)));
@@ -210,17 +226,17 @@ for i = 1:n_rows
             c.Visible='off';
         end
 
-        % Positions on trask
+        % Positions on track
         ax3 = axes('Parent',f2);
         plot(l_x.YData(im_start:im_end),l_y.YData(im_start:im_end),'Color',color1,'Parent',ax3);
         line('XData',l_x.YData(ind_im_e1),'YData',l_y.YData(ind_im_e1),...
-            'Marker','o','MarkerSize',3,'MarkerEdgeColor','none','MarkerFaceColor',[.5 .5 .5],...
+            'Marker',marker_s,'MarkerSize',marker_size,'MarkerEdgeColor','none','MarkerFaceColor',color_s,...
             'LineStyle','none','Parent',ax3);
         line('XData',l_x.YData(ind_im_e2),'YData',l_y.YData(ind_im_e2),...
-            'Marker','o','MarkerSize',3,'MarkerEdgeColor','none','MarkerFaceColor',[.5 .5 .5],...
+            'Marker',marker_p,'MarkerSize',marker_size,'MarkerEdgeColor','none','MarkerFaceColor',color_p,...
             'LineStyle','none','Parent',ax3);
         line('XData',l_x.YData(ind_im_e3),'YData',l_y.YData(ind_im_e3),...
-            'Marker','o','MarkerSize',3,'MarkerEdgeColor','none','MarkerFaceColor',[.5 .5 .5],...
+            'Marker',marker_e,'MarkerSize',marker_size,'MarkerEdgeColor','none','MarkerFaceColor',color_e,...
             'LineStyle','none','Parent',ax3);
 %         line('XData',l_x.YData(im_sequence(index)),'YData',l_y.YData(im_sequence(index)),...
 %             'Marker','o','MarkerSize',5,'MarkerEdgeColor','none','MarkerFaceColor',color2,'Parent',ax3);
@@ -242,7 +258,7 @@ for i = 1:n_rows
         try
             ha = annotation('arrow');
             ha.Parent = ax3;
-            arrow_step = 2;
+            arrow_step = 1;
             x_arrow = [l_x.YData(im_sequence(index)) l_x.YData(min(im_sequence(index)+arrow_step,end))];
             y_arrow = [l_y.YData(im_sequence(index)) l_y.YData(min(im_sequence(index)+arrow_step,end))];
             % x_arrow = [l_x.YData(im_sequence(index)) l_x.YData(min(im_sequence(index)+1,end))]/ax3.XLim(2);
@@ -256,13 +272,13 @@ for i = 1:n_rows
         ax4 = axes('Parent',f2);
         plot(data_r.time_ref.Y(im_start:im_end),l_s.YData(im_start:im_end),'Color',color1,'Parent',ax4);
         line('XData',data_r.time_ref.Y(ind_im_e1),'YData',l_s.YData(ind_im_e1),...
-            'Marker','o','MarkerSize',3,'MarkerEdgeColor','none','MarkerFaceColor',[.5 .5 .5],...
+            'Marker',marker_s,'MarkerSize',marker_size,'MarkerEdgeColor','none','MarkerFaceColor',color_s,...
             'LineStyle','none','Parent',ax4);
         line('XData',data_r.time_ref.Y(ind_im_e2),'YData',l_s.YData(ind_im_e2),...
-            'Marker','o','MarkerSize',3,'MarkerEdgeColor','none','MarkerFaceColor',[.5 .5 .5],...
+            'Marker',marker_p,'MarkerSize',marker_size,'MarkerEdgeColor','none','MarkerFaceColor',color_p,...
             'LineStyle','none','Parent',ax4);
         line('XData',data_r.time_ref.Y(ind_im_e3),'YData',l_s.YData(ind_im_e3),...
-            'Marker','o','MarkerSize',3,'MarkerEdgeColor','none','MarkerFaceColor',[.5 .5 .5],...
+            'Marker',marker_e,'MarkerSize',marker_size,'MarkerEdgeColor','none','MarkerFaceColor',color_e,...
             'LineStyle','none','Parent',ax4);
         line('XData',[data_r.time_ref.Y(im_sequence(index)) data_r.time_ref.Y(im_sequence(index))],...
             'YData',[0 1.2*max(l_s.YData(im_sequence))],'Color',color2,'Parent',ax4);
@@ -305,6 +321,7 @@ if flag_save
     if ~exist(folder,'dir')
         mkdir(folder);
     end
+    
     saveas(f2,fullfile(folder,sprintf('%s_%s.pdf',turn,f2.Name)));
     fprintf('Image saved [%s].\n',fullfile(folder,sprintf('%s_%s.pdf',turn,f2.Name)));
     close(f2);

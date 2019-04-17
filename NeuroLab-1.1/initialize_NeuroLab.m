@@ -242,6 +242,12 @@ line([CUR_IM CUR_IM], ylim(b),...
     'HitTest','off',...
     'Parent', b);
 
+% % Debugging
+% if n_burst>1
+%     n_burst = 1;
+%     length_burst=n_burst*length_burst;
+% end
+
 % Mean Trace
 xdata = [reshape(1:LAST_IM,[length_burst,n_burst]);NaN(1,n_burst)];
 ydata = [reshape(mean(mean(IM,2,'omitnan'),1,'omitnan'),[length_burst,n_burst]);NaN(1,n_burst)];

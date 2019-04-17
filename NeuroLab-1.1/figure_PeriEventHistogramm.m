@@ -65,7 +65,7 @@ uicontrol('Units','characters','Style','popupmenu','Parent',iP,...
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
     'Tag','Checkbox1','Value',1,'Tooltipstring','Align Before Stimulus');
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
-    'Tag','Checkbox2','Value',1,'Tooltipstring','Align After Stimulus');
+    'Tag','Checkbox2','Value',0,'Tooltipstring','Align After Stimulus');
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
     'Tag','Checkbox3','Value',1,'Tooltipstring','Link/Unlink Axes');
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
@@ -988,7 +988,7 @@ if isempty(handles.EventTable.UserData)
         ind_keep = [];
         for i =1:size(episodes,1)
             ind_start = (t_start - t_e1(i))<0+t_margin;
-            ind_end = (t_end - t_e2(i))>0;
+            ind_end = (t_end - t_e2(i))>0-t_margin;
             if sum(ind_start.*ind_end)>0
                 ind_keep = [ind_keep;i];
             end
@@ -1036,13 +1036,16 @@ time_after = str2double(handles.Edit_End.String);
 % Extracting Event times
 ind_events = handles.EventTable.UserData.Selection;
 ind_keep = ones(size(ind_events));        
-Time_indices = NaN(length(ind_events),4);
 Event_Selection = handles.EventTable.Data(ind_events,:);
-for i =1:length(ind_events)
-    a = datenum(char(Event_Selection(i,1)));
-    b = datenum(char(Event_Selection(i,2)));
-    Time_indices(i,:) = [((a-floor(a))*24*3600)-time_before,(a-floor(a))*24*3600,(b-floor(b))*24*3600,((b-floor(b))*24*3600)+time_after];
-end
+% Time_indices = NaN(length(ind_events),4);
+% for i =1:length(ind_events)
+%     a = datenum(char(Event_Selection(i,1)));
+%     b = datenum(char(Event_Selection(i,2)));
+%     Time_indices(i,:) = [((a-floor(a))*24*3600)-time_before,(a-floor(a))*24*3600,(b-floor(b))*24*3600,((b-floor(b))*24*3600)+time_after];
+% end
+A = datenum(char(Event_Selection(:,1)));
+B = datenum(char(Event_Selection(:,2)));
+Time_indices = [((A-floor(A))*24*3600)-time_before,(A-floor(A))*24*3600,(B-floor(B))*24*3600,((B-floor(B))*24*3600)+time_after];
 
 % Channels
 if channels>0
@@ -1065,6 +1068,8 @@ if channels>0
                 end
             end
         end
+        % update
+        handles.EventTable.UserData.Selection = handles.EventTable.UserData.Selection(ind_keep==1);
         ind_events = ind_events(ind_keep==1);
         Time_indices = Time_indices(ind_keep==1,:);
         Ydata = Ydata(ind_keep==1,:,:);
@@ -1672,12 +1677,14 @@ handles.ButtonBatch.UserData.data= data;
 %             s(:,:,i) = nanconv(s(:,:,i),w,'same');
 %         end
         
+        all_colors = [];
         for i=1:length(lines)
             line('XData',ref_time,...
                 'YData',m(:,:,i),...
                 'Color',lines(i).Color,...
                 'LineWidth',2,...
                 'Parent',ax2)
+            all_colors = [all_colors;lines(i).Color];
         end
         
         if hObj.Value==2 || hObj.Value==3 || hObj.Value==5 || hObj.Value==6
@@ -1726,8 +1733,8 @@ handles.ButtonBatch.UserData.data= data;
         tab = handles.SecondTab;
         delete(tab.Children);        
         all_axes = [];
-        margin_w=.02;
-        margin_h=.02;
+        margin_w=0;%.02;
+        margin_h=0;%.02;
         n_columns = 4;
         n_rows = ceil(length(lines)/n_columns);
         % Creating axes
@@ -1835,6 +1842,19 @@ handles.ButtonBatch.UserData.data= data;
                     'LineWidth',.2,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
             end
         end
+
+        % Saving
+        S.ref_time = ref_time;
+        S.Time_indices = handles.Popup1.UserData.Time_indices;
+        S.labels = labels;
+        S.str_popup = strtrim(hObj.String(hObj.Value,:));
+        S.m = m;
+        S.s = s;
+        S.ind_start = ind_start;
+        S.ind_end = ind_end;
+        S.all_colors = all_colors;
+        S.thresh_prop = thresh_prop;
+        handles.ButtonBatch.UserData.AverageResponseData = S;
     end
 
     function popup_response(hObj,~,ax1,cmap_pearson,cmap_spearman,labels,labs)
@@ -2032,6 +2052,7 @@ S.ind_start = handles.Popup1.UserData.ind_start;
 S.ind_end = handles.Popup1.UserData.ind_end;
 S.ref_time = handles.Popup1.UserData.ref_time;
 S.label_events = label_events;
+S.Time_indices = Time_indices;
 S.fUS_Selection = fUS_Selection;
 S.align1 = align1;
 S.align2 = align2;
@@ -2213,6 +2234,7 @@ S.Ydata = handles.Popup2.UserData.Ydata;
 S.ind_start = handles.Popup2.UserData.ind_start;
 S.ind_end = handles.Popup2.UserData.ind_end;
 S.ref_time = handles.Popup2.UserData.ref_time;
+S.Time_indices = Time_indices;
 S.label_events = label_events;
 S.LFP_Selection = LFP_Selection;
 S.align1 = align1;
@@ -2313,6 +2335,7 @@ S.Ydata = handles.Popup3.UserData.Ydata;
 S.ind_start = handles.Popup3.UserData.ind_start;
 S.ind_end = handles.Popup3.UserData.ind_end;
 S.ref_time = handles.Popup3.UserData.ref_time;
+S.Time_indices = Time_indices;
 S.label_events = label_events;
 S.CFC_Selection = CFC_Selection;
 S.align1 = align1;
@@ -2742,7 +2765,7 @@ all_tabs = [handles.SecondTab;handles.ThirdTab;handles.FourthTab;handles.FifthTa
 for i =1:length(all_tabs)
     handles.TabGroup.SelectedTab = all_tabs(i);
     s = sprintf('%s',handles.TabGroup.SelectedTab.Title);
-    pic_name = sprintf('%s_fUSPeriEventHistogram_%s_%03d%s',FILES(CUR_FILE).recording,s,GTraces.ImageSaveExtension);
+    pic_name = sprintf('%s_fUSPeriEventHistogram_%s_%s%s',FILES(CUR_FILE).recording,s,char(time_group),GTraces.ImageSaveExtension);
     saveas(handles.MainFigure,fullfile(folder_save,pic_name),GTraces.ImageSaveFormat);
     fprintf('Image saved at %s.\n',fullfile(folder_save,pic_name));
 end
@@ -2771,11 +2794,6 @@ mkdir(folder_save);
 % General
 align1 = handles.Checkbox1.Value;
 align2 = handles.Checkbox2.Value;
-data = handles.ButtonBatch.UserData.data;
-labels = handles.ButtonBatch.UserData.labels;
-channels = str2double(handles.Edit1.String);
-electrodes = str2double(handles.Edit2.String);
-crossfreq = str2double(handles.Edit3.String);
 time_group = handles.ButtonCompute.UserData.TimeGroup;
 if strcmp(handles.PopupStart.String(handles.PopupStart.Value,:),handles.PopupEnd.String(handles.PopupEnd.Value,:))
     str_ref = strcat(strtrim(char(handles.PopupEnd.String(handles.PopupEnd.Value,:))));
@@ -2783,10 +2801,35 @@ else
     str_ref = strcat(strtrim(char(handles.PopupStart.String(handles.PopupStart.Value,:))),'|',strtrim(char(handles.PopupEnd.String(handles.PopupEnd.Value,:))));
 end
 Doppler_ref = handles.Text2.String;
+
+labels_fus = [];
+labels_lfp = [];
+labels_cfc = [];
+
+n_fus = str2double(handles.Edit1.String);
+if n_fus>0
+    labels_fus = handles.fUSTable.Data(handles.fUSTable.UserData.Selection,1);
+end
+n_lfp = str2double(handles.Edit2.String);
+if n_lfp>0
+    labels_lfp = handles.LFPTable.Data(handles.LFPTable.UserData.Selection,1);
+end
+n_cfc = str2double(handles.Edit3.String);
+if n_cfc >0
+    labels_cfc = handles.CFCTable.Data(handles.CFCTable.UserData.Selection,1);
+end
+n_events = length(handles.EventTable.UserData.Selection);
+EventSelection = handles.EventTable.Data(handles.EventTable.UserData.Selection,:);
+Time_indices = handles.Popup1.UserData.Time_indices;
+
+temp = regexp(FILES(CUR_FILE).session,'_','split');
+rat_id = char(temp(2));
+rat_name = strrep(FILES(CUR_FILE).ncf,'.txt','');
+
 % Save
-save(fullfile(folder_save,'EventDisplay.mat'),'data','labels','time_group','str_ref','Doppler_ref',...
-    'channels','electrodes','crossfreq','align1','align2','-v7.3');
-fprintf('Data saved at [%s].\n',fullfile(folder_save,'EventDisplay.mat'));
+save(fullfile(folder_save,'RecordingInfo.mat'),'time_group','str_ref','Doppler_ref','align1','align2','rat_name','rat_id',...
+    'n_fus','labels_fus','n_lfp','labels_lfp','n_cfc','labels_cfc','n_events','EventSelection','Time_indices','-v7.3');
+fprintf('Data saved at [%s].\n',fullfile(folder_save,'RecordingInfo.mat'));
 
 % fUS_Data
 S = handles.ButtonBatch.UserData.fUSData;
@@ -2795,13 +2838,14 @@ if ~isempty(S)
     ind_start = S.ind_start;
     ind_end = S.ind_end;
     ref_time = S.ref_time;
+    Time_indices = S.Time_indices;
     label_events = S.label_events;
     fUS_Selection = S.fUS_Selection;
     align1 = S.align1;
     align2 = S.align2;
     % Save
     save(fullfile(folder_save,'fUS_Data.mat'),'Ydata','ind_start','ind_end','ref_time','time_group',...
-        'label_events','fUS_Selection','align1','align2','-v7.3');
+        'Time_indices','label_events','fUS_Selection','align1','align2','-v7.3');
     fprintf('Data saved at [%s].\n',fullfile(folder_save,'fUS_Data.mat'));
 end
 
@@ -2812,13 +2856,14 @@ if ~isempty(S)
     ind_start = S.ind_start;
     ind_end = S.ind_end;
     ref_time = S.ref_time;
+    Time_indices = S.Time_indices;
     label_events = S.label_events;
-    LFP_Selection = S.fUS_Selection;
+    LFP_Selection = S.LFP_Selection;
     align1 = S.align1;
     align2 = S.align2;
     % Save
     save(fullfile(folder_save,'LFP_Data.mat'),'Ydata','ind_start','ind_end','ref_time','time_group',...
-        'label_events','LFP_Selection','align1','align2','-v7.3');
+        'Time_indices','label_events','LFP_Selection','align1','align2','-v7.3');
     fprintf('Data saved at [%s].\n',fullfile(folder_save,'fUS_Data.mat'));
 end
 
@@ -2829,15 +2874,32 @@ if ~isempty(S)
     ind_start = S.ind_start;
     ind_end = S.ind_end;
     ref_time = S.ref_time;
+    Time_indices = S.Time_indices;
     label_events = S.label_events;
     CFC_Selection = S.CFC_Selection;
     align1 = S.align1;
     align2 = S.align2;
     % Save
     save(fullfile(folder_save,'CFC_Data.mat'),'Ydata','ind_start','ind_end','ref_time','time_group',...
-        'label_events','CFC_Selection','align1','align2','-v7.3');
+        'Time_indices','label_events','CFC_Selection','align1','align2','-v7.3');
     fprintf('Data saved at [%s].\n',fullfile(folder_save,'fUS_Data.mat'));
 end
+
+% AverageResponseData
+S = handles.ButtonBatch.UserData.AverageResponseData;
+ref_time = S.ref_time;
+Time_indices = S.Time_indices;
+labels = S.labels;
+str_popup = S.str_popup;
+m = S.m;
+s = S.s;
+ind_start = S.ind_start;
+ind_end = S.ind_end;
+all_colors = S.all_colors;
+thresh_prop = S.thresh_prop;
+save(fullfile(folder_save,'AverageResponse.mat'),'ref_time','Time_indices','ind_start','ind_end','ref_time','m','s',...
+    'all_colors','thresh_prop','labels','str_popup','align1','align2','-v7.3');
+fprintf('Data saved at [%s].\n',fullfile(folder_save,'AverageResponseData.mat'));
 
 end
 
@@ -2864,7 +2926,6 @@ if nargin<4
     end
 else
     % batch mode
-
     % Selecting regions and traces
     if ~isempty(str_traces)||~isempty(str_regions)
         % str_regions
@@ -2877,7 +2938,7 @@ else
         %warning('No traces or regions matching selection [].\n')
         % Selecting all by default
         handles.fUSTable.UserData.Selection = (1:size(handles.fUSTable.Data,1))';
-        % handles.LFPTable.UserData.Selection = (1:size(handles.LFPTable.Data,1))';
+        handles.LFPTable.UserData.Selection = (1:size(handles.LFPTable.Data,1))';
     end
     
     % Selecting Time Groups
