@@ -389,7 +389,7 @@ for index = 1:length(S)
     end
     
     % Main line
-    ref_time = S(index).Xdata(1,:);
+    ref_time = mean(S(index).Xdata,1,'omitnan');
     Ydata = S(index).Ydata;
     ind_start = S(index).ind_start;
     ind_end = S(index).ind_end;
@@ -439,8 +439,12 @@ for index = 1:length(S)
     ax.YTickLabel = labels_rats;
     
     ind_keep = find(sum(~isnan(S(index).Xdata))/size(S(index).Xdata,1)>.5);
-    ax.XTick = 500:500:ind_keep(end);
-    ax.XTickLabel = {'.5';'1.0';'1.5';'2.0'};
+    ax.XTick = ind_keep(1):500:ind_keep(end);
+    str_label = [];
+    for i =1:length(ax.XTick)
+        str_label = [str_label;{ref_time(ax.XTick(i))}];
+    end
+    ax.XTickLabel = str_label;
     ax.XLim = [ind_keep(1),ind_keep(end)];
     ax.CLim = [-5;20];
      
@@ -531,28 +535,28 @@ for index = 1:length(S)
         linestyle = '-';
     end
     
-%     % all trials
-%     for j=1:size(S(index).Xdata,1)
-%         ref_time = S(index).Xdata(j,:);
-%         ydata = S(index).Ydata(j,:);
-%         ind_start = S(index).ind_start(j);
-%         ind_end = S(index).ind_end(j);
-%     
+    % all trials
+    for j=1:size(S(index).Xdata,1)
+        ref_time = S(index).Xdata(j,:);
+        ydata = S(index).Ydata(j,:);
+        ind_start = S(index).ind_start(j);
+        ind_end = S(index).ind_end(j);
+    
 %         %trial
 %         line('XData',ref_time,'YData',ydata,...
 %             'Color',f_colors(index,:),'LineWidth',.1,'Linestyle',linestyle,...
 %             'Marker','none','MarkerSize',1,'MarkerFaceColor','none',...
 %             'MarkerEdgeColor',f_colors(index,:),'Parent',ax)
-%         % ticks on graph
-%         val1 = .95;
-%         val2 = 1;
-%         line('XData',[ref_time(ind_start),ref_time(ind_start)],...
-%             'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
-%             'LineWidth',.1,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
-%         line('XData',[ref_time(ind_end),ref_time(ind_end)],...
-%             'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
-%             'LineWidth',.1,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);        
-%     end
+        % ticks on graph
+        val1 = .95;
+        val2 = 1;
+        line('XData',[ref_time(ind_start),ref_time(ind_start)],...
+            'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
+            'LineWidth',.1,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
+        line('XData',[ref_time(ind_end),ref_time(ind_end)],...
+            'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
+            'LineWidth',.1,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);        
+    end
     
     %average
     ref_time = mean(S(index).Xdata,'omitnan');
@@ -583,10 +587,11 @@ for index = 1:length(S)
     % axes limits
     frac = sum(~isnan(S(index).Xdata))/size(S(index).Xdata,1);
     ind_keep = find(frac>.5);
-    ax.XTick = ref_time(ind_keep(1):500:ind_keep(end));
-    ax.XTickLabel = {'.5';'1.0';'1.5';'2.0'};
+    %ax.XTick = ref_time(ind_keep(1):500:ind_keep(end));
+    %ax.XTickLabel = {'.5';'1.0';'1.5';'2.0'};
     ax.XLim = [ref_time(ind_keep(1)),ref_time(ind_keep(end))];
     ax.YLim = [-5;15];
+     
      
 end
 
