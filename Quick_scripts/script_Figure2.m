@@ -9,29 +9,29 @@ end
 
 timegroup = {'LEFT_RUNS';'RIGHT_RUNS'};
 
-[D,R,S,list_regions] = compute_script_Figure2(cur_list,char(timegroup(1)));
-plot1_Figure2(R,list_regions,cur_list,char(timegroup(1)),gather_regions);
-plot2_Figure2(S,list_regions,cur_list,char(timegroup(1)),gather_regions);
+[D,P,R,S,list_regions] = compute_script_Figure2(cur_list,char(timegroup(2)),gather_regions);
+plot1_Figure2(P,R,list_regions,cur_list,char(timegroup(2)),gather_regions);
+plot2_Figure2(P,S,list_regions,cur_list,char(timegroup(2)),gather_regions);
 
 end
 
-function [D,R,S,list_regions] = compute_script_Figure2(cur_list,timegroup)
+function [D,P,R,S,list_regions] = compute_script_Figure2(cur_list,timegroup,gather_regions)
 
-close all;
+%close all;
 global DIR_STATS;
 
 folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
 all_files = dir(fullfile(folder,'*_E'));
 index =0;
 
-% list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
-%     '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
-%     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
-%     '20150724_170457_E';'20150726_152241_E';'20150728_134238_E';'20151126_170516_E';...
-%     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
-%     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
-%     '20160629_191304_E'};
-list_coronal = {'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
+list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
+    '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
+    '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
+    '20150724_170457_E';'20150726_152241_E';'20150728_134238_E';'20151126_170516_E';...
+    '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
+    '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
+    '20160629_191304_E'};
+%list_coronal = {'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
@@ -177,38 +177,59 @@ for index = 1:length(D)
         end
     end
 end
+
+% Setting Parameters
+f = figure('Visible','off');
+colormap(f,'parula');
+P.Colormap = f.Colormap;
+P.f_colors = f.Colormap(round(1:64/length(R):64),:);
+close(f);
+
+P.margin_w=.01;
+P.margin_h=.02;
+if gather_regions
+    P.n_columns = 4;
+else
+    P.n_columns = 8;
+end
+P.n_rows = ceil(length(R)/P.n_columns);
+P.val1 = .9;
+P.val2 = 1;
+P.tick_width =.5;
+P.thresh_average = .5;
+P.all_markers = {'none';'none';'none'};
+P.all_linestyles = {'--';':';'_'};
+if gather_regions
+    P.patch_alpha = .1;
+else
+    P.patch_alpha = .3;
 end
 
-function plot1_Figure2(R,list_regions,cur_list,timegroup,gather_regions)
+end
+
+function plot1_Figure2(P,R,list_regions,cur_list,timegroup,gather_regions)
+
 % Drawing results
 f = figure;
-%f.Name = sprintf('Synthesis Hemodynamics Response per recording [%s | %s]',cur_list,timegroup);
 f.Name = sprintf('Fig2_SynthesisA_%s-%s',cur_list,timegroup);
 
-colormap(f,'parula');
+f.Colormap = P.Colormap;
+f_colors = P.f_colors;
+margin_w = P.margin_w;
+margin_h = P.margin_h;
+n_columns = P.n_columns;
+n_rows = P.n_rows;
+val1 = P.val1;
+val2 = P.val2;
+tick_width = P.tick_width;
+thresh_average = P.thresh_average;
+all_markers = P.all_markers;
+all_linestyles = P.all_linestyles;
+patch_alpha = P.patch_alpha;
 
-% colors
-f_colors = f.Colormap(round(1:64/length(R):64),:);
 
-% Sixth tab
-all_axes = [];
-margin_w=.01;
-margin_h=.02;
-if gather_regions
-    n_columns = 4;
-else
-    n_columns = 8;
-end
-n_rows = ceil(length(list_regions)/n_columns);
-val1 = .9;
-val2 = 1;
-tick_width =.5;
-thresh_average = .5;
-all_markers = {'none';'none';'none'};
-all_linestyles = {'--';'-.';'_'};
-patch_alpha = .1;
-        
 % Creating axes
+all_axes = [];
 for ii = 1:n_rows
     for jj = 1:n_columns
         index = (ii-1)*n_columns+jj;
@@ -326,36 +347,29 @@ fprintf('Figure Saved [%s].\n',fullname);
 
 end
 
-function plot2_Figure2(S,list_regions,cur_list,timegroup,gather_regions)
+function plot2_Figure2(P,S,list_regions,cur_list,timegroup,gather_regions)
 
 % Drawing results
 f = figure;
-%f.Name = sprintf('Synthesis Hemodynamics Response all_trials [%s | %s]',cur_list,timegroup);
 f.Name = sprintf('Fig2_SynthesisC_%s-%s',cur_list,timegroup);
-colormap(f,'parula');
-f_colors = f.Colormap(round(1:64/length(S):64),:);
 
-% Sixth tab
-all_axes = [];
-margin_w=.02;
-margin_h=.02;
-if gather_regions
-    n_columns = 4;
-else
-    n_columns = 8;
-end
-n_rows = ceil(length(list_regions)/n_columns);
-val1 = .9;
-val2 = 1;
-tick_width = .5;
-thresh_average = .5;
-all_markers = {'none';'none';'none'};
-all_linestyles = {'--';'-.';'_'};
-% all_markers = {'x';'o';'none'};
-% all_linestyles = {'none';'none';'_'};
-patch_alpha = .1;
+f.Colormap = P.Colormap;
+f_colors = P.f_colors;
+margin_w = P.margin_w;
+margin_h = P.margin_h;
+n_columns = P.n_columns;
+n_rows = P.n_rows;
+val1 = P.val1;
+val2 = P.val2;
+tick_width = P.tick_width;
+thresh_average = P.thresh_average;
+all_markers = P.all_markers;
+all_linestyles = P.all_linestyles;
+patch_alpha = P.patch_alpha;
+
 
 % Creating axes
+all_axes = [];
 for ii = 1:n_rows
     for jj = 1:n_columns
         index = (ii-1)*n_columns+jj;
