@@ -1,21 +1,20 @@
 % Article RUN
-% Figure 2
+% Figure 2A
+% Hemodynamic Response for a given time group
 
-function script_Figure2(cur_list,gather_regions)
+function script_Figure2A(cur_list,timegroup,gather_regions)
 
-if nargin <2
+if nargin <3
     gather_regions = false;
 end
 
-timegroup = {'LEFT_RUNS';'RIGHT_RUNS'};
-
-[D,P,R,S,list_regions] = compute_script_Figure2(cur_list,char(timegroup(2)),gather_regions);
-plot1_Figure2(P,R,list_regions,cur_list,char(timegroup(2)),gather_regions);
-plot2_Figure2(P,S,list_regions,cur_list,char(timegroup(2)),gather_regions);
+[D,P,R,S,list_regions] = browse_data(cur_list,timegroup,gather_regions);
+plot1(P,R,list_regions,cur_list,timegroup,gather_regions);
+plot2(P,S,list_regions,cur_list,timegroup,gather_regions);
 
 end
 
-function [D,P,R,S,list_regions] = compute_script_Figure2(cur_list,timegroup,gather_regions)
+function [D,P,R,S,list_regions] = browse_data(cur_list,timegroup,gather_regions)
 
 %close all;
 global DIR_STATS;
@@ -185,15 +184,15 @@ P.Colormap = f.Colormap;
 P.f_colors = f.Colormap(round(1:64/length(R):64),:);
 close(f);
 
-P.margin_w=.01;
-P.margin_h=.02;
+P.margin_w = .01;
+P.margin_h = .02;
 if gather_regions
     P.n_columns = 4;
 else
     P.n_columns = 8;
 end
 P.n_rows = ceil(length(R)/P.n_columns);
-P.val1 = .9;
+P.val1 = -1;
 P.val2 = 1;
 P.tick_width =.5;
 P.thresh_average = .5;
@@ -207,11 +206,11 @@ end
 
 end
 
-function plot1_Figure2(P,R,list_regions,cur_list,timegroup,gather_regions)
+function plot1(P,R,list_regions,cur_list,timegroup,gather_regions)
 
 % Drawing results
 f = figure;
-f.Name = sprintf('Fig2_SynthesisA_%s-%s',cur_list,timegroup);
+f.Name = sprintf('Fig2A_SynthesisA_%s-%s',cur_list,timegroup);
 
 f.Colormap = P.Colormap;
 f_colors = P.f_colors;
@@ -239,7 +238,7 @@ for ii = 1:n_rows
         x = mod(index-1,n_columns)/n_columns;
         y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
         ax = axes('Parent',f);
-        ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+        ax.Position= [x+2*margin_w y+margin_h (1/n_columns)-3*margin_w (1/n_rows)-3*margin_h];
         ax.XAxisLocation ='origin';
         ax.Title.String = sprintf('Ax-%02d',index);
         ax.Title.Visible = 'on';
@@ -264,7 +263,7 @@ if gather_regions
             x = mod(index-1,n_columns)/n_columns;
             y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
             ax = all_axes(index);
-            ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];       
+            ax.Position= [x+2*margin_w y+margin_h (1/n_columns)-3*margin_w (1/n_rows)-3*margin_h];       
         end
     end
     all_axes = all_axes(ic);
@@ -290,6 +289,7 @@ for index = 1:length(R)
     
     % Main line
     for j=1:size(R(index).ref_time,1)
+        N = size(R(index).ref_time,1);
         ref_time = R(index).ref_time(j,:);
         m = R(index).m(j,:);
         s = R(index).s(j,:);
@@ -300,8 +300,8 @@ for index = 1:length(R)
             'Color',f_colors(index,:),'LineWidth',1,'Linestyle',linestyle,...
             'Marker',marker','MarkerSize',1,'MarkerFaceColor',f_colors(index,:),...
             'MarkerEdgeColor',f_colors(index,:),'Parent',ax)
-        title(ax,labels_gathered(index));
-        grid(ax,'on');
+        title(ax,sprintf('%s [n=%d]',char(labels_gathered(index)),N));
+        %grid(ax,'on');
         
         %Patch
         p_xdat = [ref_time,fliplr(ref_time)];
@@ -327,13 +327,13 @@ for index = 1:length(R)
 
 end
 
-% Legend once all has been drawn
-all_axes_unique = unique(all_axes);
-for i = 1:length(all_axes_unique)
-    ax = all_axes_unique(i);
-    l = findobj(ax,'Type','line','-not','Tag','Ticks','-not','Tag','');
-    legend(ax,l,regexprep({l(:).Tag}','.mat',''));
-end
+% % Legend once all has been drawn
+% all_axes_unique = unique(all_axes);
+% for i = 1:length(all_axes_unique)
+%     ax = all_axes_unique(i);
+%     l = findobj(ax,'Type','line','-not','Tag','Ticks','-not','Tag','');
+%     legend(ax,l,regexprep({l(:).Tag}','.mat',''));
+% end
 
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
@@ -347,11 +347,11 @@ fprintf('Figure Saved [%s].\n',fullname);
 
 end
 
-function plot2_Figure2(P,S,list_regions,cur_list,timegroup,gather_regions)
+function plot2(P,S,list_regions,cur_list,timegroup,gather_regions)
 
 % Drawing results
 f = figure;
-f.Name = sprintf('Fig2_SynthesisC_%s-%s',cur_list,timegroup);
+f.Name = sprintf('Fig2A_SynthesisB_%s-%s',cur_list,timegroup);
 
 f.Colormap = P.Colormap;
 f_colors = P.f_colors;
@@ -379,7 +379,7 @@ for ii = 1:n_rows
         x = mod(index-1,n_columns)/n_columns;
         y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
         ax = axes('Parent',f);
-        ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+        ax.Position= [x+2*margin_w y+margin_h (1/n_columns)-3*margin_w (1/n_rows)-3*margin_h];
         ax.XAxisLocation ='origin';
         ax.Title.String = sprintf('Ax-%02d',index);
         ax.Title.Visible = 'on';
@@ -404,7 +404,7 @@ if gather_regions
             x = mod(index-1,n_columns)/n_columns;
             y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
             ax = all_axes(index);
-            ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];       
+            ax.Position= [x+2*margin_w y+margin_h (1/n_columns)-3*margin_w (1/n_rows)-3*margin_h];       
         end
     end
     all_axes = all_axes(ic);
@@ -454,6 +454,7 @@ for index = 1:length(S)
 %     end
     
     %average
+    N = size(S(index).Xdata,1);
     ref_time = mean(S(index).Xdata,'omitnan');
     m = mean(S(index).Ydata,'omitnan');
     s = std(S(index).Ydata,[],'omitnan');
@@ -465,8 +466,7 @@ for index = 1:length(S)
         'Color',f_colors(index,:),'LineWidth',1,'Linestyle',linestyle,...
         'Marker',marker','MarkerSize',3,'MarkerFaceColor','none',...
         'MarkerEdgeColor',f_colors(index,:),'Parent',ax)
-    title(ax,labels_gathered(index));
-    grid(ax,'on');
+    %grid(ax,'on');
     
     %Patch
     p_xdat = [ref_time,fliplr(ref_time)];
@@ -476,7 +476,7 @@ for index = 1:length(S)
         'FaceColor',f_colors(index,:),'FaceAlpha',patch_alpha,'EdgeColor','none',...
         'LineWidth',.25,'Parent',ax);
         
-    title(ax,labels_gathered(index));
+    title(ax,sprintf('%s [n=%d]',char(labels_gathered(index)),N));
     %grid(ax,'on');
     
     % axes limits
