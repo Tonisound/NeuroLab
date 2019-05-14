@@ -7,7 +7,9 @@ if nargin <2
     gather_regions = false;
 end
 
-timegroup = {'RUN';'LEFT_RUNS';'RIGHT_RUNS'};
+%timegroup = {'LEFT_RUNS';'RIGHT_RUNS'};
+timegroup = {'10_FIRST';'10_MID';'10_LAST'};
+
 
 [D,P,R,S] = browse_data(cur_list,timegroup,gather_regions);
 %plot1(P,R);
@@ -91,9 +93,9 @@ if strcmp(cur_list,'CORONAL')
     D = D(ind_keep,:);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
-        'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
-        'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
+    list_regions = {'AntCortex-L.mat';'AntCortex-R.mat';'AMidCortex-L.mat';'AMidCortex-R.mat';'PMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-L.mat';'PostCortex-R.mat';...
+        'DG-L.mat';'DG-R.mat';'CA3-L.mat';'CA3-R.mat';'CA1-L.mat';'CA1-R.mat';'dHpc-L.mat';'dHpc-R.mat';'vHpc-L.mat';'vHpc-R.mat';...
+        'dThal-L.mat';'dThal-R.mat';'vThal-L.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
         'HypothalRg-L.mat';'HypothalRg-R.mat'};
     ind_keep = strcmp({D(:,1).plane}',cur_list);
     D = D(ind_keep,:);
@@ -125,6 +127,10 @@ for index = 1:length(D)
         fullpath = fullfile(folder,cur_file,timegroup);
         rat_name = D(index,j).rat_name;
         rat_id = D(index,j).rat_id;
+        
+        if ~exist(fullfile(fullpath,'fUS_Data.mat'),'file')
+            continue;
+        end
         
         % Loading fUS_Data
         data_fus = load(fullfile(fullpath,'fUS_Data.mat'));
@@ -174,8 +180,9 @@ for index = 1:length(D)
                 R(i,j).str_popup = [R(i,j).str_popup;{data_ar.str_popup}];
                 
                 R(i,j).ref_time = [R(i,j).ref_time;[data_ar.ref_time,NaN(1,lmax-length(data_ar.ref_time))]];
-                R(i,j).m = [R(i,j).m;[data_ar.m(:,:,i),NaN(1,lmax-length(data_ar.ref_time))]];
-                R(i,j).s = [R(i,j).s;[data_ar.s(:,:,i),NaN(1,lmax-length(data_ar.ref_time))]];
+                R(i,j).m = [R(i,j).m;[data_ar.m(:,:,ind_keep),NaN(1,lmax-length(data_ar.ref_time))]];
+                R(i,j).s = [R(i,j).s;[data_ar.s(:,:,ind_keep),NaN(1,lmax-length(data_ar.ref_time))]];
+                
             end
         end
     end
@@ -227,6 +234,8 @@ gather_regions = P.gather_regions;
 % Drawing results
 f = figure;
 f.Name = sprintf('Fig2B_SynthesisA_%s',cur_list);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 
 f.Colormap = P.Colormap;
 %f_colors = P.f_colors;
@@ -331,7 +340,7 @@ for index = 1:length(R)
                 'FaceColor',g_colors(j,:),'FaceAlpha',patch_alpha,'EdgeColor','none',...
                 'LineWidth',.25,'Parent',ax);
             % ticks on graph
-            ax.YLim = [-5;20];
+            ax.YLim = [-2;15];
             line('XData',[ref_time(R(index,j).ind_start(k)),ref_time(R(index,j).ind_start(k))],...
                 'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
                 'LineWidth',tick_width,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
@@ -344,7 +353,7 @@ for index = 1:length(R)
     %ax.YLim = [min(R(index,j).m(:),[],'omitnan') max(R(index,j).m(:),[],'omitnan')];
     ind_keep = find(sum(~isnan(R(index,j).m),1)/size(R(index,j).m,1)>thresh_average);
     ax.XLim = [ref_time(ind_keep(1)), ref_time(ind_keep(end))];
-    %ax.YLim = [-5;20];
+    %ax.YLim = [-2;15];
     
     end
     
@@ -384,6 +393,8 @@ all_timegroups =regexprep(all_timegroups,'RUN','ALL');
 % Drawing results
 f = figure;
 f.Name = sprintf('Fig2B_SynthesisB_%s',cur_list);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 
 f.Colormap = P.Colormap;
 g_colors = P.g_colors;
@@ -518,7 +529,7 @@ for index = 1:length(S)
         % axes limits
         ind_keep = find(sum(~isnan(S(index,j).Ydata),1)/size(S(index,j).Ydata,1)> thresh_average);
         ax.XLim = [ref_time(ind_keep(1))-.5, ref_time(ind_keep(end))];
-        ax.YLim = [-5;20];
+        ax.YLim = [-2;15];
         %ax.XTick = ref_time(ind_keep(1):500:ind_keep(end));
         %ax.XTickLabel = {'.5';'1.0';'1.5';'2.0'};
         
@@ -551,6 +562,7 @@ global DIR_STATS;
 folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
 fullname = fullfile(folder,sprintf('%s%s',f.Name,'.pdf'));
 saveas(f,fullname);
+%plot2svg(strcat('D:\TRANSFER\Antoine\',f.Name,'.svg'),f);
 fprintf('Figure Saved [%s].\n',fullname);
 
 end

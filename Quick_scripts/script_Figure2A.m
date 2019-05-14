@@ -16,7 +16,7 @@ end
 
 function [D,P,R,S,list_regions] = browse_data(cur_list,timegroup,gather_regions)
 
-%close all;
+close all;
 global DIR_STATS;
 
 folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
@@ -92,9 +92,9 @@ if strcmp(cur_list,'CORONAL')
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
-        'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
-        'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
+    list_regions = {'AntCortex-L.mat';'AntCortex-R.mat';'AMidCortex-L.mat';'AMidCortex-R.mat';'PMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-L.mat';'PostCortex-R.mat';...
+        'DG-L.mat';'DG-R.mat';'CA3-L.mat';'CA3-R.mat';'CA1-L.mat';'CA1-R.mat';'dHpc-L.mat';'dHpc-R.mat';'vHpc-L.mat';'vHpc-R.mat';...
+        'dThal-L.mat';'dThal-R.mat';'vThal-L.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
         'HypothalRg-L.mat';'HypothalRg-R.mat'};
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
@@ -171,8 +171,8 @@ for index = 1:length(D)
             R(i).str_popup = [R(i).str_popup;{data_ar.str_popup}];
             
             R(i).ref_time = [R(i).ref_time;[data_ar.ref_time,NaN(1,lmax-length(data_ar.ref_time))]];
-            R(i).m = [R(i).m;[data_ar.m(:,:,i),NaN(1,lmax-length(data_ar.ref_time))]];
-            R(i).s = [R(i).s;[data_ar.s(:,:,i),NaN(1,lmax-length(data_ar.ref_time))]];
+            R(i).m = [R(i).m;[data_ar.m(:,:,ind_keep),NaN(1,lmax-length(data_ar.ref_time))]];
+            R(i).s = [R(i).s;[data_ar.s(:,:,ind_keep),NaN(1,lmax-length(data_ar.ref_time))]];
         end
     end
 end
@@ -211,6 +211,8 @@ function plot1(P,R,list_regions,cur_list,timegroup,gather_regions)
 % Drawing results
 f = figure;
 f.Name = sprintf('Fig2A_SynthesisA_%s-%s',cur_list,timegroup);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 
 f.Colormap = P.Colormap;
 f_colors = P.f_colors;
@@ -301,7 +303,7 @@ for index = 1:length(R)
             'Marker',marker','MarkerSize',1,'MarkerFaceColor',f_colors(index,:),...
             'MarkerEdgeColor',f_colors(index,:),'Parent',ax)
         title(ax,sprintf('%s [n=%d]',char(labels_gathered(index)),N));
-        %grid(ax,'on');
+        grid(ax,'on');
         
         %Patch
         p_xdat = [ref_time,fliplr(ref_time)];
@@ -310,7 +312,7 @@ for index = 1:length(R)
             'FaceColor',f_colors(index,:),'FaceAlpha',patch_alpha,'EdgeColor','none',...
             'LineWidth',.25,'Parent',ax);
         % ticks on graph
-        ax.YLim = [-5;20];
+        ax.YLim = [-2;15];
         line('XData',[ref_time(R(index).ind_start(j)),ref_time(R(index).ind_start(j))],...
             'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
             'LineWidth',tick_width,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
@@ -318,12 +320,14 @@ for index = 1:length(R)
             'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
             'LineWidth',tick_width,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
     end
-    
     % axes limits
     %ax.YLim = [min(R(index).m(:),[],'omitnan') max(R(index).m(:),[],'omitnan')];
     ind_keep = find(sum(~isnan(R(index).m),1)/size(R(index).m,1)>thresh_average);
-    ax.XLim = [ref_time(ind_keep(1)), ref_time(ind_keep(end))];
-    %ax.YLim = [-5;20];
+    try
+        ax.XLim = [ref_time(ind_keep(1)), ref_time(ind_keep(end))];
+    catch
+        ax.XLim = [0;5];
+    end
 
 end
 
@@ -352,6 +356,8 @@ function plot2(P,S,list_regions,cur_list,timegroup,gather_regions)
 % Drawing results
 f = figure;
 f.Name = sprintf('Fig2A_SynthesisB_%s-%s',cur_list,timegroup);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 
 f.Colormap = P.Colormap;
 f_colors = P.f_colors;
@@ -466,7 +472,7 @@ for index = 1:length(S)
         'Color',f_colors(index,:),'LineWidth',1,'Linestyle',linestyle,...
         'Marker',marker','MarkerSize',3,'MarkerFaceColor','none',...
         'MarkerEdgeColor',f_colors(index,:),'Parent',ax)
-    %grid(ax,'on');
+    grid(ax,'on');
     
     %Patch
     p_xdat = [ref_time,fliplr(ref_time)];
@@ -477,12 +483,12 @@ for index = 1:length(S)
         'LineWidth',.25,'Parent',ax);
         
     title(ax,sprintf('%s [n=%d]',char(labels_gathered(index)),N));
-    %grid(ax,'on');
+    grid(ax,'on');
     
     % axes limits
     ind_keep = find(sum(~isnan(S(index).Ydata),1)/size(S(index).Ydata,1)> thresh_average);
     ax.XLim = [ref_time(ind_keep(1))-.5, ref_time(ind_keep(end))];
-    ax.YLim = [-5;20];
+    ax.YLim = [-2;15];
     %ax.XTick = ref_time(ind_keep(1):500:ind_keep(end));
     %ax.XTickLabel = {'.5';'1.0';'1.5';'2.0'};
     

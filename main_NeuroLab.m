@@ -12,13 +12,11 @@ d = dir('NeuroLab*');
 for i = 1:length(d)
     addpath(genpath(char(d(i).name)));
 end
-d = dir('NPMK*');
+d = dir('packages*');
 for i = 1:length(d)
     addpath(genpath(char(d(i).name)));
 end
 addpath(genpath('Quick_scripts'));
-addpath('IQ_Loading');
-addpath('FastICA_25');
 
 
 % Initializing Preferences.mat if Preferences file is missing

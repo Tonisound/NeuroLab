@@ -6,8 +6,8 @@
 function script_Figure1B(myhandles)
 
 % paper mode
-matlab.graphics.internal.setPrintPreferences('DefaultPaperPositionMode','manual');
-set(groot,'defaultFigurePaperPositionMode','manual');
+% matlab.graphics.internal.setPrintPreferences('DefaultPaperPositionMode','manual');
+% set(groot,'defaultFigurePaperPositionMode','manual');
 
 %baseline
 global DIR_SAVE FILES CUR_FILE IM;
