@@ -686,8 +686,8 @@ function compute_Callback(hObj,~,handles)
 % Compute Correlation Map
 % Compute Correlogram
 
-global START_IM END_IM IM DIR_SAVE FILES CUR_FILE;
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+global START_IM END_IM IM DIR_SAVE FILES CUR_FILE LAST_IM;
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch')
@@ -778,26 +778,58 @@ handles.Cmin_0.String = sprintf('%.1f',handles.CenterAxes.CLim(1));
 handles.Cmax_0.String = sprintf('%.1f',handles.CenterAxes.CLim(2));
 
 % Reshaping xdat 
-xdat = reshape(xdata,[length_burst+1,n_burst]);
-xdat = reshape(xdat(1:end-1,:),[length_burst*n_burst,1]);
-xdat(Time_indices==0) = NaN;
-% Adding NaN Values between each burst
-Xdat = [reshape(xdat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
-Xdat = Xdat(:);
-data = Xdat;
-for k=1:length(h_other)
-    color = h_other(k).Color;
-    ydata = h_other(k).YData;
-    % Reshaping ydat 
-    ydat = reshape(ydata,[length_burst+1,n_burst]);
-    ydat = reshape(ydat(1:end-1,:),[length_burst*n_burst,1]);
-    ydat(Time_indices==0) = NaN;
+
+
+
+if strcmp(rec_mode,'BURST')
+    % new code
+    % add NaN values between bursts
+    length_burst = 59;
+    n_burst = LAST_IM/length_burst;
+    xdat = reshape(xdata(1:end-1),[length_burst,n_burst]);
+    xdat = reshape(xdat,[length_burst*n_burst,1]);
+    xdat(Time_indices==0) = NaN;
     % Adding NaN Values between each burst
-    Ydat = [reshape(ydat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
-    Ydat = Ydat(:);
-    data = [data,Ydat];
+    Xdat = [reshape(xdat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
+    Xdat = Xdat(:);
+    data = Xdat;
+    for k=1:length(h_other)
+        color = h_other(k).Color;
+        ydata = h_other(k).YData;
+        % Reshaping ydat
+        ydat = reshape(ydata(1:end-1),[length_burst,n_burst]);
+        ydat = reshape(ydat,[length_burst*n_burst,1]);
+        ydat(Time_indices==0) = NaN;
+        % Adding NaN Values between each burst
+        Ydat = [reshape(ydat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
+        Ydat = Ydat(:);
+        data = [data,Ydat];
+    end
+    handles.Slider.UserData.data = data;
+else
+    % old code
+    xdat = reshape(xdata,[length_burst+1,n_burst]);
+    xdat = reshape(xdat(1:end-1,:),[length_burst*n_burst,1]);
+    xdat(Time_indices==0) = NaN;
+    % Adding NaN Values between each burst
+    Xdat = [reshape(xdat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
+    Xdat = Xdat(:);
+    data = Xdat;
+    for k=1:length(h_other)
+        color = h_other(k).Color;
+        ydata = h_other(k).YData;
+        % Reshaping ydat
+        ydat = reshape(ydata,[length_burst+1,n_burst]);
+        ydat = reshape(ydat(1:end-1,:),[length_burst*n_burst,1]);
+        ydat(Time_indices==0) = NaN;
+        % Adding NaN Values between each burst
+        Ydat = [reshape(ydat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
+        Ydat = Ydat(:);
+        data = [data,Ydat];
+    end
+    handles.Slider.UserData.data = data;
 end
-handles.Slider.UserData.data = data;
+
 
 % Correlogramm
 str_labels = cell(1,size(data,2));
