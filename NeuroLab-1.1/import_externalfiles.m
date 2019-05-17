@@ -149,18 +149,26 @@ for i=1:length(ind_traces)
     t = strrep(t,'LFP_0_Theta_power','Theta');
     t = regexprep(t,'_','-');
     
+    %Adding burst
+    Xtemp = traces(ind_traces(i)).X_ind;
+    %Xtemp = [reshape(Xtemp,[data_t.length_burst,data_t.n_burst]);NaN(1,data_t.n_burst)];
+    Ytemp = traces(ind_traces(i)).Y_im;
+    %Ytemp = [reshape(Ytemp,[data_t.length_burst,data_t.n_burst]);NaN(1,data_t.n_burst)];
+    
     if sum(strcmp(t,lines_name))>0
         %line already exists overwrite
         ind_overwrite = find(strcmp(t,lines_name)==1);
         lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
-        lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
+        lines(ind_overwrite).XData = Xtemp;
+        lines(ind_overwrite).YData = Ytemp;
         fprintf('External Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
     else
         %line creation
         %str = lower(char(traces(ind_traces(i)).fullname));
         color = rand(1,3);
-        hl = line('XData',traces(ind_traces(i)).X_ind,...
-            'YData',traces(ind_traces(i)).Y_im,...
+        
+        hl = line('XData',Xtemp,...
+            'YData',Ytemp,...
             'Color',color,...
             'Tag','Trace_Cerep',...
             'Visible','off',...

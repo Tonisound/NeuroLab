@@ -226,12 +226,18 @@ for i=1:length(ind_traces)
      
     % finding trace name
     t = traces(ind_traces(i)).fullname;
+    %Adding burst
+    Xtemp = traces(ind_traces(i)).X_ind;
+    %Xtemp = [reshape(Xtemp,[data_t.length_burst,data_t.n_burst]);NaN(1,data_t.n_burst)];
+    Ytemp = traces(ind_traces(i)).Y_im;
+    %Ytemp = [reshape(Ytemp,[data_t.length_burst,data_t.n_burst]);NaN(1,data_t.n_burst)];
     
     if sum(strcmp(t,lines_name))>0
         %line already exists overwrite
         ind_overwrite = find(strcmp(t,lines_name)==1);
         lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
-        lines(ind_overwrite).YData = traces(ind_traces(i)).Y_im;
+        lines(ind_overwrite).XData = Xtemp;
+        lines(ind_overwrite).YData = Ytemp;
         fprintf('LFP Trace successfully updated (%s) ',traces(ind_traces(i)).fullname);
         save_name = strrep(t,'/','_');
     else
@@ -250,9 +256,10 @@ for i=1:length(ind_traces)
         else
             color = rand(1,3);
         end
+        
         % Line creation
-        hl = line('XData',traces(ind_traces(i)).X_ind,...
-            'YData',traces(ind_traces(i)).Y_im,...
+        hl = line('XData',Xtemp,...
+            'YData',Ytemp,...
             'Color',color,...
             'Tag','Trace_Cerep',...
             'Visible','off',...

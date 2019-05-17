@@ -28,6 +28,7 @@ f2 = figure('Units','characters',...
     'Name','Pixel Correlation');
 clrmenu(f2);
 colormap('jet');
+ax_dummy = axes('Parent',f2,'Tag','Dummy','Visible','off');
 
 % Information Panel
 iP = uipanel('Units','normalized',...
@@ -190,20 +191,20 @@ tab1 = uitab('Parent',tabgp,...
     'Tag','MainTab');
 tab2 = uitab('Parent',tabgp,...
     'Units','normalized',...
-    'Title','Propagation',...
+    'Title','RT Pattern',...
     'Tag','SecondTab');
 tab3 = uitab('Parent',tabgp,...
     'Units','normalized',...
-    'Title','Functional Connectivity',...
+    'Title','Propagation',...
     'Tag','ThirdTab');
 tab4 = uitab('Parent',tabgp,...
     'Units','normalized',...
-    'Title','Traces & Tags',...
+    'Title','Connectivity',...
     'Tag','FourthTab');
-% tab5 = uitab('Parent',tabgp,...
-%     'Units','normalized',...
-%     'Title','Dynamics',...
-%     'Tag','FifthTab');
+tab5 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Traces & Tags',...
+    'Tag','FifthTab');
 
 % Copying objects
 % Center Panel Copy
@@ -351,13 +352,13 @@ c4.Position = [.95 .15 .02 .7];
 e3.Position = [19/20     .01      w_button   2*w_button];
 e4.Position = [19/20     .9      w_button   2*w_button];
 
-% Third Tab
+% Fourth Tab
 % Auxilliary Panel 3
 aP3 = uipanel('Units','normalized',...
     'bordertype','etchedin',...
     'Position',[0 0 1 1],...
     'Tag','AuxPanel3',...
-    'Parent',tab3);
+    'Parent',tab4);
 ax5 = subplot(1,1,1,'Parent',aP3,'Tag','Ax5','NextPlot','replacechildren');
 colormap(ax5,'jet');
 ax5.YDir = 'reverse';
@@ -396,14 +397,16 @@ c5.Position = [.95 .15 .02 .7];
 e1.Position = [19/20     .01      w_button   2*w_button];
 e2.Position = [19/20     .9      w_button   2*w_button];
 
-% Fourth Tab
+% Fifth Tab
 % Lines Array
 m = findobj(myhandles.RightAxes,'Tag','Trace_Mean');
 l = flipud(findobj(myhandles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
 t = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
 
-lines_1 = [m;l];
-lines_2 = t;
+% lines_1 = [m;l];
+% lines_2 = t;
+lines_1 = copyobj([m;l],ax_dummy);
+lines_2 = copyobj(t,ax_dummy);
 
 % Adding NaN values 
 for i = 1:length(lines_2)
@@ -419,7 +422,7 @@ p1.UserData.lines = lines;
 
 
 %Regions Panel
-rPanel = uipanel('Parent',tab4,...
+rPanel = uipanel('Parent',tab5,...
     'Units','normalized',...
     'Position',[0 0 .25 1],...
     'Title','Regions',...
@@ -445,7 +448,7 @@ rt.UserData.Selection = strcmp(D(:,2),'Trace_Region');
 %rt.UserData.Selection = (1:size(D,1))';
 
 %Trace Panel
-tPanel = uipanel('Parent',tab4,...
+tPanel = uipanel('Parent',tab5,...
     'Units','normalized',...
     'Position',[.25 0 .25 1],...
     'Title','Traces',...
@@ -481,7 +484,7 @@ taPanel = uipanel('FontSize',10,...
     'Position',[.5 0 .25 1],...
     'Title','Time Tags',...
     'Tag','Tag_Panel',...
-    'Parent',tab4);
+    'Parent',tab5);
 % UiTable
 t = uitable('Units','normalized',...
     'ColumnName','',...
@@ -508,7 +511,7 @@ ePanel = uipanel('FontSize',10,...
     'Position',[.75 0 .25 1],...
     'Title','Episodes',...
     'Tag','Episode_Panel',...
-    'Parent',tab4);
+    'Parent',tab5);
 % UiTable
 et = uitable('Units','normalized',...
     'ColumnName','',...
@@ -561,7 +564,7 @@ reset_Callback([],[],handles2);
 handles2.MainFigure.Position = [30 10 150 60];
 im = findobj(handles2.CenterAxes,'Tag','MainImage');
 set(im,'CData',zeros(size(im)));
-tabgp.SelectedTab = tab4;
+tabgp.SelectedTab = tab5;
 
 % If nargin > 3 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
@@ -950,6 +953,63 @@ handles.Cmax_4.String = sprintf('%.1f',handles.Ax4.CLim(2));
 handles.Cmin_4.String = sprintf('%.1f',handles.Ax4.CLim(1));
 %box(handles.Ax4,'on');
 
+%Third Tab
+margin_w = .01;
+margin_h = .02;
+n_columns = 6;
+n_rows = ceil(length(lags)/n_columns);
+
+% Creating axes
+delete(handles.ThirdTab.Children);
+all_axes = [];
+str_labels0 = str_labels(2:end);
+A0 = A(2:end,:);
+
+for ii = 1:n_rows
+    for jj = 1:n_columns
+        index = (ii-1)*n_columns+jj;
+        if index>length(lags)
+            continue;
+        end
+        x = mod(index-1,n_columns)/n_columns;
+        y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+        ax = axes('Parent',handles.ThirdTab);
+        ax.Position= [x+2*margin_w y+margin_h (1/n_columns)-3*margin_w (1/n_rows)-3*margin_h];
+        ax.YDir ='reverse';
+        ax.Title.String = sprintf('t = %.2f s',step*lags(index));
+        ax.Visible = 'on';
+        all_axes = [all_axes;ax];
+        colormap(ax,'jet');
+        hold(ax,'on');
+    end
+end
+%all_axes = flipud(all_axes);
+
+% plot regions
+for i =1:length(all_axes)
+    ax  = all_axes(i);
+    for j=1:length(lines_1)
+        l = lines_1(j);
+        region = l.UserData.Name;
+        ind_keep = find(strcmp(str_labels0,region)==1);
+        
+        if ~strcmp(l.Tag,'Trace_Region')
+            continue;
+        end
+        % Patch
+%         p = copyobj(l.UserData.Graphic,ax);
+%         p.Visible = 'on';
+%         p.FaceAlpha = abs(A0(ind_keep,i));
+%         p.EdgeColor = 'none';
+%         p.FaceColor ='r';
+        % mask
+        mask  = l.UserData.Mask;
+        im = imagesc(255*mask,'Parent',ax);
+        im.AlphaData = mask*abs(A0(ind_keep,i));
+
+    end
+end
+
 % Update Text and Strings
 handles.Text3.String = sprintf('START_IM = %d (%s)',START_IM,handles.TimeDisplay.UserData(START_IM,:));
 handles.Text4.String = sprintf('END_IM = %d (%s)',END_IM,handles.TimeDisplay.UserData(END_IM,:));
@@ -1135,12 +1195,12 @@ pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
-handles.TabGroup.SelectedTab = handles.ThirdTab;
+handles.TabGroup.SelectedTab = handles.FourthTab;
 pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
-% handles.TabGroup.SelectedTab = handles.FourthTab;
+% handles.TabGroup.SelectedTab = handles.FifthTab;
 % pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 % saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 % fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));

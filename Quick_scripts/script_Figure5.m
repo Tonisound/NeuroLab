@@ -26,13 +26,13 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
-%list_coronal = {'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
+%list_coronal = {'20150224_175307_E';'20150225_154031_E';'20150226_173600_E';'20150716_130039_E';'20160622_191334_E'};
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
-    '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
-    '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
-    '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
-    '20160630_114317_E';'20160701_130444_E'};
+    '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E'};%;...
+%     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
+%     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
+%     '20160630_114317_E';'20160701_130444_E'};
 
 % list of references to search (in order)
 %list_ref = {'SPEED';'ACCEL'};
@@ -189,6 +189,9 @@ margin_w=.02;
 margin_h=.02;
 n_columns = 4;
 n_rows = ceil(length(list_regions)/n_columns);
+all_P = [];
+all_E = [];
+    
 % Creating axes
 for ii = 1:n_rows
     for jj = 1:n_columns
@@ -224,7 +227,7 @@ if gather_regions
             x = mod(index-1,n_columns)/n_columns;
             y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
             ax = all_axes(index);
-            ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];       
+            ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
         end
     end
     all_axes = all_axes(ic);
@@ -236,11 +239,11 @@ labels_gathered=regexprep(labels_gathered,'.mat','');
 % Plotting
 for index = 1:length(S)
     
-    if isempty(S(index).region)
+   if isempty(S(index).region)
         continue
-    end
-    
-    ax = all_axes(index);
+   end
+   
+   ax = all_axes(index);
     if contains(S(index).region,'-L')
         marker = 'none';
         linestyle = '-';%'--';
@@ -268,40 +271,153 @@ for index = 1:length(S)
     Ydata = S(index).Ydata;
     ind_start = S(index).ind_start;
     ind_end = S(index).ind_end;
-    m1 = mean(Ydata,2,'omitnan');
-    m_binned = m1'*T;
+    %m1 = mean(Ydata,2,'omitnan');
+    %m_binned = m1'*T;
     
     m2 = NaN(size(ind_end));
-    lag=100;
+    s2 = NaN(size(ind_end));
+    lag = 100;
+    % Reference time
     ind_ref = ind_end;
     for j=1:size(Ydata,1)
         m2(j) = mean(Ydata(j,ind_start(j)-lag:ind_ref(j)+lag),'omitnan');
+        s2(j) = std(Ydata(j,ind_start(j)-lag:ind_ref(j)+lag),[],'omitnan');
     end
+    %sem2 = s2/sqrt(1);
     m2(isnan(m2))=0;
     m_binned = m2'*T;
     str_fig = 'FullRun';
     
-    b = bar(m_binned,'FaceColor',f_colors(index,:),...
+    % Alternative
+    index_binned_NaN = index_binned;
+    index_binned_NaN(index_binned_NaN==0)=NaN;
+    M2 = index_binned_NaN.*(repmat(m2,[1,size(T,2)]));
+    M_binned = mean(M2,'omitnan');
+    S_binned = std(M2,[],'omitnan');
+    div = sum(~isnan(M2));
+    div(div==0)=1;
+    SEM_binned = S_binned./div;
+    
+    b = bar(M_binned,'FaceColor',f_colors(index,:),...
         'EdgeColor','none','Parent',ax);
     title(ax,labels_gathered(index));
-%     errorbar(bar_data,ebar_data,...
-%         'Color','k',...
-%         'Parent',ax2,...
-%         'LineStyle','none',...
-%         'MarkerSize',3,...
-%         'LineWidth',.5);
+    hold(ax,'on');
+    e = errorbar(M_binned,SEM_binned,'k',...
+        'linewidth',.5,'linestyle','none',...
+        'Parent',ax,'Tag','ErrorBar');
+    e.CapSize = 2;
+%     % Removing bar edges
+%     for i =1:length(b)
+%         b(i).EdgeColor='k';
+%         b(i).LineWidth= .1;
+%     end
     
     % axes limits
     ax.FontSize = 8;
     ax.XTick = 0:10:60;
     ax.XTickLabel = {'0';'10';'20';'30';'40';'50';'60'};
-    ax.XLim = [.5 30.5];
-    ax.YLim = [-5 20];
+    ax.XLim = [.5 30+.5];
+    ax.YLim = [-2 15];
+	 ax.TickLength = [0 0];
+    
+    % Linear Fit
+    x = b.XData(~isnan(b.YData));
+    y = b.YData(~isnan(b.YData));
+    y = y(x<ax.XLim(2));
+    x = x(x<ax.XLim(2));
+    n = 1;
+    P = polyfit(x,y,n);
+    all_P = [all_P;P];
+    switch n
+        case 1
+            l = line('XData',x,'YData',P(end)+P(end-1)*x,'Color','r',...%f_colors(index,:),...
+                'Linewidth',.75,'Linestyle','-','Parent',ax);
+        case 2
+            l = line('XData',x,'YData',P(end)+P(end-1)*x+P(end-2)*x.^2,'Color','r',...%f_colors(index,:),...
+                'Linewidth',.75,'Linestyle','-','Parent',ax);
+    end
+    
+    % quadratic Error
+    t = min(length(x),ax.XLim(2));
+    E = mean((l.YData(1:t)-b.YData(1:t)).^2,'omitnan');
+    all_E = [all_E;E];
+    text(.7*ax.XLim(2),.9*ax.YLim(2),sprintf('err = %.1f',E),...
+        'FontSize',9,'Parent',ax,'Color','r');
+    text(.7*ax.XLim(2),.8*ax.YLim(2),sprintf('b = %.2f',10*P(end-1)),...
+        'FontSize',9,'Parent',ax,'Color','r');
 end
 
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
 fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s',f.Name,'.pdf')));
+
+% % 2nd figure
+% figure();
+% ax1 = subplot(311);
+% bdat = all_P(:,1);
+% b = bar(1:length(bdat),diag(bdat),'stacked','Parent',ax1);
+% for k=1:length(bdat)
+%     %b(k).FaceColor = char(GDisp.colors(k));
+%     b(k).FaceColor = f_colors(k,:);
+% end
+% ax1.XTick = 1:length(bdat);
+% ax1.XTickLabel = labels_gathered;
+% ax1.XTickLabelRotation = 45;
+% ax1.TickLength=[0 0];
+% ax1.XLim = [.5 length(bdat)+.5];
+% ax1.YLim = [min(bdat)-.1 max(bdat)+.1];
+% 
+% ax2 = subplot(312);
+% bdat = all_P(:,2);
+% b = bar(1:length(bdat),diag(bdat),'stacked','Parent',ax2);
+% for k=1:length(bdat)
+%     %b(k).FaceColor = char(GDisp.colors(k));
+%     b(k).FaceColor = f_colors(k,:);
+% end
+% ax2.XTick = 1:length(bdat);
+% ax2.XTickLabel = labels_gathered;
+% ax2.XTickLabelRotation = 45;
+% ax2.TickLength=[0 0];
+% ax2.XLim = [.5 length(bdat)+.5];
+% ax2.YLim = [min(bdat)-.1 max(bdat)+.1];
+% 
+% ax3 = subplot(313);
+% bdat = all_E(:,1);
+% b = bar(1:length(bdat),diag(bdat),'stacked','Parent',ax3);
+% for k=1:length(bdat)
+%     %b(k).FaceColor = char(GDisp.colors(k));
+%     b(k).FaceColor = f_colors(k,:);
+% end
+% ax3.XTick = 1:length(bdat);
+% ax3.XTickLabel = labels_gathered;
+% ax3.XTickLabelRotation = 45;
+% ax3.TickLength=[0 0];
+% ax3.XLim = [.5 length(bdat)+.5];
+% ax3.YLim = [min(bdat)-.1 max(bdat)+.1];
+
+% 3rd figure
+f = figure();
+ax1 = axes('parent',f);
+m_size = all_E/max(all_E);
+line('XData',[0 0],'YData',[-10 10],'Parent',ax1,...
+    'linewidth',.5,'Color','k');
+line('YData',[0 0],'XData',[-10 10],'Parent',ax1,...
+    'linewidth',.5,'Color','k');
+for k=1:size(all_P,1)
+    l = line('XData',all_P(k,1),'YData',all_P(k,2),'Parent',ax1,...
+        'MarkerFaceColor',[.5 .5 .5],'Marker','o','MarkerSize',10*(1+m_size(k)),...
+        'MarkerEdgeColor','none');
+    l = line('XData',all_P(k,1),'YData',all_P(k,2),'Parent',ax1,...
+        'MarkerFaceColor',f_colors(k,:),'Marker','o','MarkerSize',10,...
+        'MarkerEdgeColor','none');
+    text(all_P(k,1)+.01,all_P(k,2),sprintf('%s',char(labels_gathered(k))),...
+        'FontSize',9,'Parent',ax1,'Color','k');
+end
+ax1.Title.String = cur_list;
+ax1.XLabel.String = 'Potentiation Strength';
+ax1.YLabel.String = 'Potentiation Offset';
+ax1.XLim = [min(all_P(:,1))-.01 max(all_P(:,1))+.01];
+ax1.YLim = [min(all_P(:,2))-.5 max(all_P(:,2))+.5];
 
 end
