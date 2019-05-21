@@ -19,7 +19,7 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
-    '20160630_114317_E';'20160701_130444_E'};
+    '20160630_114317_E';};%'20160701_130444_E'};
 
 % list of references to search (in order)
 list_ref = {'SPEED';'ACCEL'};
@@ -117,7 +117,11 @@ end
 % Buidling struct S
 rmax_regions = NaN(length(D),length(list_regions)); 
 tmax_regions = NaN(length(D),length(list_regions));
-S = struct('labels','','ref_name','','lags','','step','','RT_pattern','','Rmax_map','','Tmax_map','','background','');
+rmax_regions_resamp = NaN(length(D),length(list_regions)); 
+tmax_regions_resamp = NaN(length(D),length(list_regions));
+S = struct('labels','','ref_name','','lags','','step','',...
+    'RT_pattern','','Rmax_map','','Tmax_map','','background','',...
+    'RT_pattern_resamp','','lags_resampled','');
     
 for index = 1:length(D)
     
@@ -125,17 +129,6 @@ for index = 1:length(D)
     reference = D(index).reference;
     timegroup = D(index).timegroup;
     fulpath = fullfile(folder,cur_file,reference,timegroup,'Regions');
-    
-    % Loading rmax, tmax
-    for i=1:length(list_regions)
-        region_name = char(list_regions(i));
-        ddd = dir(fullfile(folder,cur_file,reference,timegroup,'Regions',region_name));
-        if ~isempty(ddd)
-            data_r = load(fullfile(folder,cur_file,reference,timegroup,'Regions',region_name),'tmax','rmax');
-            rmax_regions(index,i) = data_r.rmax;
-            tmax_regions(index,i) = data_r.tmax;
-        end
-    end
     
     % Loading UF
     data_uf = load(fullfile(folder,cur_file,reference,timegroup,'UF.mat'),'UF');
@@ -148,6 +141,42 @@ for index = 1:length(D)
     S(index).RT_pattern = data_c.RT_pattern;
     S(index).Rmax_map = data_c.Rmax_map;
     S(index).Tmax_map = data_c.Tmax_map;
+    
+    % Loading rmax, tmax
+    for i=1:length(list_regions)
+        region_name = char(list_regions(i));
+        ddd = dir(fullfile(folder,cur_file,reference,timegroup,'Regions',region_name));
+        if ~isempty(ddd)
+            data_r = load(fullfile(folder,cur_file,reference,timegroup,'Regions',region_name),'tmax','rmax');
+            rmax_regions(index,i) = data_r.rmax;
+            tmax_regions(index,i) = data_r.tmax;
+        end
+    end
+
+    % Computing rmax, tmax
+    RT_pattern = S(index).RT_pattern;
+    labels = S(index).labels ;
+    lags_s = S(index).lags*S(index).step;
+    resamp_step = 0.01;
+    lags_resampled = lags_s(1):resamp_step:lags_s(end);
+    RT_pattern_resamp = interp2(lags_s,(1:size(RT_pattern,1))',RT_pattern,lags_resampled,(1:size(RT_pattern,1))');
+    [RT_pattern_rmax,RT_pattern_imax] = max(RT_pattern_resamp,[],2);
+    RT_pattern_tmax = [];
+    for k=1:length(RT_pattern_imax)
+        RT_pattern_tmax = [RT_pattern_tmax;lags_resampled(RT_pattern_imax(k))];
+    end    
+    S(index).RT_pattern_resamp = RT_pattern_resamp;
+    S(index).lags_resampled = lags_resampled;
+    
+    % Loading rmax_resamp, tmax_resamp
+    for i=1:length(list_regions)
+        region_name = strrep(char(list_regions(i)),'.mat','');
+        ind_keep = find(strcmp(labels,region_name)==1);
+        if ~isempty(ind_keep)
+            rmax_regions_resamp(index,i) = RT_pattern_rmax(ind_keep(1));
+            tmax_regions_resamp(index,i) = RT_pattern_tmax(ind_keep(1));
+        end
+    end
     
     % Loading background image
     folder_im = 'I:\NEUROLAB\NLab_DATA';
@@ -362,7 +391,13 @@ end
 %plotting
 for k =1:length(S)
     ax = all_axes(k);
-    imagesc('XData',S(k).lags*S(k).step,'YData',1:length(S(k).labels),'CData',S(k).RT_pattern,'Parent',ax);
+    colormap(ax,'parula');
+    RT_pattern = S(k).RT_pattern_resamp;
+    lags = S(k).lags_resampled;
+    % RT_pattern = S(k).RT_pattern;
+    % lags = S(k).lags*S(k).step; 
+    
+    imagesc('XData',lags,'YData',1:length(S(k).labels),'CData',RT_pattern,'Parent',ax);
     ax.Title.String = strrep(D(k).file,'_','-');
     %ax.Visible = 'off';
     ax.Title.Visible ='on';
@@ -373,6 +408,19 @@ for k =1:length(S)
     ax.XTickLabel = round(S(k).lags(1:5:end)*S(k).step);
     ax.FontSize = 5;
     ax.Title.FontSize = 10;
+    
+    % ticks
+    [~,imax] = max(RT_pattern,[],2,'omitnan');
+    ydat = [];
+    for kk=1:size(RT_pattern,1)
+        ydat = [ydat;lags(imax(kk))];
+    end  
+%     line('YData',1:length(S(k).labels),'XData',ydat,'Parent',ax,...
+%         'LineStyle','none','MarkerSize',3,'Marker','o',...
+%         'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+    line('YData',1:length(S(k).labels),'XData',ydat,'Parent',ax,...
+        'LineStyle','--','MarkerSize',3,'Marker','none',...
+        'Color',[.5 .5 .5],'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
     
     ax.YLim = [.5,length(S(k).labels)+.5];
     ax.YTick = 1:length(S(k).labels);

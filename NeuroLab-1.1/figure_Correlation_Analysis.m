@@ -853,7 +853,11 @@ for k=2:length(h_other)+1
     labs(k) = {strcat(str_t1,name(1:min(3,end)),name(max(4,end-4):end),str_t2)};
 end
 
+rfact = 5;
 [Cor,P_cor] = compute_correlogramm(series,lags);
+% series_resamp = interp2(series,[rfact,1]);
+% lags_resamp = rfact*lags(1):rfact*lags(end);
+% [Cor_resamp,P_cor_resamp] = compute_correlogramm(series_resamp,lags_resamp);
 handles.Slider.UserData.Cor = Cor;
 handles.Slider.UserData.P_cor = P_cor;
 handles.Slider.UserData.str_labels = str_labels;
@@ -968,22 +972,55 @@ handles.Ax3.YLim = [-1,1];
 handles.Ax3.XGrid = 'on';
 handles.Ax3.YGrid = 'on';
 
+% Resampling A
+resamp_step = 0.01;
+lags_s = lags*step;
+lags_resampled = lags_s(1):resamp_step:lags_s(end);
+A_resamp = interp2(lags_s,(1:size(A,1))',A,lags_resampled,(1:size(A,1))');
+[~,imax] = max(A_resamp,[],2);
+A_tmax = [];
+for k=1:length(imax)
+    A_tmax = [A_tmax;lags_resampled(imax(k))];
+end
+
 % Display Time-Shift Correlogram
 cla(handles.Ax4);
-imagesc('CData',A,...
+resample = true;
+switch resample
+    case true
+        lags_ = lags_resampled;
+        A_ = A_resamp;
+    case false
+        lags_ = lags*step;
+        A_ = A;
+end
+imagesc('XData',lags_,'YData',1:length(labs),'CData',A_,...
     'Parent',handles.Ax4,...
     'Tag','TimeLagCorr');
 title(handles.Ax4,'Time Lag Correlation');
 set(handles.Ax4,'YTick',1:length(labs),'YTickLabel', labels);
 set(handles.Ax4, 'TickLength', [0 0]);
-handles.Ax4.XLim = [.5, length(lags)+.5];
-set(handles.Ax4,'XTick',1:length(lags),'XTickLabel',lags_labels);
-handles.Ax4.XTickLabelRotation = 0;
+handles.Ax4.XLim = [lags_(1), lags_(end)];
+% set(handles.Ax4,'XTick',1:length(lags),'XTickLabel',lags_labels);
+% handles.Ax4.XTickLabelRotation = 0;
 handles.Ax4.YLim = [.5, length(labs)+.5];
 handles.Ax4.YDir = 'reverse';
 handles.Cmax_4.String = sprintf('%.1f',handles.Ax4.CLim(2));
 handles.Cmin_4.String = sprintf('%.1f',handles.Ax4.CLim(1));
 %box(handles.Ax4,'on');
+
+% ticks
+[~,imax] = max(A_,[],2,'omitnan');
+ydat = [];
+for kk=1:size(A_,1)
+    ydat = [ydat;lags_(imax(kk))];
+end
+line('YData',1:length(labs),'XData',ydat,'Parent',handles.Ax4,...
+    'LineStyle','none','MarkerSize',3,'Marker','o',...
+    'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+% line('YData',1:length(S(k).labels),'XData',ydat,'Parent',handles.Ax4,...
+%     'LineStyle','--','MarkerSize',3,'Marker','none',...
+%     'Color',[.5 .5 .5],'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
 
 %Third Tab
 margin_w = .01;
@@ -1309,7 +1346,7 @@ for i=1:length(ind_group)
     handles.Tag_table.UserData.Selection = TimeGroups_S(ii).Selected';
     
     % Compute
-    str_ref = {'DG-L'};
+    str_ref = {'SPEED';'ACCEL-POWER'};
     %str_ref = {'Phasic';'Theta';'Gamma';'Whole';'ACCEL-POWER';'SPEED';'EMG-POWER'};
     for k =1:length(str_ref)
         p1 = handles.Popup1;
