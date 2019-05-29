@@ -13,7 +13,7 @@ f2 = figure('Units','characters',...
     'PaperPositionMode','auto',...
     'Name','Peri Event Histogramm');
 clrmenu(f2);
-colormap(f2,'jet');
+colormap(f2,'winter');
 f2.UserData.success = false;
 
 iP = uipanel('FontSize',12,...
@@ -1983,6 +1983,10 @@ if ~isempty(handles.Button_Sort.UserData.permutation)
 end
 
 % Update Axes
+flag_event_image = true; % true: use imagesc to display events/ false: use lines 
+f_colors = handles.MainFigure.Colormap(round(1:64/size(Ydata,1):64),:);
+g_colors = handles.MainFigure.Colormap;
+
 for i=1:channels
     ind = (val-1)*channels+i;
     if  ind <= n_channels  
@@ -1992,48 +1996,85 @@ for i=1:channels
         t = t(1:min(length(t),20));
         str_t1 = strcat('{\color[rgb]',sprintf('{%.2f %.2f %.2f}',c_reg(1),c_reg(2),c_reg(3)),'[}');
         str_t2 = strcat('{\color[rgb]',sprintf('{%.2f %.2f %.2f}',c_reg(1),c_reg(2),c_reg(3)),']}');
-         
-        % Image all Events
+        
         ax1 = findobj(handles.MainPanel,'Tag',sprintf('Ax%d',i));
-        imagesc('XData',ref_time,...
-            'CData',Ydata(:,:,ind),...
-            'Parent',ax1,...
-            'Tag','EventImage');
-        
-        % Ticks on Image Data
-        for j=1:length(ind_events)
-            line('XData',[ref_time(ind_start(j)),ref_time(ind_start(j))],...
-                'YData',[j-.5 j+.5],...
-                'LineWidth',2,...
-                'Color','w',...
-                'Parent',ax1);
-            line('XData',[ref_time(ind_end(j)),ref_time(ind_end(j))],...
-                'YData',[j-.5 j+.5],...
-                'LineWidth',2,...
-                'Color','w',...
-                'Parent',ax1);
+        if flag_event_image
+            % Image all Events
+            imagesc('XData',ref_time,'CData',Ydata(:,:,ind),...
+                'Parent',ax1,'Tag','EventImage');
+            % Ticks on Image Data
+            for j=1:length(ind_events)
+                line('XData',[ref_time(ind_start(j)),ref_time(ind_start(j))],...
+                    'YData',[j-.5 j+.5],...
+                    'LineWidth',2,'Color','w','Parent',ax1);
+                line('XData',[ref_time(ind_end(j)),ref_time(ind_end(j))],...
+                    'YData',[j-.5 j+.5],...
+                    'LineWidth',2,'Color','w','Parent',ax1);
+            end
+            %Title and axes limits
+            set(ax1,'Ydir','reverse');        
+            ax1.YTick = 1:size(Ydata,1);
+            ax1.YTickLabel = label_events;
+            title(ax1,strcat(str_t1,t,str_t2));
+            ax1.Tag = sprintf('Ax%d',i);
+            ax1.XLim = [ref_time(1), ref_time(end)];
+            ax1.YLim = [.5, size(Ydata,1)+.5];
+            
+            % Integral Curve on Image Data
+            %integ = mean(Ydata(:,:,ind),2,'omitnan');
+            integ = mean(Ydata(:,ind_end,ind),2,'omitnan');
+            m = min(integ);
+            M = max(integ);
+            integ = integ*((ax1.XLim(2)-ax1.XLim(1))/(M-m));
+            m = min(integ);
+            integ = integ-(m-ax1.XLim(1));
+            line(integ,1:size(Ydata,1),...
+                'Tag',sprintf('Integ_Curve%d',i),...
+                'Parent',ax1,...
+                'Color',[0 0 0]);
+            
+        else
+            % Image all Events (Lines)
+            all_l1 = [];
+            all_l2 = [];
+            all_ymax = [];
+            for j=1:size(Ydata,1)
+                offset = size(Ydata,1)-j+1;
+                scale = .12;
+                l1 = line('XData',ref_time,'YData',offset+scale*Ydata(j,:,ind),...
+                    'Parent',ax1,'Tag','EventLine','Color',f_colors(j,:));
+                % Marker
+                line('XData',[ref_time(ind_start(j)),ref_time(ind_end(j))],...
+                    'YData',[offset offset],... %'YData',offset+scale*[Ydata(j,ind_start(j),ind),Ydata(j,ind_end(j),ind)],...
+                    'LineStyle','none','Marker','+','MarkerEdgeColor',[.5 .5 .5],...
+                    'MarkerSize',3,'MarkerFaceColor',[.5 .5 .5],'Parent',ax1);
+                [~,ind_max] = max(Ydata(j,:,ind),[],'omitnan'); 
+                l2 = line('XData',ref_time(ind_max),...
+                    'YData',offset+scale*Ydata(j,ind_max,ind),...
+                    'LineStyle','none','Marker','o','MarkerEdgeColor','none',...
+                    'MarkerSize',5,'MarkerFaceColor',f_colors(j,:),'Parent',ax1);
+                all_l1 = [all_l1;l1];
+                all_l2 = [all_l2;l2];
+                all_ymax = [all_ymax;mean(Ydata(j,ind_end-100:ind_end+100,ind),'omitnan')];
+                %all_ymax = [all_ymax;mean(Ydata(j,ind_max-100:ind_max+100,ind),'omitnan')];
+            end
+            % colors
+            %ind_color = ceil(63*rescale(all_ymax))+1;
+            [~,ind_color] = sort(flipud(all_ymax));
+            for j=1:length(all_l1)
+                all_l1(j).Color = f_colors(ind_color(j),:);
+                all_l2(j).MarkerFaceColor = all_l1(j).Color;
+            end
+            
+            %Title and axes limits
+            set(ax1,'Ydir','normal');
+            ax1.YTick = 1:size(Ydata,1);
+            ax1.YTickLabel = flipud(label_events);
+            title(ax1,strcat(str_t1,t,str_t2));
+            ax1.Tag = sprintf('Ax%d',i);
+            ax1.XLim = [ref_time(1), ref_time(end)];
+            ax1.YLim = [.5, size(Ydata,1)+2.5];
         end
-        
-        %Title and axes limits
-        title(ax1,strcat(str_t1,t,str_t2));
-        ax1.Tag = sprintf('Ax%d',i);
-        set(ax1,'Ydir','reverse');
-        ax1.XLim = [ref_time(1), ref_time(end)];
-        ax1.YLim = [.5, size(Ydata,1)+.5];
-        ax1.YTick = 1:size(Ydata,1);
-        ax1.YTickLabel = label_events;
-        
-        % Integral Curve on Image Data
-        integ = mean(Ydata(:,:,ind),2,'omitnan');
-        m = min(integ);
-        M = max(integ);
-        integ = integ*((ax1.XLim(2)-ax1.XLim(1))/(M-m));
-        m = min(integ);
-        integ = integ-(m-ax1.XLim(1));
-        line(integ,1:size(Ydata,1),...
-            'Tag',sprintf('Integ_Curve%d',i),...
-            'Parent',ax1,...
-            'Color',[0 0 0]);
         
         % Update Controls
         caxis(ax1,'auto');
@@ -2165,6 +2206,9 @@ if ~isempty(handles.Button_Sort.UserData.permutation)
     label_events = label_events(I);
 end
 
+flag_event_image = true; % true: use imagesc to display events/ false: use lines 
+f_colors = handles.MainFigure.Colormap(round(1:64/size(Ydata,1):64),:);
+
 % Update Axes
 for i=1:electrodes
     ind = (val-1)*electrodes+i;
@@ -2176,47 +2220,87 @@ for i=1:electrodes
         str_t1 = strcat('{\color[rgb]',sprintf('{%.2f %.2f %.2f}',c_reg(1),c_reg(2),c_reg(3)),'[}');
         str_t2 = strcat('{\color[rgb]',sprintf('{%.2f %.2f %.2f}',c_reg(1),c_reg(2),c_reg(3)),']}');
          
-        % Image all Events
         ax1 = findobj(handles.SecondPanel,'Tag',sprintf('Ax%d',i));
-        imagesc('XData',ref_time,...
-            'CData',Ydata(:,:,ind),...
-            'Parent',ax1,...
-            'Tag','EventImage');
+        if flag_event_image
         
-        % Ticks on Image Data
-        for j=1:length(ind_events)
-            line('XData',[ref_time(ind_start(j)),ref_time(ind_start(j))],...
-                'YData',[j-.5 j+.5],...
-                'LineWidth',2,...
-                'Color','w',...
-                'Parent',ax1);
-            line('XData',[ref_time(ind_end(j)),ref_time(ind_end(j))],...
-                'YData',[j-.5 j+.5],...
-                'LineWidth',2,...
-                'Color','w',...
-                'Parent',ax1);
+            % Image all Events
+            imagesc('XData',ref_time,'CData',Ydata(:,:,ind),...
+                'Parent',ax1,'Tag','EventImage');
+            % Ticks on Image Data
+            for j=1:length(ind_events)
+                line('XData',[ref_time(ind_start(j)),ref_time(ind_start(j))],...
+                    'YData',[j-.5 j+.5],...
+                    'LineWidth',2,'Color','w','Parent',ax1);
+                line('XData',[ref_time(ind_end(j)),ref_time(ind_end(j))],...
+                    'YData',[j-.5 j+.5],...
+                    'LineWidth',2,'Color','w','Parent',ax1);
+            end
+            
+            %Title and axes limits
+            set(ax1,'Ydir','reverse');        
+            ax1.YTick = 1:size(Ydata,1);
+            ax1.YTickLabel = label_events;
+            title(ax1,strcat(str_t1,t,str_t2));
+            ax1.Tag = sprintf('Ax%d',i);
+            ax1.XLim = [ref_time(1), ref_time(end)];
+            ax1.YLim = [.5, size(Ydata,1)+.5];
+            
+            % Integral Curve on Image Data
+            %integ = mean(Ydata(:,:,ind),2,'omitnan');
+            integ = mean(Ydata(:,ind_end,ind),2,'omitnan');
+            m = min(integ);
+            M = max(integ);
+            integ = integ*((ax1.XLim(2)-ax1.XLim(1))/(M-m));
+            m = min(integ);
+            integ = integ-(m-ax1.XLim(1));
+            line(integ,1:size(Ydata,1),...
+                'Tag',sprintf('Integ_Curve%d',i),...
+                'Parent',ax1,...
+                'Color',[0 0 0]);
+            
+        else
+            % Image all Events (Lines)
+            all_l1 = [];
+            all_l2 = [];
+            all_ymax = [];
+            for j=1:size(Ydata,1)
+                offset = size(Ydata,1)-j+1;
+                scale = 1.5;
+                l1 = line('XData',ref_time,'YData',offset+scale*Ydata(j,:,ind),...
+                    'Parent',ax1,'Tag','EventLine','Color',f_colors(j,:));
+                % Marker
+                line('XData',[ref_time(ind_start(j)),ref_time(ind_end(j))],...
+                    'YData',[offset offset],... %'YData',offset+scale*[Ydata(j,ind_start(j),ind),Ydata(j,ind_end(j),ind)],...
+                    'LineStyle','none','Marker','+','MarkerEdgeColor',[.5 .5 .5],...
+                    'MarkerSize',3,'MarkerFaceColor',[.5 .5 .5],'Parent',ax1);
+                [~,ind_max] = max(Ydata(j,:,ind),[],'omitnan'); 
+                l2 = line('XData',ref_time(ind_max),...
+                    'YData',offset+scale*Ydata(j,ind_max,ind),...
+                    'LineStyle','none','Marker','o','MarkerEdgeColor','none',...
+                    'MarkerSize',5,'MarkerFaceColor',f_colors(j,:),'Parent',ax1);
+                                            
+                all_l1 = [all_l1;l1];
+                all_l2 = [all_l2;l2];
+                %all_ymax = [all_ymax;mean(Ydata(j,ind_end-100:ind_end+100,ind),'omitnan')];
+                all_ymax = [all_ymax;mean(Ydata(j,ind_max-10:ind_max+10,ind),'omitnan')];
+            end
+            % colors
+            %ind_color = ceil(63*rescale(all_ymax))+1;
+            [~,ind_color] = sort(flipud(all_ymax));
+            for j=1:length(all_l1)
+                all_l1(j).Color = f_colors(ind_color(j),:);
+                all_l2(j).MarkerFaceColor = all_l1(j).Color;
+            end
+            
+            %Title and axes limits
+            set(ax1,'Ydir','normal');
+            ax1.YTick = 1:size(Ydata,1);
+            ax1.YTickLabel = flipud(label_events);
+            title(ax1,strcat(str_t1,t,str_t2));
+            ax1.Tag = sprintf('Ax%d',i);
+            ax1.XLim = [ref_time(1), ref_time(end)];
+            ax1.YLim = [.5, size(Ydata,1)+2.5];
         end
-        
-        %Title and axes limits
-        title(ax1,strcat(str_t1,t,str_t2));
-        ax1.Tag = sprintf('Ax%d',i);
-        set(ax1,'Ydir','reverse');
-        ax1.XLim = [ref_time(1), ref_time(end)];
-        ax1.YLim = [.5, size(Ydata,1)+.5];
-        ax1.YTick = 1:size(Ydata,1);
-        ax1.YTickLabel = label_events;
-        
-        % Integral Curve on Image Data
-        integ = mean(Ydata(:,:,ind),2,'omitnan');
-        m = min(integ);
-        M = max(integ);
-        integ = integ*((ax1.XLim(2)-ax1.XLim(1))/(M-m));
-        m = min(integ);
-        integ = integ-(m-ax1.XLim(1));
-        line(integ,1:size(Ydata,1),...
-            'Tag',sprintf('Integ_Curve%d',i),...
-            'Parent',ax1,...
-            'Color',[0 0 0]);
         
         % Update Controls
         caxis(ax1,'auto');

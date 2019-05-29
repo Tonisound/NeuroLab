@@ -7,8 +7,8 @@ if nargin <2
     gather_regions = false;
 end
 
-%timegroup = {'LEFT_RUNS';'RIGHT_RUNS'};
-timegroup = {'10_FIRST';'10_MID';'10_LAST'};
+timegroup = {'LEFT_RUNS';'RIGHT_RUNS'};
+%timegroup = {'10_FIRST';'10_MID';'10_LAST'};
 
 
 [D,P,R,S] = browse_data(cur_list,timegroup,gather_regions);
