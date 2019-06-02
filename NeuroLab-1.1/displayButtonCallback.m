@@ -58,7 +58,7 @@ switch strtrim(str(val,:))
         figure_fUS_FrequencyAnalysis(handles);
         
     case '(Figure) Vascular Potentiation'
-        figure_VascularPotentiation(handles);
+        figure_VascularPotentiation(handles,1);
         
     case '(Figure) fUS Episode Statistics'
         figure_fUS_EpisodeStatistics(handles,1);

@@ -521,6 +521,9 @@ for i = 1:length(ind_files)
                     
                 case '(Figure) fUS Episode Statistics'
                     f2 = figure_fUS_EpisodeStatistics(myhandles,0,str_group);
+                
+                case '(Figure) Vascular Potentiation'
+                    f2 = figure_VascularPotentiation(myhandles,0,str_group);
                     
                 case '(Figure) Peak Detection'
                     f2 = figure_PeakDetection(myhandles,0,str_tag);

@@ -1,5 +1,5 @@
 function f2 = figure_fUS_EpisodeStatistics(handles,val,str_group)
-% Time Tag Selection Callback
+% (Figure) Displays epsiode statistics based on time groups
 
 global DIR_SAVE FILES CUR_FILE;
 
