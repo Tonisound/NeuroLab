@@ -125,7 +125,7 @@ m = findobj(handles.RightAxes,'Tag','Trace_Mean');
 l = flipud(findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
 t = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep'));
 lines = copyobj([m;l;t],ax_dummy);
-%bc.UserData.lines = lines;
+f.UserData.lines = lines;
 
 % Table Data
 D = [];
@@ -145,7 +145,9 @@ tt = uitable('Units','normalized',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
     'Parent',tracePanel);
-tt.UserData.Selection = find(strcmp(tt.Data(:,2),'Trace_Region')==1);
+%tt.UserData.Selection = find(strcmp(tt.Data(:,2),'Trace_Region')==1);
+tt.UserData.Selection = [];
+f.UserData.lines_name = tt.Data(:,1);
 gt = uitable('Units','normalized',...
     'ColumnName','',...
     'RowName',{},...
@@ -158,14 +160,24 @@ gt = uitable('Units','normalized',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
     'Parent',groupPanel);
-gt.UserData.Selection=[];
+gt.UserData.Selection = [];
 gt.UserData.TimeGroups_name = TimeGroups_name;
 gt.UserData.TimeGroups_S = TimeGroups_S;
 
+% Pixel Tab
+uitab('Parent',tabgp,...
+    'Title','Pixels',...
+    'Tag','PixelTab');
+
+% Regions Tab
+uitab('Parent',tabgp,...
+    'Title','Regions (lines)',...
+    'Tag','RegionTab');
+
 % Potentiation Tab
 uitab('Parent',tabgp,...
-    'Title','Potentiation',...
-    'Tag','PotentiationTab');
+    'Title','Regions (mask)',...
+    'Tag','BarTab');
 
 handles2 = guihandles(f);
 reset_Callback([],[],handles2);
@@ -194,29 +206,31 @@ end
 
 function compute_Callback(~,~,handles)
 
-tab0 = handles.PotentiationTab;
+tab0 = handles.PixelTab;
+tab1 = handles.RegionTab;
+tab2 = handles.BarTab;
 f = handles.MainFigure;
 margin_w = str2double(handles.Edit3.String);
 margin_h = str2double(handles.Edit4.String);
 IM = f.UserData.IM;
+lines = f.UserData.lines;
+lines_name = f.UserData.lines_name;
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch');
 drawnow;
 handles.MainFigure.UserData.success = false;
 
-delete(tab0.Children);
-
 % Select Time indices
-selection = handles.Group_table.UserData.Selection;
-if isempty(selection)
+sel1 = handles.Group_table.UserData.Selection;
+if isempty(sel1)
     start_im = str2double(handles.Edit1.String);
     end_im = str2double(handles.Edit2.String);
     Time_indices = (handles.MainFigure.UserData.time_ref.X>=start_im).*(handles.MainFigure.UserData.time_ref.X<=end_im);
     str_title = sprintf('CURRENT[%d-%d]',start_im,end_im);
 else
-    selection = selection(1);
-    TimeTags_images = handles.Group_table.UserData.TimeGroups_S(selection).TimeTags_images;
+    sel1 = sel1(1);
+    TimeTags_images = handles.Group_table.UserData.TimeGroups_S(sel1).TimeTags_images;
     Time_indices = zeros(size(handles.MainFigure.UserData.time_ref.X));
     for i =1:size(TimeTags_images,1)
         im1 = TimeTags_images(i,1);
@@ -224,49 +238,91 @@ else
         ind_keep = (handles.MainFigure.UserData.time_ref.X>=im1).*(handles.MainFigure.UserData.time_ref.X<=im2);
         Time_indices(ind_keep==1)=1;
     end
-    str_title = sprintf('TimeGroup-%s',char(handles.Group_table.UserData.TimeGroups_name(selection)));
+    str_title = sprintf('TimeGroup-%s',char(handles.Group_table.UserData.TimeGroups_name(sel1)));
 end
 
+% Select Regions
+sel2 = handles.Trace_table.UserData.Selection;
+if isempty(sel2)
+    ind_regions = find(strcmp(handles.Trace_table.Data(:,2),'Trace_Region')==1);
+    handles.Trace_table.UserData.Selection = ind_regions;
+else
+    ind_regions = sel2;
+end
+%str_regions = handles.Trace_table.Data(ind_regions,1);
+
+% Compute Pixel Potentiation
 %X = (1:end_im-start_im+1)';
 X = (1:length(find(Time_indices==1)))';
 n = 1;
-P1 = NaN(size(IM(:,:,1)));
-P2 = NaN(size(IM(:,:,1)));
+Slope_Map = NaN(size(IM(:,:,1)));
+Offset_Map = NaN(size(IM(:,:,1)));
 h = waitbar(0,'Please wait');
-
 for i =1:size(IM,1)
     for j =1:size(IM,2)
         Y = squeeze(IM(i,j,Time_indices==1));
         P = polyfit(X,Y,n);
-        P1(i,j) = P(1);
-        P2(i,j) = P(2);
+        Slope_Map(i,j) = P(1);
+        Offset_Map(i,j) = P(2);
     end
     x=i/size(IM,1);
     waitbar(x,h,sprintf('%.1f %% completed',100*x));
-
 end
 close(h);
 
+% Compute Pixel Potentiation per Mask
+lines_reg = findobj(lines,'Tag','Trace_Region');
+S = struct('name',[],'offset_map',[],'slope_map',[],'offset',[],'slope',[],'color',[]);
+S(length(lines_reg)).name = '';
+for i =1:length(lines_reg)
+    l = lines_reg(i);
+    S(i).name = l.UserData.Name;
+    mask = l.UserData.Mask;
+    mask(mask==0)=NaN;
+    S(i).offset_map = mask.*Offset_Map;
+    S(i).slope_map = mask.*Slope_Map;
+    S(i).offset = mean(mean(S(i).offset_map,1,'omitnan'),2,'omitnan');
+    S(i).slope = mean(mean(S(i).slope_map,1,'omitnan'),2,'omitnan');
+    S(i).color = l.Color;
+end
+
+% Compute Region Potentiation
+Slope_Reg = NaN(size(ind_regions));
+Offset_Reg = NaN(size(ind_regions));
+str_regions = [];
+r_colors = [];
+for i =1:length(ind_regions)
+    %region_name = char(handles.Trace_table.Data(ind_regions(i),1));
+    l = lines(ind_regions(i));
+    str_regions = [str_regions ; {l.UserData.Name}];
+    r_colors = [r_colors ;l.Color];
+    Y = (squeeze(l.YData(Time_indices==1)))';
+    P = polyfit(X,Y,n);
+    Slope_Reg(i) = P(1);
+    Offset_Reg(i) = P(2);
+end
+
+% PixelTab
+delete(tab0.Children);
 ax1 = axes('Parent',tab0);
-imagesc(P2,'parent',ax1);
+imagesc(Offset_Map,'parent',ax1);
 %title(sprintf('offset (%d-%d)',start_im,end_im))
 title(sprintf('Offset (%s)',str_title))
 colorbar(ax1);
 
-
-Mmax = max(max(P1(:),0));
-Mmin = min(min(P1(:),0));
+Mmax = max(max(Slope_Map(:),0));
+Mmin = min(min(Slope_Map(:),0));
 ax2 = axes('Parent',tab0);
-im = imagesc(P1,'parent',ax2);
-im.AlphaData = P1>0;
+im = imagesc(Slope_Map,'parent',ax2);
+im.AlphaData = Slope_Map>0;
 %title(sprintf('slope + (%d-%d)',start_im,end_im))
 title(sprintf('Slope + (%s)',str_title));
 colorbar(ax2);
 ax2.CLim = [0 Mmax];
 
 ax3 = axes('Parent',tab0);
-im = imagesc(P1,'parent',ax3);
-im.AlphaData = P1<0;
+im = imagesc(Slope_Map,'parent',ax3);
+im.AlphaData = Slope_Map<0;
 %title(sprintf('slope - (%d-%d)',start_im,end_im))
 title(sprintf('Slope - (%s)',str_title))
 colorbar(ax3);
@@ -282,12 +338,42 @@ ax3.Position = [2/3+margin_w margin_h 1/3-4*margin_w 1-2*margin_h];
 ax2.Visible = 'off';
 ax2.Title.Visible = 'on';
 
-% Storing Data
-handles.MainFigure.UserData.P1 = P1;
-handles.MainFigure.UserData.P2 = P2;
-handles.MainFigure.UserData.str_title = str_title;
+% RegionTab
+delete(tab1.Children);
+ax1 = axes('Parent',tab1);
+for i =1:length(Slope_Reg)
+    line('XData',Slope_Reg(i),'YData',Offset_Reg(i),'Linestyle','none','Parent',ax1,...
+        'Marker','o','MarkerSize',5,'MarkerFaceColor',r_colors(i,:),'MarkerEdgeColor','none');
+end
+legend(str_regions,'Location','eastoutside');
+ax1.Title.String = sprintf('Region Potentiation (%s)',str_title);
+ax1.YLabel.String = 'Offset';
+ax1.XLabel.String = 'Slope';
+colorbar(ax1);
 
-handles.TabGroup.SelectedTab = handles.PotentiationTab;
+% BarTab
+delete(tab2.Children);
+ax1 = axes('Parent',tab2);
+for i =1:length(S)
+    line('XData',S(i).slope,'YData',S(i).offset,'Linestyle','none','Parent',ax1,...
+        'Marker','o','MarkerSize',5,'MarkerFaceColor',S(i).color,'MarkerEdgeColor','none');
+end
+legend({S(:).name}','Location','eastoutside');
+ax1.Title.String = sprintf('Region Potentiation (Mask) (%s)',str_title);
+ax1.YLabel.String = 'Offset';
+ax1.XLabel.String = 'Slope';
+colorbar(ax1);
+
+% Storing Data
+handles.MainFigure.UserData.Slope_Map = Slope_Map;
+handles.MainFigure.UserData.Offset_Map = Offset_Map;
+handles.MainFigure.UserData.Slope_Reg = Slope_Reg;
+handles.MainFigure.UserData.Offset_Reg = Offset_Reg;
+handles.MainFigure.UserData.str_title = str_title;
+handles.MainFigure.UserData.str_regions = str_regions;
+handles.MainFigure.UserData.S = S;
+
+handles.TabGroup.SelectedTab = handles.PixelTab;
 set(handles.MainFigure, 'pointer', 'arrow');
 handles.MainFigure.UserData.success = true;
 
@@ -308,8 +394,22 @@ end
 
 % Saving Image
 cur_tab = handles.TabGroup.SelectedTab;
-handles.TabGroup.SelectedTab = handles.PotentiationTab;
-pic_name = sprintf('%s_Vascular_Potentiation_%s%s',FILES(CUR_FILE).recording,str_title,GTraces.ImageSaveExtension);
+
+handles.TabGroup.SelectedTab = handles.PixelTab;
+tab = handles.TabGroup.SelectedTab.Title;
+pic_name = sprintf('%s_Vascular_Potentiation_%s_%s%s',FILES(CUR_FILE).recording,str_title,tab,GTraces.ImageSaveExtension);
+saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+
+handles.TabGroup.SelectedTab = handles.RegionTab;
+tab = handles.TabGroup.SelectedTab.Title;
+pic_name = sprintf('%s_Vascular_Potentiation_%s_%s%s',FILES(CUR_FILE).recording,str_title,tab,GTraces.ImageSaveExtension);
+saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+
+handles.TabGroup.SelectedTab = handles.BarTab;
+tab = handles.TabGroup.SelectedTab.Title;
+pic_name = sprintf('%s_Vascular_Potentiation_%s_%s%s',FILES(CUR_FILE).recording,str_title,tab,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
@@ -324,6 +424,7 @@ load('Preferences.mat','GTraces');
 
 %Loading data
 str_title = char(handles.MainFigure.UserData.str_title);
+str_regions = handles.MainFigure.UserData.str_regions;
 recording = FILES(CUR_FILE).recording;
 % % Storing parameters
 % Tag_Selection = handles.MainFigure.UserData.Tag_Selection;
@@ -333,8 +434,11 @@ recording = FILES(CUR_FILE).recording;
 % t_gauss_cbv = handles.MainFigure.UserData.t_gauss_cbv;
 % freqdom = handles.MainFigure.UserData.freqdom;
 % Storing data
-P1 = handles.MainFigure.UserData.P1;
-P2 = handles.MainFigure.UserData.P2;
+Slope_Map = handles.MainFigure.UserData.Slope_Map;
+Offset_Map = handles.MainFigure.UserData.Offset_Map;
+Slope_Reg = handles.MainFigure.UserData.Slope_Reg;
+Offset_Reg = handles.MainFigure.UserData.Offset_Reg;
+S = handles.MainFigure.UserData.S;
 
 % Creating Stats Directory
 data_dir = fullfile(DIR_STATS,'Vascular_Potentiation',FILES(CUR_FILE).recording);
@@ -344,8 +448,8 @@ end
 
 % Saving data
 filename = sprintf('%s_Vascular_Potentiation_%s.mat',FILES(CUR_FILE).recording,str_title);
-save(fullfile(data_dir,filename),'recording','str_title','P1','P2',...
-    '-v7.3');
+save(fullfile(data_dir,filename),'recording','str_title','str_regions',...
+    'Slope_Map','Offset_Map','Slope_Reg','Offset_Reg','S','-v7.3');
 fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
 
 end
