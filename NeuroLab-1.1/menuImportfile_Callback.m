@@ -24,6 +24,18 @@ if flag == 1
 else
     % Recording list Import
     rec_list = dir(fullfile(SEED_SWL,'*.txt'));
+%     ind_rm = ~(cellfun('isempty',strfind({rec_list(:).name(1)}','.')));
+    ind_rm = zeros(size(rec_list));
+    for j=1:length(ind_rm)
+        temp = char(rec_list(j).name);
+        if strcmp(temp(1),'.')
+            ind_rm(j)=1;
+        else
+            ind_rm(j)=0;
+        end
+    end
+    rec_list(ind_rm==1) = [];
+    
     s = listdlg('PromptString','Select a recording list:',...
         'SelectionMode','single','ListString',{rec_list(:).name}','ListSize',[300 500]);
     if isempty(s)

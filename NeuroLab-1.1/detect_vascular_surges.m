@@ -79,13 +79,22 @@ else
     tt_data = load(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_images','TimeTags_strings');
 end
 
-% Loading Regions
-if ~exist(fullfile(folder_name,'Spikoscope_Regions.mat'),'file')
-    errordlg('Impossible to pick regions.\n File Spikoscope_Regions.mat not found.');
-    return;
-else
-    r_data = load(fullfile(folder_name,'Spikoscope_Regions.mat'),'regions','X','Y');
-end
+% % Loading Regions
+% if ~exist(fullfile(folder_name,'Spikoscope_Regions.mat'),'file')
+%     errordlg('Impossible to pick regions.\n File Spikoscope_Regions.mat not found.');
+%     return;
+% else
+%     r_data = load(fullfile(folder_name,'Spikoscope_Regions.mat'),'regions','X','Y');
+% end
+% % Picking Whole region
+% ind_whole = find(strcmpi({r_data.regions(:).name}','whole')==1);
+% if length(ind_rem)~=1 
+%     errordlg(sprintf('%d region(s) corresponding to Whole found.',length(ind_whole)));
+%     return;
+% else
+%     whole_mask = r_data.regions(ind_whole).mask;
+%     whole_mask(whole_mask==0) = NaN;
+% end
 
 
 % Picking REM and AW distribution
@@ -99,15 +108,23 @@ elseif length(ind_aw)~=1
     return
 end
 
+
 % Picking Whole region
-ind_whole = find(strcmpi({r_data.regions(:).name}','whole')==1);
-if length(ind_rem)~=1 
+l_all = findobj(handles.RightAxes,'Tag','Trace_Region');
+l_all_name = [];
+for i=1:length(l_all)
+    l_all_name = [l_all_name;{l_all(i).UserData.Name}];
+end
+%ind_whole = find(strcmpi(l_all_name,'whole')==1);
+ind_whole = [find(strcmpi(l_all_name,'whole')==1);find(strcmpi(l_all_name,'whole-reg')==1)];
+if length(ind_whole)~=1 
     errordlg(sprintf('%d region(s) corresponding to Whole found.',length(ind_whole)));
     return;
 else
-    whole_mask = r_data.regions(ind_whole).mask;
+    whole_mask = l_all(ind_whole).UserData.Mask;
     whole_mask(whole_mask==0) = NaN;
 end
+
 
 % Extracting AW movie
 TimeTags_images = tg_data.TimeGroups_S(ind_aw).TimeTags_images;

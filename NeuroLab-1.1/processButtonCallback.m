@@ -18,6 +18,9 @@ switch strtrim(str(val,:))
     case 'Detect Left-Right Runs'
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Sleep Score'
+        sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        
     case 'Edit Anatomical Regions'
         edit_patches(handles);
         

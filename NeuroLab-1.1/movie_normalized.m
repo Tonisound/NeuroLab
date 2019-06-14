@@ -8,7 +8,7 @@ global SEED IM DIR_SAVE DIR_FIG DIR_STATS FILES CUR_FILE START_IM END_IM;
 % Input dialog Initialization
 prompt={'Delay to start (s)';'Window size (s)';'Video loading';'Save/Display mode (disp/frames/video)'};
 name = 'Select Movie Initialization Parameters';
-defaultans = {'0.0';'240.0';'false';'disp'};
+defaultans = {'0.0';'20.0';'false';'disp'};
 answer = inputdlg(prompt,name,[1 100],defaultans);
 if isempty(answer)
     return;
