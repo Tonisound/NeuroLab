@@ -24,7 +24,7 @@ if ~isempty(pt1)
         if pt1(1,1)==pt2(1,1)
             t2 = findobj(all_axes(i),'Tag','T2');
             t2.Visible = 'off';
-            if ~strcmp(all_axes(i).Parent.Tag,'BotPanel');
+            if ~strcmp(all_axes(i).Parent.Tag,'BotPanel')
                 axis(all_axes(i),'auto y');
             end
             t2.YData = [all_axes(i).YLim(1) all_axes(i).YLim(2)];

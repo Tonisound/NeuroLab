@@ -21,13 +21,10 @@ switch strtrim(str(val,:))
     case 'Sleep Score'
         sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-    case 'Edit Anatomical Regions'
-        edit_patches(handles);
-        
     case 'Import LFP Traces'
         import_lfptraces(FILES(CUR_FILE),handles);
         
-    case 'Import Regions'
+    case 'Import Anatomical Regions'
         import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,handles);
         
     case'Import External Files'

@@ -1,18 +1,19 @@
-function f = edit_patches(handles)
+function f = menuEdit_AnatRegions_Callback(folder_name,handles)
 
-%global DIR_SAVE FILES CUR_FILE 
-global START_IM END_IM IM;
+global IM CUR_IM ;
 
+data_config = load(fullfile(folder_name,'Config.mat'));
 f = figure('Name','Anatomical Regions Edition',...
     'NumberTitle','off',...
     'Units','normalized',...
-    'MenuBar','none',...
     'Tag','EditFigure');
 colormap(f,'gray');
 clrmenu(f);
-%colormap(f,'jet');
+f.UserData.data_config = data_config;
+f.UserData.IM = IM;
 
 ax = copyobj(handles.CenterAxes,f);
+ax.CLimMode = 'auto';
 ax.Tag = 'AxEdit';
 ax.TickLength = [0 0];
 ax.XTickLabel = '';
@@ -69,6 +70,45 @@ removeButton = uicontrol('Style','pushbutton',...
     'Tag','removeButton',...
     'Parent',f);
 
+
+l_mean = findobj(handles.RightAxes,'Tag','Trace_Mean');
+l_cursor = findobj(handles.RightAxes,'Tag','Cursor');
+ax_mean = axes('Parent',f,'YTick',[],...
+    'YTickLabel','','YLim',[min(l_mean.YData,[],'omitnan') max(l_mean.YData,[],'omitnan')]);
+%set(ax_mean,'ButtonDownFcn',{@template_axes_clickFcn,ax_mean});
+
+f.UserData.l_mean = copyobj(l_mean,ax_mean);
+l_cursor = copyobj(l_cursor,ax_mean);
+f.UserData.l_cursor = l_cursor;
+l_cursor.Tag = 'T2';
+l_cursor.Color = 'r';
+l_cursor.HitTest = 'on';
+set(l_cursor,'ButtonDownFcn',{@click_l_cursor});
+
+t1 = uicontrol('Style','text',...
+    'Units','normalized',...
+    'String',sprintf('%d / %d',l_cursor.XData(1),f.UserData.data_config.LAST_IM),...
+    'Tag','Text1',...
+    'HorizontalAlignment','right',...
+    'Parent',f);
+pu1 = uicontrol('Style','popupmenu',...
+    'Units','normalized',...
+    'String','current|source|normalized|dB',...
+    'Tag','popup1',...
+    'Parent',f);
+set(pu1,'Callback',{@pu1_Callback,folder_name});
+
+importButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Import',...
+    'Tag','importButton',...
+    'Parent',f);
+exportButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Export',...
+    'Tag','exportButton',...
+    'Parent',f);
+
 okButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
     'String','OK',...
@@ -89,6 +129,13 @@ newButton.Position = [.825 .9 .15 .05];
 drawButton.Position = [.825 .85 .15 .05];
 applyButton.Position = [.825 .8 .15 .05];
 removeButton.Position = [.825 .75 .15 .05];
+
+ax_mean.Position = [.825 .45 .15 .1];
+t1.Position = [.9 .55 .075 .05];
+pu1.Position = [.825 .55 .075 .05];
+importButton.Position = [.825 .35 .15 .05];
+exportButton.Position = [.825 .3 .15 .05];
+
 boxMask.Position = [.825 .15 .15 .05];
 okButton.Position = [.825 .1 .15 .05];
 cancelButton.Position = [.825 .05 .15 .05];
@@ -105,9 +152,9 @@ set(boxMask,'Callback',{@boxMask_Callback,handles2});
 
 
 % Changing main image
-%main_im = mean(IM(:,:,START_IM:END_IM),3,'omitnan');
-n_images = 100;
-main_im = mean(IM(:,:,START_IM:min(START_IM+n_images,END_IM)),3,'omitnan');
+% n_images = 100;
+% main_im = mean(IM(:,:,START_IM:min(START_IM+n_images,END_IM)),3,'omitnan');
+main_im = IM(:,:,CUR_IM);
 im = findobj(ax,'Tag','MainImage');
 im.CData = main_im;
 
@@ -157,8 +204,6 @@ end
 
 function newButton_callback(~,~,handles)
 
-global IM;
-
 answer = inputdlg('Enter Region Name','Region creation',[1 60]);
 if ~isempty(handles.Region_table.Data)
     while contains(char(answer),handles.Region_table.Data)
@@ -190,8 +235,8 @@ handles.drawButton.UserData = [];
 
 
 % mask creation
-x_mask = size(IM,1);
-y_mask = size(IM,2);
+x_mask = handles.EditFigure.UserData.data_config.X;
+y_mask = handles.EditFigure.UserData.data_config.Y;
 new_mask = double(poly2mask(hq.XData,hq.YData,x_mask,y_mask));
 
 % Updating UserData
@@ -421,5 +466,81 @@ if ~isempty(hObj.UserData.Selection)
     patches(hObj.UserData.Selection).LineWidth = 2;
     patches(hObj.UserData.Selection).FaceColor = patches(hObj.UserData.Selection).EdgeColor;
 end
+
+end
+
+function click_l_cursor(hObj,~)
+
+ax = hObj.Parent;
+f = ax.Parent;
+ax.UserData = 1;
+
+f.Pointer = 'hand';
+set(f,'WindowButtonMotionFcn', {@figure_motionFcn,ax});
+set(f,'WindowButtonUpFcn', {@unclickFcn,ax});
+
+end
+
+function figure_motionFcn(~,~,ax2)
+
+pt_rp = ax2.CurrentPoint;
+Xlim = ax2.XLim;
+Ylim = ax2.YLim;
+l_cursor = findobj(ax2,'Tag','T2');
+text1 = findobj(ax2.Parent,'Tag','Text1');
+im = findobj(ax2.Parent,'Tag','MainImage');
+
+%Move Cursor
+if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<Ylim(2))
+    l_cursor.XData = [round(pt_rp(1,1)) round(pt_rp(1,1))];
+    im.CData = ax2.Parent.UserData.IM(:,:,round(pt_rp(1,1)));
+    text1.String = sprintf('%d / %d',round(pt_rp(1,1)),round(ax2.XLim(2)));
+end
+
+end
+
+function unclickFcn(f,~,ax)
+
+set(f,'WindowButtonMotionFcn','');
+set(f,'WindowButtonUpFcn', '');
+ax.UserData = [];
+f.Pointer = 'arrow';
+
+end
+
+function pu1_Callback(hObj,~,folder_name)
+
+global IM;
+temp = strtrim(hObj.String(hObj.Value,:));
+f = hObj.Parent;
+im = findobj(f,'Tag','MainImage');
+l_cursor = findobj(f,'Tag','T2');
+cur_im = l_cursor.XData(1);
+
+switch temp
+    case 'current'
+        f.UserData.IM = IM;
+        
+    case 'source'
+        fprintf('Loading Doppler_film ...\n');
+        Dn = load(fullfile(folder_name,'Doppler.mat'),'Doppler_film');
+        fprintf('===> Doppler_film loaded from %s.\n',fullfile(folder_name,'Doppler.mat'));
+        f.UserData.IM = Dn.Doppler_film;
+        
+    case 'normalized'
+        fprintf('Loading Doppler_normalized ...\n');
+        Dn = load(fullfile(folder_name,'Doppler_normalized.mat'),'Doppler_normalized');
+        fprintf('Doppler_normalized loaded : %s\n',fullfile(folder_name,'Doppler_normalized.mat'));
+        f.UserData.IM = Dn.Doppler_normalized;
+    
+    case 'dB'
+        fprintf('Loading Doppler_film ...\n');
+        Dn = load(fullfile(folder_name,'Doppler.mat'),'Doppler_film');
+        fprintf('===> dB Movie computed from %s [ref image: %d].\n',fullfile(folder_name,'Doppler.mat'),cur_im);
+        f.UserData.IM = 20*log10(abs(Dn.Doppler_film)/max(max(abs(Dn.Doppler_film(:,:,cur_im)))));
+        %f.UserData.IM = 20*log10(abs(IM)/max(max(abs(IM(:,:,cur_im)))));
+end
+
+im.CData = f.UserData.IM(:,:,cur_im);
 
 end

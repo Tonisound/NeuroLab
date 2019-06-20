@@ -10,7 +10,7 @@ if nargin<3
 end
 
 switch version
-    case 0,
+    case 0
         % Single-line
         all_axes = hObj;
     case 1

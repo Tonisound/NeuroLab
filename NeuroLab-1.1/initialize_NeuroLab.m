@@ -146,6 +146,7 @@ uimenu(m2,'Label','Edit Traces','Tag','EditMenu_Edition','Accelerator','T');
 uimenu(m2,'Label','Edit Time Tags','Tag','EditMenu_TimeTagEdition');
 uimenu(m2,'Label','Edit Time Groups','Tag','EditMenu_TimeGroupEdition');
 uimenu(m2,'Label','Edit LFP Configuration','Tag','EditMenu_LFPConfig');
+uimenu(m2,'Label','Edit Anatomical Regions','Tag','EditMenu_AnatRegions');
 
 uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','on');
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
@@ -329,8 +330,8 @@ pl = uicontrol(f,'Style','popup',...
     'Tag','ProcessListPopup',...
     'FontSize',fontsize,...
     'Parent',botPanel);
-pl_str = 'Compute Normalized Movie|Detect Vascular Surges|Detect Left-Right Runs|Edit Anatomical Regions';
-pl_str = strcat(pl_str,'|Import Regions|Import LFP Traces|Import External Files');
+pl_str = 'Compute Normalized Movie|Detect Vascular Surges|Detect Left-Right Runs';
+pl_str = strcat(pl_str,'|Import Anatomical Regions|Import LFP Traces|Import External Files');
 pl_str = strcat(pl_str,'|Export LFP bands|Export Binary Masks|Export Anatomical Regions|Export IMO file');
 pl.String = pl_str;
 
@@ -619,6 +620,7 @@ set(myhandles.EditMenu_Edition,'Callback',{@menuEdit_TracesEdition_Callback,myha
 set(myhandles.EditMenu_TimeTagEdition,'Callback','menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.EditMenu_TimeGroupEdition,'Callback','menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.EditMenu_LFPConfig,'Callback','menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
+set(myhandles.EditMenu_AnatRegions,'Callback','menuEdit_AnatRegions_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhandles});
 set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
