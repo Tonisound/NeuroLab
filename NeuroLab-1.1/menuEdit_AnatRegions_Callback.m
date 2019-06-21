@@ -1,12 +1,15 @@
-function f = menuEdit_AnatRegions_Callback(folder_name,handles)
+function f = menuEdit_AnatRegions_Callback(F,handles)
 
-global IM CUR_IM ;
+global IM CUR_IM DIR_SAVE;
+folder_name = fullfile(DIR_SAVE,F.nlab);
 
 data_config = load(fullfile(folder_name,'Config.mat'));
 f = figure('Name','Anatomical Regions Edition',...
     'NumberTitle','off',...
     'Units','normalized',...
     'Tag','EditFigure');
+colormap(f,'jet');
+f.UserData.Colormap = f.Colormap;
 colormap(f,'gray');
 clrmenu(f);
 f.UserData.data_config = data_config;
@@ -44,11 +47,6 @@ table_region.Units = 'normalized';
 table_region.UserData.Selection = [];
 
 % OK & CANCEL Buttons
-boxMask = uicontrol('Style','checkbox',...
-    'Units','normalized',...
-    'String','Mask Display',...
-    'Tag','boxMask',...
-    'Parent',f);
 newButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
     'String','New',...
@@ -103,12 +101,31 @@ importButton = uicontrol('Style','pushbutton',...
     'String','Import',...
     'Tag','importButton',...
     'Parent',f);
+set(importButton,'Callback',{@importButton_Callback,F});
 exportButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
     'String','Export',...
     'Tag','exportButton',...
     'Parent',f);
+set(exportButton,'Callback',{@exportButton_Callback,F});
+boxPref = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Prefix',...
+    'Value',1,...
+    'Tag','boxPref',...
+    'Parent',f);
+boxSuf = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Suffix',...
+    'Value',1,...
+    'Tag','boxSuf',...
+    'Parent',f);
 
+boxMask = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Mask Display',...
+    'Tag','boxMask',...
+    'Parent',f);
 okButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
     'String','OK',...
@@ -130,12 +147,14 @@ drawButton.Position = [.825 .85 .15 .05];
 applyButton.Position = [.825 .8 .15 .05];
 removeButton.Position = [.825 .75 .15 .05];
 
-ax_mean.Position = [.825 .45 .15 .1];
-t1.Position = [.9 .55 .075 .05];
-pu1.Position = [.825 .55 .075 .05];
+ax_mean.Position = [.825 .5 .15 .1];
+t1.Position = [.9 .6 .075 .05];
+pu1.Position = [.825 .6 .075 .05];
 importButton.Position = [.825 .35 .15 .05];
 exportButton.Position = [.825 .3 .15 .05];
 
+boxPref.Position = [.825 .4 .075 .05];
+boxSuf.Position = [.9 .4 .075 .05];
 boxMask.Position = [.825 .15 .15 .05];
 okButton.Position = [.825 .1 .15 .05];
 cancelButton.Position = [.825 .05 .15 .05];
@@ -542,5 +561,183 @@ switch temp
 end
 
 im.CData = f.UserData.IM(:,:,cur_im);
+
+end
+
+function exportButton_Callback(hObj,~,F)
+
+global SEED_REGION;
+f = hObj.Parent;
+region_table = findobj(f,'Tag','Region_table');
+
+if ~exist(fullfile(SEED_REGION,F.recording),'dir')
+    %rmdir(fullfile(SEED_REGION,F.recording),'s');
+    mkdir(fullfile(SEED_REGION,F.recording));
+end
+
+% Export Selection
+[ind_export,v] = listdlg('Name','Region Exportation','PromptString','Select Regions to export',...
+        'SelectionMode','multiple','ListString',region_table.Data,'InitialValue',[],'ListSize',[300 500]);
+
+% return if selection empty
+if v==0 || isempty(ind_export)
+    return;
+end
+
+for i=1:length(ind_export)
+    p = region_table.UserData.patches(ind_export(i));
+    mask = p.UserData.Mask;
+    X = size(p.UserData.Mask,2);
+    Y = size(p.UserData.Mask,1);
+    z=0;
+    % Writing into file
+    filename = strcat('NLab-reg_',p.UserData.Name,sprintf('_%d_%d.U8',X,Y));
+    filename_full = fullfile(SEED_REGION,F.recording,filename);
+    fileID = fopen(filename_full,'w');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,X,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,Y,'uint8');
+    fwrite(fileID,mask,'uint8');
+    fclose(fileID);
+    fprintf('NLab region successfully exported [%s].\n',filename);
+end
+%fprintf('NLab regions successfully exported [%s].\n',fullfile(SEED_REGION,F.recording));
+
+end
+
+function importButton_Callback(hObj,~,F)
+
+global SEED_REGION;
+f = hObj.Parent;
+region_table = findobj(f,'Tag','Region_table');
+ax = findobj(f,'Tag','AxEdit');
+cb1 = findobj(f,'Tag','boxPref');
+cb2 = findobj(f,'Tag','boxSuf');
+
+[files_regions,dir_regions] = uigetfile(fullfile(SEED_REGION,F.recording,'*.U8'),'Select Regions to Import','MultiSelect','on');
+
+if dir_regions==0
+    return;
+end
+
+files_regions = files_regions';
+% Building regions structure
+regions = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});
+
+% Sorting by name
+pattern_list = {'ac';'s1bf';'lpta';'rs';'v2';'antcortex';'amidcortex';'pmidcortex';'postcortex';'neocortex';...
+    'dg';'ca3';'ca2';'ca1';'fc';'subiculum';'dhpc';'vhpc';...
+    'dthal';'vthal';'vpm';'po';'thalamus';'cpu';'gp';'hypothalrg'};
+files_regions_sorted = [];
+for i =1:length(pattern_list)
+    pattern = strcat('_',pattern_list(i),'_');
+    ind_sort = contains(lower(files_regions'),pattern);
+    files_regions_sorted = [files_regions_sorted;files_regions(ind_sort)];
+    files_regions(ind_sort)=[];
+end
+files_regions = [files_regions_sorted;files_regions];
+
+% filling regions structure
+for i=1:length(files_regions)
+    filename = fullfile(dir_regions,char(files_regions(i)));
+    fileID = fopen(filename,'r');
+    raw = fread(fileID,8,'uint8')';
+    X = raw(8);
+    Y = raw(4);
+    mask = fread(fileID,[X,Y],'uint8')';
+    fclose(fileID);
+    regions(i).name = char(files_regions(i));
+    
+    %regions(i).mask = mask';
+    % Discrepant mask size
+    X_ref = f.UserData.data_config.X;
+    Y_ref = f.UserData.data_config.Y;
+    pad_mask = padarray(mask',[abs(X-X_ref),abs(Y-Y_ref)],'post');
+    newmask = pad_mask(1:X_ref,1:Y_ref);
+    regions(i).mask = newmask;
+    
+    % Creating Patch
+    [y,x]= find(mask'==1);
+    try
+        k = convhull(x,y);
+        regions(i).patch_x = x(k);
+        regions(i).patch_y = y(k);
+    catch
+        % Problem when points are colinear
+        regions(i).patch_x = x;
+        regions(i).patch_y = y ;
+    end
+end
+
+%Largest Prefix
+if cb1.Value
+    pattern = char(regions(1).name);
+    count=0;
+    while (count <= length(pattern)) && (sum(contains({regions(:).name}',pattern(1:count)))== size({regions(:).name}',1))
+        count = count+1;
+    end
+    prefix = pattern(1:count-1);
+else
+    prefix = '';
+end
+%Largest Suffix
+if cb2.Value
+    pattern = char(regions(1).name);
+    count=0;
+    while (count <= length(pattern)) && (sum(contains({regions(:).name}',pattern(end-count+1:end)))== size({regions(:).name}',1))
+        count = count+1;
+    end
+    suffix = pattern(end-count+2:end);
+else
+    suffix = '';
+end
+for i=1:length(files_regions)
+    root =  regions(i).name;
+    regions(i).name = root(length(prefix)+1:end-length(suffix));
+end
+
+% Adding patches from regions structure
+count = 0;
+for i = 1:length(regions)
+    % Color counter
+    % color = rand(1,3);
+    count = count+1;
+    str = lower(char(regions(i).name));
+    if contains(str,{'hpc';'ca1';'ca2';'ca3';'dg';'fc';'subic';'lent'})
+        delta = 10;
+    elseif contains(str,{'thal';'vpm';'po';'cpu-';'gp';'septal'})
+        delta = 20;
+    elseif contains(str,{'cortex';'rs';'ac';'s1';'lpta';'m12';'v1';'v2';'cg';'cx';'ptp'})
+        delta = 0;
+    else
+        delta = 30;
+    end
+    ind_color = min(delta+count,length(f.UserData.Colormap));
+    color = f.UserData.Colormap(ind_color,:);
+    
+    % Patch creation
+    hq = patch('XData',regions(i).patch_x,...
+        'YData',regions(i).patch_y,...
+        'FaceColor','none',...
+        'EdgeColor',color,...
+        'Tag',char(regions(i).name),...
+        'FaceAlpha',.5,...
+        'LineWidth',1,...
+        'Visible','on',...
+        'Parent',ax);
+    % Updating UserData
+    s.Name = char(regions(i).name);
+    s.Mask = regions(i).mask;
+    hq.UserData = s;
+    
+    %update table
+    region_table.UserData.patches = [region_table.UserData.patches;hq];
+    region_table.Data = [region_table.Data;{regions(i).name}];
+end
 
 end

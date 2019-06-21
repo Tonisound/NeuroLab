@@ -15,7 +15,7 @@ global SEED_REGION LAST_IM IM;
 %seed_region = '/Users/tonio/Documents/Spikoscope_RegionArchive/';
 seed_region = fullfile(SEED_REGION,'Spikoscope_RegionArchive');
 %file_E = strrep(file_session,'_MySession','_E_spiko_region_archive');
-file_E = strcat(file_session,'_spiko_region_archive');
+file_E = strcat(file_session,'_spiko_region_archive'); 
 dir_regions = dir(fullfile(seed_region,file_E,'Mask*'));
 
 %Sorting by datenum
@@ -327,28 +327,3 @@ actualize_plot(handles);
 success = true;
 
 end
-
-function pattern = largest_prefix(C)
-pattern = char(C(1,1));
-%while length(pattern)>1 && length(cell2mat(regexp(C,pattern)))<length(C)
-%    pattern = pattern(1:end-1);
-%end
-cur=1;
-while length(pattern)>1 && cur<length(C)
-    if isempty(strfind(char(C(cur,1)),pattern))
-        pattern = pattern(1:end-1);
-    else
-        cur = cur+1;
-    end
-end
-end
-
-function pattern = largest_suffix(C)
-Pattern = char(C(1,1));
-pattern = Pattern(end);
-while length(pattern)<length(Pattern) && length(cell2mat(regexp(C,pattern)))>=length(C)
-    pattern = Pattern(end-length(pattern):end);
-end
-pattern = pattern(2:end);
-end
-
