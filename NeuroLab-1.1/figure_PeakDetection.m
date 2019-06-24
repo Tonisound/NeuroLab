@@ -4,7 +4,7 @@ global DIR_SAVE FILES CUR_FILE START_IM END_IM;
 
 % Loading Time Reference
 if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file'))
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst','rec_mode');
 else
     warning('Missing Reference Time File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     return;
@@ -33,10 +33,12 @@ clrmenu(f2);
 f2.UserData.time_ref = time_ref;
 f2.UserData.n_burst = n_burst;
 f2.UserData.length_burst = length_burst;
+f2.UserData.rec_mode = rec_mode;
 f2.UserData.TimeTags = TimeTags;
 f2.UserData.TimeTags_strings = TimeTags_strings;
 f2.UserData.TimeTags_cell = TimeTags_cell;
 f2.UserData.g_colors = get(groot,'DefaultAxesColorOrder');
+f2.UserData.folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
 
 %Parameters
 L = 10;                      % Height top panels
@@ -490,99 +492,148 @@ end
 function update_popup_Callback(pu,~,handles)
 
 % Extracting EEG curves
-traces = handles.MainFigure.UserData.traces;
 time_ref = handles.MainFigure.UserData.time_ref;
 ax = handles.Ax1;
 channel = char(pu.String(pu.Value,:));
-str_traces = [];
-ind_keep = zeros(length(traces),1);
-% for i =1 : length(traces)
-%     if ~isempty(strfind(traces(i).UserData.Name,channel))
+folder_name = handles.MainFigure.UserData.folder_name;
+
+% traces = handles.MainFigure.UserData.traces;
+% str_traces = [];
+% ind_keep = zeros(length(traces),1);
+% for i =1 : length(traces) 
+%     temp = regexp(traces(i).UserData.Name,'/','split');
+%     if length(temp)>1 && strcmp(char(temp(2)),channel)
 %         ind_keep(i) = 1;
 %         str_traces =[str_traces;{traces(i).UserData.Name}];
 %     end
 % end
-for i =1 : length(traces) 
-    temp = regexp(traces(i).UserData.Name,'/','split');
-    if length(temp)>1 && strcmp(char(temp(2)),channel)
-        ind_keep(i) = 1;
-        str_traces =[str_traces;{traces(i).UserData.Name}];
-    end
-end
+% % patterns
+% traces = traces(ind_keep==1);
+% ind_glow = contains(str_traces,{'Gamma-low/';'Power-gammalow/'});
+% ind_gmid = contains(str_traces,{'Gamma-mid/';'Power-gammamid/'});
+% ind_gmidup = contains(str_traces,{'Gamma-mid-up/';'Power-gammamidup/'});
+% ind_ghigh = contains(str_traces,{'Gamma-high/';'Power-gammahigh/'});
+% ind_ghighup = contains(str_traces,{'Gamma-high-up/';'Power-gammahighup/'});
+% ind_ripple = contains(str_traces,{'Ripple/';'Power-ripple/'});
+% ind_theta = contains(str_traces,{'Phasic-theta/';'Power-theta/'});
 
-% patterns
-pattern_glow = {'Gamma-low/';'Power-gammalow/'};
-pattern_gmid = {'Gamma-mid/';'Power-gammamid/'};
-pattern_gmidup = {'Gamma-mid-up/';'Power-gammamidup/'};
-pattern_ghigh = {'Gamma-high/';'Power-gammahigh/'};
-pattern_ghighup = {'Gamma-high-up/';'Power-gammahighup/'};
-pattern_ripple = {'Ripple/';'Power-ripple/'};
-pattern_theta = {'Phasic-theta/';'Power-theta/'};
+% Loading directly from Sources_LFP 
+dir_traces = dir(fullfile(folder_name,'Sources_LFP','Power-*.mat'));
+dir_traces = dir_traces(contains({dir_traces(:).name}',sprintf('_%s',channel)));
+str_traces = {dir_traces(:).name}';
+ind_glow = contains(str_traces,{'gammalow_'});
+ind_gmid = contains(str_traces,{'gammamid_'});
+ind_gmidup = contains(str_traces,{'gammamidup_'});
+ind_ghigh = contains(str_traces,{'gammahigh_'});
+ind_ghighup = contains(str_traces,{'gammahighup_'});
+ind_ripple = contains(str_traces,{'ripple_'});
+ind_theta = contains(str_traces,{'theta_'});
 
-traces = traces(ind_keep==1);
-% ind_glow = ~(cellfun('isempty',strfind(str_traces,pattern_glow)));
-% ind_gmid = ~(cellfun('isempty',strfind(str_traces,pattern_gmid)));
-% ind_gmidup = ~(cellfun('isempty',strfind(str_traces,pattern_gmidup)));
-% ind_ghigh = ~(cellfun('isempty',strfind(str_traces,pattern_ghigh)));
-% ind_ghighup = ~(cellfun('isempty',strfind(str_traces,pattern_ghighup)));
-% ind_ripple = ~(cellfun('isempty',strfind(str_traces,pattern_ripple)));
-% ind_theta = ~(cellfun('isempty',strfind(str_traces,pattern_theta)));
-ind_glow = contains(str_traces,pattern_glow);
-ind_gmid = contains(str_traces,pattern_gmid);
-ind_gmidup = contains(str_traces,pattern_gmidup);
-ind_ghigh = contains(str_traces,pattern_ghigh);
-ind_ghighup = contains(str_traces,pattern_ghighup);
-ind_ripple = contains(str_traces,pattern_ripple);
-ind_theta = contains(str_traces,pattern_theta);
-
+f_samp = .1;
 if sum(ind_glow)>0
-    x_glow = traces(ind_glow).UserData.X(:);
-    y_glow = traces(ind_glow).UserData.Y(:);
+%     x_glow = traces(ind_glow).UserData.X(:);
+%     y_glow = traces(ind_glow).UserData.Y(:);
+    data_channel = load(fullfile(dir_traces(ind_glow).folder,dir_traces(ind_glow).name));
+    x_glow = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+    y_glow = data_channel.Y;
+    %Resamp
+    y_glow = interp1(x_glow,y_glow,(data_channel.x_start:f_samp:data_channel.x_end)');
+    x_glow = (data_channel.x_start:f_samp:data_channel.x_end)';
 else
     x_glow = time_ref.Y;
     y_glow = NaN(size(time_ref.Y));
+    %y_glow = rand(size(x_glow));
+    warning('No trace found Gamma Low [%s]',channel);
 end
 if sum(ind_gmid)>0
-    x_gmid = traces(ind_gmid).UserData.X(:);
-    y_gmid = traces(ind_gmid).UserData.Y(:);
+%     x_gmid = traces(ind_gmid).UserData.X(:);
+%     y_gmid = traces(ind_gmid).UserData.Y(:);
+    data_channel = load(fullfile(dir_traces(ind_gmid).folder,dir_traces(ind_gmid).name));
+    x_gmid = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+    y_gmid = data_channel.Y;
+    %Resamp
+    y_gmid= interp1(x_gmid,y_gmid,(data_channel.x_start:f_samp:data_channel.x_end)');
+    x_gmid= (data_channel.x_start:f_samp:data_channel.x_end)';
 else
     x_gmid = time_ref.Y;
     y_gmid = NaN(size(time_ref.Y));
+    % y_gmid = rand(size(x_gmid));
+    warning('No trace found Gamma Mid [%s]',channel);
 end
 if sum(ind_gmidup)>0
-    x_gmidup = traces(ind_gmidup).UserData.X(:);
-    y_gmidup = traces(ind_gmidup).UserData.Y(:);
+%     x_gmidup = traces(ind_gmidup).UserData.X(:);
+%     y_gmidup = traces(ind_gmidup).UserData.Y(:);
+    data_channel = load(fullfile(dir_traces(ind_gmidup).folder,dir_traces(ind_gmidup).name));
+    x_gmidup = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+    y_gmidup = data_channel.Y;
+    %Resamp
+    y_gmidup = interp1(x_gmidup,y_gmidup,(data_channel.x_start:f_samp:data_channel.x_end)');
+    x_gmidup = (data_channel.x_start:f_samp:data_channel.x_end)';
 else
     x_gmidup = time_ref.Y;
     y_gmidup = NaN(size(time_ref.Y));
+    % y_gmidup = rand(size(x_gmidup));
+    warning('No trace found Gamma Mid Up [%s]',channel);
 end
 if sum(ind_ghigh)>0
-    x_ghigh = traces(ind_ghigh).UserData.X(:);
-    y_ghigh = traces(ind_ghigh).UserData.Y(:);
+%     x_ghigh = traces(ind_ghigh).UserData.X(:);
+%     y_ghigh = traces(ind_ghigh).UserData.Y(:);
+    data_channel = load(fullfile(dir_traces(ind_ghigh).folder,dir_traces(ind_ghigh).name));
+    x_ghigh = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+    y_ghigh = data_channel.Y;
+    %Resamp
+    y_ghigh = interp1(x_ghigh,y_ghigh,(data_channel.x_start:f_samp:data_channel.x_end)');
+    x_ghigh = (data_channel.x_start:f_samp:data_channel.x_end)';
 else
     x_ghigh = time_ref.Y;
     y_ghigh = NaN(size(time_ref.Y));
+    % y_ghigh = rand(size(x_ghigh));
+    warning('No trace found Gamma High [%s]',channel);
 end
 if sum(ind_ghighup)>0
-    x_ghighup = traces(ind_ghighup).UserData.X(:);
-    y_ghighup = traces(ind_ghighup).UserData.Y(:);
+%     x_ghighup = traces(ind_ghighup).UserData.X(:);
+%     y_ghighup = traces(ind_ghighup).UserData.Y(:);
+    data_channel = load(fullfile(dir_traces(ind_ghighup).folder,dir_traces(ind_ghighup).name));
+    x_ghighup = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+    y_ghighup = data_channel.Y;
+    %Resamp
+    y_ghighup = interp1(x_ghighup,y_ghighup,(data_channel.x_start:f_samp:data_channel.x_end)');
+    x_ghighup = (data_channel.x_start:f_samp:data_channel.x_end)';
 else
     x_ghighup = time_ref.Y;
     y_ghighup = NaN(size(time_ref.Y));
+    % y_ghighup = rand(size(x_ghighup));
+    warning('No trace found Gamma High Up [%s]',channel);
 end
 if sum(ind_ripple)>0
-    x_ripple = traces(ind_ripple).UserData.X(:);
-    y_ripple = traces(ind_ripple).UserData.Y(:);
+%     x_ripple = traces(ind_ripple).UserData.X(:);
+%     y_ripple = traces(ind_ripple).UserData.Y(:);
+    data_channel = load(fullfile(dir_traces(ind_ripple).folder,dir_traces(ind_ripple).name));
+    x_ripple = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+    y_ripple = data_channel.Y;
+    %Resamp
+    y_ripple = interp1(x_ripple,y_ripple,(data_channel.x_start:f_samp:data_channel.x_end)');
+    x_ripple = (data_channel.x_start:f_samp:data_channel.x_end)';
 else
     x_ripple = time_ref.Y;
     y_ripple = NaN(size(time_ref.Y));
+    % y_ripple = rand(size(x_ripple));
+    warning('No trace found Ripple [%s]',channel);
 end
 if sum(ind_theta)>0
-    x_theta = traces(ind_theta).UserData.X(:);
-    y_theta = traces(ind_theta).UserData.Y(:);
+%     x_theta = traces(ind_theta).UserData.X(:);
+%     y_theta = traces(ind_theta).UserData.Y(:);
+    data_channel = load(fullfile(dir_traces(ind_theta).folder,dir_traces(ind_theta).name));
+    x_theta = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+    y_theta = data_channel.Y;
+    %Resamp
+    y_theta = interp1(x_theta,y_theta,(data_channel.x_start:f_samp:data_channel.x_end)');
+    x_theta = (data_channel.x_start:f_samp:data_channel.x_end)';
 else
     x_theta = time_ref.Y;
     y_theta = NaN(size(time_ref.Y));
+    %y_theta = rand(size(x_theta));
+    warning('No trace found Theta [%s]',channel);
 end
 
 
@@ -659,8 +710,15 @@ plot(x_ghighup,y_ghighup,'Tag','ghighup','LineWidth',2,'Parent',ax,'Color',g_col
 plot(x_ripple,y_ripple,'Tag','ripple','LineWidth',2,'Parent',ax,'Color',g_colors(6,:));
 plot(x_theta,y_theta,'k','Tag','theta','LineWidth',.5,'Parent',ax);
 ax.YLabel.String = 'LFP filtered'; 
-legend(ax,{'gamma low';'gamma mid';'gamma mid up';'gamma high';'gamma high up';'ripple';'theta'},'Tag','Legend');
+label_lfp = {'gamma low';'gamma mid';'gamma mid up';'gamma high';'gamma high up';'ripple';'theta'};
+legend(ax,label_lfp,'Tag','Legend');
 hold(ax,'off');
+
+% Visible/Not vsible
+all_boxes = findobj(handles.MainTab,'Tag','BoxVisible');
+for i =1:length(all_boxes)
+    boxVisible_Callback(all_boxes(i),[]);
+end
 
 % Storing
 handles.MainFigure.UserData.t_gauss_lfp = t_gauss;
