@@ -57,7 +57,7 @@ e4_def = '1';
 e4_tip = 'CBV Gaussian smoothing';
 e5_def = '5';
 e5_tip = 'Marker Size';
-e6_def = '.01';
+e6_def = '.1';
 e6_tip = 'Step size';
 e7_def = '-20';
 e7_tip = 'Thresh_inf (s)';
@@ -461,6 +461,7 @@ t_gauss = str2double(handles.Edit3.String);
 ax = handles.Ax_LFP;
 channel = char(pu.String(pu.Value,:));
 folder_name = handles.MainFigure.UserData.folder_name;
+time_ref = handles.MainFigure.UserData.time_ref;
 
 % traces = handles.MainFigure.UserData.traces;
 % str_traces = [];
@@ -813,6 +814,7 @@ if strcmp(rec_mode,'BURST')
     end
     %renaming
     x_im = xq;
+    handles.MainFigure.UserData.x_im = x_im;
     y_cortex = yq(1,:);
     y_hpc = yq(2,:);
     y_thal = yq(3,:);
@@ -820,11 +822,19 @@ if strcmp(rec_mode,'BURST')
 end
 
 % Gaussian Smoothing
+% delta = x_im(2)-x_im(1);
+% y_cortex = imgaussfilt(y_cortex,round(t_gauss/delta));
+% y_hpc = imgaussfilt(y_hpc,round(t_gauss/delta));
+% y_thal = imgaussfilt(y_thal,round(t_gauss/delta));
+% y_whole = imgaussfilt(y_whole,round(t_gauss/delta));
 delta = x_im(2)-x_im(1);
-y_cortex = imgaussfilt(y_cortex,round(t_gauss/delta));
-y_hpc = imgaussfilt(y_hpc,round(t_gauss/delta));
-y_thal = imgaussfilt(y_thal,round(t_gauss/delta));
-y_whole = imgaussfilt(y_whole,round(t_gauss/delta));
+w = gausswin(round(2*t_gauss/delta));
+s=sum(w);
+w = w/s;
+y_cortex = s*nanconv(y_cortex,w,'same');
+y_hpc = s*nanconv(y_hpc,w,'same');
+y_thal = s*nanconv(y_thal,w,'same');
+y_whole = s*nanconv(y_whole,w,'same');
 
 % Plotting fus
 g_colors = handles.MainFigure.UserData.g_colors;
@@ -845,7 +855,7 @@ for i =1:length(all_boxes)
 end
 
 % Storing CBV data
-CBV_data = NaN(length(lines),size(x_im,2));
+CBV_data = NaN(length(lines),length(x_im));
 label_channels = cell(length(lines),1);
 x_im = [handles.MainFigure.UserData.time_ref.Y;NaN];
 for i =1:length(lines)
@@ -870,13 +880,18 @@ for i =1:length(lines)
         y = yq;
     end
     
-    y = imgaussfilt(y,round(t_gauss/delta));
-    CBV_data(i,:) = y;
+    %y = imgaussfilt(y,round(t_gauss/delta));
+    w = gausswin(round(2*t_gauss/delta));
+    s = sum(w);
+    w = w/s;
+    y_conv = s*nanconv(y,w,'same');
+    CBV_data(i,:) = y_conv;
+    
 end
 
 %renaming
 if strcmp(rec_mode,'BURST')
-x_im = xq;
+    x_im = xq;
 end
 
 % Storing 
@@ -920,6 +935,7 @@ g_colors = handles.MainFigure.UserData.g_colors;
 time_ref = handles.MainFigure.UserData.time_ref;
 TimeTags = handles.MainFigure.UserData.TimeTags;
 TimeTags_strings = handles.MainFigure.UserData.TimeTags_strings;
+rec_mode = handles.MainFigure.UserData.rec_mode;
 
 % Storing Timing
 x_start = handles.Ax_LFP.XLim(1);
@@ -1021,16 +1037,16 @@ end
 
 % Building S_fus
 S_fus = struct('x',[],'y',[],'name',[]);
-S_fus(1).x = x_im;
+S_fus(1).x = x_im(:);
 S_fus(1).y = y_cortex(:);
 S_fus(1).name = 'cortex';
-S_fus(2).x = x_im;
+S_fus(2).x = x_im(:);
 S_fus(2).y = y_hpc(:);
 S_fus(2).name = 'hpc';
-S_fus(3).x = x_im;
+S_fus(3).x = x_im(:);
 S_fus(3).y = y_thal(:);
 S_fus(3).name = 'thal';
-S_fus(4).x = x_im;
+S_fus(4).x = x_im(:);
 S_fus(4).y = y_whole(:);
 S_fus(4).name = 'whole';
 
@@ -1068,7 +1084,7 @@ thresh_sup = str2double(handles.Edit8.String);
 thresh_step = str2double(handles.Edit6.String);
 %thresh_step = .1;
 thresh_dom = thresh_inf:thresh_step:thresh_sup;
-marker_type = {'o','*','diamond','.'};
+%marker_type = {'o','*','diamond','.'};
 markersize = str2double(handles.Edit5.String);
 
 % Reinitialize panels
@@ -1081,30 +1097,55 @@ R_peak = NaN(n_fus,n_lfp);
 T_peak = NaN(n_fus,n_lfp);
 X_corr = NaN(n_fus,n_lfp,length(thresh_dom));
 
+h = waitbar(0,'Please wait');
+count =0;
 for j =1:length(S_fus)
-    ind_notnan = (~isnan(S_fus(j).x)).*(~isnan(S_fus(j).y));
+    %ind_notnan = (~isnan(S_fus(j).x)).*(~isnan(S_fus(j).y));
+    ind_notnan = (~isnan(S_fus(j).x));
     xfus = S_fus(j).x(ind_notnan==1);
     yfus = S_fus(j).y(ind_notnan==1);
     %name_ref = S_fus(j).name;
     
     for i=1:length(S_lfp)
+        count = count+1;
         ax = findobj(handles.FirstTab,'Tag',sprintf('Ax%d-%d',j,i));
         xlfp = S_lfp(i).x;
         ylfp = S_lfp(i).y;
-        x_ref = max(xlfp(1),xfus(1)):thresh_step: min(xlfp(end),xfus(end));
+        x_ref = (max(xlfp(1),xfus(1)):thresh_step: min(xlfp(end),xfus(end)))';
         y_fus = interp1(xfus,yfus,x_ref);
         y_lfp = interp1(xlfp,ylfp,x_ref);
         
         % normalization
-        y_fus = (y_fus-mean(y_fus))/std(y_fus);
-        y_lfp = (y_lfp-mean(y_lfp))/std(y_lfp);
+        y_fus = (y_fus-mean(y_fus,'omitnan'))/std(y_fus,[],'omitnan');
+        y_lfp = (y_lfp-mean(y_lfp,'omitnan'))/std(y_lfp,[],'omitnan');
 
-        % compute xcorr
-        [r,lags] = xcorr(y_fus(:),y_lfp(:),'coeff');
-        lags = lags*thresh_step;
-        ind_keep = ((lags>=thresh_inf).*(lags<=thresh_sup))';
-        r = r(ind_keep==1);
-        lags = lags(ind_keep==1);
+        if strcmp(rec_mode,'BURST')
+            % compute xcorr with NaN
+            
+            lags = thresh_inf:thresh_step:thresh_sup;
+            r = zeros(length(lags),1);
+            for k = 1:length(lags)
+                lag = lags(k);
+                step = round(lag/thresh_step);
+                if lag==0
+                    r(k) = corr(y_fus,y_lfp,'rows','complete');
+                elseif lag>0
+                    r(k) = corr(y_fus(step+1:end),y_lfp(1:end-step),'rows','complete');
+                elseif lag<0
+                    r(k) = corr(y_fus(1:end-abs(step)),y_lfp(abs(step)+1:end),'rows','complete');
+                end
+            end
+        else
+            % compute xcorr
+            [r,lags] = xcorr(y_fus(:),y_lfp(:),'coeff');
+            lags = lags*thresh_step;
+            ind_keep = ((lags>=thresh_inf).*(lags<=thresh_sup))';
+            r = r(ind_keep==1);
+            lags = lags(ind_keep==1);
+        end
+        prop = count/(length(S_fus)*length(S_lfp));
+        waitbar(prop,h,sprintf('Computing lagged correlations %.1f %% completed',100*prop));
+        
         % max corr
         [rmax,ind_max] = max(r);
         rmin = min(r);
@@ -1189,6 +1230,7 @@ for j =1:length(S_fus)
         
     end
 end
+close(h);
 
 fprintf(' done\n');
 handles.MainFigure.Pointer = 'arrow';
