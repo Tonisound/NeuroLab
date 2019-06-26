@@ -46,6 +46,7 @@ ax2.XLim = [.5,size(Doppler_film,3)+5];
 delta = max(test)-min(test);
 ax2.YLim = [min(test)-.1*delta,max(test)+.1*delta];
 ax2.UserData = [];
+ax2.YScale = 'log';
 
 line('XData',t,'YData',test,'Color','k','LineWidth',1,'Parent',ax2);
 l_thresh = line('XData',[.5,size(Doppler_film,3)+5],'YData',[thresh,thresh],...

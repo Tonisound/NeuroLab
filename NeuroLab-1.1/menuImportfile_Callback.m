@@ -107,7 +107,13 @@ for i = 1:length(FileList)
         temp = regexp(FileName,session,'split');
         parent = strrep(char(temp(1)),SEED,'');
         % parent = parent(1:end-1);
-        parent = strrep(parent,filesep,'');
+        %parent = strrep(parent,filesep,'');
+        if strcmp(parent(1),filesep)
+            parent = parent(2:end);
+        end
+        if strcmp(parent(end),filesep)
+            parent = parent(1:end-1);
+        end
         % Extracting recording
         recording = char(FileName_split(end));
     else

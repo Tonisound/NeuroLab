@@ -155,7 +155,7 @@ ft.UserData.Selection = [];
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
 D = [cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Trace Edition'};{'Import Reference Time'};{'Import LFP Configuration'};{'Actualize Traces'};{'Save UF Params'}];
+    {'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Import Reference Time'};{'Import LFP Configuration'};{'Actualize Traces'};{'Save UF Params'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -488,7 +488,7 @@ for i = 1:length(ind_files)
                 case 'Edit Time Groups'
                     success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                         
-                case 'Import Regions'
+                case 'Import Anatomical Regions'
                     success = import_regions(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
                 case 'Import LFP Traces'
@@ -548,6 +548,12 @@ for i = 1:length(ind_files)
                     
                 case 'Actualize Traces'
                     success = actualize_traces(myhandles);
+                    
+                case 'Time Tag Edition'
+                    success = menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
+                    
+                case 'Time Group Edition'
+                    success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                     
                 case 'Save UF Params'
                     success = saving_UFParams(fullfile(FILES(ii).fullpath,FILES(ii).dir_fus),fullfile(DIR_SAVE,FILES(ii).nlab));
