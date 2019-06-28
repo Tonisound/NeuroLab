@@ -39,8 +39,11 @@ switch strtrim(str(val,:))
 %     case 'Filter LFP for theta'
 %         filter_lfp_theta(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
 
-    case 'Export Anatomical Regions'
+    case 'Export Patches'
         export_patches(handles);
+        
+    case 'Export Anatomical Regions'
+        export_regions(handles,FILES(CUR_FILE).recording);
         
     case 'Export IMO file'
         export_imofile(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),SEED_SPIKO,FILES(CUR_FILE).session);

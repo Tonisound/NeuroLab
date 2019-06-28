@@ -509,6 +509,9 @@ for i = 1:length(ind_files)
                 case 'Export LFP bands'
                     % in this case 1 select band manually, else 0 for all bands
                     success = export_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                                    
+                case 'Export Anatomical Regions'
+                    success = export_regions(myhandles,FILES(ii).recording,0);
                 
                 case 'Export Binary Masks'
                     success = export_binary_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii),myhandles,0);

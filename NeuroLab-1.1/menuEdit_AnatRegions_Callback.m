@@ -47,7 +47,7 @@ table_region.Units = 'normalized';
 table_region.UserData.Selection = [];
 
 % OK & CANCEL Buttons
-newButton = uicontrol('Style','pushbutton',...
+newButton = uicontrol('Style','pushbutton',... 
     'Units','normalized',...
     'String','New',...
     'Tag','newButton',...
@@ -67,11 +67,16 @@ removeButton = uicontrol('Style','pushbutton',...
     'String','Remove',...
     'Tag','removeButton',...
     'Parent',f);
+mergeButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Merge',...
+    'Tag','mergeButton',...
+    'Parent',f);
 
 
 l_mean = findobj(handles.RightAxes,'Tag','Trace_Mean');
 l_cursor = findobj(handles.RightAxes,'Tag','Cursor');
-ax_mean = axes('Parent',f,'YTick',[],...
+ax_mean = axes('Parent',f,'YTick',[],'Tag','AxMean',...
     'YTickLabel','','YLim',[min(l_mean.YData,[],'omitnan') max(l_mean.YData,[],'omitnan')]);
 %set(ax_mean,'ButtonDownFcn',{@template_axes_clickFcn,ax_mean});
 
@@ -123,8 +128,15 @@ boxSuf = uicontrol('Style','checkbox',...
 
 boxMask = uicontrol('Style','checkbox',...
     'Units','normalized',...
-    'String','Mask Display',...
+    'String','Show masks',...
+    'Value',0,...
     'Tag','boxMask',...
+    'Parent',f);
+boxEdit = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Edit names',...
+    'Value',0,...
+    'Tag','boxEdit',...
     'Parent',f);
 okButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
@@ -146,16 +158,18 @@ newButton.Position = [.825 .9 .15 .05];
 drawButton.Position = [.825 .85 .15 .05];
 applyButton.Position = [.825 .8 .15 .05];
 removeButton.Position = [.825 .75 .15 .05];
+mergeButton.Position = [.825 .7 .15 .05];
 
-ax_mean.Position = [.825 .5 .15 .1];
-t1.Position = [.9 .6 .075 .05];
-pu1.Position = [.825 .6 .075 .05];
-importButton.Position = [.825 .35 .15 .05];
-exportButton.Position = [.825 .3 .15 .05];
+t1.Position = [.9 .55 .075 .05];
+pu1.Position = [.825 .55 .075 .05];
+ax_mean.Position = [.825 .45 .15 .1];
+boxPref.Position = [.825 .35 .075 .05];
+boxSuf.Position = [.9 .35 .075 .05];
+importButton.Position = [.825 .3 .15 .05];
+exportButton.Position = [.825 .25 .15 .05];
 
-boxPref.Position = [.825 .4 .075 .05];
-boxSuf.Position = [.9 .4 .075 .05];
-boxMask.Position = [.825 .15 .15 .05];
+boxMask.Position = [.825 .15 .075 .05];
+boxEdit.Position = [.9 .15 .075 .05];
 okButton.Position = [.825 .1 .15 .05];
 cancelButton.Position = [.825 .05 .15 .05];
 
@@ -165,9 +179,11 @@ set(newButton,'Callback',{@newButton_callback,handles2});
 set(drawButton,'Callback',{@drawButton_callback,handles2});
 set(applyButton,'Callback',{@applyButton_callback,handles2});
 set(removeButton,'Callback',{@removeButton_callback,handles2});
+set(mergeButton,'Callback',{@mergeButton_callback,handles2});
 set(okButton,'Callback',{@okButton_callback,handles,handles2});
 set(cancelButton,'Callback',{@cancelButton_callback,handles2});
 set(boxMask,'Callback',{@boxMask_Callback,handles2});
+set(boxEdit,'Callback',{@boxEdit_Callback,handles2});
 
 
 % Changing main image
@@ -276,13 +292,14 @@ function drawButton_callback(hObj,~,handles)
 marker_size = 5;
 line_width = 1;
 marker_type = 'o';
-marker_color = 'w';
+marker_color = 'r';
 
 delete(findobj(handles.AxEdit,'Tag','Marker'));
 delete(findobj(handles.AxEdit,'Tag','Line'));
 
 xdata = [];
 ydata = [];
+handles.EditFigure.CurrentAxes = handles.AxEdit;
 [x,y,button] = ginput(1);
 x = round(x);
 y = round(y);
@@ -290,7 +307,7 @@ y = round(y);
 while button==1
     % marker
     line(x,y,'Tag','Marker','Marker',marker_type,'MarkerSize',marker_size,...
-        'MarkerFaceColor','none','MarkerEdgeColor',marker_color,'Parent',handles.AxEdit);
+        'MarkerFaceColor',marker_color,'MarkerEdgeColor',marker_color,'Parent',handles.AxEdit)
     % line
     if ~isempty(xdata)
         line([x,xdata(end)],[y,ydata(end)],'Tag','Line',...
@@ -298,7 +315,7 @@ while button==1
     end
     xdata = [xdata;x];
     ydata = [ydata;y];
-    [x,y,button] = ginput(1);    
+    [x,y,button] = ginput(1);
 end
 
 if length(xdata)>1
@@ -324,6 +341,8 @@ if ~isempty(handles.drawButton.UserData)
     selection = handles.Region_table.UserData.Selection;
     
     if ~isempty(selection)
+        % apply only to first region
+        selection = selection(1);
         str = char(handles.Region_table.Data(selection,:));
         p = findobj(handles.EditFigure,'Tag',str);
         p.XData = xdata;
@@ -359,9 +378,71 @@ elseif ~isempty(selection)
     delete(handles.Region_table.UserData.patches(selection));   
     handles.Region_table.UserData.patches(selection)=[];
     handles.Region_table.Data(selection,:)=[];
+    
 else
     errordlg('Select region to remove.');
     return;
+end
+
+end
+
+function mergeButton_callback(~,~,handles)
+% Merge selected patches
+
+selection = handles.Region_table.UserData.Selection;
+
+if ~isempty(selection) && length(selection)>1
+    
+    D = handles.Region_table.Data(selection);
+    %Largest Prefix
+    pattern = char(D(1));
+    count=0;
+    while (count <= length(pattern)) && (sum(contains(D,pattern(1:count)))== size(D,1))
+        count = count+1;
+    end
+    prefix = pattern(1:count-1);
+    
+    while strcmp(prefix(end),'-') || strcmp(prefix(end),'_')
+        prefix = prefix(1:end-1);
+    end
+    
+    % Mask
+    P = handles.Region_table.UserData.patches(selection);
+    all_mask = [];
+    all_colors = [];
+    for i=1:length(P)
+        mask = P(i).UserData.Mask;
+        all_mask = cat(3,all_mask,mask);
+        all_colors = cat(3,all_colors,P(i).EdgeColor);
+    end
+    new_mask = double(sum(all_mask,3)>0);
+    new_color = mean(all_colors,3);
+    % Patch
+    % Adding whole region
+    [y,x]= find(new_mask'==1);
+    k = convhull(x,y);
+    pxdata = x(k);
+    pydata = y(k);
+    
+    % patch creation
+    hq = patch('XData',pydata,...
+        'YData',pxdata,...
+        'FaceColor','none',...
+        'EdgeColor',new_color,...
+        'Tag',prefix,...
+        'FaceAlpha',.5,...
+        'LineWidth',1,...
+        'Visible','on',...
+        'Parent',handles.AxEdit);
+    % Updating UserData
+    s.Name = prefix;
+    s.Mask = new_mask;
+    hq.UserData = s;
+    
+    %update table
+    handles.Region_table.UserData.patches = [handles.Region_table.UserData.patches;hq];
+    handles.Region_table.Data = [handles.Region_table.Data;s.Name];
+
 end
 
 end
@@ -467,10 +548,22 @@ end
 
 end
 
+function boxEdit_Callback(src,~,handles)
+
+table = handles.Region_table;
+if src.Value
+    table.ColumnEditable = true;
+else
+    table.ColumnEditable = false;
+end
+
+end
+
 function uitable_select(hObj,evnt)
 
 if ~isempty(evnt.Indices)
-    hObj.UserData.Selection = unique(evnt.Indices(1,1));
+    %hObj.UserData.Selection = unique(evnt.Indices(1,1));
+    hObj.UserData.Selection = unique(evnt.Indices(:,1));
 else
     hObj.UserData.Selection = [];
 end
@@ -481,9 +574,14 @@ for i =1:length(patches)
      patches(i).LineWidth = 1;
      patches(i).FaceColor = 'none';
 end
-if ~isempty(hObj.UserData.Selection)
-    patches(hObj.UserData.Selection).LineWidth = 2;
-    patches(hObj.UserData.Selection).FaceColor = patches(hObj.UserData.Selection).EdgeColor;
+
+selection = hObj.UserData.Selection;
+if ~isempty(selection)
+    for j =1:length(selection)
+        index = selection(j);
+        patches(index).LineWidth = 2;
+        patches(index).FaceColor = patches(index).EdgeColor;
+    end
 end
 
 end

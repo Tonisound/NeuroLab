@@ -485,7 +485,7 @@ time_ref = handles.MainFigure.UserData.time_ref;
 
 % Loading directly from Sources_LFP 
 dir_traces = dir(fullfile(folder_name,'Sources_LFP','Power-*.mat'));
-dir_traces = dir_traces(contains({dir_traces(:).name}',sprintf('_%s',channel)));
+dir_traces = dir_traces(contains({dir_traces(:).name}',sprintf('_%s.',channel)));
 str_traces = {dir_traces(:).name}';
 ind_glow = contains(str_traces,{'gammalow_'});
 ind_gmid = contains(str_traces,{'gammamid_'});

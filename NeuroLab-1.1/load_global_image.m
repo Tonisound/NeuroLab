@@ -21,12 +21,14 @@ end
 
 switch index
     case 1
+        % Doppler_film
         fprintf('Loading Doppler_film ...\n');
         data_l = load(fullfile(folder_name,'Doppler.mat'),'Doppler_film');
         fprintf('Doppler_film loaded : %s\n',fullfile(folder_name,'Doppler.mat'));
         IM = data_l.Doppler_film;
         
-    case 2 
+    case 2
+        % Doppler_normalized
         if exist(fullfile(folder_name,'Doppler_normalized.mat'),'file')
             fprintf('Loading Doppler_normalized ...\n');
             data_l = load(fullfile(folder_name,'Doppler_normalized.mat'));
@@ -37,9 +39,15 @@ switch index
         end
         IM = data_l.Doppler_normalized;
     case 3
+        % Differential Movie
         im_diff = diff(IM,1,3);
         IM = cat(3,im_diff,im_diff(:,:,end));
-
+    case 4
+        % Doppler_dB
+        fprintf('Loading Doppler_film ...\n');
+        data_l = load(fullfile(folder_name,'Doppler.mat'),'Doppler_film');
+        fprintf('Doppler_film loaded : %s\n',fullfile(folder_name,'Doppler.mat'));
+        IM = 20*log10(abs(data_l.Doppler_film)/max(max(abs(data_l.Doppler_film(:,:,CUR_IM)))));
 end
 
 % Gaussian window

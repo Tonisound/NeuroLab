@@ -51,7 +51,7 @@ end
 X = size(data_r.Mask,2);
 Y = size(data_r.Mask,1);
 z = 0;
-    
+
 for i =1:size(all_binary,3)
     %region_name = sprintf('fUS-Region-%03d_%d_%d.U8',i,X,Y);
     region_name = assign_name(binary_count(i),X,Y);
@@ -68,7 +68,7 @@ for i =1:size(all_binary,3)
     fwrite(fileID,z,'uint8');
     fwrite(fileID,Y,'uint8');
     fwrite(fileID,mask,'uint8');
-
+    
     fclose(fileID);
 end
 
@@ -84,11 +84,21 @@ switch counter
     case 0
         region = 'Whole-reg';
     case 2
-        region = 'S1ULp-L';
+        region = 'S1J-L';
+    case 6
+        region = 'S1FL-L';
+    case 8
+        region = 'AIV-L';
     case 10
         region = 'M1-L';
     case 16
+        region = 'fmi-L';
+    case 20
         region = 'CPu-L';
+    case 23
+        region = 'AcbC-L';
+    case 27
+        region = 'M2-L';
     case 29
         region = 'Cg1-L';
     case 33
@@ -97,12 +107,22 @@ switch counter
         region = 'Cg1-R';
     case 53
         region = 'Cg2-R';
+    case 62
+        region = 'M2-R';
     case 71
+        region = 'fmi-R';
+    case 77
+        region = 'AcbC-R';
+    case 78
         region = 'CPu-R';
     case 84
-        region = 'M2-R';
+        region = 'M1-R';
+    case 90
+        region = 'AIV-R';
+    case 91
+        region = 'S1FL-R';
     case 96
-        region = 'S1ULp-R';
+        region = 'S1J-R';
     otherwise
         region = sprintf('%03d',counter);
 end

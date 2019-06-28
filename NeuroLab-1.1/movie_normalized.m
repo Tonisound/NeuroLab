@@ -244,6 +244,8 @@ f = figure('Name',sprintf('fUS-EEG Recording - %s (%s)',FILES(CUR_FILE).nlab,str
     'Colormap',handles.MainFigure.Colormap,...
     'KeyPressFcn',{@f_keypress_fcn},...
     'Toolbar','none');
+e0 = uicontrol(f,'Units','normalized','Style','edit','Tag','Edit0',...
+    'String','','TooltipString','pause between frame (s)');
 % Time Tags
 t1 = uicontrol(f,'Units','normalized','Style','text',...
     'String','','FontWeight','bold','TooltipString','Time');
@@ -297,7 +299,7 @@ e2 = uicontrol(f,'Units','normalized','Style','edit',...
 cb2 = uicontrol(f,'Units','normalized','Style','Checkbox',...
     'TooltipString','YLimMode traces');
 e3 = uicontrol(f,'Units','normalized','Style','edit',...
-    'Visible','off','TooltipString','CLim min');
+    'Visible','off','TooltipString','CLim autoscale factor');
 cb3 = uicontrol(f,'Units','normalized','Style','Checkbox',...
     'TooltipString','CLimMode Spectrograms');
 e4 = uicontrol(f,'Units','normalized','Style','edit',...
@@ -318,6 +320,7 @@ factor_zoom = 1.1;
 t_start= t_start_0;
 f.UserData.flag = 1;
 f.UserData.t_video = .1;                % Video Speed
+e0.String = sprintf('%.3f',f.UserData.t_video);
 f.UserData.t_lfp = t_lfp_0;             % Temporal window
 f.UserData.add_dir = add_dir;
 f.UserData.filename = FILES(CUR_FILE).nlab;
@@ -495,7 +498,7 @@ for i=1:l1
     
     % Plotting Cursor
     y_inf = 100000;
-    c = line([NaN NaN],[-y_inf y_inf],'Parent',ax,'LineWidth',1,'Color',[.5 .5 .5]);
+    c = line([NaN NaN],[-y_inf y_inf],'Parent',ax,'LineWidth',1,'Color',[.5 .5 .5],'Tag','Cursor');
     c.Tag = sprintf('Cursor%d',i);
     
     % Storing data
@@ -507,6 +510,7 @@ for i=1:l1
     Y = [Y_sup;Y;NaN(1e6,1)];
     
     ax.UserData.Y = Y;
+    ax.UserData.Tag = l(i).Tag;
     %ax.UserData.X = [X_sup;X];
     
     s = Y(floor(t(START_IM)/delta):floor(t(END_IM)/delta),1);
@@ -577,6 +581,7 @@ ax_im.Position = [.05 .525 .25 .375];
 ax_im2.Position = [.05 .1 .25 .375];
 cbar.Position = [.31 .525 .02 .375];
 
+e0.Position = [.91 .925 .08 .05];
 t1.Position = [.91 .85 .08 .05];
 t2.Position = [.91 .8 .08 .05];
 t3.Position = [.91 .75 .08 .05];
@@ -622,10 +627,13 @@ i = START_IM;
 while i>=START_IM && i<=END_IM
     if ishandle(f)
         tic
-        
+        disp('coucou')
         f.UserData.i = i;
         t_lfp = f.UserData.t_lfp;
-        t_video = f.UserData.t_video;
+        
+        t_video = str2double(e0.String);
+        f.UserData.t_video = t_video;
+        %t_video = f.UserData.t_video;
         %Update timing
         t1.String = sprintf('%s',datestr(t(i)/(24*3600),'HH:MM:SS.FFF'));
         t2.String = sprintf('%d/%d',i,END_IM);
@@ -743,13 +751,20 @@ while i>=START_IM && i<=END_IM
                 cb2.String = 'manual';
                 ax.YLimMode = 'manual';
                 e3.Visible = f.UserData.button_visible;
-                %factor = str2double(e3.String);
-                %lim_inf = ax.UserData.mean-factor*ax.UserData.stdev;
-                %lim_sup = ax.UserData.mean+factor*ax.UserData.stdev;
-                lim_inf = min(ax.UserData.series(:));
-                lim_sup = max(ax.UserData.series(:));
-                %                 lim_inf = lim_inf - .1*(lim_sup-lim_inf);
-                %                 lim_sup = lim_sup + .1*(lim_sup-lim_inf);
+                
+                as_factor = str2double(e3.String);
+                switch ax.UserData.Tag
+                    case 'Trace_Cerep'
+                        lim_inf = ax.UserData.mean-as_factor*ax.UserData.stdev;
+                        lim_sup = ax.UserData.mean+as_factor*ax.UserData.stdev;
+                        
+                    case {'Trace_Mean';'Trace_Pixel';'Trace_Region';'Trace_Box'}
+                        lim_inf = min(ax.UserData.series(:));
+                        lim_sup = max(ax.UserData.series(:));
+                        % lim_inf = lim_inf - .1*(lim_sup-lim_inf);
+                        % lim_sup = lim_sup + .1*(lim_sup-lim_inf);
+                end
+
             end
             % YLim
             if lim_inf<lim_sup
@@ -812,6 +827,7 @@ while i>=START_IM && i<=END_IM
             else
                 warning('losing pace -> slowing down');
                 f.UserData.t_video = 2*f.UserData.t_video;
+                e0.String = sprintf('%.3f',f.UserData.t_video);
             end
         end
         
@@ -868,6 +884,7 @@ function f_keypress_fcn(hObj,evnt)
 
 %hObj.UserData.flag
 %evnt.Key
+e0 = findobj(hObj,'Tag','Edit0');
 switch evnt.Key
     case 'uparrow'
         hObj.UserData.flag=10;
@@ -883,12 +900,14 @@ switch evnt.Key
         hObj.UserData.flag =-100;
     case 'm'
         hObj.UserData.t_video = 2*hObj.UserData.t_video;
+        e0.String = sprintf('%.3f',hObj.UserData.t_video);
     case 'p'
-        hObj.UserData.t_video = hObj.UserData.t_video*hObj.UserData.factor_zoom;
+        hObj.UserData.t_video = hObj.UserData.t_video/2;
+        e0.String = sprintf('%.3f',hObj.UserData.t_video);
     case 'a'
         hObj.UserData.t_lfp = hObj.UserData.t_lfp/hObj.UserData.factor_zoom;
     case 'z'
-        hObj.UserData.t_lfp = 2*hObj.UserData.t_lfp;
+        hObj.UserData.t_lfp = hObj.UserData.t_lfp*hObj.UserData.factor_zoom;
     case 's'
         add_dir = hObj.UserData.add_dir;
         number = hObj.UserData.i;
