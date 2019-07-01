@@ -1,7 +1,12 @@
-function f = menuEdit_AnatRegions_Callback(F,handles)
+function success = menuEdit_AnatRegions_Callback(F,handles,val)
 
 global IM CUR_IM DIR_SAVE;
 folder_name = fullfile(DIR_SAVE,F.nlab);
+success = true;
+
+if nargin<3
+    val=1;
+end
 
 data_config = load(fullfile(folder_name,'Config.mat'));
 f = figure('Name','Anatomical Regions Edition',...
@@ -14,6 +19,7 @@ colormap(f,'gray');
 clrmenu(f);
 f.UserData.data_config = data_config;
 f.UserData.IM = IM;
+f.UserData.success = false;
 
 ax = copyobj(handles.CenterAxes,f);
 ax.CLimMode = 'auto';
@@ -180,7 +186,7 @@ set(drawButton,'Callback',{@drawButton_callback,handles2});
 set(applyButton,'Callback',{@applyButton_callback,handles2});
 set(removeButton,'Callback',{@removeButton_callback,handles2});
 set(mergeButton,'Callback',{@mergeButton_callback,handles2});
-set(okButton,'Callback',{@okButton_callback,handles,handles2});
+set(okButton,'Callback',{@okButton_callback,handles,handles2,val});
 set(cancelButton,'Callback',{@cancelButton_callback,handles2});
 set(boxMask,'Callback',{@boxMask_Callback,handles2});
 set(boxEdit,'Callback',{@boxEdit_Callback,handles2});
@@ -234,6 +240,9 @@ else
     table_region.Data = [];
     table_region.UserData.patches = [];
 end
+
+waitfor(f);
+success = true;
 
 end
 
@@ -451,7 +460,7 @@ function cancelButton_callback(~,~,handles2)
     close(handles2.EditFigure);
 end
 
-function okButton_callback(~,~,handles,handles2)
+function okButton_callback(~,~,handles,handles2,val)
 % Apply changes to the Main Figure
 % handles: main figure 
 % handles2: region edition figure 
@@ -514,6 +523,10 @@ end
 
 
 % Close figure and actualize traces
+handles2.EditFigure.UserData.success = true;
+% if val ==1
+%     close(handles2.EditFigure);
+% end
 close(handles2.EditFigure);
 actualize_traces(handles);
 

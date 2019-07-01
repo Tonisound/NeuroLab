@@ -91,7 +91,7 @@ if val == 1
         'SelectionMode','multiple','ListString',str_band,'InitialValue',[],'ListSize',[300 500]);
 else
     % batch mode
-    pattern_list = {'Theta','Gamma Low','Gamma Mid','Gamma High'};
+    pattern_list = {'Delta','Theta','Gamma Low','Gamma Mid','Gamma High','Ripple'};
     %pattern_list = {'Theta'};
     ind_band = contains(str_band,pattern_list);
     v = true;
@@ -222,7 +222,7 @@ if val == 1
 else
     % batch mode
     % pattern_list = {'LFP'};
-    pattern_list = {'Power'};
+    pattern_list = {'Power';'LFP-theta'};
     ind_traces = find(contains({traces.fullname}',pattern_list)==1);
     ok = true;
 end

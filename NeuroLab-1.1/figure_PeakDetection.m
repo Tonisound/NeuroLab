@@ -40,6 +40,30 @@ f2.UserData.TimeTags_cell = TimeTags_cell;
 f2.UserData.g_colors = get(groot,'DefaultAxesColorOrder');
 f2.UserData.folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
 
+% to avoid bug
+f2.UserData.thresh_inf = [];
+f2.UserData.thresh_sup = [];
+f2.UserData.freqdom = [];
+f2.UserData.R_y = [];
+f2.UserData.M_y = [];
+f2.UserData.ratio_y = [];
+f2.UserData.data_y = [];
+f2.UserData.R_dydt = [];
+f2.UserData.M_dydt = [];
+f2.UserData.ratio_dydt = [];
+f2.UserData.data_dydt = [];
+f2.UserData.S_lfp = [];
+f2.UserData.S_lfp_cont = [];
+f2.UserData.S_fus = [];
+f2.UserData.S_dfusdt = [];
+f2.UserData.S_cbv = [];
+f2.UserData.S_dcbvdt = [];
+f2.UserData.label_channels = [];
+f2.UserData.R_all = [];
+f2.UserData.R_dalldt = [];
+f2.UserData.R_cont = [];
+f2.UserData.R_dcont = [];
+
 %Parameters
 L = 10;                      % Height top panels
 l = 1;                       % Height info panel
@@ -497,29 +521,9 @@ ax = handles.Ax1;
 channel = char(pu.String(pu.Value,:));
 folder_name = handles.MainFigure.UserData.folder_name;
 
-% traces = handles.MainFigure.UserData.traces;
-% str_traces = [];
-% ind_keep = zeros(length(traces),1);
-% for i =1 : length(traces) 
-%     temp = regexp(traces(i).UserData.Name,'/','split');
-%     if length(temp)>1 && strcmp(char(temp(2)),channel)
-%         ind_keep(i) = 1;
-%         str_traces =[str_traces;{traces(i).UserData.Name}];
-%     end
-% end
-% % patterns
-% traces = traces(ind_keep==1);
-% ind_glow = contains(str_traces,{'Gamma-low/';'Power-gammalow/'});
-% ind_gmid = contains(str_traces,{'Gamma-mid/';'Power-gammamid/'});
-% ind_gmidup = contains(str_traces,{'Gamma-mid-up/';'Power-gammamidup/'});
-% ind_ghigh = contains(str_traces,{'Gamma-high/';'Power-gammahigh/'});
-% ind_ghighup = contains(str_traces,{'Gamma-high-up/';'Power-gammahighup/'});
-% ind_ripple = contains(str_traces,{'Ripple/';'Power-ripple/'});
-% ind_theta = contains(str_traces,{'Phasic-theta/';'Power-theta/'});
-
 % Loading directly from Sources_LFP 
 dir_traces = dir(fullfile(folder_name,'Sources_LFP','Power-*.mat'));
-dir_traces = dir_traces(contains({dir_traces(:).name}',sprintf('_%s',channel)));
+dir_traces = dir_traces(contains({dir_traces(:).name}',sprintf('_%s.',channel)));
 str_traces = {dir_traces(:).name}';
 ind_glow = contains(str_traces,{'gammalow_'});
 ind_gmid = contains(str_traces,{'gammamid_'});
@@ -749,48 +753,30 @@ end
 
 function update_cbv_traces(handles,myhandles)
 
+global LAST_IM;
 ax1 = handles.Ax2;
 t_gauss = str2double(handles.Edit4.String);
 x_im = [handles.MainFigure.UserData.time_ref.Y;NaN];
+x_start = handles.MainFigure.UserData.time_ref.Y(1);
+x_end = handles.MainFigure.UserData.time_ref.Y(end);
 tit_legend = {'cortex';'hpc';'thal';'whole'};
+rec_mode = handles.MainFigure.UserData.rec_mode;
+length_burst = handles.MainFigure.UserData.length_burst;
+n_burst = handles.MainFigure.UserData.n_burst;
 
 % Loading lines
 lines = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
 ind_hpc = [];
 ind_thal = [];
 ind_cortex = [];
-% for i =1:length(lines)
-%     str = lower(lines(i).UserData.Name);
-%     if ~isempty(strfind(str,'ca1'))||...
-%             ~isempty(strfind(str,'ca2'))||...
-%             ~isempty(strfind(str,'ca3'))||...
-%             ~isempty(strfind(str,'dg'))||...
-%             ~isempty(strfind(str,'subic'))||...
-%             ~isempty(strfind(str,'lent-'))
-%         ind_hpc = [ind_hpc;i];
-%     elseif ~isempty(strfind(str,'thalamus'))
-%         ind_thal = [ind_thal;i];
-%     elseif ~isempty(strfind(str,'rs-'))||...
-%             ~isempty(strfind(str,'ac-'))||...
-%             ~isempty(strfind(str,'s1'))||...
-%             ~isempty(strfind(str,'lpta'))||...
-%             ~isempty(strfind(str,'m12'))||...
-%             ~isempty(strfind(str,'v1'))||...
-%             ~isempty(strfind(str,'v2'))||...
-%             ~isempty(strfind(str,'cg-'))||...
-%             ~isempty(strfind(str,'cx-'))||...
-%             ~isempty(strfind(str,'ptp'))
-%         ind_cortex = [ind_cortex;i];
-%     end
-% end
+
 for i =1:length(lines)
     str = lower(lines(i).UserData.Name);
-    if ~isempty(strfind(str,'dhpc'))||...
-            ~isempty(strfind(str,'vhpc'))
+    if contains(str,'dhpc')||contains(str,'vhpc')
         ind_hpc = [ind_hpc;i];
-    elseif ~isempty(strfind(str,'thalamus'))
+    elseif contains(str,'thalamus')
         ind_thal = [ind_thal;i];
-    elseif ~isempty(strfind(str,'cortex-'))
+    elseif contains(str,'cortex-')
         ind_cortex = [ind_cortex;i];
     end
 end
@@ -845,15 +831,53 @@ else
     coeff = coeff/sum(coeff(:,1));
     y_thal = sum(coeff.*data,1);
 end
-
 y_whole = lines_whole.YData;
 
+% Reshaping if rec_mode = BURST
+if strcmp(rec_mode,'BURST')
+    f_samp = .1;
+    length_burst = 59;
+    n_burst = LAST_IM/length_burst;
+    xq = x_start:f_samp:x_end;
+    yq = NaN(4,size(xq,2));
+    % add NaN values between bursts
+    all_y_im = [y_cortex;y_hpc;y_thal;y_whole];
+    for k=1:4
+        y_im = all_y_im(k,:);
+        for i=1:n_burst
+            % adding values to yq for each burst
+            ind_burst = (i-1)*length_burst+1:(i*length_burst);
+            xburst = x_im(ind_burst);
+            yburst = y_im(ind_burst);
+            [~,i1]=min((xq-xburst(1)).^2);
+            [~,i2]=min((xq-xburst(end)).^2);
+            y_int = interp1(xburst,yburst,xq(i1:i2));
+            yq(k,i1:i2) = y_int;
+        end
+    end
+    %renaming
+    x_im = xq;
+    handles.MainFigure.UserData.x_im = x_im;
+    y_cortex = yq(1,:);
+    y_hpc = yq(2,:);
+    y_thal = yq(3,:);
+    y_whole = yq(4,:);
+end
+
 % Gaussian Smoothing
+% delta = x_im(2)-x_im(1);
+% y_cortex = imgaussfilt(y_cortex,round(t_gauss/delta));
+% y_hpc = imgaussfilt(y_hpc,round(t_gauss/delta));
+% y_thal = imgaussfilt(y_thal,round(t_gauss/delta));
+% y_whole = imgaussfilt(y_whole,round(t_gauss/delta));
 delta = x_im(2)-x_im(1);
-y_cortex = imgaussfilt(y_cortex,round(t_gauss/delta));
-y_hpc = imgaussfilt(y_hpc,round(t_gauss/delta));
-y_thal = imgaussfilt(y_thal,round(t_gauss/delta));
-y_whole = imgaussfilt(y_whole,round(t_gauss/delta));
+w = gausswin(round(2*t_gauss/delta));
+s=sum(w);
+w = w/s;
+y_cortex = s*nanconv(y_cortex,w,'same');
+y_hpc = s*nanconv(y_hpc,w,'same');
+y_thal = s*nanconv(y_thal,w,'same');
+y_whole = s*nanconv(y_whole,w,'same');
 
 % Plotting fus
 g_colors = handles.MainFigure.UserData.g_colors;
@@ -887,11 +911,19 @@ d_thal(d_thal<thresh) = val_thresh;
 d_whole(d_whole<thresh) = val_thresh;
 
 % Gaussian Smoothing
+% delta = x_im(2)-x_im(1);
+% d_cortex = imgaussfilt(d_cortex,round(t_gauss/delta));
+% d_hpc = imgaussfilt(d_hpc,round(t_gauss/delta));
+% d_thal = imgaussfilt(d_thal,round(t_gauss/delta));
+% d_whole = imgaussfilt(d_whole,round(t_gauss/delta));
 delta = x_im(2)-x_im(1);
-d_cortex = imgaussfilt(d_cortex,round(t_gauss/delta));
-d_hpc = imgaussfilt(d_hpc,round(t_gauss/delta));
-d_thal = imgaussfilt(d_thal,round(t_gauss/delta));
-d_whole = imgaussfilt(d_whole,round(t_gauss/delta));
+w = gausswin(round(2*t_gauss/delta));
+s=sum(w);
+w = w/s;
+d_cortex = s*nanconv(d_cortex,w,'same');
+d_hpc = s*nanconv(d_hpc,w,'same');
+d_thal = s*nanconv(d_thal,w,'same');
+d_whole = s*nanconv(d_whole,w,'same');
 
 % Drawing derivative
 g_colors = handles.MainFigure.UserData.g_colors;
@@ -905,18 +937,55 @@ ax2.YLabel.String = 'CBV derivatives';
 legend(ax2,tit_legend,'Tag','Legend');
 hold(ax2,'off');
 
+% Visible/Not vsible
+all_boxes = findobj(handles.MainTab,'Tag','BoxVisible');
+for i =1:length(all_boxes)
+    boxVisible_Callback(all_boxes(i),[]);
+end
+
+% Storing CBV data
 CBV_data = NaN(length(lines),length(x_im));
 dCBVdt_data = NaN(length(lines),length(x_im));
 label_channels = cell(length(lines),1);
+x_im = [handles.MainFigure.UserData.time_ref.Y;NaN];
 for i =1:length(lines)
     label_channels(i) = {lines(i).UserData.Name};
     y = lines(i).YData;
-    y = imgaussfilt(y,round(t_gauss/delta));
-    d_y = interp1(.5:length(y)+.5,[NaN,diff(y),NaN],1:length(y));
+    
+    % Reshaping if rec_mode = BURST
+    if strcmp(rec_mode,'BURST')
+        xq = x_start:f_samp:x_end;
+        yq = NaN(size(xq));
+        % add NaN values between bursts
+        for ii=1:n_burst
+            % adding values to yq for each burst
+            ind_burst = (ii-1)*length_burst+1:(ii*length_burst);
+            xburst = x_im(ind_burst);
+            yburst = y(ind_burst);
+            [~,i1]=min((xq-xburst(1)).^2);
+            [~,i2]=min((xq-xburst(end)).^2);
+            y_int = interp1(xburst,yburst,xq(i1:i2));
+            yq(i1:i2) = y_int;
+        end
+        y = yq;
+    end
+    
+    %y = imgaussfilt(y,round(t_gauss/delta));
+    w = gausswin(round(2*t_gauss/delta));
+    s = sum(w);
+    w = w/s;
+    y_conv = s*nanconv(y,w,'same');
+    d_y = interp1(.5:length(y_conv)+.5,[NaN,diff(y_conv),NaN],1:length(y_conv));
     d_y(d_y<thresh) = val_thresh;
-    d_y = imgaussfilt(d_y,round(t_gauss/delta));
-    CBV_data(i,:) = y;
-    dCBVdt_data(i,:) = d_y;
+    %d_y = imgaussfilt(d_y,round(t_gauss/delta));
+    d_yconv = s*nanconv(d_y,w,'same');
+    CBV_data(i,:) = y_conv;
+    dCBVdt_data(i,:) = d_yconv;
+end
+
+%renaming
+if strcmp(rec_mode,'BURST')
+    x_im = xq;
 end
 
 % Storing 

@@ -155,7 +155,8 @@ ft.UserData.Selection = [];
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
 D = [cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Import Reference Time'};{'Import LFP Configuration'};{'Actualize Traces'};{'Save UF Params'}];
+    {'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit Anatomical Regions'};...
+    {'Import Reference Time'};{'Import LFP Configuration'};{'Actualize Traces'};{'Save UF Params'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -512,6 +513,9 @@ for i = 1:length(ind_files)
                                     
                 case 'Export Anatomical Regions'
                     success = export_regions(myhandles,FILES(ii).recording,0);
+                    
+                case 'Edit Anatomical Regions'
+                    success = menuEdit_AnatRegions_Callback(FILES(ii),myhandles,0);
                 
                 case 'Export Binary Masks'
                     success = export_binary_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii),myhandles,0);

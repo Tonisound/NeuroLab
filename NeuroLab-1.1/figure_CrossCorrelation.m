@@ -463,26 +463,6 @@ channel = char(pu.String(pu.Value,:));
 folder_name = handles.MainFigure.UserData.folder_name;
 time_ref = handles.MainFigure.UserData.time_ref;
 
-% traces = handles.MainFigure.UserData.traces;
-% str_traces = [];
-% ind_keep = zeros(length(traces),1);
-% for i =1 : length(traces) 
-%     temp = regexp(traces(i).UserData.Name,'/','split');
-%     if length(temp)>1 && strcmp(char(temp(2)),channel)
-%         ind_keep(i) = 1;
-%         str_traces =[str_traces;{traces(i).UserData.Name}];
-%     end
-% end
-% % patterns
-% traces = traces(ind_keep==1);
-% ind_glow = contains(str_traces,{'Gamma-low/';'Power-gammalow/'});
-% ind_gmid = contains(str_traces,{'Gamma-mid/';'Power-gammamid/'});
-% ind_gmidup = contains(str_traces,{'Gamma-mid-up/';'Power-gammamidup/'});
-% ind_ghigh = contains(str_traces,{'Gamma-high/';'Power-gammahigh/'});
-% ind_ghighup = contains(str_traces,{'Gamma-high-up/';'Power-gammahighup/'});
-% ind_ripple = contains(str_traces,{'Ripple/';'Power-ripple/'});
-% ind_theta = contains(str_traces,{'Phasic-theta/';'Power-theta/'});
-
 % Loading directly from Sources_LFP 
 dir_traces = dir(fullfile(folder_name,'Sources_LFP','Power-*.mat'));
 dir_traces = dir_traces(contains({dir_traces(:).name}',sprintf('_%s.',channel)));
