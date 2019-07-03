@@ -3,6 +3,11 @@ function f2 = figure_PeriEventHistogramm(handles,val,str_group,str_regions,str_t
 
 global DIR_SAVE FILES CUR_FILE;
 
+% loading Config.mat
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')
+     data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'));
+end
+
 f2 = figure('Units','characters',...
     'HandleVisibility','callback',...
     'IntegerHandle','off',...
@@ -15,6 +20,7 @@ f2 = figure('Units','characters',...
 clrmenu(f2);
 colormap(f2,'winter');
 f2.UserData.success = false;
+f2.UserData.data_config = data_config;
 
 iP = uipanel('FontSize',12,...
     'Units','normalized',...
@@ -354,9 +360,17 @@ uicontrol('style','edit',...
     'Parent',tab5);
 
 % SixthTab
-tab5 = uitab('Parent',tabgp,...
-    'Title','Regression',...
-    'Tag',' ');
+tab6 = uitab('Parent',tabgp,...
+    'Title','Peak-to-Peak',...
+    'Tag','SixthTab');
+uicontrol('style','popup','String','Start|End|Mean|Median|Max',...
+    'Units','normalized','Position',[.35 .01 .1 .03],...
+    'Value',2,'Tag','PopupfUS_6','Parent',tab6);
+uicontrol('style','popup','Value',1,...
+    'String','Pearson|Spearman|Kendall',...
+    'Units','normalized','Position',[.55 .01 .1 .03],...
+    'TooltipString','Correlation Type','Tag','Popup_correlation_6','Parent',tab6);
+
 
 % Lines Array
 ax_lines = axes('Parent',f2,'Visible','off');
@@ -858,6 +872,8 @@ set(handles.PopupTrials,'Callback',{@update_popup_trials_Callback,handles});
 set(handles.PopupEpisodeList,'Callback',{@update_episode_list,handles});
 set(handles.PopupStart,'Callback',{@update_episode,handles});
 set(handles.PopupEnd,'Callback',{@update_episode,handles});
+set(handles.PopupfUS_6,'Callback',{@peak2peak_Callback,handles});
+set(handles.Popup_correlation_6,'Callback',{@peak2peak_Callback,handles});
 
 
 % Resetting Button_Sort
@@ -1278,6 +1294,9 @@ adaptation_Callback(handles);
 
 % Update Polar Plot Panel
 display_regression([],[],handles);
+
+% Update Peak-to-Peak Panel
+peak2peak_Callback([],[],handles);
 
 % Store Data
 % handles.ButtonBatch.UserData.Zdata = Zdata;
@@ -1797,7 +1816,7 @@ handles.ButtonBatch.UserData.data= data;
         ax2.XAxisLocation = 'origin';
         ax2.YAxisLocation = 'origin';
         
-        % Sixth tab
+        % Second tab
         tab = handles.SecondTab;
         delete(tab.Children);        
         all_axes = [];
@@ -1942,6 +1961,216 @@ handles.ButtonBatch.UserData.data= data;
         %ax1.CLim = [-1,1];
         %ax1.Title.String = 'Pearson';
     end
+
+end
+
+function peak2peak_Callback(~,~,handles)
+
+handles.MainFigure.Pointer = 'watch';
+drawnow;
+
+% Retrieve data
+S1 = handles.ButtonBatch.UserData.fUSData;
+label_fus = S1.fUS_Selection(:,1);
+lab_fus = [];
+color_fus = [];
+for i =1:length(label_fus)
+    temp = char(label_fus(i));
+    lab_fus = [lab_fus;{temp(1:2)}];
+    color_fus = [color_fus;handles.Popup1.UserData.lines_channels(i).Color];
+end
+S2 = handles.ButtonBatch.UserData.LFPData;
+label_lfp = S2.LFP_Selection(:,1);
+lab_lfp = [];
+color_lfp = [];
+for i =1:length(label_lfp)
+    temp = char(label_lfp(i));
+    lab_lfp = [lab_lfp;{temp(1:2)}];
+    color_lfp = [color_lfp;handles.Popup2.UserData.lines_electrodes(i).Color];
+end
+
+% Clearing tab
+tab = handles.SixthTab;
+pu61 = handles.PopupfUS_6;
+pu62 = handles.Popup_correlation_6;
+index_ref = strtrim(pu61.String(pu61.Value,:));
+corr_type = strtrim(pu62.String(pu62.Value,:));
+
+all_obj = tab.Children;
+for i =1:length(all_obj)
+    if ~strcmp(all_obj(i).Tag,'PopupfUS_6')&& ~(strcmp(all_obj(i).Tag,'Popup_correlation_6'))
+        delete(all_obj(i));
+    end
+end
+%delete(tab.Children);
+
+all_paxes = [];
+margin_w = .02;
+margin_h = .05;
+n_columns = 5;
+n_rows = ceil(size(S2.LFP_Selection,1)/n_columns);
+
+% Finding indices
+if ~isempty(S1)
+    Ydata1 = S1.Ydata;
+    ind_start1 = S1.ind_start;
+    ind_end1 = S1.ind_end;
+    Time_indices = S1.Time_indices;
+    fUS_Selection = S1.fUS_Selection;
+    ref_time = S1.ref_time;
+    label_events = S1.label_events;
+    align1 = S1.align1;
+    align2 = S1.align2;
+end
+if ~isempty(S2)
+    Ydata2 = S2.Ydata;
+    ind_start2 = S2.ind_start;
+    ind_end2 = S2.ind_end;
+    Time_indices = S2.Time_indices;
+    LFP_Selection = S2.LFP_Selection;
+    ref_time = S2.ref_time;
+    label_events = S2.label_events;
+    align1 = S2.align1;
+    align2 = S2.align2;
+end
+
+
+C_XY = NaN(length(label_fus),length(label_lfp));
+S_pp = struct('R_data1',[],'R_data2',[],'C_XY',[],'label_fus',[],'label_lfp',[]);
+S_pp(length(label_fus),length(label_lfp)).C_XY = NaN;
+for i=1:length(label_fus)
+    ydata1 = Ydata1(:,:,i);
+    R_data1 = [];
+%     for k=1:size(ydata1,1)
+%         R_data1 = [R_data1;ydata1(k,index_1(k))];
+%     end
+    switch index_ref
+        case 'Start'
+            for k=1:size(ydata1,1)
+                R_data1 = [R_data1;ydata1(k,ind_start1(k))];
+            end   
+        case 'End'
+            for k=1:size(ydata1,1)
+                R_data1 = [R_data1;ydata1(k,ind_end1(k))];
+            end
+        case 'Max'
+            for k=1:size(ydata1,1)
+                R_data1 = [R_data1;max(ydata1(k,:),[],'omitnan')];
+            end
+        case 'Median'
+            for k=1:size(ydata1,1)
+                R_data1 = [R_data1;median(ydata1(k,:),'omitnan')];
+            end
+        case 'Mean'
+            for k=1:size(ydata1,1)
+                R_data1 = [R_data1;mean(ydata1(k,:),'omitnan')];
+            end
+    end
+    
+    for j=1:length(label_lfp)
+        ydata2 = Ydata2(:,:,j);
+        R_data2 = [];
+%         for k=1:size(ydata2,1)
+%             R_data2 = [R_data2;ydata2(k,index_2(k))];
+%         end
+        switch index_ref
+            case 'Start'
+                for k=1:size(ydata2,1)
+                    R_data2 = [R_data2;ydata2(k,ind_start2(k))];
+                end
+            case 'End'
+                for k=1:size(ydata2,1)
+                    R_data2 = [R_data2;ydata2(k,ind_end2(k))];
+                end
+            case 'Max'
+                for k=1:size(ydata2,1)
+                    R_data2 = [R_data2;max(ydata2(k,:),[],'omitnan')];
+                end
+            case 'Median'
+                for k=1:size(ydata2,1)
+                    R_data2 = [R_data2;median(ydata2(k,:),'omitnan')];
+                end
+            case 'Mean'
+                for k=1:size(ydata2,1)
+                    R_data2 = [R_data2;mean(ydata2(k,:),'omitnan')];
+                end
+        end
+        C_XY(i,j)= corr(R_data1,R_data2,'type',corr_type,'rows','complete');
+        
+        % Storing
+        S_pp(i,j).C_XY = C_XY(i,j);
+        S_pp(i,j).R_data1 = R_data1;
+        S_pp(i,j).R_data2 = R_data2;
+        S_pp(i,j).label_fus = char(label_fus(i));
+        S_pp(i,j).label_lfp = char(label_lfp(j));
+    end
+end
+
+% Creating axes
+for ii = 1:n_rows
+    for jj = 1:n_columns
+        index = (ii-1)*n_columns+jj;
+        if index>size(S2.LFP_Selection,1)
+            continue;
+        end
+        x = mod(index-1,n_columns)/n_columns;
+        y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+        
+        % Creating polar axes
+        pax = polaraxes('Parent',tab,'Tag',sprintf('PolarAx%d',index));
+        hold(pax,'on');
+        
+        %delta = pu1.Position(2)+pu1.Position(4);
+        pax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+        
+        % polar plot
+%         theta = rescale(1:length(label_fus)+1,0,2*pi);
+%         theta = theta(1:end-1)';
+%         rho = rand(length(label_fus),1);
+%         p = polarplot(theta,rho,'Parent',pax,'Color',color_lfp(index,:));
+%         % polar hist
+%         theta = rescale(1:length(label_fus)+1,0,2*pi);
+%         rho = rand(length(label_fus),1);
+%         p = polarhistogram('BinEdges',theta,'BinCounts',rho,'Parent',pax,...
+%             'FaceColor',color_lfp(index,:),'EdgeColor','none');
+        
+        % polar hist with colors
+        theta = rescale(1:length(label_fus)+1,0,2*pi);
+        rho = C_XY(:,index);
+        % rho = rand(length(label_fus),1);
+        rho_diag = diag(rho);
+        all_p = [];
+        for j=1:length(rho_diag)
+            p = polarhistogram('BinEdges',theta,'BinCounts',abs(rho_diag(j,:)),'Parent',pax,...
+                'FaceColor',color_fus(j,:),'EdgeColor','none','FaceAlpha',1);
+            if sum(rho_diag(j,:))>0
+                p.EdgeColor='k';
+            else
+                p.EdgeColor='w';
+            end
+            all_p = [all_p;p];
+        end
+        
+        % Title and label
+        pax.RLim = [0 1];
+        pax.Title.String = label_lfp(index);
+        pax.ThetaAxisUnits = 'radian';
+        pax.ThetaTick = theta;
+        pax.ThetaTickLabel = lab_fus;
+        pax.ThetaTick = '';
+        pax.ThetaTickLabel = '';
+        all_paxes = [all_paxes;pax];
+    end
+end
+
+% Saving
+handles.ButtonBatch.UserData.PeaktoPeakData.S_pp = S_pp;
+handles.ButtonBatch.UserData.PeaktoPeakData.index_ref = index_ref;
+handles.ButtonBatch.UserData.PeaktoPeakData.corr_type = corr_type;
+handles.ButtonBatch.UserData.PeaktoPeakData.C_XY = C_XY;
+handles.ButtonBatch.UserData.PeaktoPeakData.label_fus = label_fus;
+handles.ButtonBatch.UserData.PeaktoPeakData.label_lfp = label_lfp;
+handles.MainFigure.Pointer = 'arrow';
 
 end
 
@@ -2913,7 +3142,7 @@ save_video(work_dir,video_dir,video_name);
 set(handles.MainFigure, 'pointer', 'arrow');
 
 % Saving all tabs
-all_tabs = [handles.SecondTab;handles.ThirdTab;handles.FourthTab;handles.FifthTab];
+all_tabs = [handles.SecondTab;handles.ThirdTab;handles.FourthTab;handles.FifthTab;handles.SixthTab];
 for i =1:length(all_tabs)
     handles.TabGroup.SelectedTab = all_tabs(i);
     s = sprintf('%s',handles.TabGroup.SelectedTab.Title);
@@ -3053,21 +3282,22 @@ save(fullfile(folder_save,'AverageResponse.mat'),'ref_time','Time_indices','ind_
     'all_colors','thresh_prop','labels','str_popup','align1','align2','-v7.3');
 fprintf('Data saved at [%s].\n',fullfile(folder_save,'AverageResponseData.mat'));
 
-% RegressionData
-S = handles.ButtonBatch.UserData.AverageResponseData;
-ref_time = S.ref_time;
-Time_indices = S.Time_indices;
-labels = S.labels;
-str_popup = S.str_popup;
-m = S.m;
-s = S.s;
-ind_start = S.ind_start;
-ind_end = S.ind_end;
-all_colors = S.all_colors;
-thresh_prop = S.thresh_prop;
-save(fullfile(folder_save,'AverageResponse.mat'),'ref_time','Time_indices','ind_start','ind_end','ref_time','m','s',...
-    'all_colors','thresh_prop','labels','str_popup','align1','align2','-v7.3');
-fprintf('Data saved at [%s].\n',fullfile(folder_save,'AverageResponseData.mat'));
+% PeaktoPeakData
+S_pp = [];
+%S_pp = handles.ButtonBatch.UserData.PeaktoPeakData.S_pp;
+index_ref = handles.ButtonBatch.UserData.PeaktoPeakData.index_ref;
+corr_type = handles.ButtonBatch.UserData.PeaktoPeakData.corr_type;
+C_XY = handles.ButtonBatch.UserData.PeaktoPeakData.C_XY;
+label_fus = handles.ButtonBatch.UserData.PeaktoPeakData.label_fus;
+label_lfp = handles.ButtonBatch.UserData.PeaktoPeakData.label_lfp;
+save(fullfile(folder_save,'PeaktoPeak.mat'),'S_pp','C_XY','index_ref','corr_type',...
+    'label_fus','label_lfp','align1','align2','-v7.3');
+fprintf('Data saved at [%s].\n',fullfile(folder_save,'PeaktoPeakData.mat'));
+
+% % RegressionData
+% save(fullfile(folder_save,'Regression.mat'),'ref_time','Time_indices','ind_start','ind_end','ref_time','m','s',...
+%     'all_colors','thresh_prop','labels','str_popup','align1','align2','-v7.3');
+% fprintf('Data saved at [%s].\n',fullfile(folder_save,'RegressionData.mat'));
 
 end
 
