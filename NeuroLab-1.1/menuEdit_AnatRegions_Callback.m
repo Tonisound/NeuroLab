@@ -46,6 +46,7 @@ table_region = uitable('Units','normalized',...
     'CellSelectionCallback',@uitable_select,...
     'RowStriping','on',...
     'Parent',f);
+table_region.CellEditCallback = {@uitable_edit};
 % Adjust Columns
 table_region.Units = 'pixels';
 table_region.ColumnWidth ={table_region.Position(3)-w_margin};
@@ -190,6 +191,7 @@ set(okButton,'Callback',{@okButton_callback,handles,handles2,val});
 set(cancelButton,'Callback',{@cancelButton_callback,handles2});
 set(boxMask,'Callback',{@boxMask_Callback,handles2});
 set(boxEdit,'Callback',{@boxEdit_Callback,handles2});
+ 
 
 
 % Changing main image
@@ -536,6 +538,9 @@ function boxMask_Callback(src,~,handles)
 
 hm = findobj(handles.AxEdit,'Type','Patch','-not','Tag','Box');
 im = findobj(handles.AxEdit,'Tag','MainImage');
+region_table = findobj(src.Parent,'Tag','Region_table');
+selection = region_table.UserData.Selection;
+list_selected = region_table.Data(selection);
 
 if src.Value 
     %draw mask 
@@ -543,11 +548,21 @@ if src.Value
         color = hm(i).EdgeColor;
         color_mask = cat(3, color(1)*ones(size(im.CData)),color(2)*ones(size(im.CData)),color(3)*ones(size(im.CData)));
         mask = hm(i).UserData.Mask;
-        image('CData',color_mask,...
-            'Parent',handles.AxEdit,...
-            'Tag','Mask',...
-            'Hittest','off',...
-            'AlphaData',edge(mask,'canny'));
+        alpha = hm(i).FaceAlpha;
+
+        if sum(strcmp(list_selected,hm(i).UserData.Name))>0
+            image('CData',color_mask,...
+                'Parent',handles.AxEdit,...
+                'Tag','Mask',...
+                'Hittest','off',...
+                'AlphaData',alpha*mask);
+        else
+            image('CData',color_mask,...
+                'Parent',handles.AxEdit,...
+                'Tag','Mask',...
+                'Hittest','off',...
+                'AlphaData',alpha*edge(mask,'canny'));
+        end
         hm(i).Visible = 'off';
     end
     
@@ -595,6 +610,20 @@ if ~isempty(selection)
         patches(index).LineWidth = 2;
         patches(index).FaceColor = patches(index).EdgeColor;
     end
+end
+
+end
+
+function uitable_edit(hObj,evnt)
+
+patches = hObj.UserData.patches;
+selection = evnt.Indices(1);
+
+if ~strcmp(patches(selection).UserData.Name,evnt.PreviousData)
+    %disp('warning');
+    warning('Problem updating region name (Selection/Name Mismatch).');
+else
+    patches(selection).UserData.Name = char(evnt.NewData);
 end
 
 end
