@@ -306,10 +306,10 @@ uicontrol('Units','normalized',...
         'String','Update',...
         'Tag','ButtonUpdate');
 uicontrol('style','popup',...
-    'String','Mean|Median|Start|End|Max',...
+    'String','Start|End|Max|Mean|Median',...
     'Units','normalized',...
     'Position',[.2 .01 .15 .03],...
-    'Value',val,...
+    'Value',5,...
     'Tag','PopupfUS_5',...
     'Parent',tab5);
 uicontrol('style','checkbox',...
@@ -363,9 +363,9 @@ uicontrol('style','edit',...
 tab6 = uitab('Parent',tabgp,...
     'Title','Peak-to-Peak',...
     'Tag','SixthTab');
-uicontrol('style','popup','String','Start|End|Mean|Median|Max',...
+uicontrol('style','popup','String','Start|End|Max|Mean|Median',...
     'Units','normalized','Position',[.35 .01 .1 .03],...
-    'Value',2,'Tag','PopupfUS_6','Parent',tab6);
+    'Value',5,'Tag','PopupfUS_6','Parent',tab6);
 uicontrol('style','popup','Value',1,...
     'String','Pearson|Spearman|Kendall',...
     'Units','normalized','Position',[.55 .01 .1 .03],...
@@ -2005,9 +2005,9 @@ end
 %delete(tab.Children);
 
 all_paxes = [];
-margin_w = .02;
-margin_h = .05;
-n_columns = 5;
+margin_w = .01;
+margin_h = .02;
+n_columns = 6;
 n_rows = ceil(size(S2.LFP_Selection,1)/n_columns);
 
 % Finding indices
@@ -2157,8 +2157,9 @@ for ii = 1:n_rows
         pax.ThetaAxisUnits = 'radian';
         pax.ThetaTick = theta;
         pax.ThetaTickLabel = lab_fus;
-        pax.ThetaTick = '';
-        pax.ThetaTickLabel = '';
+        %pax.ThetaTick = '';
+        %pax.ThetaTickLabel = '';
+        pax.FontSize = 6;
         all_paxes = [all_paxes;pax];
     end
 end
@@ -3303,6 +3304,8 @@ end
 
 function batch_Callback(~,~,handles,str_group,str_regions,str_traces)
 
+data_config = handles.MainFigure.UserData.data_config;
+
 if nargin<4
     % user mode
     if isempty(handles.TimeGroupsTable.UserData)
@@ -3324,19 +3327,36 @@ if nargin<4
     end
 else
     % batch mode
-    % Selecting regions and traces
-    if ~isempty(str_traces)||~isempty(str_regions)
-        % str_regions
+    % Selecting regions
+    if ~isempty(str_regions)
         selection = find(contains(handles.fUSTable.Data(:,1),str_regions)==1);
         handles.fUSTable.UserData.Selection = selection;
-        % str_traces
+    else
+        %warning('No traces or regions matching selection [].\n')
+        % Selecting all by default
+        handles.fUSTable.UserData.Selection = (1:size(handles.fUSTable.Data,1))';
+    end
+    
+    % Selecting traces
+    if ~isempty(str_traces)
         selection = find(contains(handles.LFPTable.Data(:,1),str_traces)==1);
         handles.LFPTable.UserData.Selection = selection;
     else
         %warning('No traces or regions matching selection [].\n')
         % Selecting all by default
-        handles.fUSTable.UserData.Selection = (1:size(handles.fUSTable.Data,1))';
-        handles.LFPTable.UserData.Selection = (1:size(handles.LFPTable.Data,1))';
+        %handles.LFPTable.UserData.Selection = (1:size(handles.LFPTable.Data,1))';
+        
+        % Selectinf main channel
+        if ~isempty(data_config.File.mainchannel)
+            pattern_lfp = [{data_config.File.mainchannel};{'SPEED'};{'ACCEL-POWER'}];
+        else
+            pattern_lfp = [{data_config.File.mainchannel};{'SPEED'};{'ACCEL-POWER'}];
+        end
+        ind_keep = zeros(size(handles.LFPTable.Data,1),1);
+        for k =1:length(pattern_lfp)
+            ind_keep = ind_keep+contains(handles.LFPTable.Data(:,1),pattern_lfp(k));
+        end
+        handles.LFPTable.UserData.Selection= find(ind_keep>0);
     end
     
     % Selecting Time Groups

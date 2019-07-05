@@ -7,22 +7,23 @@ success = false;
 % Loading Channel Config
 if exist(fullfile(folder_name,'Nconfig.mat'),'file')
     d_ncf = load(fullfile(folder_name,'Nconfig.mat'),...
-        'channel_id','channel_list','channel_type');
+        'ind_channel','channel_id','channel_list','channel_type');
+    ind_channel = d_ncf.ind_channel(:);
     channel_id = d_ncf.channel_id(:);
     channel_type = d_ncf.channel_type(:);
     channel_list = d_ncf.channel_list(:);
-    D = [channel_id,channel_type,channel_list];
+    D = [num2cell(ind_channel),channel_id,channel_type,channel_list];
 else
     D=cell(39,3);
     for j=1:32
-        D(j,:)={sprintf('%d',j),'LFP',sprintf('LFP-%03d',j)};
+        D(j,:)={sprintf('%d',j),sprintf('%d',j),'LFP',sprintf('LFP-%03d',j)};
     end
     for j=33:35
-        D(j,:)={sprintf('%d',j),'ACC',sprintf('ACC-%03d',j)};
+        D(j,:)={sprintf('%d',j),sprintf('%d',j),'ACC',sprintf('ACC-%03d',j)};
     end
-    D(36,:)={sprintf('%d',36),'TEMP',sprintf('TEMP-%03d',36)};
+    D(36,:)={sprintf('%d',j),sprintf('%d',36),'TEMP',sprintf('TEMP-%03d',36)};
     for j=37:39
-        D(j,:)={sprintf('%d',j),'GYR',sprintf('GYR-%03d',j)};
+        D(j,:)={sprintf('%d',j),sprintf('%d',j),'GYR',sprintf('GYR-%03d',j)};
     end
     
 end
@@ -70,10 +71,10 @@ panel1 = uipanel('FontSize',ftsize,...
     'Parent',f2);
 
 % UiTable 
-t1 = uitable('ColumnName',{'ID','Type','Name'},...
-    'ColumnFormat',{'char','char','char'},...
-    'ColumnEditable',[true,true,false],...
-    'ColumnWidth',{180 180 180 90},...
+t1 = uitable('ColumnName',{'index','ID','Type','Name'},...
+    'ColumnFormat',{'char','char','char','char'},...
+    'ColumnEditable',[false,true,true,false],...
+    'ColumnWidth',{90 180 180 180},...
     'Tag','Tag_Table',...
     'Units','normalized',...
     'FontSize',ftsize,...
@@ -108,8 +109,9 @@ t1.Data = D;
 
     function okButton_callback(~,~)
         
-        channel_id = t1.Data(:,1);
-        channel_type = t1.Data(:,2);
+        ind_channel = cell2mat(t1.Data(:,1));
+        channel_id = t1.Data(:,2);
+        channel_type = t1.Data(:,3);
         channel_list = cell(size(channel_id));
         for i =1:length(channel_id)
             channel_list(i) = {sprintf('%s/%s',char(channel_type(i)),char(channel_id(i)))};
@@ -124,7 +126,7 @@ t1.Data = D;
             fprintf('Files.mat updated.\n');
         else
             save(fullfile(folder_name,'Nconfig.mat'),...
-                'channel_id','channel_list','channel_type','-append');
+                'ind_channel','channel_id','channel_list','channel_type','-append');
             fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
         end
         close(f2);

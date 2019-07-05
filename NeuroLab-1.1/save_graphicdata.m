@@ -36,6 +36,16 @@ function save_graphicdata(savedir,handles)
         return;
     end
     
+%     % Housecleaning: emptying Sources_LFP/ before saving
+%     load('Preferences.mat','GTraces');
+%     save_fmt = GTraces.GraphicSaveFormat;
+%     if strcmp(save_fmt,'Graphic_objects_full.mat')
+%         disp('============== Vider ==================');
+%         if exist(fullfile(savedir,'Sources_LFP'),'dir')
+%             rmdir(fullfile(savedir,'Sources_LFP'),'s');
+%         end
+%     end
+    
     % Generate graphic objects        
     f = figure('Visible','off');
     h = gobjects(2,1);

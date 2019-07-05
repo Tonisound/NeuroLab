@@ -7,10 +7,10 @@ load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
 xlim1 = time_ref.Y(1);
 xlim2 = time_ref.Y(end);
 l = findobj(myhandles.RightAxes,'Tag','Trace_Cerep');
-temp=[];
-all_traces = struct('X',[],'Y',[],'f_samp',[]);
+% temp=[];
+all_traces = struct('name',[],'X',[],'Y',[],'f_samp',[]);
 for i =1:length(l)
-    temp = [temp;{l(i).UserData.Name}];
+%     temp = [temp;{l(i).UserData.Name}];
     X=l(i).UserData.X;
     Y=l(i).UserData.Y;
     f_samp = 1/(X(2)-X(1));
@@ -18,12 +18,45 @@ for i =1:length(l)
 %    Y = Y(floor(xlim1*f_samp):ceil(xlim2*f_samp));
     X = X(floor(xlim1*f_samp):min(end,ceil(xlim2*f_samp)));
     Y = Y(floor(xlim1*f_samp):min(end,ceil(xlim2*f_samp)));
+    all_traces(i).name = l(i).UserData.Name;
     all_traces(i).X = X;
     all_traces(i).Y = Y;
     all_traces(i).f_samp = f_samp;
 end
+counter = i;
+
+% loading LFP-theta channels directly from Sources_LFP 
+% (-> complete channels if LFP-theta not loaded already)
+dir_theta = dir(fullfile(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),'Sources_LFP','LFP-theta_*.mat'));
+str_theta = {dir_theta(:).name}';
+all_theta = struct('name',[],'X',[],'Y',[],'f_samp',[]);
+for i=1:length(str_theta)
+    data_channel = load(fullfile(dir_theta(i).folder,dir_theta(i).name));
+    x_theta = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+    y_theta = data_channel.Y;
+    all_theta(i).name = strrep(char(dir_theta(i).name),'_','/');
+    all_theta(i).name = strrep(all_theta(i).name,'.mat','');
+    all_theta(i).X = x_theta;
+    all_theta(i).Y = y_theta;
+    all_theta(i).f_samp = 1/(x_theta(2)-x_theta(1));
+    
+    ind_thetaload = strcmp({all_traces(:).name}',all_theta(i).name);
+    ind_lfpload = strcmp({all_traces(:).name}',strrep(all_theta(i).name,'LFP-theta','LFP'));
+    if sum(ind_thetaload)==0 && sum(ind_lfpload)>0
+        % adding to traces
+        %fprintf('Adding channel %s.\n',all_theta(i).name);
+        counter = counter+1;
+        all_traces(counter).name = all_theta(i).name;
+        all_traces(counter).X = all_theta(i).X;
+        all_traces(counter).Y = all_theta(i).Y;
+        all_traces(counter).f_samp = all_theta(i).f_samp;
+%     else
+%         fprintf('Channel %s already loaded or irrelevant.\n',all_theta(i).name);
+    end
+end
 
 %Sorting LFP channels according to configuration
+temp = {all_traces(:).name}';
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
     %sort if lfp configuration is found
     data_lfp = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'channel_type','channel_id');
@@ -51,7 +84,7 @@ if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
         ind_all = ind_all+ind_keep;
         ind_2 = [ind_2;find(ind_keep==1)];
     end
-    ind_remainder = ~ind_all.*contains(temp,'LFP_theta/');
+    ind_remainder = ~ind_all.*contains(temp,'LFP-theta/');
     ind_2=[ind_2;find(ind_remainder==1)];
 else
     %unsorted
@@ -65,7 +98,7 @@ if sum(ind_1)==0
     errordlg('Missing LFP channels. Reload configuration.');
     return;
 end
-if sum(ind_2)==0
+if sum(ind_2)==0 || length(ind_2)<length(ind_1)
     % errordlg('Missing LFP-theta channels. Reload configuration.');
     % return;
     warning('Missing LFP-theta channels. Mode spectrogramm only.');
@@ -80,6 +113,29 @@ traces_name = temp(ind_1);
 phases_name = temp(ind_2);
 traces = all_traces(ind_1);
 phases = all_traces(ind_2);
+
+% Keeping source, differenttial channels or both
+load('Preferences.mat','GImport');
+ind_1_diff = contains(traces_name,'$');
+ind_1_source = ~ind_1_diff;
+ind_2_diff = contains(phases_name,'$');
+ind_2_source = ~ind_2_diff;
+% updating bands depending on 
+switch GImport.Channel_loading
+    case 'source'
+        ind_1 = ind_1_source;
+        ind_2 = ind_2_source;
+    case 'differential'
+        ind_1 = ind_1_diff;
+        ind_2 = ind_2_diff;
+    otherwise%case 'both'
+        ind_1 = logical(ind_1_source+ind_1_diff);
+        ind_2 = logical(ind_2_source+ind_2_diff);
+end
+traces_name = traces_name(ind_1);
+phases_name = phases_name(ind_2);
+traces = traces(ind_1);
+phases = phases(ind_2);
 
 % Loading Time Reference
 if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file'))
@@ -182,9 +238,10 @@ exc = uicontrol('Units','normalized',...
 pu = [];
 for i=1:8
     p = uicontrol('Units','normalized',...
-        'Style','popupmenu',...
+        'Style','popupmenu',... 
         'Parent',iP,...
         'String',sprintf('Popup%d',i),...
+        'ToolTipString',sprintf('Ax%d',i),...
         'Visible','off',...
         'Tag',sprintf('Popup%d',i));
     p.UserData.index=i;
@@ -193,6 +250,7 @@ for i=1:8
 end
 %Storing all_popups
 f2.UserData.all_popups = pu;
+
 
 e1 = uicontrol('Units','normalized',...
     'Style','edit',...
@@ -531,7 +589,14 @@ if channels > l
         %copy_graphicdata(old_handles.RightAxes,ax0,ax);
         all_lines = flipud(findobj(old_handles.RightAxes,'type','line','-not','Tag','Cursor'));
         for i =1:length(all_lines)
-            copyobj(all_lines(i),ax);
+            newl = copyobj(all_lines(i),ax);
+            if strcmp(newl.Tag,'Trace_Region')
+                newl.Marker ='.';
+                newl.MarkerSize = 5;
+%                 newl.Marker = 'o';
+%                 newl.MarkerSize = 3;
+                newl.LineStyle ='none';
+            end
         end
         
         all_obj = ax.Children;

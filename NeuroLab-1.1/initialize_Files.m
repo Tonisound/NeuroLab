@@ -3,7 +3,7 @@ function initialize_Files()
 % Default Values used when Files.mat Files is missing or during Reset
 
 FILES = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},'video',{},'dir_lfp',{},'dir_fus',{},'dir_ext',{},'acq',{},'dop',{},'biq',{},...
-    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},'nev',{},'ccf',{},'rcf',{},'ncf',{},'nlab',{},'type',{});
+    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},'nev',{},'ccf',{},'rcf',{},'ncf',{},'mainchannel',{},'nlab',{},'type',{});
 CUR_FILE = 1;
 str='<0>';
 

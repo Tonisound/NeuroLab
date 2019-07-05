@@ -331,8 +331,8 @@ pl = uicontrol(f,'Style','popup',...
     'FontSize',fontsize,...
     'Parent',botPanel);
 pl_str = 'Compute Normalized Movie|Detect Vascular Surges|Detect Left-Right Runs';
-pl_str = strcat(pl_str,'|Export LFP bands|Export Binary Masks|Export Patches|Export Anatomical Regions|Export IMO file');
 pl_str = strcat(pl_str,'|Import Anatomical Regions|Import LFP Traces|Import External Files');
+pl_str = strcat(pl_str,'|Export LFP bands|Export Binary Masks|Export Patches|Export Anatomical Regions|Export IMO file');
 pl.String = pl_str;
 
 % Process Button
