@@ -2064,7 +2064,8 @@ end
 
 
 C_XY = NaN(length(label_fus),length(label_lfp));
-S_pp = struct('R_data1',[],'R_data2',[],'C_XY',[],'label_fus',[],'label_lfp',[]);
+S_pp = struct('C_XY',[],'label_fus',[],'label_lfp',[],...
+    'R_data1',[],'R_data2',[],'R_data1_scaled',[],'R_data2_scaled',[]);
 S_pp(length(label_fus),length(label_lfp)).C_XY = NaN;
 for i=1:length(label_fus)
     ydata1 = Ydata1(:,:,i);
@@ -2098,9 +2099,6 @@ for i=1:length(label_fus)
     for j=1:length(label_lfp)
         ydata2 = Ydata2(:,:,j);
         R_data2 = [];
-%         for k=1:size(ydata2,1)
-%             R_data2 = [R_data2;ydata2(k,index_2(k))];
-%         end
         switch index_ref
             case 'Start'
                 for k=1:size(ydata2,1)
@@ -2129,6 +2127,8 @@ for i=1:length(label_fus)
         S_pp(i,j).C_XY = C_XY(i,j);
         S_pp(i,j).R_data1 = R_data1;
         S_pp(i,j).R_data2 = R_data2;
+        S_pp(i,j).R_data1_scaled = rescale(R_data1,0,1);
+        S_pp(i,j).R_data2_scaled = rescale(R_data2,0,1);
         S_pp(i,j).label_fus = char(label_fus(i));
         S_pp(i,j).label_lfp = char(label_lfp(j));
     end
@@ -3487,8 +3487,8 @@ save(fullfile(folder_save,'AverageResponse.mat'),'ref_time','Time_indices','ind_
 fprintf('Data saved at [%s].\n',fullfile(folder_save,'AverageResponseData.mat'));
 
 % PeaktoPeakData
-S_pp = [];
-%S_pp = handles.ButtonBatch.UserData.PeaktoPeakData.S_pp;
+%S_pp = [];
+S_pp = handles.ButtonBatch.UserData.PeaktoPeakData.S_pp;
 index_ref = handles.ButtonBatch.UserData.PeaktoPeakData.index_ref;
 corr_type = handles.ButtonBatch.UserData.PeaktoPeakData.corr_type;
 C_XY = handles.ButtonBatch.UserData.PeaktoPeakData.C_XY;

@@ -1,21 +1,17 @@
 % Article RUN
-% Figure 6
+% Figure 8
 % to run after batch Peri-Event Time Histogram 
-% Display (and save figure)vascular plasticity for all brain regions
+% Display (and save figure) polar plots for all brain regions
 % Sorts all trials relative to the time of first trial 
 
-function script_Figure6(cur_list,timegroup,gather_regions)
+function script_Figure8(cur_list,timegroup)
 
-if nargin <3
-    gather_regions = false;
-end
-
-[D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup);
-plot1_Figure6(S,list_regions,cur_list,timegroup,gather_regions);
+[S,list_regions,list_lfp] = compute_script_Figure8(cur_list,timegroup);
+plot1_Figure8(S,list_regions,list_lfp,cur_list,timegroup);
 
 end
 
-function [D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup)
+function [S,list_regions,list_lfp] = compute_script_Figure8(cur_list,timegroup)
 
 close all;
 folder = 'I:\NEUROLAB\NLab_Statistics\fUS_PeriEventHistogram';
@@ -30,6 +26,7 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
 %list_coronal = {'20150224_175307_E';'20150225_154031_E';'20150226_173600_E';'20150716_130039_E';'20160622_191334_E'};
+list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E'};%;...
@@ -38,8 +35,8 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
 %     '20160630_114317_E';'20160701_130444_E'};
 
 % list of references to search (in order)
-%list_ref = {'SPEED';'ACCEL'};
-%list_ref = {'heta'};
+% list_ref = {'SPEED';'ACCEL'};
+% list_ref = {'heta'};
 % timegroup = 'RIGHT_RUNS';
 % cur_list = 'DIAGONAL';
 
@@ -104,18 +101,31 @@ else
         'HypothalRg-L.mat';'HypothalRg-R.mat'};
 end
     
+list_lfp = [{'ACCEL-POWER[61-extra]'};...
+    {'ACCEL-POWER[62-extra]'};...
+    {'ACCEL-POWER[63-extra]'};...
+    {'SPEED'};...
+    {'Power-delta/'};...
+    {'Power-theta/'};...
+    {'Power-gammalow/'};...
+    {'Power-gammamid/'};...
+    {'Power-gammamidup/'};...
+    {'Power-gammahigh/'};...
+    {'Power-gammahighup/'};...
+    {'Power-ripple/'}];
+
 % Buidling struct S
 % All_trials
-S = struct('Ydata',[],'Xdata',[],'ind_end',[],'ind_start',[],'label_events','','region','',...
-    't_start',[],'t_end',[],'file','','str_ref','','rat_name','','rat_id','');
-S(length(list_regions)).Ydata = [];
+S = struct('R',[],'R_data1',[],'R_data2',[],'R_data1_scaled',[],'R_data2_scaled',[],...
+    'R_data_file',[],'R_data_str_ref',[],'R_data_rat_name',[],'R_data_rat_id',[],...
+    'index_ref',[],'corr_type',[],'file',[],'str_ref',[],'rat_name',[],'rat_id',[]);
+S(length(list_lfp),length(list_regions)).R = [];
 
-% Average per recording
-R = struct('ref_time',[],'m',[],'s',[],'ind_start',[],'ind_end',[],'labels','','str_popup','');
-R(length(list_regions)).Ydata = [];
 
-lmax = 5000;
-    
+% % Average per recording
+% R = struct('ref_time',[],'m',[],'s',[],'ind_start',[],'ind_end',[],'labels','','str_popup','');
+% R(length(list_regions)).Ydata = [];
+
 for index = 1:length(D)
     
     cur_file = D(index).file;
@@ -126,72 +136,75 @@ for index = 1:length(D)
     rat_id = D(index).rat_id;
     
     % Loading rmax, tmax
-    data_fus = load(fullfile(fullpath,'fUS_Data.mat'));
-    for i=1:length(list_regions)
+    data_fus = load(fullfile(fullpath,'PeaktoPeak.mat'));
+    %label_fus = data_fus.label_fus;
+    %label_lfp = data_fus.label_lfp;
+    
+    for i=1:length(list_lfp)
+        lfp_name = strrep(char(list_lfp(i)),'.mat','');
+        %ind_keep = find(strcmp(data_fus.label_lfp,lfp_name)==1);
+        ind_lfp = find(contains(data_fus.label_lfp,lfp_name)==1);
         
-        region_name = strrep(char(list_regions(i)),'.mat','');
-        ind_keep = find(strcmp(data_fus.fUS_Selection(:,1),region_name)==1);
-        
-        if ~isempty(ind_keep)        
-            Ydata_temp = cat(2,data_fus.Ydata(:,:,ind_keep),NaN(size(data_fus.Ydata,1),lmax-size(data_fus.Ydata,2)));
-            S(i).Ydata = [S(i).Ydata;Ydata_temp];
-            Xdata_temp = cat(2,data_fus.ref_time,NaN(1,lmax-length(data_fus.ref_time)));
-            Xdata_temp = repmat(Xdata_temp,[size(Ydata_temp,1),1]);
-            S(i).Xdata = [S(i).Xdata;Xdata_temp];
-            S(i).label_events = [S(i).label_events;data_fus.label_events];
-            S(i).t_start = [S(i).t_start;data_fus.Time_indices(:,2)-data_fus.Time_indices(1,1)];
-            S(i).t_end = [S(i).t_end;data_fus.Time_indices(:,3)-data_fus.Time_indices(1,1)];
+        % Selecting ind_lfp
+        if isempty(ind_lfp)
+            continue;
+        elseif length(ind_lfp)>1
+            ind_lfp = ind_lfp(1);data
+            warning('Multiple pattern matches [Pattern: %s /File: %s /Selected: %s]',lfp_name,cur_file,data_fus.label_lfp(ind_lfp));
+        end
             
-            S(i).region = region_name;
-            S(i).ind_start = [S(i).ind_start;data_fus.ind_start];
-            S(i).ind_end = [S(i).ind_end;data_fus.ind_end];
+        for j=1:length(list_regions)
+            region_name = strrep(char(list_regions(j)),'.mat','');
+            ind_reg = find(strcmp(data_fus.label_fus,region_name)==1);
             
-%             S(i).rat_name = [S(i).rat_name;repmat({D(index).rat_name},[size(Ydata_temp,1),1])];
-%             S(i).rat_id = [S(i).rat_id;repmat({D(index).rat_id},[size(Ydata_temp,1),1])];
-%             S(i).file = [S(i).file;repmat({cur_file},[size(Ydata_temp,1),1])];
-%             S(i).str_ref =[S(i).str_ref;repmat({D(index).str_ref},[size(Ydata_temp,1),1])];      
-            S(i).rat_name = [S(i).rat_name;{D(index).rat_name};repmat({''},[size(Ydata_temp,1),1])];
-            S(i).rat_id = [S(i).rat_id;{D(index).rat_id};repmat({''},[size(Ydata_temp,1),1])];
-            S(i).file = [S(i).file;{cur_file};repmat({''},[size(Ydata_temp,1),1])];
-            S(i).str_ref =[S(i).str_ref;{D(index).str_ref};repmat({''},[size(Ydata_temp,1),1])];
-
+            % Selecting ind_reg
+            if isempty(ind_reg)
+                continue;
+            elseif length(ind_reg)>1
+                ind_reg = ind_reg(1);
+                warning('Multiple pattern matches [Pattern: %s /File: %s /Selected: %s]',region_name,cur_file,data_fus.label_fus(ind_reg));
+            end
+            
+            % Filling Data            
+            S(i,j).R = [S(i,j).R;data_fus.C_XY(ind_reg,ind_lfp)];
+            S(i,j).index_ref = [S(i,j).index_ref;data_fus.index_ref];
+            S(i,j).corr_type = [S(i,j).corr_type;data_fus.corr_type];
+            S(i,j).file = [S(i,j).file;{cur_file}];
+            S(i,j).str_ref = [S(i,j).str_ref;{str_ref}];
+            S(i,j).rat_name = [S(i,j).rat_name;{rat_name}];
+            S(i,j).rat_id = [S(i,j).rat_id;{rat_id}];
+            % all_events
+            S(i,j).R_data1 = [S(i,j).R_data1;data_fus.S_pp(ind_reg,ind_lfp).R_data1];
+            S(i,j).R_data2 = [S(i,j).R_data2;data_fus.S_pp(ind_reg,ind_lfp).R_data2];
+            S(i,j).R_data1_scaled = [S(i,j).R_data1_scaled;data_fus.S_pp(ind_reg,ind_lfp).R_data1_scaled];
+            S(i,j).R_data2_scaled = [S(i,j).R_data2_scaled;data_fus.S_pp(ind_reg,ind_lfp).R_data2_scaled];
+            N = length(data_fus.S_pp(ind_reg,ind_lfp).R_data1);
+            S(i,j).R_data_file = [S(i,j).R_data_file; cellstr(repmat(cur_file,[N,1]))];
+            S(i,j).R_data_str_ref = [S(i,j).R_data_str_ref; cellstr(repmat(str_ref,[N,1]))];
+            S(i,j).R_data_rat_name = [S(i,j).R_data_rat_name; cellstr(repmat(rat_name,[N,1]))];
+            S(i,j).R_data_rat_id = [S(i,j).R_data_rat_id; cellstr(repmat(rat_id,[N,1]))];
         end
     end
     
-    data_ar = load(fullfile(fullpath,'AverageResponse.mat'));
-    for i=1:length(list_regions)
-        
-        region_name = strrep(char(list_regions(i)),'.mat','');
-        ind_keep = find(strcmp(data_ar.labels,region_name)==1);
-        if ~isempty(ind_keep)
-            R(i).ind_start = [R(i).ind_start;mean(data_ar.ind_start)];
-            R(i).ind_end = [R(i).ind_end;mean(data_ar.ind_end)];
-            R(i).region = region_name;
-            R(i).str_popup = [R(i).str_popup;{data_ar.str_popup}];
-            
-            R(i).ref_time = [R(i).ref_time;[data_ar.ref_time,NaN(1,lmax-length(data_ar.ref_time))]];
-            R(i).m = [R(i).m;[data_ar.m(:,:,i),NaN(1,lmax-length(data_ar.ref_time))]];
-            R(i).s = [R(i).s;[data_ar.s(:,:,i),NaN(1,lmax-length(data_ar.ref_time))]];
-        end
-    end
-end
 end
 
-function plot1_Figure6(S,list_regions,cur_list,timegroup,gather_regions)
+end
+
+function plot1_Figure8(S,list_regions,list_lfp,cur_list,timegroup)
 
 % Drawing results
 f = figure;
-%f.Name = sprintf('Synthesis Hemodynamics Response all_trials [%s | %s]',cur_list,timegroup);
-f.Name = sprintf('Fig5_SynthesisB_%s-%s',cur_list,timegroup);
+f.Name = sprintf('Fig8_SynthesisA_%s-%s',cur_list,timegroup);
 colormap(f,'parula');
 f_colors = f.Colormap(round(1:64/length(S):64),:);
+list_regions=regexprep(list_regions,'.mat','');
 
 % Sixth tab
 all_axes = [];
-margin_w=.02;
-margin_h=.02;
+margin_w = .02;
+margin_h =.02;
 n_columns = 4;
-n_rows = ceil(length(list_regions)/n_columns);
+n_rows = ceil(length(list_lfp)/n_columns);
 all_P = [];
 all_E = [];
     
@@ -199,7 +212,7 @@ all_E = [];
 for ii = 1:n_rows
     for jj = 1:n_columns
         index = (ii-1)*n_columns+jj;
-        if index>length(list_regions)
+        if index>length(list_lfp)
             continue;
         end
         x = mod(index-1,n_columns)/n_columns;
@@ -213,31 +226,6 @@ for ii = 1:n_rows
     end
 end
 
-%gather_regions = false;
-if gather_regions
-    labels_gathered = strrep(list_regions,'-L','');
-    labels_gathered = strrep(labels_gathered,'-R','');
-    [C, ~, ic] = unique(labels_gathered,'stable');
-    % Reposition axes
-    delete(all_axes(length(C)+1:end));
-    n_rows = ceil(length(C)/n_columns);
-    for ii = 1:n_rows
-        for jj = 1:n_columns
-            index = (ii-1)*n_columns+jj;
-            if index>length(C)
-                continue;
-            end
-            x = mod(index-1,n_columns)/n_columns;
-            y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
-            ax = all_axes(index);
-            ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
-        end
-    end
-    all_axes = all_axes(ic);
-else
-    labels_gathered = list_regions;
-end
-labels_gathered=regexprep(labels_gathered,'.mat','');
 
 % Plotting
 for index = 1:length(S)
@@ -303,7 +291,7 @@ for index = 1:length(S)
     
     b = bar(M_binned,'FaceColor',f_colors(index,:),...
         'EdgeColor','none','Parent',ax);
-    title(ax,labels_gathered(index));
+    title(ax,list_regions(index));
     hold(ax,'on');
     e = errorbar(M_binned,SEM_binned,'k',...
         'linewidth',.5,'linestyle','none',...
@@ -354,73 +342,5 @@ f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
 fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s',f.Name,'.pdf')));
-
-% % 2nd figure
-% figure();
-% ax1 = subplot(311);
-% bdat = all_P(:,1);
-% b = bar(1:length(bdat),diag(bdat),'stacked','Parent',ax1);
-% for k=1:length(bdat)
-%     %b(k).FaceColor = char(GDisp.colors(k));
-%     b(k).FaceColor = f_colors(k,:);
-% end
-% ax1.XTick = 1:length(bdat);
-% ax1.XTickLabel = labels_gathered;
-% ax1.XTickLabelRotation = 45;
-% ax1.TickLength=[0 0];
-% ax1.XLim = [.5 length(bdat)+.5];
-% ax1.YLim = [min(bdat)-.1 max(bdat)+.1];
-% 
-% ax2 = subplot(312);
-% bdat = all_P(:,2);
-% b = bar(1:length(bdat),diag(bdat),'stacked','Parent',ax2);
-% for k=1:length(bdat)
-%     %b(k).FaceColor = char(GDisp.colors(k));
-%     b(k).FaceColor = f_colors(k,:);
-% end
-% ax2.XTick = 1:length(bdat);
-% ax2.XTickLabel = labels_gathered;
-% ax2.XTickLabelRotation = 45;
-% ax2.TickLength=[0 0];
-% ax2.XLim = [.5 length(bdat)+.5];
-% ax2.YLim = [min(bdat)-.1 max(bdat)+.1];
-% 
-% ax3 = subplot(313);
-% bdat = all_E(:,1);
-% b = bar(1:length(bdat),diag(bdat),'stacked','Parent',ax3);
-% for k=1:length(bdat)
-%     %b(k).FaceColor = char(GDisp.colors(k));
-%     b(k).FaceColor = f_colors(k,:);
-% end
-% ax3.XTick = 1:length(bdat);
-% ax3.XTickLabel = labels_gathered;
-% ax3.XTickLabelRotation = 45;
-% ax3.TickLength=[0 0];
-% ax3.XLim = [.5 length(bdat)+.5];
-% ax3.YLim = [min(bdat)-.1 max(bdat)+.1];
-
-% 3rd figure
-f = figure();
-ax1 = axes('parent',f);
-m_size = all_E/max(all_E);
-line('XData',[0 0],'YData',[-10 10],'Parent',ax1,...
-    'linewidth',.5,'Color','k');
-line('YData',[0 0],'XData',[-10 10],'Parent',ax1,...
-    'linewidth',.5,'Color','k');
-for k=1:size(all_P,1)
-    l = line('XData',all_P(k,1),'YData',all_P(k,2),'Parent',ax1,...
-        'MarkerFaceColor',[.5 .5 .5],'Marker','o','MarkerSize',10*(1+m_size(k)),...
-        'MarkerEdgeColor','none');
-    l = line('XData',all_P(k,1),'YData',all_P(k,2),'Parent',ax1,...
-        'MarkerFaceColor',f_colors(k,:),'Marker','o','MarkerSize',10,...
-        'MarkerEdgeColor','none');
-    text(all_P(k,1)+.01,all_P(k,2),sprintf('%s',char(labels_gathered(k))),...
-        'FontSize',9,'Parent',ax1,'Color','k');
-end
-ax1.Title.String = cur_list;
-ax1.XLabel.String = 'Potentiation Strength';
-ax1.YLabel.String = 'Potentiation Offset';
-ax1.XLim = [min(all_P(:,1))-.01 max(all_P(:,1))+.01];
-ax1.YLim = [min(all_P(:,2))-.5 max(all_P(:,2))+.5];
 
 end

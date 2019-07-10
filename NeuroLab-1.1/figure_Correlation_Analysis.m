@@ -705,7 +705,8 @@ function compute_Callback(hObj,~,handles)
 % Compute Correlogram
 
 global START_IM END_IM IM DIR_SAVE FILES CUR_FILE LAST_IM;
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
+    'time_ref','length_burst','n_burst','rec_mode','n_images');
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch')
@@ -797,13 +798,12 @@ handles.Cmax_0.String = sprintf('%.1f',handles.CenterAxes.CLim(2));
 
 % Reshaping xdat 
 
-
-
 if strcmp(rec_mode,'BURST')
     % new code
     % add NaN values between bursts
     length_burst = 59;
-    n_burst = LAST_IM/length_burst;
+    %n_burst = LAST_IM/length_burst;
+    n_burst = n_images/length_burst;
     xdat = reshape(xdata(1:end-1),[length_burst,n_burst]);
     xdat = reshape(xdat,[length_burst*n_burst,1]);
     xdat(Time_indices==0) = NaN;
@@ -1172,8 +1172,11 @@ if ~isdir(stats_dir)
     mkdir(stats_dir);
 end
 
-ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name(1:min(end,20))),'/','-');
-save_dir= fullfile(stats_dir,strcat(ref_name,'-',handles.Text2.String),folder_name);
+% ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name(1:min(end,20))),'/','-');
+% save_dir= fullfile(stats_dir,strcat(ref_name,'-',handles.Text2.String),folder_name);
+ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name),'/','-');
+save_dir= fullfile(stats_dir,ref_name,folder_name);
+
 work_dir = fullfile(save_dir,'Regions');
 if isdir(save_dir)
     rmdir(save_dir,'s');
@@ -1258,8 +1261,10 @@ val = handles.Slider.Value;
 lags = handles.Slider.Min:handles.Slider.Max;
 
 % Saving Video frame
-ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name(1:min(end,20))),'/','-');
-save_dir= fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,strcat(ref_name,'-',handles.Text2.String),folder_name);
+% ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name(1:min(end,20))),'/','-');
+% save_dir= fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,strcat(ref_name,'-',handles.Text2.String),folder_name);
+ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name),'/','-');
+save_dir = fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,ref_name,folder_name);
 work_dir = fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,strcat(ref_name,'-',handles.Text2.String),folder_name,'Frames');
 
 
@@ -1382,7 +1387,9 @@ for i=1:length(ind_group)
         compute_Callback(bc,[],handles);
         savestats_Callback([],[],handles);
         saveimage_Callback([],[],handles);
-        delete('_info.txt');
+        if exist('_info.txt','file')
+            delete('_info.txt');
+        end
     end
 end
 

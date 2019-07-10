@@ -1,5 +1,7 @@
 % Article RUN
 % Figure 5
+% to run after batch Peri-Event Time Histogram 
+% Display (and save figure) all trials for all brain regions
 
 function script_Figure5(cur_list,timegroup,gather_regions)
 
@@ -8,7 +10,7 @@ if nargin <3
 end
 
 [D,R,S,list_regions] = compute_script_Figure5(cur_list,timegroup);
-plot1_Figure4(S,list_regions,cur_list,timegroup,gather_regions);
+plot1_Figure5(S,list_regions,cur_list,timegroup,gather_regions);
 
 end
 
@@ -178,7 +180,7 @@ end
 end
 
 
-function plot1_Figure4(S,list_regions,cur_list,timegroup,gather_regions)
+function plot1_Figure5(S,list_regions,cur_list,timegroup,gather_regions)
 
 % Drawing results
 f = figure;

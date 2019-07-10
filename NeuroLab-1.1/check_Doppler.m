@@ -10,6 +10,7 @@ tag = [];
 % Removing data points where variance is too high
 t = (1:size(Doppler_film,3))';
 test = permute(mean(mean(Doppler_film,2,'omitnan'),1,'omitnan'),[3,1,2]);
+test(test<0)=0.0001;
 
 
 % Checking arguments depending on importation type
@@ -33,7 +34,7 @@ ax1.Visible = 'off';
 %colormap(ax1,'gray');
 
 text1 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
-text1.String = sprintf('Frame %d/%d',CUR_IM,size(Doppler_film,3));
+text1.String = sprintf('%d/%d',CUR_IM,size(Doppler_film,3));
 text2 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
 text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
     sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
@@ -79,8 +80,8 @@ cancelButton.Enable = status;
 %Positions
 ax1.Position = [.025 .1 .2 .8];
 ax2.Position = [.25 .1 .65 .8];
-text1.Position = [.025 .925 .2 .04];
-text2.Position = [.92 .7 .06 .2];
+text1.Position = [.92 .8 .06 .1];
+text2.Position = [.92 .7 .06 .1];
 text3.Position = [.1 .925 .8 .04];
 text4.Position = [.92 .6 .06 .1];
 
