@@ -1,8 +1,13 @@
-function success = menuEdit_LFPConfig_Callback(folder_name,handles)
+function success = menuEdit_LFPConfig_Callback(folder_name,handles,val)
 % Channel Configuration Edition
 
 global FILES CUR_FILE;
 success = false;
+
+if nargin<3
+    % user mode 
+    val =1;
+end
 
 % Loading Channel Config
 if exist(fullfile(folder_name,'Nconfig.mat'),'file')

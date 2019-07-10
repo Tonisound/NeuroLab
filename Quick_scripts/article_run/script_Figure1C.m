@@ -1,6 +1,6 @@
 % Article RUN
 % Figure 1C
-% aggregates and left and right runs 
+% aggregates left and right runs 
 %close all;
 
 function script_Figure1C(myhandles)

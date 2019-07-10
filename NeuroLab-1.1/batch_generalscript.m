@@ -154,8 +154,8 @@ ft.UserData.Selection = [];
 
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
-D = [cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit Anatomical Regions'}];
+D = [{'Clear Sources_LFP'};cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
+    {'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit Anatomical Regions'};{'Edit LFP Configuration'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -327,6 +327,7 @@ str_spiko = [];
 for i =1:length(ft.UserData.Selection)%size(FILES,2)
     ii = ft.UserData.Selection(i);
     switch str
+            
         case 'Graphic_objects.mat'
             if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_light.mat'),'file')
                 data = load(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_light.mat'),'traces');
@@ -482,6 +483,20 @@ for i = 1:length(ind_files)
         
         %try
             switch process_name
+                case 'Clear Sources_LFP'
+                    % Housecleaning: emptying Sources_LFP/ before saving
+                    load('Preferences.mat','GTraces');
+                    save_fmt = GTraces.GraphicSaveFormat;
+                    success=false;
+                    if strcmp(save_fmt,'Graphic_objects_full.mat')
+                        disp('============== Housecleaning ==================');
+                        if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'dir')
+                            delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
+                            rmdir(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'s');
+                            success=true;
+                        end
+                    end
+                    
                 case 'Compute Normalized Movie'
                     success = compute_normalizedmovie(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                        
@@ -515,6 +530,9 @@ for i = 1:length(ind_files)
                     
                 case 'Edit Anatomical Regions'
                     success = menuEdit_AnatRegions_Callback(FILES(ii),myhandles,0);
+                    
+                case 'Edit LFP Configuration'
+                    success = menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
                 case 'Export Binary Masks'
                     success = export_binary_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii),myhandles,0);

@@ -2,6 +2,7 @@ function f2 = figure_Correlation_Analysis(myhandles,val,str_group)
 
 global DIR_SAVE CUR_IM START_IM END_IM FILES CUR_FILE;
 
+%Time_Reference
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
     load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
 else
@@ -9,11 +10,25 @@ else
     return;
 end
 
+%Time_Tags
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
     load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images','TimeTags_strings');
 else
     errordlg(sprintf('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat')));
     return;
+end
+
+%Time_Groups
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
+    data_tg = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
+else
+    errordlg(sprintf('Please edit Time_Groups.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
+    return;
+end
+
+% loading Config.mat
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')
+     data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'));
 end
 
 f2 = figure('Units','characters',...
@@ -29,6 +44,9 @@ f2 = figure('Units','characters',...
 clrmenu(f2);
 colormap('jet');
 ax_dummy = axes('Parent',f2,'Tag','Dummy','Visible','off');
+
+f2.UserData.data_config = data_config;
+f2.UserData.data_tg = data_tg;
 
 % Information Panel
 iP = uipanel('Units','normalized',...
@@ -1171,9 +1189,12 @@ im4 = findobj(handles.Ax4,'type','image');
 A = im4.CData;
 [r_max,t_max] = max(A,[],2);
 [r_min,t_min] = min(A,[],2);
-x_ = lags*step;
-x_max = x_(t_max)';
-x_min = x_(t_min)';
+% x_ = lags*step;
+% x_max = x_(t_max)';
+% x_min = x_(t_min)';
+x_ = im4.XData;
+x_max = (x_(t_max))';
+x_min = (x_(t_min))';
 
 UF.labels = labels;
 UF.ref_name = ref_name;
@@ -1191,7 +1212,8 @@ Rmax_map = im1.CData;
 im2 = findobj(handles.Ax2,'type','Image');
 Tmax_map = im2.CData;
 RT_pattern = A;
-save(fullfile(save_dir,'Correlation_pattern.mat'),'Rmax_map','Tmax_map','RT_pattern','-v7.3');
+save(fullfile(save_dir,'Correlation_pattern.mat'),'Rmax_map','Tmax_map','RT_pattern',...
+    'x_','labels','r_max','t_max','x_max','r_min','t_min','x_min','-v7.3');
 
 for k=2:length(labels)
     filename = regexprep(strcat(char(labels(k)),'.mat'),'/','-');
@@ -1264,6 +1286,11 @@ pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
+handles.TabGroup.SelectedTab = handles.ThirdTab;
+pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
+saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+
 handles.TabGroup.SelectedTab = handles.FourthTab;
 pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
@@ -1296,7 +1323,6 @@ switch tag
         handles.Edit2.String = 15;
 end
 
-
 handles.Edit1.UserData.Previous = handles.Edit1.String;
 handles.Edit2.UserData.Previous = handles.Edit2.String;
 handles.Slider.Min = str2double(handles.Edit1.String);
@@ -1309,24 +1335,17 @@ end
 
 function batch_Correlation_Callback(hObj,~,handles,str_group,v)
 
-global DIR_SAVE FILES CUR_FILE;
-
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
-else
-    errordlg(sprintf('Please edit Time_Groups.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
-    return;
-end
-
+data_config = handles.MainFigure.UserData.data_config;
+data_tg = handles.MainFigure.UserData.data_tg;
 
 if nargin == 3
     % If Manual Callback open inputdlg
     [ind_group,v] = listdlg('Name','Group Selection','PromptString','Select Time Groups',...
-        'SelectionMode','multiple','ListString',TimeGroups_name,'InitialValue','','ListSize',[300 500]);
+        'SelectionMode','multiple','ListString',data_tg.TimeGroups_name,'InitialValue','','ListSize',[300 500]);
 else
     % If batch mode, keep only elements in str_group
     ind_group = [];
-    temp = TimeGroups_name;
+    temp = data_tg.TimeGroups_name;
     for i=1:length(temp)
         ind_keep = ~(cellfun('isempty',strfind(str_group,temp(i))));
         if sum(ind_keep)>0
@@ -1336,33 +1355,34 @@ else
 end
 
 if isempty(ind_group)||v==0
-        return;
+    return;
 end
 
 for i=1:length(ind_group)
     ii = ind_group(i);
     % Update Tag_table
-    hObj.UserData.folder_name = char(TimeGroups_name(ii));
-    handles.Tag_table.UserData.Selection = TimeGroups_S(ii).Selected';
+    hObj.UserData.folder_name = char(data_tg.TimeGroups_name(ii));
+    handles.Tag_table.UserData.Selection = data_tg.TimeGroups_S(ii).Selected';
+    
+%     % Selecting main channel
+%     if ~isempty(data_config.File.mainchannel)
+%         str_ref = [{data_config.File.mainchannel};{'SPEED'};{'ACCEL-POWER'}];
+%     else
+%         str_ref = [{'SPEED'};{'ACCEL-POWER'}];
+%     end
+    str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
+        {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'}];
     
     % Compute
-    str_ref = {'SPEED';'ACCEL-POWER'};
-    %str_ref = {'Phasic';'Theta';'Gamma';'Whole';'ACCEL-POWER';'SPEED';'EMG-POWER'};
-    for k =1:length(str_ref)
-        p1 = handles.Popup1;
-        bc = handles.ButtonCompute;
-        ind_keep = ~(cellfun('isempty',strfind(p1.String,char(str_ref(k)))));
-        ind_val = ind_keep.*(1:length(ind_keep))';
-        
-        for kk =1:length(ind_val)
-            if ind_val(kk)> 0
-                p1.Value = kk;
-                compute_Callback(bc,[],handles);
-                savestats_Callback([],[],handles);
-                %saveimage_Callback([],[],handles);
-                delete('_info.txt');
-            end
-        end
+    p1 = handles.Popup1;
+	bc = handles.ButtonCompute;
+	ind_pu = find(contains(p1.String,str_ref)==1);
+    for k =1:length(ind_pu)
+        p1.Value = ind_pu(k);
+        compute_Callback(bc,[],handles);
+        savestats_Callback([],[],handles);
+        saveimage_Callback([],[],handles);
+        delete('_info.txt');
     end
 end
 

@@ -283,14 +283,14 @@ markersize = 15;
 markertype = '+';
 marker_width = .25;
 alpha_value = .3;
-% visible_status = [{'on','on','off','on','off','off','on'};
-%     {'on','on','off','on','off','off','on'};
-%     {'on','on','off','on','off','off','on'};
-%     {'off','off','off','off','off','off','off'}];
-visible_status = [{'on','on','on','on','on','on','on'};
-    {'on','on','on','on','on','on','on'};
-    {'on','on','on','on','on','on','on'};
+visible_status = [{'on','on','off','on','off','off','on'};
+    {'on','on','off','on','off','off','on'};
+    {'on','on','off','on','off','off','on'};
     {'on','on','on','on','on','on','on'}];
+% visible_status = [{'on','on','on','on','on','on','on'};
+%     {'on','on','on','on','on','on','on'};
+%     {'on','on','on','on','on','on','on'};
+%     {'on','on','on','on','on','on','on'}];
 
 % Computing mean
 for j =1:length(data.S_fus)

@@ -2006,8 +2006,12 @@ for i =1:length(panels)
             M = max(max(lines(k).YData(indexes==1),[],'omitnan'),M);
             m = min(min(lines(k).YData(indexes==1),[],'omitnan'),m);
         end
-        if ~isnan(m) && ~isnan(M)
-            ax.YLim = [m M];
+        try
+            if ~isnan(m) && ~isnan(M)
+                ax.YLim = [m M];
+            end
+        catch
+            warning('Problem autoscale axis %s',ax.Tag);
         end
         
         %Spectrogram

@@ -71,7 +71,7 @@ uicontrol('Units','characters','Style','popupmenu','Parent',iP,...
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
     'Tag','Checkbox1','Value',1,'Tooltipstring','Align Before Stimulus');
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
-    'Tag','Checkbox2','Value',0,'Tooltipstring','Align After Stimulus');
+    'Tag','Checkbox2','Value',1,'Tooltipstring','Align After Stimulus');
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
     'Tag','Checkbox3','Value',1,'Tooltipstring','Link/Unlink Axes');
 uicontrol('Units','characters','Style','checkbox','Parent',iP,...
@@ -370,6 +370,23 @@ uicontrol('style','popup','Value',1,...
     'String','Pearson|Spearman|Kendall',...
     'Units','normalized','Position',[.55 .01 .1 .03],...
     'TooltipString','Correlation Type','Tag','Popup_correlation_6','Parent',tab6);
+
+% SeventhTab
+tab7 = uitab('Parent',tabgp,...
+    'Title','AutoCorrelation',...
+    'Tag','SeventhTab');
+uicontrol('style','popup','String','Single|3 trials|5 trials',...
+    'Units','normalized','Position',[.9 .01 .1 .03],...
+    'Value',1,'Tag','Popup_AutoCorr1','Parent',tab7);
+uicontrol('style','popup','String','Raw|Best Fit',...
+    'Units','normalized','Position',[.9 .05 .1 .03],...
+    'Value',1,'Tag','Popup_AutoCorr2','Parent',tab7);
+
+
+% % EightTab
+% tab8 = uitab('Parent',tabgp,...
+%     'Title','Gaussian  Fit',...
+%     'Tag','EightTab');
 
 
 % Lines Array
@@ -874,6 +891,8 @@ set(handles.PopupStart,'Callback',{@update_episode,handles});
 set(handles.PopupEnd,'Callback',{@update_episode,handles});
 set(handles.PopupfUS_6,'Callback',{@peak2peak_Callback,handles});
 set(handles.Popup_correlation_6,'Callback',{@peak2peak_Callback,handles});
+set(handles.Popup_AutoCorr1,'Callback',{@autocorr_Callback,handles});
+set(handles.Popup_AutoCorr2,'Callback',{@autocorr_Callback,handles});
 
 
 % Resetting Button_Sort
@@ -1298,6 +1317,12 @@ display_regression([],[],handles);
 % Update Peak-to-Peak Panel
 peak2peak_Callback([],[],handles);
 
+% % Update Gaussian Panel
+% gaussianfit_Callback([],[],handles);
+
+% Update AutoCorr Panel
+autocorr_Callback([],[],handles);
+
 % Store Data
 % handles.ButtonBatch.UserData.Zdata = Zdata;
 % handles.ButtonBatch.UserData.ref_time= ref_time;
@@ -1470,7 +1495,7 @@ ax1.XTickLabelRotation=45;
 theta = rescale(1:length(bdata),2*pi/length(bdata),2*pi);
 rho1 = bdata.^2;
 polarplot(theta,rho1,'parent',pax1,'color',g_colors(mod(hObj.UserData.index-1,length(g_colors))+1,:));
-pax1.ThetaTick = theta*360/(2*pi);
+pax1.ThetaTick = theta*360/(20*pi);
 pax1.ThetaTickLabel = fUS;
 pax1.RLim = [0 .5];
 
@@ -2032,6 +2057,9 @@ if ~isempty(S2)
     label_events = S2.label_events;
     align1 = S2.align1;
     align2 = S2.align2;
+    if isempty(LFP_Selection)
+        return;
+    end
 end
 
 
@@ -2155,7 +2183,7 @@ for ii = 1:n_rows
         pax.RLim = [0 1];
         pax.Title.String = label_lfp(index);
         pax.ThetaAxisUnits = 'radian';
-        pax.ThetaTick = theta;
+        pax.ThetaTick = theta+(theta(2)-theta(1))/2;
         pax.ThetaTickLabel = lab_fus;
         %pax.ThetaTick = '';
         %pax.ThetaTickLabel = '';
@@ -2171,6 +2199,181 @@ handles.ButtonBatch.UserData.PeaktoPeakData.corr_type = corr_type;
 handles.ButtonBatch.UserData.PeaktoPeakData.C_XY = C_XY;
 handles.ButtonBatch.UserData.PeaktoPeakData.label_fus = label_fus;
 handles.ButtonBatch.UserData.PeaktoPeakData.label_lfp = label_lfp;
+handles.MainFigure.Pointer = 'arrow';
+
+end
+
+% function gaussianfit_Callback(~,~,handles)
+% end
+
+function autocorr_Callback(~,~,handles)
+
+handles.MainFigure.Pointer = 'watch';
+drawnow;
+
+% Ydata = handles.Popup2.UserData.Ydata;
+% ind_start = handles.Popup2.UserData.ind_start;
+% ind_end = handles.Popup2.UserData.ind_end;
+% ref_time = handles.Popup2.UserData.ref_time;
+% val_popup2 = handles.Popup2.Value;
+% electrodes = str2double(handles.Edit2.String);
+% n_electrodes = length(handles.LFPTable.UserData.Selection);
+% m = mean(Ydata(:,:,ind),1,'omitnan');
+% s = std(Ydata(:,:,ind),[],1,'omitnan');
+
+% Retrieve data
+S1 = handles.ButtonBatch.UserData.fUSData;
+label_fus = S1.fUS_Selection(:,1);
+label_events = S1.label_events;
+lab_fus = [];
+color_fus = [];
+for i =1:length(label_fus)
+    temp = char(label_fus(i));
+    lab_fus = [lab_fus;{temp(1:2)}];
+    color_fus = [color_fus;handles.Popup1.UserData.lines_channels(i).Color];
+end
+
+% Clearing tab
+tab = handles.SeventhTab;
+pu71 = handles.Popup_AutoCorr1;
+str_autocorr = strtrim(pu71.String(pu71.Value,:));
+pu72 = handles.Popup_AutoCorr2;
+corr_type = strtrim(pu72.String(pu72.Value,:));
+all_obj = tab.Children;
+for i =1:length(all_obj)
+    if ~strcmp(all_obj(i).Tag,'Popup_AutoCorr1')&&~strcmp(all_obj(i).Tag,'Popup_AutoCorr2')
+        delete(all_obj(i));
+    end
+end
+
+all_axes = [];
+margin_w = .01;
+margin_h = .02;
+n_columns = 6;
+n_rows = ceil(length(label_fus)/n_columns);
+
+% Computing correlations
+C_FIRST = NaN(size(S1.Ydata,1),3,size(S1.Ydata,3));
+C_LAST = NaN(size(S1.Ydata,1),3,size(S1.Ydata,3));
+
+for i =1:size(S1.fUS_Selection,1)
+    Ydata = S1.Ydata(:,:,i);
+    y_first1 = Ydata(1,:);
+    y_last1 = Ydata(end,:);
+    try
+        y_first2 = mean(Ydata(1:2,:),1,'omitnan');
+    catch
+        y_first2 = y_first1;
+    end
+    try 
+        y_last2 = mean(Ydata(end-1:end,:),1,'omitnan');
+    catch
+        y_last2 = y_last1;
+    end
+    try
+        y_first3 = mean(Ydata(1:3,:),1,'omitnan');
+    catch
+        y_first3 = y_first2;
+    end
+    try
+        y_last3 = mean(Ydata(end-2:end,:),1,'omitnan');
+    catch
+        y_last3 = y_last2;
+    end
+    
+    y_first_all = [y_first1(:),y_first2(:),y_first3(:)];
+    y_last_all = [y_last1(:),y_last2(:),y_last3(:)];
+    
+    % Computing correlations (no lag)
+    if strcmp(corr_type,'Raw')
+        c_first = corr(y_first_all,Ydata','rows','complete');
+        c_last = corr(y_last_all,Ydata','rows','complete');
+        C_FIRST(:,:,i) = c_first';
+        C_LAST(:,:,i) = c_last';
+    end
+    
+    % Computing correlations (with lag)
+    if strcmp(corr_type,'Best Fit')
+        
+%         for j=1:size(C_FIRST,1)
+%             y_trial = Ydata(j,:)';
+%             for k=1:size(C_FIRST,2)
+%                 y_first = y_first_all(:,k); 
+%                 C_FIRST(j,k,i)=0;
+%             end
+%         end
+        c_first = corr(y_first_all,Ydata','rows','complete');
+        c_last = corr(y_last_all,Ydata','rows','complete');
+        C_FIRST(:,:,i) = c_first';
+        C_LAST(:,:,i) = c_last';
+    end
+end
+
+
+% Creating axes
+for ii = 1:n_rows
+    for jj = 1:n_columns
+        index = (ii-1)*n_columns+jj;
+        if index>size(S1.fUS_Selection,1)
+            continue;
+        end
+        x = mod(index-1,n_columns)/n_columns;
+        y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+        
+        % Creating axes
+        ax = axes('Parent',tab,'Tag',sprintf('PolarAx%d',index));
+        hold(ax,'on');
+        
+        % Plotting corr
+        xdata = (1:size(S1.Ydata,1))';
+        switch str_autocorr
+            case 'Single'
+                ydata1 = C_FIRST(:,1,index);
+                ydata2 = C_LAST(:,1,index);
+            case '2 trials'
+                ydata1 = C_FIRST(:,2,index);
+                ydata2 = C_LAST(:,2,index);
+            case '3 trials'
+                ydata1 = C_FIRST(:,3,index);
+                ydata2 = C_LAST(:,3,index);
+        end
+        line('XData',xdata,'YData',ydata1,'Parent',ax,...
+            'Marker','o','MarkerSize',3,'MarkerFaceColor','b','MarkerEdgeColor','none',...
+            'LineStyle','-','Color','b','Tag','Corr_First');
+        line('XData',xdata,'YData',ydata2,'Parent',ax,...
+            'Marker','o','MarkerSize',3,'MarkerFaceColor','r','MarkerEdgeColor','none',...
+            'LineStyle','-','Color','r','Tag','Corr_Last');
+        
+        % ax limits
+        ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+        ax.Title.String = label_fus(index);
+        ax.YLim = [-1,1];
+        ax.XLim = [.5 size(S1.Ydata,1)+.5];
+        % ax.XTick = 1:size(S1.Ydata,1);
+        % ax.XTickLabel = S1.label_events;
+        ax.XTickLabelRotation = 45;
+        if index==size(S1.fUS_Selection,1)
+            l = legend(ax,{'First';'Last'});
+            %l.Position(1) = l.Position(1)+1.2*l.Position(3);
+            pupos = handles.Popup_AutoCorr1.Position;
+            l.Position(1) = pupos(1);
+            l.Position(3) = .9*pupos(3);
+            l.Position(2) = pupos(2)+2.5*pupos(4);
+            l.Position(4) = 2*pupos(4);
+        end
+        all_axes = [all_axes;ax];
+            
+    end
+end
+
+% Saving
+handles.ButtonBatch.UserData.AutoCorrData.xdata = S1.Time_indices(:,2)-S1.Time_indices(1,2);
+handles.ButtonBatch.UserData.AutoCorrData.C_FIRST = C_FIRST;
+handles.ButtonBatch.UserData.AutoCorrData.C_LAST = C_LAST;
+handles.ButtonBatch.UserData.AutoCorrData.corr_type = corr_type;
+handles.ButtonBatch.UserData.AutoCorrData.str_autocorr = str_autocorr;
+handles.ButtonBatch.UserData.AutoCorrData.label_fus = label_fus;
+handles.ButtonBatch.UserData.AutoCorrData.label_events = label_events;
 handles.MainFigure.Pointer = 'arrow';
 
 end
@@ -3143,7 +3346,7 @@ save_video(work_dir,video_dir,video_name);
 set(handles.MainFigure, 'pointer', 'arrow');
 
 % Saving all tabs
-all_tabs = [handles.SecondTab;handles.ThirdTab;handles.FourthTab;handles.FifthTab;handles.SixthTab];
+all_tabs = [handles.SecondTab;handles.ThirdTab;handles.FourthTab;handles.FifthTab;handles.SixthTab;handles.SeventhTab];
 for i =1:length(all_tabs)
     handles.TabGroup.SelectedTab = all_tabs(i);
     s = sprintf('%s',handles.TabGroup.SelectedTab.Title);
@@ -3295,6 +3498,18 @@ save(fullfile(folder_save,'PeaktoPeak.mat'),'S_pp','C_XY','index_ref','corr_type
     'label_fus','label_lfp','align1','align2','-v7.3');
 fprintf('Data saved at [%s].\n',fullfile(folder_save,'PeaktoPeakData.mat'));
 
+% AutoCorrData
+xdata = handles.ButtonBatch.UserData.AutoCorrData.xdata;
+C_FIRST = handles.ButtonBatch.UserData.AutoCorrData.C_FIRST;
+C_LAST = handles.ButtonBatch.UserData.AutoCorrData.C_LAST;
+corr_type = handles.ButtonBatch.UserData.AutoCorrData.corr_type;
+str_autocorr = handles.ButtonBatch.UserData.AutoCorrData.str_autocorr;
+label_fus = handles.ButtonBatch.UserData.AutoCorrData.label_fus;
+label_events = handles.ButtonBatch.UserData.AutoCorrData.label_events;
+save(fullfile(folder_save,'AutoCorr.mat'),'C_FIRST','C_LAST','xdata','str_autocorr','corr_type',...
+    'label_fus','label_events','align1','align2','-v7.3');
+fprintf('Data saved at [%s].\n',fullfile(folder_save,'AutoCorrData.mat'));
+
 % % RegressionData
 % save(fullfile(folder_save,'Regression.mat'),'ref_time','Time_indices','ind_start','ind_end','ref_time','m','s',...
 %     'all_colors','thresh_prop','labels','str_popup','align1','align2','-v7.3');
@@ -3346,11 +3561,11 @@ else
         % Selecting all by default
         %handles.LFPTable.UserData.Selection = (1:size(handles.LFPTable.Data,1))';
         
-        % Selectinf main channel
+        % Selecting main channel
         if ~isempty(data_config.File.mainchannel)
             pattern_lfp = [{data_config.File.mainchannel};{'SPEED'};{'ACCEL-POWER'}];
         else
-            pattern_lfp = [{data_config.File.mainchannel};{'SPEED'};{'ACCEL-POWER'}];
+            pattern_lfp = [{'SPEED'};{'ACCEL-POWER'}];
         end
         ind_keep = zeros(size(handles.LFPTable.Data,1),1);
         for k =1:length(pattern_lfp)

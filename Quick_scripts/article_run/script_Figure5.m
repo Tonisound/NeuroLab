@@ -1,19 +1,19 @@
 % Article RUN
-% Figure 4
+% Figure 5
 
-function script_Figure4(cur_list,timegroup,gather_regions)
+function script_Figure5(cur_list,timegroup,gather_regions)
 
 if nargin <3
     gather_regions = false;
 end
 
-[D,R,S,list_regions] = compute_script_Figure4(cur_list,timegroup);
+[D,R,S,list_regions] = compute_script_Figure5(cur_list,timegroup);
 plot1_Figure4(S,list_regions,cur_list,timegroup,gather_regions);
 
 end
 
 
-function [D,R,S,list_regions] = compute_script_Figure4(cur_list,timegroup)
+function [D,R,S,list_regions] = compute_script_Figure5(cur_list,timegroup)
 
 close all;
 global DIR_STATS;
