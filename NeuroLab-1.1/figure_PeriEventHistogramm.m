@@ -1029,10 +1029,21 @@ hObj.UserData = episodes;
 handles.EventTable.Data = cell(length(episodes(1).Y),2);
 
 handles.PopupStart.String = {episodes(:).shortname};
-handles.PopupStart.Value = 4;
 handles.PopupEnd.String = {episodes(:).shortname};
-handles.PopupEnd.Value = 5;
 
+%handles.PopupStart.Value = 4;
+val_start = find(strcmp(handles.PopupStart.String,'AfterA_(s)')==1);
+if isempty(val_start)
+    val_start = find(strcmp({episodes(:).shortname},'Begin_(s)')==1);
+end
+handles.PopupStart.Value = val_start;
+%handles.PopupEnd.Value = 5;
+val_end = find(strcmp({episodes(:).shortname},'BeforeB_(s)')==1);
+if isempty(val_end)
+    val_end = find(strcmp(handles.PopupEnd.String,'End_(s)')==1);
+end
+handles.PopupEnd.Value = val_end;
+ 
 update_episode(handles.PopupStart,[],handles);
 update_episode(handles.PopupEnd,[],handles);
 
@@ -1164,6 +1175,11 @@ if channels>0
     lines_channels = hObj.UserData.lines_channels;
     lines_channels = lines_channels(ind_channels);
     [Xdata,Ydata,ind_start,ind_end,ref_time,f_samp] = compute_channels(handles,Time_indices,ind_events,f_int);
+    
+    if isempty(ref_time)
+        warning('No matching episodes [Time Groups: %s].',char(hObj.UserData.TimeGroup));
+        return;
+    end
     
     % Clean Up if Box4 checked
     if handles.Checkbox4.Value
@@ -1495,9 +1511,10 @@ ax1.XTickLabelRotation=45;
 theta = rescale(1:length(bdata),2*pi/length(bdata),2*pi);
 rho1 = bdata.^2;
 polarplot(theta,rho1,'parent',pax1,'color',g_colors(mod(hObj.UserData.index-1,length(g_colors))+1,:));
-pax1.ThetaTick = theta*360/(20*pi);
+pax1.ThetaTick = theta*360/(2*pi);
 pax1.ThetaTickLabel = fUS;
 pax1.RLim = [0 .5];
+%pax1.ThetaAxisUnits = 'radian';
 
 cla(ax2);
 for ii=1:size(Ydata1,3)
@@ -1510,7 +1527,7 @@ ax2.YLabel.String='fUS';
 l = lsline(ax2);
 
 % Storing data
-% to complete
+% to be completed
 
 end
 
@@ -2013,6 +2030,13 @@ for i =1:length(label_lfp)
     lab_lfp = [lab_lfp;{temp(1:2)}];
     color_lfp = [color_lfp;handles.Popup2.UserData.lines_electrodes(i).Color];
 end
+label_events = S1.label_events;
+
+% % Return if label_events too short
+% if length(label_events)<=1
+%     fprintf('Sparse Event Data. Skipping peak-to-peak analysis.\n');
+%     return;
+% end
 
 % Clearing tab
 tab = handles.SixthTab;
@@ -2134,6 +2158,9 @@ for i=1:length(label_fus)
     end
 end
 
+% Skipping NaN values
+C_XY(isnan(C_XY))=0;
+
 % Creating axes
 for ii = 1:n_rows
     for jj = 1:n_columns
@@ -2199,6 +2226,7 @@ handles.ButtonBatch.UserData.PeaktoPeakData.corr_type = corr_type;
 handles.ButtonBatch.UserData.PeaktoPeakData.C_XY = C_XY;
 handles.ButtonBatch.UserData.PeaktoPeakData.label_fus = label_fus;
 handles.ButtonBatch.UserData.PeaktoPeakData.label_lfp = label_lfp;
+handles.ButtonBatch.UserData.PeaktoPeakData.label_events = label_events;
 handles.MainFigure.Pointer = 'arrow';
 
 end
@@ -3274,6 +3302,12 @@ function saveImage_Callback(~,~,handles)
 set(handles.MainFigure, 'pointer', 'watch');
 drawnow;
 
+% Check if Compute successful
+if ~handles.MainFigure.UserData.success
+    fprintf('Compute operation was unsuccessful. Proceed without saving images.\n');
+    return;
+end
+
 global FILES CUR_FILE DIR_FIG;
 load('Preferences.mat','GTraces');
 
@@ -3364,6 +3398,12 @@ function saveStats_Callback(~,~,handles)
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch');
 drawnow;
+
+% Check if Compute successful
+if ~handles.MainFigure.UserData.success
+    fprintf('Compute operation was unsuccessful. Proceed without saving stats.\n');
+    return;
+end
 
 global FILES CUR_FILE DIR_STATS;
 load('Preferences.mat','GTraces');
@@ -3494,8 +3534,9 @@ corr_type = handles.ButtonBatch.UserData.PeaktoPeakData.corr_type;
 C_XY = handles.ButtonBatch.UserData.PeaktoPeakData.C_XY;
 label_fus = handles.ButtonBatch.UserData.PeaktoPeakData.label_fus;
 label_lfp = handles.ButtonBatch.UserData.PeaktoPeakData.label_lfp;
+label_events = handles.ButtonBatch.UserData.PeaktoPeakData.label_events;
 save(fullfile(folder_save,'PeaktoPeak.mat'),'S_pp','C_XY','index_ref','corr_type',...
-    'label_fus','label_lfp','align1','align2','-v7.3');
+    'label_fus','label_lfp','label_events','align1','align2','-v7.3');
 fprintf('Data saved at [%s].\n',fullfile(folder_save,'PeaktoPeakData.mat'));
 
 % AutoCorrData
@@ -3575,7 +3616,13 @@ else
     end
     
     % Selecting Time Groups
-    selection = find(contains(handles.TimeGroupsTable.Data(:,1),str_group)==1);
+    % selection = find(contains(handles.TimeGroupsTable.Data(:,1),str_group)==1);
+    ind_keep = zeros(size(handles.TimeGroupsTable.Data,1),1);
+    for k=1:length(str_group)
+        ind_keep = ind_keep+strcmp(handles.TimeGroupsTable.Data(:,1),char(str_group(k)));
+    end
+    selection = find(ind_keep>0);
+    
     for i =1:length(selection)
         handles.TimeGroupsTable.UserData.Selection = selection(i);
         handles.EventTable.UserData = [];
@@ -3583,7 +3630,6 @@ else
         saveStats_Callback([],[],handles);
         saveImage_Callback([],[],handles);
     end
-    
 end
 
 end

@@ -2,8 +2,10 @@
 % Figure 3
 close all;
 
-folder = 'I:\fUSLAB\fLab_Statistics\fUS_Correlation';
-all_files = dir(fullfile(folder,'*_E'));
+%folder = 'I:\fUSLAB\fLab_Statistics\fUS_Correlation';
+%all_files = dir(fullfile(folder,'*_E'));
+all_files = dir(fullfile(folder,'*_E_nlab'));
+folder = 'I:\NEUROLAB\NLab_Statistics\fUS_Correlation';
 D = struct('file','','reference','','all_regions','','timegroup','','plane','');
 index =0;
 
@@ -22,8 +24,8 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20160630_114317_E';};%'20160701_130444_E'};
 
 % list of references to search (in order)
-list_ref = {'SPEED';'ACCEL'};
-%list_ref = {'Theta'};
+%list_ref = {'SPEED';'ACCEL'};
+list_ref = {'Theta'};
 flag_mainchannel = true;
 timegroup = 'RUN';
 cur_list = 'CORONAL';
@@ -32,7 +34,8 @@ for i = 1:length(all_files)
     cur_file = char(all_files(i).name);
     
     % reference
-    d = dir(fullfile(folder,cur_file,'*_normalized'));
+    %d = dir(fullfile(folder,cur_file,'*_normalized'));
+    d = dir(fullfile(folder,cur_file,'Ref-*'));
     
     flag_ref=false;
     for j=1:length(list_ref) 

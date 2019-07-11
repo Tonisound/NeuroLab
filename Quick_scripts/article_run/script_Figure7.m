@@ -26,15 +26,15 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
-list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
-    '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
-    '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E'};
+list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
+%'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
+%     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E'};
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
-    '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E'};%;...
-%     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
-%     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
-%     '20160630_114317_E';'20160701_130444_E'};
+    '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
+    '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
+    '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
+    '20160630_114317_E';'20160701_130444_E'};
 
 % list of references to search (in order)
 % list_ref = {'SPEED';'ACCEL'};
@@ -142,6 +142,13 @@ for index = 1:length(D)
     %label_fus = data_fus.label_fus;
     %label_lfp = data_fus.label_lfp;
     
+    % test if data not too sparse
+    thresh_events = 5;
+    if length(data_fus.label_events)<thresh_events
+        warning('Insufficient episode number (%d) [File: %s]',length(data_fus.label_events),cur_file);
+        continue;
+    end
+    
     for i=1:length(list_lfp)
         lfp_name = strrep(char(list_lfp(i)),'.mat','');
         %ind_keep = find(strcmp(data_fus.label_lfp,lfp_name)==1);
@@ -167,7 +174,7 @@ for index = 1:length(D)
                 warning('Multiple pattern matches [Pattern: %s /File: %s /Selected: %s]',region_name,cur_file,data_fus.label_fus(ind_reg));
             end
             
-            % Filling Data            
+            % Filling Data
             S(i,j).R = [S(i,j).R;data_fus.C_XY(ind_reg,ind_lfp)];
             S(i,j).index_ref = [S(i,j).index_ref;{data_fus.index_ref}];
             S(i,j).corr_type = [S(i,j).corr_type;{data_fus.corr_type}];
@@ -255,6 +262,8 @@ for ii = 1:n_rows
 %                 'MarkerFaceColor',f_colors(k,:),'MarkerEdgeColor','w');
             
             % errorbar
+            %rho_mean(isnan(rho_mean))=0;
+            %rho_sem(isnan(rho_sem))=0;
             polarplot([theta_tick(k) theta_tick(k)],[abs(rho_mean)-rho_sem abs(rho_mean)+rho_sem],'Parent',pax,...
                 'Color','k','Marker','o','MarkerSize',2,'LineStyle','-',...
                 'MarkerFaceColor',f_colors(k,:),'MarkerEdgeColor','k');
@@ -354,7 +363,8 @@ for i =1:length(list_lfp)
             
             % Plotting
             list_rat = unique(S(i,index).R_data_rat_name);
-            markers = {'o';'+';'*';'x';'s';'d';'<';'>';'p';'h'};
+            markers = {'o';'+';'*';'x';'s';'d';'<';'>';'p';'h';...
+                'o';'+';'*';'x';'s';'d';'<';'>';'p';'h'};
             xdata = S(i,index).R_data1_scaled;
             ydata = S(i,index).R_data2_scaled;
             %xdata = S(i,index).R_data1;
