@@ -1,13 +1,32 @@
 % Article RUN
 % Figure 3
-close all;
+% to run after batch fUS_Correlation 
+% Display (and save figure) mean correlation patterns
 
+function script_Figure3(cur_list,timegroup,gather_regions)
+
+close all;
+if nargin <3
+    gather_regions = false;
+end
+
+[D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup);
+plot1_Figure3(D,S,list_regions,R)
+
+end
+
+function [D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup)
+
+%timegroup = 'RUN';
+%cur_list = 'CORONAL';
 %folder = 'I:\fUSLAB\fLab_Statistics\fUS_Correlation';
 %all_files = dir(fullfile(folder,'*_E'));
-all_files = dir(fullfile(folder,'*_E_nlab'));
+
+flag_mainchannel = false;
 folder = 'I:\NEUROLAB\NLab_Statistics\fUS_Correlation';
-D = struct('file','','reference','','all_regions','','timegroup','','plane','');
-index =0;
+all_files = dir(fullfile(folder,'*_E'));
+D = struct('file','','reference','','all_regions','','timegroup','','plane','','main_channel','');
+index = 0;
 
 list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
     '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
@@ -24,30 +43,46 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20160630_114317_E';};%'20160701_130444_E'};
 
 % list of references to search (in order)
-%list_ref = {'SPEED';'ACCEL'};
-list_ref = {'Theta'};
-flag_mainchannel = true;
-timegroup = 'RUN';
-cur_list = 'CORONAL';
+list_ref = {'SPEED';'ACCEL'};
+% list_ref = {'Power-gammahigh'};
 
 for i = 1:length(all_files)
-    cur_file = char(all_files(i).name);
     
+    index = index+1;
+    cur_file = char(all_files(i).name);
     % reference
-    %d = dir(fullfile(folder,cur_file,'*_normalized'));
-    d = dir(fullfile(folder,cur_file,'Ref-*'));
+    % d = dir(fullfile(folder,cur_file,'*_normalized'));
+    d = dir(fullfile(folder,cur_file,timegroup,'Ref-*'));
+    
+    % Getting main channel
+    if exist(fullfile('I:\NEUROLAB\NLab_DATA',strrep(cur_file,'_E','_E_nlab'),'Config.mat'),'file')
+        data_config = load(fullfile('I:\NEUROLAB\NLab_DATA',strrep(cur_file,'_E','_E_nlab'),'Config.mat'),'File');
+        D(index).main_channel = data_config.File.mainchannel ;
+    end
     
     flag_ref=false;
     for j=1:length(list_ref) 
         pattern = char(list_ref(j));
+        
         if sum(contains({d(:).name}',pattern))>0
             ind_keep = find(contains({d(:).name}',pattern)==1);
             if length(ind_keep)>1
                 % Selecting
+                % main channel
+                if flag_mainchannel
+                    ind_keep2 = find(contains({d(ind_keep).name}',D(index).main_channel)==1);
+                    if length(ind_keep2)==1
+                        reference = char(d(ind_keep(ind_keep2)).name);
+                        flag_ref = true;
+                        break;
+                    end
+                end
+                
+                % highest correlation
                 rmax_score=[];
                 for k=1:length(ind_keep)
-                    if exist(fullfile(folder,cur_file,char(d(ind_keep(k)).name),timegroup,'Correlation_pattern.mat'),'file')
-                        data_cp = load(fullfile(folder,cur_file,char(d(ind_keep(k)).name),timegroup,'Correlation_pattern.mat'),'RT_pattern');
+                    if exist(fullfile(folder,cur_file,timegroup,char(d(ind_keep(k)).name),'Correlation_pattern.mat'),'file')
+                        data_cp = load(fullfile(folder,cur_file,timegroup,char(d(ind_keep(k)).name),'Correlation_pattern.mat'),'RT_pattern');
                         rmax_score=[rmax_score;mean(max(data_cp.RT_pattern,[],2,'omitnan'),'omitnan')];         
                     end
                 end
@@ -71,17 +106,16 @@ for i = 1:length(all_files)
         continue;
     end
     
-    % timegroup
-    dd = dir(fullfile(folder,cur_file,reference,timegroup));
+    % Storing all_regions
+    dd = dir(fullfile(folder,cur_file,timegroup,reference,'Correlation_pattern.mat'));
     if ~isempty(dd)
-        ddd = dir(fullfile(folder,cur_file,reference,timegroup,'Regions','*.mat'));
-        all_regions = {ddd(:).name}';
+        ddd = load(fullfile(dd(1).folder,dd(1).name));
+        all_regions = ddd.labels;
     else
         continue;
     end
     
     % updating struct D
-    index = index+1;
     D(index).file = cur_file;
     D(index).reference = reference;
     D(index).timegroup = timegroup;
@@ -93,29 +127,30 @@ for i = 1:length(all_files)
     else
         D(index).plane = 'UNDEFINED';
     end
+    
 end
 
 % list_regions
 if strcmp(cur_list,'CORONAL')
-    list_regions =    {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
-        'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
-        'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    list_regions =    {'AC-L';'AC-R';'S1BF-L';'S1BF-R';'LPtA-L';'LPtA-R';'RS-L';'RS-R';...
+        'DG-L';'DG-R';'CA1-L';'CA1-R';'CA2-L';'CA2-R';'CA3-L';'CA3-R';...
+        'dThal-L';'dThal-R';'Po-L';'Po-R';'VPM-L';'VPM-R';...
+        'HypothalRg-L';'HypothalRg-R'};
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
-        'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
-        'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'GP-L.mat';'CPu-L.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    list_regions = {'AntCortex-L';'AMidCortex-L';'PMidCortex-R';'PostCortex-R';...
+        'DG-R';'CA3-R';'CA1-R';'dHpc-R';'vHpc-R';...
+        'dThal-R';'vThal-R';'Thalamus-L';'Thalamus-R';'GP-L';'CPu-L';...
+        'HypothalRg-L';'HypothalRg-R'};
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
 else
-    list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
-        'dHpc-L.mat';'dHpc-R.mat';...
-        'Thalamus-L.mat';'Thalamus-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    list_regions =    {'Neocortex-L';'Neocortex-R';...
+        'dHpc-L';'dHpc-R';...
+        'Thalamus-L';'Thalamus-R';...
+        'HypothalRg-L';'HypothalRg-R'};
 end
     
 % Buidling struct S
@@ -132,11 +167,12 @@ for index = 1:length(D)
     cur_file = D(index).file;
     reference = D(index).reference;
     timegroup = D(index).timegroup;
-    fulpath = fullfile(folder,cur_file,reference,timegroup,'Regions');
+    %fulpath = fullfile(folder,cur_file,reference,timegroup,'Regions');
     
     % Loading UF
-    data_uf = load(fullfile(folder,cur_file,reference,timegroup,'UF.mat'),'UF');
-    data_c = load(fullfile(folder,cur_file,reference,timegroup,'Correlation_pattern.mat'),'RT_pattern','Rmax_map','Tmax_map');
+    data_uf = load(fullfile(folder,cur_file,timegroup,reference,'UF.mat'),'UF');
+    % data_c = load(fullfile(folder,cur_file,timegroup,reference,'Correlation_pattern.mat'),'RT_pattern','Rmax_map','Tmax_map');
+    data_c = load(fullfile(folder,cur_file,timegroup,reference,'Correlation_pattern.mat'));
     S(index).labels = data_uf.UF.labels;
     S(index).ref_name = data_uf.UF.ref_name;
     S(index).lags = data_uf.UF.lags;
@@ -149,18 +185,18 @@ for index = 1:length(D)
     % Loading rmax, tmax
     for i=1:length(list_regions)
         region_name = char(list_regions(i));
-        ddd = dir(fullfile(folder,cur_file,reference,timegroup,'Regions',region_name));
-        if ~isempty(ddd)
-            data_r = load(fullfile(folder,cur_file,reference,timegroup,'Regions',region_name),'tmax','rmax');
-            rmax_regions(index,i) = data_r.rmax;
-            tmax_regions(index,i) = data_r.tmax;
+        ind_region = find(strcmp(S(index).labels,region_name)==1);
+        if ~isempty(ind_region)
+            rmax_regions(index,i) = data_c.r_max(ind_region(1));
+            tmax_regions(index,i) = data_c.x_max(ind_region(1));
         end
     end
 
     % Computing rmax, tmax
     RT_pattern = S(index).RT_pattern;
     labels = S(index).labels ;
-    lags_s = S(index).lags*S(index).step;
+    %lags_s = S(index).lags*S(index).step; 
+    lags_s = data_c.x_;
     resamp_step = 0.01;
     lags_resampled = lags_s(1):resamp_step:lags_s(end);
     RT_pattern_resamp = interp2(lags_s,(1:size(RT_pattern,1))',RT_pattern,lags_resampled,(1:size(RT_pattern,1))');
@@ -193,13 +229,22 @@ for index = 1:length(D)
     S(index).background = 20*log10(abs(im_baseline)/max(max(abs(im_baseline))));
 end
 
-% trasnforming tmax
-%tmax_regions = tmax_regions-repmat(tmax_regions(:,1),[1 length(list_regions)]);
+R.rmax_regions = rmax_regions;
+R.tmax_regions = tmax_regions;
+
+end
+
+function plot1_Figure3(D,S,list_regions,R)
+
+rmax_regions = R.rmax_regions;
+tmax_regions = R.tmax_regions;
 
 % Drawing results
 f = figure;
 colormap(f,'parula');
 cmap = f.Colormap;
+
+% Axes
 ax1 = subplot(121);
 m = mean(rmax_regions,1,'omitnan');
 s_sem = std(rmax_regions,[],1,'omitnan')./sum(~isnan(rmax_regions),1);
@@ -434,4 +479,5 @@ for k =1:length(S)
         c = colorbar(ax);
         c.Position = [ax.Position(1)+ax.Position(3)+margin_w ax.Position(2) margin_w ax.Position(4)];
     end
+end
 end

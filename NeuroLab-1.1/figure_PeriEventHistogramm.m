@@ -375,12 +375,12 @@ uicontrol('style','popup','Value',1,...
 tab7 = uitab('Parent',tabgp,...
     'Title','AutoCorrelation',...
     'Tag','SeventhTab');
-uicontrol('style','popup','String','Single|3 trials|5 trials',...
+uicontrol('style','popup','String','Single|2 trials|3 trials',...
     'Units','normalized','Position',[.9 .01 .1 .03],...
     'Value',1,'Tag','Popup_AutoCorr1','Parent',tab7);
 uicontrol('style','popup','String','Raw|Best Fit',...
     'Units','normalized','Position',[.9 .05 .1 .03],...
-    'Value',1,'Tag','Popup_AutoCorr2','Parent',tab7);
+    'Value',2,'Tag','Popup_AutoCorr2','Parent',tab7);
 
 
 % % EightTab
@@ -2323,15 +2323,19 @@ for i =1:size(S1.fUS_Selection,1)
     % Computing correlations (with lag)
     if strcmp(corr_type,'Best Fit')
         
-%         for j=1:size(C_FIRST,1)
-%             y_trial = Ydata(j,:)';
-%             for k=1:size(C_FIRST,2)
-%                 y_first = y_first_all(:,k); 
-%                 C_FIRST(j,k,i)=0;
-%             end
-%         end
-        c_first = corr(y_first_all,Ydata','rows','complete');
-        c_last = corr(y_last_all,Ydata','rows','complete');
+        n_steps = 100 ; % delay (s)
+        c_first_ = [];
+        c_last_ = [];
+        for j=-n_steps:n_steps
+            %fprintf('ind1 [%d,%d] ind2 [%d,%d] delay [%d]\n',max(j+1,1),min(1651,1651+j),max(-j+1,1),min(1651,1651-j),j);
+            Ydata_ = Ydata(:,max(j+1,1):min(end,end+j));
+            y_first_all_ = y_first_all(max(-j+1,1):min(end,end-j),:);
+            y_last_all_ = y_last_all(max(-j+1,1):min(end,end-j),:);
+            c_first_ = cat(3,c_first_,corr(y_first_all_,Ydata_','rows','complete'));
+            c_last_ = cat(3,c_last_,corr(y_last_all_,Ydata_','rows','complete'));
+        end
+        c_first = max(c_first_,[],3);
+        c_last = max(c_last_,[],3);
         C_FIRST(:,:,i) = c_first';
         C_LAST(:,:,i) = c_last';
     end
@@ -2375,7 +2379,7 @@ for ii = 1:n_rows
         % ax limits
         ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
         ax.Title.String = label_fus(index);
-        ax.YLim = [-1,1];
+        ax.YLim = [0,1];
         ax.XLim = [.5 size(S1.Ydata,1)+.5];
         % ax.XTick = 1:size(S1.Ydata,1);
         % ax.XTickLabel = S1.label_events;
@@ -2399,7 +2403,7 @@ handles.ButtonBatch.UserData.AutoCorrData.xdata = S1.Time_indices(:,2)-S1.Time_i
 handles.ButtonBatch.UserData.AutoCorrData.C_FIRST = C_FIRST;
 handles.ButtonBatch.UserData.AutoCorrData.C_LAST = C_LAST;
 handles.ButtonBatch.UserData.AutoCorrData.corr_type = corr_type;
-handles.ButtonBatch.UserData.AutoCorrData.str_autocorr = str_autocorr;
+handles.ButtonBatch.UserData.AutoCorrData.str_autocorr = cellstr(pu71.String);
 handles.ButtonBatch.UserData.AutoCorrData.label_fus = label_fus;
 handles.ButtonBatch.UserData.AutoCorrData.label_events = label_events;
 handles.MainFigure.Pointer = 'arrow';

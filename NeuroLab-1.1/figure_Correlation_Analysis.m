@@ -743,8 +743,9 @@ if handles.Checkbox2.Value
     adapt_slider_batch(h_ref.Tag,handles);
 end
 lags = handles.Slider.Min:handles.Slider.Max;
+step = handles.Text9.UserData.time_ref.Y(2)-handles.Text9.UserData.time_ref.Y(1);
 fwrite(fid_info,sprintf('Lags : %s \n',mat2str(lags)));
-
+fwrite(fid_info,sprintf('Step(s) : %.4f \n',step));
 handles.Slider.UserData.h_ref = h_ref;
 handles.Slider.UserData.ref_name = ref_name;
 handles.Slider.UserData.ref_color = ref_color;
@@ -1167,25 +1168,19 @@ else
 end
 
 % Creating Stats Directory
-stats_dir = fullfile(DIR_STATS,'fUS_Correlation',FILES(CUR_FILE).nlab);
+stats_dir = fullfile(DIR_STATS,'fUS_Correlation',FILES(CUR_FILE).recording);
 if ~isdir(stats_dir)
     mkdir(stats_dir);
 end
-
-% ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name(1:min(end,20))),'/','-');
-% save_dir= fullfile(stats_dir,strcat(ref_name,'-',handles.Text2.String),folder_name);
 ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name),'/','-');
-save_dir= fullfile(stats_dir,ref_name,folder_name);
-
-work_dir = fullfile(save_dir,'Regions');
+save_dir= fullfile(stats_dir,folder_name,ref_name);
 if isdir(save_dir)
     rmdir(save_dir,'s');
 end
 mkdir(save_dir);
-mkdir(work_dir);
-labels = handles.Slider.UserData.str_labels;
 
 % Saving Stats
+labels = handles.Slider.UserData.str_labels';
 lags = handles.Slider.Min:handles.Slider.Max;
 step = handles.Text9.UserData.time_ref.Y(2)-handles.Text9.UserData.time_ref.Y(1);
 im4 = findobj(handles.Ax4,'type','image');
@@ -1207,9 +1202,9 @@ save(fullfile(save_dir,'UF.mat'),'UF','-v7.3');
 P_cor = handles.Slider.UserData.P_cor;
 Cor = handles.Slider.UserData.Cor;
 save(fullfile(save_dir,'fCorrelation.mat'),'Cor','P_cor','-v7.3');
-C_map = handles.Slider.UserData.C_map;
-P_map = handles.Slider.UserData.P_map;
-save(fullfile(save_dir,'Full_map.mat'),'C_map','P_map','-v7.3');
+% C_map = handles.Slider.UserData.C_map;
+% P_map = handles.Slider.UserData.P_map;
+% save(fullfile(save_dir,'Full_map.mat'),'C_map','P_map','-v7.3');
 im1 = findobj(handles.Ax1,'type','Image');
 Rmax_map = im1.CData;
 im2 = findobj(handles.Ax2,'type','Image');
@@ -1218,15 +1213,17 @@ RT_pattern = A;
 save(fullfile(save_dir,'Correlation_pattern.mat'),'Rmax_map','Tmax_map','RT_pattern',...
     'x_','labels','r_max','t_max','x_max','r_min','t_min','x_min','-v7.3');
 
-for k=2:length(labels)
-    filename = regexprep(strcat(char(labels(k)),'.mat'),'/','-');
-    rmax = r_max(k);
-    tmax = x_max(k);
-    rmin = r_min(k);
-    tmin = x_min(k);
-    save(fullfile(work_dir,filename),'rmax','tmax','rmin','tmin','-mat');
-    fprintf('File %s Saved : Rmax %.2f t_max %.2f Rmin %.2f t_min %.2f.\n',filename,r_max(k),x_max(k),r_min(k),x_min(k));
-end
+%work_dir = fullfile(save_dir,'Regions');
+%mkdir(work_dir);
+% for k=2:length(labels)
+%     filename = regexprep(strcat(char(labels(k)),'.mat'),'/','-');
+%     rmax = r_max(k);
+%     tmax = x_max(k);
+%     rmin = r_min(k);
+%     tmin = x_min(k);
+%     save(fullfile(work_dir,filename),'rmax','tmax','rmin','tmin','-mat');
+%     fprintf('File %s Saved : Rmax %.2f t_max %.2f Rmin %.2f t_min %.2f.\n',filename,r_max(k),x_max(k),r_min(k),x_min(k));
+% end
 
 %Copying info file to stats_dir
 copyfile('_info.txt',save_dir);
@@ -1261,11 +1258,9 @@ val = handles.Slider.Value;
 lags = handles.Slider.Min:handles.Slider.Max;
 
 % Saving Video frame
-% ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name(1:min(end,20))),'/','-');
-% save_dir= fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,strcat(ref_name,'-',handles.Text2.String),folder_name);
 ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name),'/','-');
-save_dir = fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,ref_name,folder_name);
-work_dir = fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).nlab,strcat(ref_name,'-',handles.Text2.String),folder_name,'Frames');
+save_dir = fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).recording,folder_name,ref_name);
+work_dir = fullfile(save_dir,'Frames');
 
 
 % Removing old folder
@@ -1282,7 +1277,7 @@ for t = 1:length(lags)
     pic_name = strcat(sprintf('fUSCorrelation_%s_%03d',ref_name,t),GTraces.ImageSaveExtension);
     saveas(handles.MainFigure,fullfile(work_dir,pic_name),GTraces.ImageSaveFormat);
 end
-video_name = strcat(FILES(CUR_FILE).nlab,'-',strcat(ref_name,'-',handles.Text2.String));
+video_name = strcat(FILES(CUR_FILE).recording,'-',strcat(ref_name,'-',handles.Text2.String));
 save_video(work_dir,save_dir,video_name);
 
 % Saving Tabs
@@ -1376,7 +1371,7 @@ for i=1:length(ind_group)
 %         str_ref = [{'SPEED'};{'ACCEL-POWER'}];
 %     end
     str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
-        {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'}];
+        {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'};{'X(m)'};{'Y(m)'}];
     
     % Compute
     p1 = handles.Popup1;

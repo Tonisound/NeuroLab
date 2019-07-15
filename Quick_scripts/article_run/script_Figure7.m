@@ -6,9 +6,10 @@
 
 function script_Figure7(cur_list,timegroup)
 
+flag_save = true;
 [S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup);
-plot1_Figure7(S,list_regions,list_lfp,cur_list,timegroup);
-plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup);
+plot1_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save);
+plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save);
 
 end
 
@@ -18,7 +19,6 @@ close all;
 folder = 'I:\NEUROLAB\NLab_Statistics\fUS_PeriEventHistogram';
 all_files = dir(fullfile(folder,'*_E'));
 index =0;
-
 list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
     '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
@@ -26,7 +26,7 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
-list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
+%list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
 %'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
 %     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E'};
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
@@ -143,7 +143,7 @@ for index = 1:length(D)
     %label_lfp = data_fus.label_lfp;
     
     % test if data not too sparse
-    thresh_events = 5;
+    thresh_events = 10;
     if length(data_fus.label_events)<thresh_events
         warning('Insufficient episode number (%d) [File: %s]',length(data_fus.label_events),cur_file);
         continue;
@@ -199,7 +199,7 @@ end
 
 end
 
-function plot1_Figure7(S,list_regions,list_lfp,cur_list,timegroup)
+function plot1_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save)
 
 % Drawing results
 f = figure;
@@ -286,7 +286,7 @@ for ii = 1:n_rows
         pax.RLim = [0 1];
         pax.Title.String = list_lfp(index);
         pax.ThetaAxisUnits = 'radian';
-        pax.ThetaTick = theta_tick
+        pax.ThetaTick = theta_tick;
         pax.ThetaTickLabel = lab_fus;
         %pax.ThetaTick = '';
         %pax.ThetaTickLabel = '';
@@ -298,12 +298,14 @@ end
 % Saving Figure
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
-saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
-fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+if flag_save
+    saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+    fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+end
 
 end
 
-function plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup)
+function plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save)
 
 % Drawing results
 f = figure;
@@ -399,11 +401,14 @@ end
 % Saving Figure
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
-for k = 1:length(all_tabs)
-    tabgp.SelectedTab = all_tabs(k);
-    str_fig = strrep(strcat('_',char(all_tabs(k).Title)),filesep,'');
-    saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
-    fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+if flag_save
+    for k = 1:length(all_tabs)
+        tabgp.SelectedTab = all_tabs(k);
+        str_fig = strrep(strcat('_',char(all_tabs(k).Title)),filesep,'');
+        saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+        fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+    end
 end
+
 
 end

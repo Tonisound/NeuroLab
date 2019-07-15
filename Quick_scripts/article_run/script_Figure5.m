@@ -179,7 +179,6 @@ for index = 1:length(D)
 end
 end
 
-
 function plot1_Figure5(S,list_regions,cur_list,timegroup,gather_regions)
 
 % Drawing results
