@@ -154,7 +154,7 @@ ft.UserData.Selection = [];
 
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
-D = [{'Clear Sources_LFP'};cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
+D = [{'Clear Sources_LFP'};{'Delete Region Traces'};cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
     {'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit Anatomical Regions'};{'Edit LFP Configuration'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
@@ -496,6 +496,10 @@ for i = 1:length(ind_files)
                             success=true;
                         end
                     end
+                    
+                case 'Delete Region Traces'
+                    delete(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+                    success=true;
                     
                 case 'Compute Normalized Movie'
                     success = compute_normalizedmovie(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);

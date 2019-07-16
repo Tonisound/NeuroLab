@@ -44,7 +44,7 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
 
 % list of references to search (in order)
 list_ref = {'SPEED';'ACCEL'};
-% list_ref = {'Power-gammahigh'};
+% list_ref = {'Power-theta'};
 
 for i = 1:length(all_files)
     

@@ -10,12 +10,15 @@ if nargin <3
     gather_regions = false;
 end
 
-[D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup);
-plot1_Figure6(S,list_regions,cur_list,timegroup,gather_regions);
+flag_grouped = true;
+flag_save = true;
+
+[D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup,flag_grouped);
+plot1_Figure6(S,list_regions,cur_list,timegroup,gather_regions,flag_save);
 
 end
 
-function [D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup)
+function [D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup,flag_grouped)
 
 close all;
 folder = 'I:\NEUROLAB\NLab_Statistics\fUS_PeriEventHistogram';
@@ -29,17 +32,17 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
-%list_coronal = {'20150224_175307_E';'20150225_154031_E';'20150226_173600_E';'20150716_130039_E';'20160622_191334_E'};
+
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
-    '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E'};%;...
-%     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
-%     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
-%     '20160630_114317_E';'20160701_130444_E'};
+    '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
+    '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
+    '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
+    '20160630_114317_E';'20160701_130444_E'};
 
 % list of references to search (in order)
-%list_ref = {'SPEED';'ACCEL'};
-%list_ref = {'heta'};
+% list_ref = {'SPEED';'ACCEL'};
+% list_ref = {'Power-Theta'};
 % timegroup = 'RIGHT_RUNS';
 % cur_list = 'DIAGONAL';
 
@@ -83,25 +86,43 @@ end
 
 % list_regions
 if strcmp(cur_list,'CORONAL')
-    list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
-        'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
-        'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
+            'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
+            'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions = {'AC.mat';'S1BF.mat';'LPtA.mat';'RS.mat';...
+            'DG.mat';'CA1.mat';'CA2.mat';'CA3.mat';...
+            'dThal.mat';'Po.mat';'VPM.mat';'Thalamus.mat';...
+            'HypothalRg.mat';'Whole.mat'};
+    end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
-        'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
-        'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
+            'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
+            'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions = {'AntCortex.mat';'AMidCortex.mat';'PMidCortex.mat';'PostCortex.mat';...
+            'DG.mat';'CA3.mat';'CA1.mat';'dHpc.mat';'vHpc.mat';...
+            'dThal.mat';'vThal.mat';'Thalamus.mat';'CPu.mat';...
+            'HypothalRg.mat';'Whole.mat'};
+    end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
 else
-    list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
-        'dHpc-L.mat';'dHpc-R.mat';...
-        'Thalamus-L.mat';'Thalamus-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
+            'dHpc-L.mat';'dHpc-R.mat';...
+            'Thalamus-L.mat';'Thalamus-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions =    {'Neocortex.mat';'dHpc.mat';'Thalamus.mat';'HypothalRg.mat';'Whole.mat'};
+    end
 end
     
 % Buidling struct S
@@ -177,12 +198,14 @@ for index = 1:length(D)
 end
 end
 
-function plot1_Figure6(S,list_regions,cur_list,timegroup,gather_regions)
+function plot1_Figure6(S,list_regions,cur_list,timegroup,gather_regions,flag_save)
 
 % Drawing results
 f = figure;
 %f.Name = sprintf('Synthesis Hemodynamics Response all_trials [%s | %s]',cur_list,timegroup);
 f.Name = sprintf('Fig5_SynthesisB_%s-%s',cur_list,timegroup);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 colormap(f,'parula');
 f_colors = f.Colormap(round(1:64/length(S):64),:);
 
@@ -350,10 +373,12 @@ for index = 1:length(S)
         'FontSize',9,'Parent',ax,'Color','r');
 end
 
-f.Units = 'pixels';
-f.Position = [195          59        1045         919];
-saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
-fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s',f.Name,'.pdf')));
+if flag_save
+    f.Units = 'pixels';
+    f.Position = [195          59        1045         919];
+    saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+    fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s',f.Name,'.pdf')));
+end
 
 % % 2nd figure
 % figure();
@@ -401,6 +426,8 @@ fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',spr
 
 % 3rd figure
 f = figure();
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 ax1 = axes('parent',f);
 m_size = all_E/max(all_E);
 line('XData',[0 0],'YData',[-10 10],'Parent',ax1,...

@@ -127,6 +127,7 @@ regions_name = [];
 for i=1:length(files_regions)
     root =  regions(i).name;
     regions(i).name = root(length(prefix)+1:end-length(suffix));
+    regions(i).name = strrep(regions(i).name,'_','-');
     regions_name = [regions_name;{regions(i).name}];
 end
 
@@ -135,8 +136,7 @@ load('Preferences.mat','GDisp','GTraces','GImport');
 switch GImport.Region_loading 
     case 'unilateral'
         fprintf('=== Unilateral Importation ===\n');
-    case 'bilateral'
-        fprintf('=== Bilateral Importation ===\n');
+    case {'bilateral';'all'}
         %regions_unilateral = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});
         regions_bilateral = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});
         patterns = regexprep(regions_name,'-L|-R|-A|-P','');
@@ -164,7 +164,13 @@ switch GImport.Region_loading
                 regions_bilateral(i).patch_y = patch_y_merge;
             end
         end
-        regions = regions_bilateral;
+        if strcmp(GImport.Region_loading,'bilateral')
+            fprintf('=== Bilateral Importation ===\n');
+            regions = regions_bilateral;
+        else
+            fprintf('=== Unilateral & Bilateral Importation ===\n');
+            regions = [regions,regions_bilateral];
+        end    
 end
 
 
@@ -234,6 +240,7 @@ for i=1:length(ind_regions)
         
         % Color counter
         count = count+1;
+        
         %if contains(str,{'hpc';'ca1';'ca2';'ca3';'dg';'fc-';'subic';'lent-'})
         if contains(str,{'hpc';'ca1';'ca2';'ca3';'dg';'fc';'subic';'lent'})
             delta = 10;

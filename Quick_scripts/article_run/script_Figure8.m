@@ -6,17 +6,20 @@
 
 function script_Figure8(cur_list,timegroup)
 
-[S,list_regions] = compute_script_Figure8(cur_list,timegroup);
-plot1_Figure8(S,list_regions,cur_list,timegroup);
+flag_grouped = true;
+flag_save = true;
+
+[S,list_regions] = compute_script_Figure8(cur_list,timegroup,flag_grouped);
+plot1_Figure8(S,list_regions,cur_list,timegroup,flag_save);
 
 end
 
-function [S,list_regions] = compute_script_Figure8(cur_list,timegroup)
+function [S,list_regions] = compute_script_Figure8(cur_list,timegroup,flag_grouped)
 
 close all;
 folder = 'I:\NEUROLAB\NLab_Statistics\fUS_PeriEventHistogram';
 all_files = dir(fullfile(folder,'*_E'));
-index =0;
+index = 0;
 
 list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
     '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
@@ -26,12 +29,13 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
 %list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
+
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
-    '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E'};%;...
-%     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
-%     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
-%     '20160630_114317_E';'20160701_130444_E'};
+    '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
+    '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
+    '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
+    '20160630_114317_E';'20160701_130444_E'};
 
 % list of references to search (in order)
 % list_ref = {'SPEED';'ACCEL'};
@@ -79,25 +83,43 @@ end
 
 % list_regions
 if strcmp(cur_list,'CORONAL')
-    list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
-        'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
-        'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
+            'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
+            'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions = {'AC.mat';'S1BF.mat';'LPtA.mat';'RS.mat';...
+            'DG.mat';'CA1.mat';'CA2.mat';'CA3.mat';...
+            'dThal.mat';'Po.mat';'VPM.mat';'Thalamus.mat';...
+            'HypothalRg.mat';'Whole.mat'};
+    end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
-        'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
-        'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
+            'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
+            'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions = {'AntCortex.mat';'AMidCortex.mat';'PMidCortex.mat';'PostCortex.mat';...
+            'DG.mat';'CA3.mat';'CA1.mat';'dHpc.mat';'vHpc.mat';...
+            'dThal.mat';'vThal.mat';'Thalamus.mat';'CPu.mat';...
+            'HypothalRg.mat';'Whole.mat'};
+    end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
 else
-    list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
-        'dHpc-L.mat';'dHpc-R.mat';...
-        'Thalamus-L.mat';'Thalamus-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
+            'dHpc-L.mat';'dHpc-R.mat';...
+            'Thalamus-L.mat';'Thalamus-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions =    {'Neocortex.mat';'dHpc.mat';'Thalamus.mat';'HypothalRg.mat';'Whole.mat'};
+    end
 end
 
 % Buidling struct S
@@ -165,11 +187,13 @@ end
 
 end
 
-function plot1_Figure8(S,list_regions,cur_list,timegroup)
+function plot1_Figure8(S,list_regions,cur_list,timegroup,flag_save)
 
 % Drawing results
 f = figure;
 f.Name = sprintf('Fig8_SynthesisA_%s-%s',cur_list,timegroup);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 colormap(f,'parula');
 f_colors = f.Colormap(round(1:64/length(S):64),:);
 list_regions=regexprep(list_regions,'.mat','');
@@ -216,11 +240,12 @@ pu1.Callback = {@update_axes,S,all_axes};
 %Update axes
 update_axes(pu1,[],S,all_axes);
 
-
-f.Units = 'pixels';
-f.Position = [195          59        1045         919];
-saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s_%s%s',f.Name,corr_type,'.pdf')));
-fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s_%s%s',f.Name,corr_type,'.pdf')));
+if flag_save
+    f.Units = 'pixels';
+    f.Position = [195          59        1045         919];
+    saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s_%s%s',f.Name,corr_type,'.pdf')));
+    fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s_%s%s',f.Name,corr_type,'.pdf')));
+end
 
 end
 
@@ -242,7 +267,7 @@ for index = 1:length(S)
     
     % Building index_binned
     step_bin = 60;
-    bins = 0:step_bin:3600;
+    bins = 0:step_bin:1800;
     t_value = S(index).xdata;
     t_value_binned = repmat(t_value,[1 length(bins)]);
     %index_binned = true(size(t_value,1),length(bins));
@@ -267,18 +292,21 @@ for index = 1:length(S)
     S2_binned = std(M2,[],'omitnan');
     div = sum(~isnan(M2));
     div(div==0)=1;
-    SEM2_binned = S2_binned./div;
+    SEM2_binned = S2_binned./sqrt(div);
     M3 = index_binned_NaN.*(repmat(m3,[1,size(T,2)]));
     M3_binned = mean(M3,'omitnan');
     S3_binned = std(M3,[],'omitnan');
     div = sum(~isnan(M3));
     div(div==0)=1;
-    SEM3_binned = S3_binned./div;
+    SEM3_binned = S3_binned./sqrt(div);
     
     % Plot corr line
     %bins_center = bins+.5*(bins(2)+bins(1));
-    bins_center1 = (1:length(bins))-.2;
-    bins_center2 = (1:length(bins))+.2;
+    %bins_center1 = (1:length(bins))-.2;
+    %bins_center2 = (1:length(bins))+.2;
+    bins_center1 = bins+.4*(bins(2)+bins(1));
+    bins_center2 = bins+.6*(bins(2)+bins(1));
+    
     line('XData',bins_center1,'YData',M2_binned,'Parent',ax,...
         'Marker','o','MarkerSize',3,'MarkerFaceColor','b','MarkerEdgeColor','none',...
         'LineStyle','-','LineWidth',1,'Color','b','Tag','Corr_First');
@@ -287,24 +315,28 @@ for index = 1:length(S)
         'LineStyle','-','LineWidth',1,'Color','r','Tag','Corr_Last');
     
     % Plot corr errorbar
+    marker_color1 = 'b';
+    marker_color2 = 'r';
+    marker_size = 3;
     for i =1:length(M2_binned)
         l1 = line('XData',[bins_center1(i),bins_center1(i)],'YData',[M2_binned(i)-SEM2_binned(i),M2_binned(i)+SEM2_binned(i)],'Parent',ax,...
-            'Marker','.','MarkerSize',5,'MarkerFaceColor','b','MarkerEdgeColor',[.5 .5 .5],...
+            'Marker','.','MarkerSize',marker_size,'MarkerFaceColor','b','MarkerEdgeColor',marker_color1,...
             'LineStyle','-','LineWidth',.2,'Color','b','Tag','Corr_First_ebar');
         l2 = line('XData',[bins_center2(i),bins_center2(i)],'YData',[M3_binned(i)-SEM3_binned(i),M3_binned(i)+SEM3_binned(i)],'Parent',ax,...
-            'Marker','.','MarkerSize',5,'MarkerFaceColor','r','MarkerEdgeColor',[.5 .5 .5],...
+            'Marker','.','MarkerSize',marker_size,'MarkerFaceColor','r','MarkerEdgeColor',marker_color2,...
             'LineStyle','-','LineWidth',.2,'Color','r','Tag','Corr_Last_ebar');
-%         l1.YData = [M2_binned(i)-S2_binned(i),M2_binned(i)+S2_binned(i)];
-%         l2.YData = [M3_binned(i)-S3_binned(i),M3_binned(i)+S3_binned(i)];
+        %l1.YData = [M2_binned(i)-S2_binned(i),M2_binned(i)+S2_binned(i)];
+        %l2.YData = [M3_binned(i)-S3_binned(i),M3_binned(i)+S3_binned(i)];
     end
     
     % axes limits
     ax.FontSize = 8;
     %ax.XTick = 0:10:60;
     %ax.XTickLabel = {'0';'10';'20';'30';'40';'50';'60'};
-    ax.XTick = bins(1:10:end)/60;
-    ax.XTickLabel = num2cell(ax.XTick);
-    ax.XLim = [.5 30+.5];
+    ax.XTick = bins(1:5:end);
+    ax.XTickLabel = num2cell(ax.XTick/60);
+    %ax.XLim = [.5 30+.5];
+    ax.XLim = [.5 bins(end)+.5];
     ax.YLim = [-1 1];
     ax.TickLength = [0 0];
     

@@ -6,14 +6,17 @@
 
 function script_Figure7(cur_list,timegroup)
 
+flag_grouped = false;
 flag_save = true;
-[S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup);
+thresh_events = 10;
+
+[S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup,flag_grouped,thresh_events);
 plot1_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save);
 plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save);
 
 end
 
-function [S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup)
+function [S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup,flag_grouped,thresh_events)
 
 close all;
 folder = 'I:\NEUROLAB\NLab_Statistics\fUS_PeriEventHistogram';
@@ -26,9 +29,12 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
-%list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';'20150225_154031_E'};
-%'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
-%     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E'};
+list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
+    '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
+    '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
+    '20150724_170457_E';'20150726_152241_E';'20150728_134238_E';'20151126_170516_E';...
+    '20160622_191334_E';'20160623_123336_E'};
+
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
@@ -82,25 +88,43 @@ end
 
 % list_regions
 if strcmp(cur_list,'CORONAL')
-    list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
-        'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
-        'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
+            'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
+            'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions = {'AC.mat';'S1BF.mat';'LPtA.mat';'RS.mat';...
+            'DG.mat';'CA1.mat';'CA2.mat';'CA3.mat';...
+            'dThal.mat';'Po.mat';'VPM.mat';'Thalamus.mat';...
+            'HypothalRg.mat';'Whole.mat'};
+    end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
-        'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
-        'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
+            'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
+            'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions = {'AntCortex.mat';'AMidCortex.mat';'PMidCortex.mat';'PostCortex.mat';...
+            'DG.mat';'CA3.mat';'CA1.mat';'dHpc.mat';'vHpc.mat';...
+            'dThal.mat';'vThal.mat';'Thalamus.mat';'CPu.mat';...
+            'HypothalRg.mat';'Whole.mat'};
+    end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
 else
-    list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
-        'dHpc-L.mat';'dHpc-R.mat';...
-        'Thalamus-L.mat';'Thalamus-R.mat';...
-        'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    if ~flag_grouped
+        list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
+            'dHpc-L.mat';'dHpc-R.mat';...
+            'Thalamus-L.mat';'Thalamus-R.mat';...
+            'HypothalRg-L.mat';'HypothalRg-R.mat'};
+    else
+        list_regions =    {'Neocortex.mat';'dHpc.mat';'Thalamus.mat';'HypothalRg.mat';'Whole.mat'};
+    end
 end
     
 list_lfp = [{'ACCEL-POWER[61-extra]'};...
@@ -143,7 +167,6 @@ for index = 1:length(D)
     %label_lfp = data_fus.label_lfp;
     
     % test if data not too sparse
-    thresh_events = 10;
     if length(data_fus.label_events)<thresh_events
         warning('Insufficient episode number (%d) [File: %s]',length(data_fus.label_events),cur_file);
         continue;
@@ -158,7 +181,7 @@ for index = 1:length(D)
         if isempty(ind_lfp)
             continue;
         elseif length(ind_lfp)>1
-            ind_lfp = ind_lfp(1);data
+            ind_lfp = ind_lfp(1);
             warning('Multiple pattern matches [Pattern: %s /File: %s /Selected: %s]',lfp_name,cur_file,data_fus.label_lfp(ind_lfp));
         end
             
@@ -204,6 +227,8 @@ function plot1_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save)
 % Drawing results
 f = figure;
 f.Name = sprintf('Fig7_SynthesisA_%s-%s',cur_list,timegroup);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 colormap(f,'parula');
 f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
 list_regions = regexprep(list_regions,'.mat','');
@@ -310,6 +335,8 @@ function plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save)
 % Drawing results
 f = figure;
 f.Name = sprintf('Fig7_SynthesisB_%s-%s',cur_list,timegroup);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
 colormap(f,'parula');
 f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
 list_regions = regexprep(list_regions,'.mat','');
