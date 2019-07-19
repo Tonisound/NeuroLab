@@ -10,12 +10,15 @@ if nargin <3
     gather_regions = false;
 end
 
-[D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup);
-plot1_Figure3(D,S,list_regions,R)
+flag_grouped = true;
+flag_sorted = true;
+
+[D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup,flag_grouped);
+plot1_Figure3(D,S,list_regions,R,flag_sorted)
 
 end
 
-function [D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup)
+function [D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup,flag_grouped)
 
 %timegroup = 'RUN';
 %cur_list = 'CORONAL';
@@ -40,11 +43,11 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
-    '20160630_114317_E';};%'20160701_130444_E'};
+    '20160630_114317_E';'20160701_130444_E'};
 
 % list of references to search (in order)
-list_ref = {'SPEED';'ACCEL'};
-% list_ref = {'Power-theta'};
+%list_ref = {'SPEED';'ACCEL'};
+ list_ref = {'Power-theta'};
 
 for i = 1:length(all_files)
     
@@ -132,25 +135,41 @@ end
 
 % list_regions
 if strcmp(cur_list,'CORONAL')
-    list_regions =    {'AC-L';'AC-R';'S1BF-L';'S1BF-R';'LPtA-L';'LPtA-R';'RS-L';'RS-R';...
-        'DG-L';'DG-R';'CA1-L';'CA1-R';'CA2-L';'CA2-R';'CA3-L';'CA3-R';...
-        'dThal-L';'dThal-R';'Po-L';'Po-R';'VPM-L';'VPM-R';...
-        'HypothalRg-L';'HypothalRg-R'};
+    if ~flag_grouped
+        list_regions = {'AC-L';'AC-R';'S1BF-L';'S1BF-R';'LPtA-L';'LPtA-R';'RS-L';'RS-R';...
+            'DG-L';'DG-R';'CA1-L';'CA1-R';'CA2-L';'CA2-R';'CA3-L';'CA3-R';...
+            'dThal-L';'dThal-R';'Po-L';'Po-R';'VPM-L';'VPM-R';...
+            'HypothalRg-L';'HypothalRg-R'};
+    else
+        list_regions = {'AC';'S1BF';'LPtA';'RS';...
+            'DG';'CA1';'CA2';'CA3';...
+            'dThal';'Po';'VPM';'Thalamus'};
+    end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    list_regions = {'AntCortex-L';'AMidCortex-L';'PMidCortex-R';'PostCortex-R';...
-        'DG-R';'CA3-R';'CA1-R';'dHpc-R';'vHpc-R';...
-        'dThal-R';'vThal-R';'Thalamus-L';'Thalamus-R';'GP-L';'CPu-L';...
-        'HypothalRg-L';'HypothalRg-R'};
+    if ~flag_grouped
+        list_regions = {'AntCortex-L';'AMidCortex-L';'PMidCortex-R';'PostCortex-R';...
+            'DG-R';'CA3-R';'CA1-R';'dHpc-R';'vHpc-R';...
+            'dThal-R';'vThal-R';'Thalamus-L';'Thalamus-R';'CPu-L';'CPu-R';...
+            'HypothalRg-L';'HypothalRg-R'};
+    else
+        list_regions = {'AntCortex';'AMidCortex';'PMidCortex';'PostCortex';...
+            'DG';'CA3';'CA1';'dHpc';'vHpc';...
+            'dThal';'vThal';'Thalamus';'CPu'};
+    end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
 else
-    list_regions =    {'Neocortex-L';'Neocortex-R';...
-        'dHpc-L';'dHpc-R';...
-        'Thalamus-L';'Thalamus-R';...
-        'HypothalRg-L';'HypothalRg-R'};
+    if ~flag_grouped
+        list_regions =    {'Neocortex-L';'Neocortex-R';...
+            'dHpc-L';'dHpc-R';...
+            'Thalamus-L';'Thalamus-R';...
+            'HypothalRg-L';'HypothalRg-R'};
+    else
+        list_regions =    {'Neocortex';'dHpc';'Thalamus';'HypothalRg';'Whole'};
+    end
 end
     
 % Buidling struct S
@@ -234,25 +253,27 @@ R.tmax_regions = tmax_regions;
 
 end
 
-function plot1_Figure3(D,S,list_regions,R)
+function plot1_Figure3(D,S,list_regions,R,flag_sorted)
 
 rmax_regions = R.rmax_regions;
 tmax_regions = R.tmax_regions;
 
 % Drawing results
 f = figure;
-colormap(f,'parula');
+%colormap(f,'parula');
+colormap(f,'copper');    
+clrmenu(f);
 cmap = f.Colormap;
 
-% Axes
+% Ax1
 ax1 = subplot(121);
+%rmax_regions = rmax_regions.^2;
 m = mean(rmax_regions,1,'omitnan');
 s_sem = std(rmax_regions,[],1,'omitnan')./sum(~isnan(rmax_regions),1);
 b1 = bar(1:length(list_regions),diag(m),'stacked','Parent',ax1);
 hold on;
 e1 = errorbar(diag(m),diag(s_sem),'Color','k',...
     'Parent',ax1,'LineStyle','none','LineWidth',1);
-% dots = 
 x_dots = repmat(1:length(list_regions),[length(D) 1]);
 plot(x_dots',rmax_regions','Linestyle','none','Linewidth',.1,'Color','k',...
     'Marker','o','MarkerSize',3,'MarkerFaceColor','k','MarkerEdgeColor','none','Parent',ax1);
@@ -260,29 +281,39 @@ ax1.XTick = 1:length(list_regions);
 ax1.XTickLabel = regexprep(list_regions,'.mat','');
 ax1.XTickLabelRotation = 45;
 ax1.YLabel.String = 'rmax';
+% sort rmax
+if flag_sorted
+    [~,ind_sorted_r] = sort(m,'descend');
+else
+    ind_sorted_r = 1:length(m);
+end
+colorbar(ax1,'northoutside');
+
+% Ax2
 ax2 = subplot(122);
 m = mean(tmax_regions,1,'omitnan');
 s_sem = std(tmax_regions,[],1,'omitnan')./sum(~isnan(tmax_regions),1);
 ax1.YLim = [0, 1];
-
 % sort timing
-flag_sorted = true;
 if flag_sorted
-    [~,ind_sorted] = sort(m,'ascend');
+    [~,ind_sorted_t] = sort(m,'ascend');
 else
-    ind_sorted = 1:length(m);
+    ind_sorted_t = 1:length(m);
 end
-m = m(ind_sorted);
-s_sem = s_sem(ind_sorted);
-list_regions_sorted = list_regions(ind_sorted);
+%m = m(ind_sorted_r);
+%s_sem = s_sem(ind_sorted_r);
+list_regions_sorted_r = list_regions(ind_sorted_r);
+list_regions_sorted_t = list_regions(ind_sorted_t);
 
-b2 = bar(diag(m),'stacked','Parent',ax2);
+ind_sorted = ind_sorted_t;
+list_regions_sorted = list_regions_sorted_t;
+b2 = bar(diag(m(ind_sorted)),'stacked','Parent',ax2);
 hold on;
-e2 = errorbar(diag(m),diag(s_sem),'Color','k',...
+e2 = errorbar(diag(m(ind_sorted)),diag(s_sem(ind_sorted)),'Color','k',...
     'Parent',ax2,'LineStyle','none','LineWidth',1);
 % dots = 
 x_dots = repmat(1:length(list_regions_sorted),[length(D) 1]);
-plot(x_dots',tmax_regions','Linestyle','none','Linewidth',.1,'Color','k',...
+plot(x_dots',tmax_regions(:,ind_sorted)','Linestyle','none','Linewidth',.1,'Color','k',...
     'Marker','o','MarkerSize',3,'MarkerFaceColor','k','MarkerEdgeColor','none','Parent',ax2);
 ax2.XTick = 1:length(list_regions_sorted);
 ax2.XTickLabel = regexprep(list_regions_sorted,'.mat','');
@@ -290,17 +321,22 @@ ax2.XTickLabelRotation = 45;
 ax2.YLabel.String = 'tmax';
 ax2.YLim = [0, 3.5];
 %[1.2, 1.6];
+colorbar(ax2,'northoutside');
 
 % colors
-ind_cmap = round(1:length(cmap)/length(b1):length(cmap));
+%ind_cmap = round(1:length(cmap)/length(b1):length(cmap));
 cmap = cmap(1:floor(length(cmap)/length(b1)):end,:);
-cmap_sorted = cmap(ind_sorted,:);
-for i =1:length(b1)
-    b2(i).FaceColor = cmap(i,:);
-    b2(i).EdgeColor='none';
+list_regions_sorted = list_regions_sorted_r;
+
+for i =1:length(list_regions_sorted)
+    ind_b2 = find(strcmp(ax2.XTickLabel,list_regions_sorted(i))==1);
+    b2(ind_b2).FaceColor = cmap(i,:);
+    %b2(ind_b2).FaceColor = cmap_sorted(i,:);
+    b2(ind_b2).EdgeColor='none';
     
-    ind_b1 = find(strcmp(ax1.XTickLabel,ax2.XTickLabel(i))==1);
+    ind_b1 = find(strcmp(ax1.XTickLabel,list_regions_sorted(i))==1);
     b1(ind_b1).FaceColor=cmap(i,:);
+    %b1(ind_b1).FaceColor=cmap_sorted(i,:);
     b1(ind_b1).EdgeColor='none';
 end
 

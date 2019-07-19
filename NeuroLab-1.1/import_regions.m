@@ -169,6 +169,16 @@ switch GImport.Region_loading
             regions = regions_bilateral;
         else
             fprintf('=== Unilateral & Bilateral Importation ===\n');
+            
+            % Removing double regions
+            ind_double = false(size(regions_bilateral));
+            for k =1:length(regions_bilateral)
+                pattern = regions_bilateral(k).name;
+                if ~isempty(find(strcmp({regions(:).name}',pattern))==1)
+                    ind_double(k)=true;
+                end
+            end
+            regions_bilateral = regions_bilateral(~ind_double);
             regions = [regions,regions_bilateral];
         end    
 end
