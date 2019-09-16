@@ -14,7 +14,7 @@ flag_grouped = true;
 flag_save = true;
 
 [D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup,flag_grouped);
-plot1_Figure6(S,list_regions,cur_list,timegroup,gather_regions,flag_save);
+plot1_Figure6(S,R,list_regions,cur_list,timegroup,gather_regions,flag_save);
 
 end
 
@@ -132,7 +132,8 @@ S = struct('Ydata',[],'Xdata',[],'ind_end',[],'ind_start',[],'label_events','','
 S(length(list_regions)).Ydata = [];
 
 % Average per recording
-R = struct('ref_time',[],'m',[],'s',[],'ind_start',[],'ind_end',[],'labels','','str_popup','');
+R = struct('ref_time',[],'m',[],'s',[],'ind_start',[],'ind_end',[],'labels','','str_popup','',...
+    'p_strength',[],'p_offset',[],'rat_name','','rat_id','');
 R(length(list_regions)).Ydata = [];
 
 lmax = 5000;
@@ -175,7 +176,22 @@ for index = 1:length(D)
             S(i).rat_id = [S(i).rat_id;{D(index).rat_id};repmat({''},[size(Ydata_temp,1),1])];
             S(i).file = [S(i).file;{cur_file};repmat({''},[size(Ydata_temp,1),1])];
             S(i).str_ref =[S(i).str_ref;{D(index).str_ref};repmat({''},[size(Ydata_temp,1),1])];
-
+            
+            % polyfit
+            x = data_fus.Time_indices(:,2)-data_fus.Time_indices(1,2);
+            y = NaN(size(Ydata_temp,1),1);
+            ind_ref = S(i).ind_end;
+            lag = 100;
+            for j=1:size(Ydata_temp,1)
+                y(j) = mean(Ydata_temp(j,ind_ref(j)-lag:ind_ref(j)+lag),'omitnan');
+            end
+            x = x(~isnan(y));
+            y = y(~isnan(y));
+            P = polyfit(x,y,1);
+            R(i).p_strength = [R(i).p_strength;P(1)];
+            R(i).p_offset = [R(i).p_offset;P(2)];
+            R(i).rat_name = [R(i).rat_name;{rat_name}];
+            R(i).rat_id = [R(i).rat_id;{rat_id}];
         end
     end
     
@@ -198,7 +214,7 @@ for index = 1:length(D)
 end
 end
 
-function plot1_Figure6(S,list_regions,cur_list,timegroup,gather_regions,flag_save)
+function plot1_Figure6(S,R,list_regions,cur_list,timegroup,gather_regions,flag_save)
 
 % Drawing results
 f = figure;
@@ -449,5 +465,117 @@ ax1.XLabel.String = 'Potentiation Strength';
 ax1.YLabel.String = 'Potentiation Offset';
 ax1.XLim = [min(all_P(:,1))-.01 max(all_P(:,1))+.01];
 ax1.YLim = [min(all_P(:,2))-.5 max(all_P(:,2))+.5];
+
+% 4th figure
+% Drawing results
+f = figure;
+f.Name = sprintf('Fig5_Synthesisc_%s-%s',cur_list,timegroup);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
+colormap(f,'parula');
+f_colors = f.Colormap(round(1:64/length(S):64),:);
+g_colors = repmat(get(groot,'DefaultAxesColorOrder'),[10,1]);
+
+panel1 = uipanel('FontSize',10,...
+    'Units','normalized',...
+    'Title','Potentiation Strength',...
+    'Tag','Panel1',...
+    'Position',[0 .5 1 .5],...
+    'Parent',f);
+panel2 = uipanel('FontSize',10,...
+    'Units','normalized',...
+    'Title','Potentiation Offset',...
+    'Tag','Panel1',...
+    'Position',[0 0 1 .5],...
+    'Parent',f);
+
+% Sixth tab
+all_axes1 = [];
+all_axes2 = [];
+margin_w=.02;
+margin_h=.02;
+n_columns = 4;
+n_rows = ceil(length(list_regions)/n_columns);
+all_P = [];
+all_E = [];
+    
+% Creating axes
+for ii = 1:n_rows
+    for jj = 1:n_columns
+        index = (ii-1)*n_columns+jj;
+        if index>length(list_regions)
+            continue;
+        end
+        x = mod(index-1,n_columns)/n_columns;
+        % Panel1
+        y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+        ax = axes('Parent',panel1);
+        ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+        ax.XAxisLocation ='origin';
+        %ax.Title.String = sprintf('Ax-%02d',index);
+        ax.Title.Visible = 'on';
+        all_axes1 = [all_axes1;ax];
+        % Panel2
+        ax = axes('Parent',panel2);
+        ax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+        ax.XAxisLocation ='origin';
+        %ax.Title.String = sprintf('Ax-%02d',index);
+        ax.Title.Visible = 'on';
+        all_axes2 = [all_axes2;ax];
+    end
+end
+
+% Filling axes
+for i = 1:length(all_axes1)
+    ax1 = all_axes1(i);
+    ax2 = all_axes2(i);
+    
+    % finding rats
+    all_rats = unique(R(i).rat_name);
+    all_lines1 = [];
+    all_lines2 = [];
+    counter = 0;
+    for j=1:length(all_rats)
+        cur_rat = all_rats(j);
+        ind_keep = find(strcmp(R(i).rat_name,cur_rat)==1);
+        if length(ind_keep)>=3
+            counter = counter+1;
+            % Panel1
+            y = R(i).p_strength(ind_keep);
+            x = (1:length(y))';       
+            l = line('XData',x,'YData',y,'Parent',ax1,...
+                'Color',g_colors(counter,:),'Tag',char(cur_rat),...
+                'LineStyle','-','LineWidth',.5,...
+                'Marker','o','MarkerSize',3,...
+                'MarkerFaceColor',g_colors(counter,:),'MarkerEdgeColor','none');
+            hold on;
+            all_lines1 = [all_lines1;l];
+            % Panel2
+            y = R(i).p_offset(ind_keep);
+            x = (1:length(y))';       
+            l = line('XData',x,'YData',y,'Parent',ax2,...
+                'Color',g_colors(counter,:),'Tag',char(cur_rat),...
+                'LineStyle','-','LineWidth',.5,...
+                'Marker','o','MarkerSize',3,...
+                'MarkerFaceColor',g_colors(counter,:),'MarkerEdgeColor','none');
+            hold on;
+            all_lines2 = [all_lines2;l];
+        else
+            continue;
+        end
+        
+    end
+    % Ax limits
+    ax1.Title.String = R(i).region;
+    ax2.Title.String = R(i).region;
+    
+end
+
+% legend
+index_leg = 2;
+leg1 = legend(all_axes1(index_leg),{all_lines1(:).Tag}');
+leg2 = legend(all_axes2(index_leg),{all_lines2(:).Tag}');
+leg1.Position(1)= leg1.Position(3)+leg1.Position(1)+3*margin_w;
+leg2.Position(1)= leg2.Position(3)+leg2.Position(1)+3*margin_w;
 
 end

@@ -355,7 +355,7 @@ else
 end
 cb2.String = ylim_default;
 cb2.Value = 1;
-e3.String = '3.0';
+e3.String = '4.0';
 % Storing TimeGroups in controls
 for i = 1:min(length(ttg),length(tg_cell))
     tt_images = TimeGroups_S(i).TimeTags_images;
@@ -440,7 +440,8 @@ y_inf = 1e6;
 % Group Coloring
 g_colors = get(groot,'defaultAxesColorOrder');
 g_colors(5,:) = f.Colormap(1,:);
-g_list = {'QW','REM-TONIC','NREM','REM-PHASIC','AW'};
+%g_list = {'QW','REM-TONIC','NREM','REM-PHASIC','AW'};
+g_list = {'QW','AW','NREM','REM'};
 g_colors(4,:) = g_colors(2,:);
 for i=1:length(g_list)
     ind_group = strcmp(tg_data.TimeGroups_name,char(g_list(i)));
@@ -449,7 +450,7 @@ for i=1:length(g_list)
         %ind_tags = contains(tt_data.TimeTags,char(g_list(i)));
         patch_colors(ind_tags,:) = repmat(g_colors(i,:),[length(ind_tags),1]);
         % Highlight REM-PHASIC
-        if i==4
+        if strcmp(g_list(i),'REM-PHASIC')
             face_alpha(ind_tags) = .75;
         else
             face_alpha(ind_tags) = alpha_value;
@@ -511,7 +512,8 @@ for i=1:l1
     
     ax.UserData.Y = Y;
     ax.UserData.Tag = l(i).Tag;
-    %ax.UserData.X = [X_sup;X];
+    X_post = X(end)+(delta:delta:delta*1e6)';
+    ax.UserData.X = [X_sup;X(:);X_post];
     
     s = Y(floor(t(START_IM)/delta):floor(t(END_IM)/delta),1);
     ax.UserData.series = s;
@@ -535,8 +537,8 @@ for i=l1+1:L
     Z = data_spectrogram(ii).Cdata;
     delta = X(2)-X(1);
     %Gaussian smoothing
-    exp_cor = 1;%.75;
-    t_smooth = 3;
+    exp_cor = .25;
+    t_smooth = 1;
     step = t_smooth/delta;
     % Correction
     correction = repmat((data_spectrogram(ii).freqdom(:).^exp_cor),1,size(Z,2));
@@ -645,17 +647,19 @@ while i>=START_IM && i<=END_IM
         % Plotting traces
         for j=1:length(all_axes)
             ax = all_axes(j);
+            X = ax.UserData.X;
             Y = ax.UserData.Y;
             delta = ax.UserData.delta;
             cla(ax);
             
             %Data
-            ind_0 = floor(t(i)/delta);
-            Y0 = Y(floor(ind_0-t_lfp/delta):floor(ind_0+t_lfp/delta));
+            %ind_0 = floor(t(i)/delta);
+            %Y0 = Y(floor(ind_0-t_lfp/delta):floor(ind_0+t_lfp/delta));
             
-            %ind_1 = floor((t(i)-t_lfp)/delta);
-            %ind_2 = floor((t(i)+t_lfp)/delta);
-            %Y0 = Y(ind_1:ind_2);
+            % Bug correction : Select Y by indexing X
+            [~,ind_1] = min((X-(t(i)-t_lfp)).^2);
+            [~,ind_2] = min((X-(t(i)+t_lfp)).^2);
+            Y0 = Y(ind_1:ind_2);
             
             %coefficients
             A = (length(Y0)-1)/(2*t_lfp);

@@ -87,8 +87,10 @@ if ~exist(str_save,'dir')
     end
 end
 % Creating folders
+% folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;GParams.DIR_SYNT;...
+%     GParams.SEED_SPIKO;GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
 folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;GParams.DIR_SYNT;...
-    GParams.SEED_SPIKO;GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
+    GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
 for j= 1:length(folder_list)
     folder = char(folder_list(j));
     if ~exist(folder,'dir')
