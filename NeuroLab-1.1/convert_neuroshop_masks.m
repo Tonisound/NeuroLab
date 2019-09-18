@@ -15,7 +15,23 @@ end
 global SEED_ATLAS;
 load('Preferences.mat','GImport');
 pixel_thresh = GImport.pixel_thresh; % minimum region size (pixels);
-test_whole = true; %adding whole-reg (largest cover from Neuroshop regions)
+test_whole = 1; %adding whole-reg (largest cover from Neuroshop regions)
+test_erase = 0; %empty region folder
+
+if val==1
+    prompt = [{'Insert whole region'};{'Erase NRegion folder'}];
+    dlg_title = 'Convert Options';
+    num_lines = 1;
+    def = [{sprintf('%d',test_whole)};{sprintf('%d',test_erase)}];
+    answer = inputdlg(prompt,dlg_title,num_lines,def);
+    
+    if ~isempty(answer)
+        test_whole=str2num(answer{1});
+        test_erase=str2num(answer{2});
+    else
+        return;
+    end
+end
 
 % Check for import folder
 if exist(fullfile(F.fullpath,F.dir_fus,'Mask.mat'),'file')
@@ -69,11 +85,11 @@ for i = 1:max(max(data_r.Mask(:,:,1)))
                 fprintf('Warning: Several regions found under index %d. Keeping first. [%s]\n',i,atlas_txt);
             end
             aname = atlas_name(ind_keep(1));
-            rname = {sprintf('%s_%d_%d.U8',char(aname),X,Y)};
+            rname = {sprintf('Nshop-reg_%s_%d_%d.U8',char(aname),X,Y)};
             region_name = [region_name;rname];
         else
             %default name
-            region_name = [region_name;{sprintf('Default-%03d_%d_%d.U8',i,X,Y)}];
+            region_name = [region_name;{sprintf('Nshop-reg_reg-%03d_%d_%d.U8',i,X,Y)}];
         end
     end
 end
@@ -85,14 +101,16 @@ if test_whole
     k = convhull(x,y);
     new_mask = double(poly2mask(y(k),x(k),size(whole_mask,1),size(whole_mask,2)));
     all_masks = cat(3,all_masks,new_mask);
-    region_name = [region_name;{sprintf('Whole-reg_%d_%d.U8',X,Y)}];
+    region_name = [region_name;{sprintf('Nshop-reg_Whole-reg_%d_%d.U8',X,Y)}];
     region_index = [region_index;0];
 end
 
 % Create export folder
 global SEED_REGION;
 dir_regions = fullfile(SEED_REGION,F.recording);
-rmdir(dir_regions,'s')
+if test_erase && exist(dir_regions,'dir')
+    rmdir(dir_regions,'s')
+end
 if ~exist(dir_regions,'dir')
     mkdir(dir_regions)
 end
