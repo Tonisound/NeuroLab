@@ -538,8 +538,8 @@ for i = 1:length(ind_files)
                 case 'Edit LFP Configuration'
                     success = menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
-                case 'Export Binary Masks'
-                    success = export_binary_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii),myhandles,0);
+                case 'Convert Neuroshop Masks'
+                    success = convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii),myhandles,0);
                     
                 case '(Figure) Global Episode Display'
                     f2=figure_GlobalDisplay(myhandles,0,str_tag);

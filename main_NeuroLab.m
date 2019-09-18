@@ -39,6 +39,7 @@ global SEED_SPIKO;              % String : Data Directory (Spikoscope Readout)
 global SEED_SWL;                % String : Recording List Directory
 global SEED_REGION;             % String : Spikoscope Regions Directory
 global SEED_CONFIG;             % String : Configuration Directory
+global SEED_ATLAS;              % String : Atlas Directory
 global DIR_SAVE;                % String : Saving Directory
 global DIR_FIG;                 % String : Figure Directory
 global DIR_STATS;               % String : Statistics Directory
@@ -57,6 +58,7 @@ SEED =          GParams.SEED;
 SEED_SPIKO =    GParams.SEED_SPIKO;
 SEED_SWL =      GParams.SEED_SWL;
 SEED_REGION =   GParams.SEED_REGION;
+SEED_ATLAS =    GParams.SEED_ATLAS;
 SEED_CONFIG =   GParams.SEED_CONFIG;
 DIR_SAVE =      GParams.DIR_SAVE;
 DIR_FIG =       GParams.DIR_FIG;

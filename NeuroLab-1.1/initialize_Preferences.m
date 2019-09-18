@@ -68,6 +68,7 @@ GParams.DIR_SYNT = fullfile(str_save,'NLab_Synthesis');
 GParams.SEED_REGION = fullfile(str_save,'Nlab_Files','NRegions');
 GParams.SEED_SWL = fullfile(str_save,'Nlab_Files','NReclists');
 GParams.SEED_CONFIG = fullfile(str_save,'Nlab_Files','NConfigs');
+GParams.SEED_ATLAS = fullfile(str_save,'Nlab_Files','NAtlas');
 GParams.sep_swl_1 = 'SEP1';
 GParams.sep_swl_2 = 'SEP2';
 
@@ -87,10 +88,8 @@ if ~exist(str_save,'dir')
     end
 end
 % Creating folders
-% folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;GParams.DIR_SYNT;...
-%     GParams.SEED_SPIKO;GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
 folder_list = {GParams.DIR_SAVE;GParams.DIR_FIG;GParams.DIR_STATS;GParams.DIR_SYNT;...
-    GParams.SEED_REGION;GParams.SEED_SWL;GParams.SEED_CONFIG};
+    GParams.SEED_REGION;GParams.SEED_ATLAS;GParams.SEED_SWL;GParams.SEED_CONFIG};
 for j= 1:length(folder_list)
     folder = char(folder_list(j));
     if ~exist(folder,'dir')
@@ -152,6 +151,7 @@ GImport.Trigger_loading_index = 1;
 GImport.Trigger_loading = 'ns5';
 GImport.Region_loading_index = 1;
 GImport.Region_loading = 'unilateral';
+GImport.pixel_thresh = 100;
 
 GFilt.broad_inf = 1;
 GFilt.broad_sup = 250;

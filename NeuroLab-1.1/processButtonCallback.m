@@ -33,8 +33,8 @@ switch strtrim(str(val,:))
     case 'Export LFP bands'
         export_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-    case 'Export Binary Masks'
-        export_binary_masks(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE),handles);
+    case 'Convert Neuroshop Masks'
+        convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE),handles);
         
 %     case 'Filter LFP for theta'
 %         filter_lfp_theta(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
