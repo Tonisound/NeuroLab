@@ -22,7 +22,6 @@ if ~exist(fullfile(SEED_REGION,file_recording),'dir')
     if length(dir_regions)>1
         S = [];
         for i =1:length(dir_regions)
-            %d = dir(fullfile(seed_region,file_E,char(dir_regions(i).name),'fUS*.U8'));
             d = dir(fullfile(seed_region,file_E,char(dir_regions(i).name),'*.U8'));
             d = d(arrayfun(@(x) ~strcmp(x.name(1),'.'),d));
             
@@ -47,7 +46,6 @@ if ~exist(fullfile(SEED_REGION,file_recording),'dir')
         return;
     else
         % be careful to remove all hidden files (.fUS_plane*.U8)
-        %files_regions = dir(fullfile(dir_regions,'fUS*.U8'));
         files_regions = dir(fullfile(dir_regions,'*.U8'));
         files_regions = files_regions(arrayfun(@(x) ~strcmp(x.name(1),'.'),files_regions));
         
@@ -66,7 +64,6 @@ if ~exist(fullfile(SEED_REGION,file_recording),'dir')
     end
 else
     dir_regions = fullfile(SEED_REGION,file_recording);
-    %files_regions = dir(fullfile(dir_regions,'fUS*.U8'));
     files_regions = dir(fullfile(dir_regions,'*.U8'));
     files_regions = files_regions(arrayfun(@(x) ~strcmp(x.name(1),'.'),files_regions));
 end
