@@ -326,14 +326,25 @@ end
 
 function [trigger,reference,padding] = extract_trigger_void(F,n_frames)
 
+load('Preferences.mat','GImport');
 reference = 'default';
 padding = 'none';
+f_def = GImport.f_def;
+
 % loading .acq
 if exist(fullfile(F.fullpath,F.dir_fus,F.acq),'file')
     data_acq = load(fullfile(F.fullpath,F.dir_fus,F.acq),'Acquisition','-mat');
-    f_acq = 1/median(diff(data_acq.Acquisition.T));
+    try
+        f_acq = 1/median(diff(data_acq.Acquisition.T));
+        % Bug fix if Acquisition.T corrupt
+        if f_acq>10
+            f_acq = f_def;
+        end
+    catch
+        % if Acquisition.T not found
+        f_acq = f_def;
+    end
 else
-    f_acq = 2.5;
     warning('Impossible to load acq file [%s].',fullfile(F.fullpath,F.dir_fus,F.acq));
 end
 

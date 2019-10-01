@@ -99,7 +99,6 @@ for j= 1:length(folder_list)
 end
 
 
-
 GDisp.W = .80;
 GDisp.H = .80;
 GDisp.w0 = .30;
@@ -152,6 +151,8 @@ GImport.Trigger_loading = 'ns5';
 GImport.Region_loading_index = 1;
 GImport.Region_loading = 'unilateral';
 GImport.pixel_thresh = 100;
+%GImport.f_def = 2.5;
+GImport.f_def = 1;
 
 GFilt.broad_inf = 1;
 GFilt.broad_sup = 250;
