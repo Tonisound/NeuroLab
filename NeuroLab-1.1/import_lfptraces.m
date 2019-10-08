@@ -164,8 +164,12 @@ for i=1:length(ind_channel)
     end
     
     traces(i).Y = Y_filt;
-    traces(i).Y_im = interp1(traces(i).X,traces(i).Y,traces(i).X_im);  
-    fprintf('Succesful Importation %s [Parent %s] [Bandpass: (%.2f Hz,%.2f Hz)].\n',traces(i).fullname,traces(i).parent,f1,f2);
+    traces(i).Y_im = interp1(traces(i).X,traces(i).Y,traces(i).X_im);
+    if contains(str,'lfp')      
+        fprintf('Succesful Importation %s [Parent %s] [Bandcut: (%.2f Hz,%.2f Hz)].\n',traces(i).fullname,traces(i).parent,f1,f2);
+    else
+        fprintf('Succesful Importation %s [Parent %s] [Bandpass: (%.2f Hz,%.2f Hz)].\n',traces(i).fullname,traces(i).parent,f1,f2);
+    end
 end
 
 

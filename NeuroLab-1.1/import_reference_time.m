@@ -170,7 +170,11 @@ end
 % Save dans ReferenceTime.mat
 time_str = cellstr(datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF'));
 handles.TimeDisplay.UserData = char(time_str);
-handles.TimeDisplay.String = char(time_str(CUR_IM));
+try
+    handles.TimeDisplay.String = char(time_str(CUR_IM));
+catch
+    handles.TimeDisplay.String = char(time_str(1));
+end
 %datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
 save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst',...
     'rec_mode','jump_value','ind_jumps','ind_bursts',...
@@ -337,7 +341,7 @@ if exist(fullfile(F.fullpath,F.dir_fus,F.acq),'file')
     try
         f_acq = 1/median(diff(data_acq.Acquisition.T));
         % Bug fix if Acquisition.T corrupt
-        if f_acq>10
+        if f_acq>10 || length(data_acq.Acquisition.T)==1
             f_acq = f_def;
         end
     catch
