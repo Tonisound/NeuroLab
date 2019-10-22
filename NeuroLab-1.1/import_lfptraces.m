@@ -102,9 +102,18 @@ if exist(fullfile(DIR_SAVE,F.nlab,'Nconfig.mat'),'file')
     channel_type = d_ncf.channel_type;
     channel_list = d_ncf.channel_list;
 else
-    % Prompt user to select files
-    [ind_channel,v] = listdlg('Name','LFP Channel Selection','PromptString','Select LFP channels',...
-        'SelectionMode','multiple','ListString',channel_list,'InitialValue','','ListSize',[300 500]);
+    if val==1
+        % user mode
+        % Prompt user to select files
+        [ind_channel,v] = listdlg('Name','LFP Channel Selection','PromptString','Select LFP channels',...
+            'SelectionMode','multiple','ListString',channel_list,'InitialValue','','ListSize',[300 500]);
+    else
+        % batch mode
+        % select all channels
+        ind_channel = 1:length(channel_list);
+        v = 1;
+    end
+    
     if isempty(ind_channel)||v==0
         return
     end

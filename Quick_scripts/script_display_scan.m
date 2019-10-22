@@ -2,24 +2,24 @@ function script_display_scan(subfolder)
 % Example of execution: script_display_scan('scan_coro_100')
 % scan_coro_100 must be in the folder specified under 'folder' variable
 
-folder = fullfile('E:\DATA\ATLAS_NLAB\20190228_SD025_scan',subfolder);
-%folder = fullfile('E:\DATA\ATLAS_NLAB\20190307_SD025_scan',subfolder);
-%folder = fullfile('E:\DATA\ATLAS_NLAB\20190307_SD025_tomo',subfolder);
+%folder = fullfile('F:\DATA\ATLAS_NLAB\20190228_SD025_scan',subfolder);
+%folder = fullfile('F:\DATA\ATLAS_NLAB\20190307_SD025_scan',subfolder);
+folder = fullfile('F:\DATA\ATLAS_NLAB\20190307_SD025_tomo',subfolder);
 
 d = dir(fullfile(folder,'*.acq'));
 load(fullfile(folder,char(d.name)),'-mat');
 
-% %tomo
-%Doppler_film= permute(squeeze(Acquisition.Data),[3 1 2 4]);
-%Doppler_film= Doppler_film(:,:,:,10);
+%tomo
+Doppler_film= permute(squeeze(Acquisition.Data),[3 1 2 4]);
+Doppler_film= Doppler_film(:,:,:,10);
 %Doppler_film = squeeze(permute(Acquisition.Data,[3,1,4,2]));
 
 %scan
-Doppler_film= permute(squeeze(Acquisition.Data),[3 1 2]);
+%Doppler_film= permute(squeeze(Acquisition.Data),[3 1 2]);
 
 % bug fix accumulation
-Doppler_film=permute(Acquisition.Data,[3 1 4 2]);
-Doppler_film = Doppler_film(:,:,1:4:end);
+% Doppler_film=permute(Acquisition.Data,[3 1 4 2]);
+% Doppler_film = Doppler_film(:,:,1:4:end);
 
 % slider display
 f = figure('Units','normalized');

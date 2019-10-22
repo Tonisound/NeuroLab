@@ -590,8 +590,8 @@ end
             edits(16).String = files_temp(cur_file).nev;
             edits(17).String = files_temp(cur_file).ncf;
             edits(18).String = files_temp(cur_file).mainchannel;
-            %edits(19).String = files_temp(cur_file).rcf;
-            %edits(20).String = files_temp(cur_file).type;
+            edits(19).String = files_temp(cur_file).dir_lfp;
+            edits(20).String = files_temp(cur_file).dir_ext;
             edits(21).String = data_norm.normalization;
             edits(22).String = sprintf('%s [%s]',data_ref.reference,data_ref.padding);
             edits(23).String = files_temp(cur_file).type;

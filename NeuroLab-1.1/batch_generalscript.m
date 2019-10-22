@@ -286,8 +286,11 @@ for i =1:length(hObj.UserData.Selection)
         str_group = [str_group;TimeGroups_name];
     end
 end
-str_group = unique(str_group);
-handles.Group_table.Data = cellstr(str_group);
+
+if ~isempty(str_group)
+    str_group = unique(str_group);
+    handles.Group_table.Data = cellstr(str_group);
+end
 handles.Group_table.UserData.Selection = [];
 
 % Loading all Time Tags

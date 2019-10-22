@@ -16,8 +16,8 @@ for i =1:length(l)
     f_samp = 1/(X(2)-X(1));
 %    X = X(floor(xlim1*f_samp):ceil(xlim2*f_samp));
 %    Y = Y(floor(xlim1*f_samp):ceil(xlim2*f_samp));
-    X = X(floor(xlim1*f_samp):min(end,ceil(xlim2*f_samp)));
-    Y = Y(floor(xlim1*f_samp):min(end,ceil(xlim2*f_samp)));
+%     X = X(floor(xlim1*f_samp):min(end,ceil(xlim2*f_samp)));
+%     Y = Y(floor(xlim1*f_samp):min(end,ceil(xlim2*f_samp)));
     all_traces(i).name = l(i).UserData.Name;
     all_traces(i).X = X;
     all_traces(i).Y = Y;
@@ -162,7 +162,8 @@ clrmenu(f2);
 
 %Parameters
 channels = 1;                % # channels (top) 
-bands = min(length(traces),8);      % # lfp (bottom)
+% bands = min(length(traces),8);      % # lfp (bottom)
+bands = 2;                   % # lfp (bottom)
 L = 10;                      % Height top panels
 l = 1;                       % Height info panel
 cb1_def = 1;                 % freq correction
@@ -2052,7 +2053,7 @@ end
 %     %c.Limits = [c_min,c_max];
 %     drawnow;
 
-end
+ end
 
 function export_wavelet_Callback(~,~,handles,val)
 % Export bands in Spikoscope_Traces.mat
