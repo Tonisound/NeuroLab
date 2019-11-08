@@ -1,5 +1,6 @@
 % Article RUN
-% Figure 2
+% Figure 2B
+% Hemodynamic Response comparison between time groups
 
 function script_Figure2B(cur_list,gather_regions)
 
