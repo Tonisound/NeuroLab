@@ -2,13 +2,15 @@
 
 success = false;
 dir_time = dir(fullfile(dir_tags,'*tags.txt'));
+% Removing hidden files
+dir_time = dir_time(arrayfun(@(x) ~strcmp(x.name(1),'.'),dir_time));
 
 switch length(dir_time)
     case 0
         errordlg(sprintf('Missing Time Tags File *tags.txt (Dir %s)',dir_tags));
         return;
     case 1
-        ind_time=1;
+        ind_time = 1;
     otherwise
         [ind_time,ok] = listdlg('PromptString','Select Time tags to import',...
             'SelectionMode','multiple','ListString',{dir_time.name},'ListSize',[300 500]);

@@ -235,6 +235,7 @@ for i =1:length(lines)
     lines_name{i} = lines(i).UserData.Name;
 end
 
+all_X = NaN(length(ind_traces),2);
 for i=1:length(ind_traces)
      
     % finding trace name
@@ -302,7 +303,62 @@ for i=1:length(ind_traces)
     x_end = X(end);
     save(fullfile(dir_source,strcat(save_name,'.mat')),'Y','f','x_start','x_end','-v7.3');
     fprintf('- Saved [%s]\n',fullfile(dir_source,strcat(save_name,'.mat')));
+    
+    all_X(i,:) = [X(1) X(end)];
 end
+
+% save TimeTags.mat (whole LFP)
+if exist(fullfile(dir_save,'Time_Tags.mat'),'file')
+    tt_data = load(fullfile(dir_save,'Time_Tags.mat'));
+else
+    warning(sprintf('Missing File %s',fullfile(dir_save,'Time_Tags.mat')));
+    return;
+end
+
+% % Finding Whole-LFP
+% Erase previous TimeTags if flag_tag
+flag_tag = true;
+if flag_tag
+    temp = {tt_data.TimeTags(:).Tag}';
+    ind_keep = ~contains(temp,"Whole-LFP");
+    tt_data.TimeTags_images = tt_data.TimeTags_images(ind_keep,:);
+    tt_data.TimeTags_strings = tt_data.TimeTags_strings(ind_keep,:);
+    tt_data.TimeTags_cell = [tt_data.TimeTags_cell(1,:);tt_data.TimeTags_cell(find(ind_keep==1)+1,:)];
+    tt_data.TimeTags = tt_data.TimeTags(ind_keep);
+end
+
+t_start = min(all_X(:,1));
+t_end = max(all_X(:,2));
+%TimeTags_strings
+tts_1 = cellstr(datestr(t_start/(24*3600),'HH:MM:SS.FFF'));
+tts_2 = cellstr(datestr((t_end-t_start)/(24*3600),'HH:MM:SS.FFF'));
+TimeTags_strings = [tts_1,tts_2];
+% TimeTags_images
+%data_t = load(fullfile(dir_save,'Time_Reference.mat'),'time_ref');
+[~, ind_min_time] = min(abs(data_t.time_ref.Y-t_start));
+[~, ind_max_time] = min(abs(data_t.time_ref.Y-t_end));
+TimeTags_images = [ind_min_time,ind_max_time];
+
+% TimeTags
+TimeTags_seconds = [t_start,t_end];
+TimeTags_dur = datestr((TimeTags_seconds(:,2)-TimeTags_seconds(:,1))/(24*3600),'HH:MM:SS.FFF');
+TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
+TimeTags.Episode = '';
+TimeTags.Tag = 'Whole-LFP';
+TimeTags.Onset = char(TimeTags_strings(1,1));
+TimeTags.Duration =  char(TimeTags_dur(1,:));
+TimeTags.Reference = TimeTags.Onset;
+TimeTags.Tokens = '';
+% TimeTags_cell
+TimeTags_cell = {'',TimeTags(1).Tag,TimeTags(1).Onset,TimeTags(1).Duration,TimeTags(1).Reference,''};
+
+% Saving TimeTags.mat
+TimeTags_images = [tt_data.TimeTags_images;TimeTags_images];
+TimeTags_strings = [tt_data.TimeTags_strings;TimeTags_strings];
+TimeTags_cell = [tt_data.TimeTags_cell;TimeTags_cell];
+TimeTags = [tt_data.TimeTags;TimeTags];
+save(fullfile(dir_save,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
+fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Time_Tags.mat'));
 
 success = true;
 
