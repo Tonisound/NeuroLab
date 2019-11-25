@@ -3607,8 +3607,8 @@ else
         %handles.LFPTable.UserData.Selection = (1:size(handles.LFPTable.Data,1))';
         
         % Selecting main channel
-        if ~isempty(data_config.File.mainchannel)
-            pattern_lfp = [{data_config.File.mainchannel};{'SPEED'};{'ACCEL-POWER'}];
+        if ~isempty(data_config.File.mainlfp)
+            pattern_lfp = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
         else
             pattern_lfp = [{'SPEED'};{'ACCEL-POWER'}];
         end

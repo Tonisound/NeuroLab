@@ -1365,8 +1365,8 @@ for i=1:length(ind_group)
     handles.Tag_table.UserData.Selection = data_tg.TimeGroups_S(ii).Selected';
     
 %     % Selecting main channel
-%     if ~isempty(data_config.File.mainchannel)
-%         str_ref = [{data_config.File.mainchannel};{'SPEED'};{'ACCEL-POWER'}];
+%     if ~isempty(data_config.File.mainlfp)
+%         str_ref = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
 %     else
 %         str_ref = [{'SPEED'};{'ACCEL-POWER'}];
 %     end
