@@ -213,16 +213,20 @@ tab2 = uitab('Parent',tabgp,...
     'Tag','SecondTab');
 tab3 = uitab('Parent',tabgp,...
     'Units','normalized',...
-    'Title','Propagation',...
+    'Title','Pixel-based Analysis',...
     'Tag','ThirdTab');
 tab4 = uitab('Parent',tabgp,...
     'Units','normalized',...
-    'Title','Connectivity',...
+    'Title','Propagation',...
     'Tag','FourthTab');
 tab5 = uitab('Parent',tabgp,...
     'Units','normalized',...
-    'Title','Traces & Tags',...
+    'Title','Connectivity',...
     'Tag','FifthTab');
+tab6 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Traces & Tags',...
+    'Tag','SixthTab');
 
 % Copying objects
 % Center Panel Copy
@@ -376,7 +380,7 @@ aP3 = uipanel('Units','normalized',...
     'bordertype','etchedin',...
     'Position',[0 0 1 1],...
     'Tag','AuxPanel3',...
-    'Parent',tab4);
+    'Parent',tab5);
 ax5 = subplot(1,1,1,'Parent',aP3,'Tag','Ax5','NextPlot','replacechildren');
 colormap(ax5,'jet');
 ax5.YDir = 'reverse';
@@ -437,10 +441,8 @@ bc.UserData.lines_1 = lines_1;
 bc.UserData.lines_2 = lines_2;
 p1.UserData.lines = lines;
 
-
-
 %Regions Panel
-rPanel = uipanel('Parent',tab5,...
+rPanel = uipanel('Parent',tab6,...
     'Units','normalized',...
     'Position',[0 0 .25 1],...
     'Title','Regions',...
@@ -466,7 +468,7 @@ rt.UserData.Selection = strcmp(D(:,2),'Trace_Region');
 %rt.UserData.Selection = (1:size(D,1))';
 
 %Trace Panel
-tPanel = uipanel('Parent',tab5,...
+tPanel = uipanel('Parent',tab6,...
     'Units','normalized',...
     'Position',[.25 0 .25 1],...
     'Title','Traces',...
@@ -502,7 +504,7 @@ taPanel = uipanel('FontSize',10,...
     'Position',[.5 0 .25 1],...
     'Title','Time Tags',...
     'Tag','Tag_Panel',...
-    'Parent',tab5);
+    'Parent',tab6);
 % UiTable
 t = uitable('Units','normalized',...
     'ColumnName','',...
@@ -529,7 +531,7 @@ ePanel = uipanel('FontSize',10,...
     'Position',[.75 0 .25 1],...
     'Title','Episodes',...
     'Tag','Episode_Panel',...
-    'Parent',tab5);
+    'Parent',tab6);
 % UiTable
 et = uitable('Units','normalized',...
     'ColumnName','',...
@@ -582,7 +584,7 @@ reset_Callback([],[],handles2);
 handles2.MainFigure.Position = [30 10 150 60];
 im = findobj(handles2.CenterAxes,'Tag','MainImage');
 set(im,'CData',zeros(size(im)));
-tabgp.SelectedTab = tab5;
+tabgp.SelectedTab = tab6;
 
 % If nargin > 3 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
@@ -798,7 +800,6 @@ handles.Cmin_0.String = sprintf('%.1f',handles.CenterAxes.CLim(1));
 handles.Cmax_0.String = sprintf('%.1f',handles.CenterAxes.CLim(2));
 
 % Reshaping xdat 
-
 if strcmp(rec_mode,'BURST')
     % new code
     % add NaN values between bursts
@@ -849,7 +850,6 @@ else
     handles.Slider.UserData.data = data;
 end
 
-
 % Correlogramm
 str_labels = cell(1,size(data,2));
 labels = cell(1,size(data,2));
@@ -872,8 +872,8 @@ for k=2:length(h_other)+1
     labs(k) = {strcat(str_t1,name(1:min(3,end)),name(max(4,end-4):end),str_t2)};
 end
 
-rfact = 5;
 [Cor,P_cor] = compute_correlogramm(series,lags);
+% rfact = 5;
 % series_resamp = interp2(series,[rfact,1]);
 % lags_resamp = rfact*lags(1):rfact*lags(end);
 % [Cor_resamp,P_cor_resamp] = compute_correlogramm(series_resamp,lags_resamp);
@@ -1042,13 +1042,124 @@ line('YData',1:length(labs),'XData',ydat,'Parent',handles.Ax4,...
 %     'Color',[.5 .5 .5],'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
 
 %Third Tab
+margin_w = .05;
+margin_h = .05;
+n_columns = 3;
+
+% Creating axes
+tab = handles.ThirdTab;
+delete(tab.Children);
+ax3_1 = axes('Position',[margin_w 2*margin_h 1/n_columns-2*margin_w 1-3*margin_h],'Parent',tab);
+ax3_2 = axes('Position',[1/n_columns+margin_w 2*margin_h 1/n_columns-2*margin_w 1-3*margin_h],'Parent',tab);
+ax3_3 = axes('Position',[2/n_columns+margin_w 2*margin_h 1/n_columns-2*margin_w 1-3*margin_h],'Parent',tab);
+% Colorbar
+c3_1 = colorbar(ax3_1,'southoutside');
+c3_1.Position = [margin_w 3*margin_h/4 1/n_columns-2*margin_w margin_h/2];
+c3_2 = colorbar(ax3_2,'southoutside');
+c3_2.Position = [1/n_columns+margin_w 3*margin_h/4 1/n_columns-2*margin_w margin_h/2];
+c3_3 = colorbar(ax3_3,'southoutside');
+c3_3.Position = [2/n_columns+margin_w 3*margin_h/4 1/n_columns-2*margin_w margin_h/2];
+
+% all pixels
+C_map2 = reshape(C_map,[size(C_map,1)*size(C_map,2) size(C_map,3)]);
+% removing NaN lines
+ind_rm = mean(isnan(C_map2),2)==1;
+C_map2 = C_map2(~ind_rm,:);
+
+% all pixels per regions
+l_reg = findobj(lines_1,'Tag','Trace_Region');
+all_masks = [];
+all_labels = [];
+all_xtick_labels = [];
+C_map3 = [];
+C_map4 = [];
+for i =1:length(l_reg)
+    cur_name = l_reg(i).UserData.Name;
+    cur_mask = l_reg(i).UserData.Mask;
+    
+    c_map_reg = repmat(cur_mask,[1 1 size(C_map,3)]).*C_map;
+    c_map_reg(c_map_reg==0)=NaN;
+    c_map_reg = reshape(c_map_reg,[size(c_map_reg,1)*size(c_map_reg,2) size(c_map_reg,3)]);
+    % removing NaN lines
+    ind_rm = mean(isnan(c_map_reg),2)==1;
+    c_map_reg = c_map_reg(~ind_rm,:);
+    C_map3 = [C_map3;c_map_reg];
+    C_map4 = [C_map4;mean(c_map_reg,'omitnan')];
+    
+    all_labels = [all_labels; {cur_name}];
+    all_xtick_labels = [all_xtick_labels; {cur_name};repmat({''},[size(c_map_reg,1),1])];
+    all_masks = cat(3,all_masks,cur_mask);
+end
+
+% Displaying all pixels
+ax = ax3_1;
+imagesc('XData',lags*step,'YData',1:size(C_map2,1),'CData',C_map2,...
+    'Parent',ax,'Tag','RT_all');
+title(ax,'All Pixels');
+set(ax, 'TickLength', [0 0]);
+ax.XLim = [lags(1)*step, lags(end)*step];
+ax.YLim = [.5, size(C_map2,1)+.5];
+ax.YDir = 'reverse';
+% ticks
+[~,imax] = max(C_map2,[],2,'omitnan');
+ydat = [];
+for kk=1:size(C_map2,1)
+    ydat = [ydat;step*lags(imax(kk))];
+end
+line('YData',1:size(C_map2,1),'XData',ydat,'Parent',ax,...
+    'LineStyle','none','MarkerSize',1,'Marker','o',...
+    'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+
+% Displaying all pixels per region
+ax = ax3_2;
+imagesc('XData',lags*step,'YData',1:size(C_map3,1),'CData',C_map3,...
+    'Parent',ax,'Tag','RT_all_sorted');
+title(ax,'All Pixels sorted');
+set(ax, 'TickLength', [0 0]);
+ax.XLim = [lags(1)*step, lags(end)*step];
+ax.YLim = [.5, size(C_map3,1)+.5];
+ax.YDir = 'reverse';
+% % ticks
+% [~,imax] = max(C_map3,[],2,'omitnan');
+% ydat = [];
+% for kk=1:size(C_map3,1)
+%     ydat = [ydat;step*lags(imax(kk))];
+% end
+% line('YData',1:size(C_map3,1),'XData',ydat,'Parent',ax,...
+%     'LineStyle','none','MarkerSize',1,'Marker','o',...
+%     'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+ax.YTick = 1:size(C_map3,1);
+ax.YTickLabel = all_xtick_labels;
+
+% Displaying all regions
+ax = ax3_3;
+imagesc('XData',lags*step,'YData',1:size(C_map4,1),'CData',C_map4,...
+    'Parent',ax,'Tag','RT_regions');
+title(ax,'All Regions');
+set(ax, 'TickLength', [0 0]);
+ax.XLim = [lags(1)*step, lags(end)*step];
+ax.YLim = [.5, size(C_map4,1)+.5];
+ax.YDir = 'reverse';
+% ticks
+[~,imax] = max(C_map4,[],2,'omitnan');
+ydat = [];
+for kk=1:size(C_map4,1)
+    ydat = [ydat;step*lags(imax(kk))];
+end
+line('YData',1:size(C_map4,1),'XData',ydat,'Parent',ax,...
+    'LineStyle','none','MarkerSize',1,'Marker','o',...
+    'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+ax.YTick = 1:size(C_map4,1);
+ax.YTickLabel = all_labels;
+
+%Fourth Tab
 margin_w = .01;
 margin_h = .02;
 n_columns = 6;
 n_rows = ceil(length(lags)/n_columns);
 
 % Creating axes
-delete(handles.ThirdTab.Children);
+delete(handles.FourthTab.Children);
 all_axes = [];
 str_labels0 = str_labels(2:end);
 A0 = A(2:end,:);
@@ -1061,7 +1172,7 @@ for ii = 1:n_rows
         end
         x = mod(index-1,n_columns)/n_columns;
         y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
-        ax = axes('Parent',handles.ThirdTab);
+        ax = axes('Parent',handles.FourthTab);
         ax.Position= [x+2*margin_w y+margin_h (1/n_columns)-3*margin_w (1/n_rows)-3*margin_h];
         ax.YDir ='reverse';
         ax.Title.String = sprintf('t = %.2f s',step*lags(index));
@@ -1094,8 +1205,10 @@ for i =1:length(all_axes)
         mask  = l.UserData.Mask;
         im = imagesc(255*mask,'Parent',ax);
         im.AlphaData = mask*abs(A0(ind_keep,i));
-
     end
+%     if i==length(all_axes)
+%         c = colorbar(ax,'eastoutside');
+%     end
 end
 
 % Update Text and Strings
@@ -1286,17 +1399,17 @@ pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
-handles.TabGroup.SelectedTab = handles.ThirdTab;
-pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
-saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
-fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
-
 handles.TabGroup.SelectedTab = handles.FourthTab;
 pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
-% handles.TabGroup.SelectedTab = handles.FifthTab;
+handles.TabGroup.SelectedTab = handles.FifthTab;
+pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
+saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+
+% handles.TabGroup.SelectedTab = handles.SixthTab;
 % pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 % saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 % fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
