@@ -253,7 +253,7 @@ uicontrol('Units','normalized',...
     'Tag','Cmax_0',...
     'Callback', {@update_caxis,ax,c0,2},...
     'Tooltipstring','CMax Main');
-colormap(ax,'jet');
+% colormap(ax,'jet');
 
 % Second Tab
 % Auxilliary Panel 1
@@ -263,7 +263,7 @@ aP1 = uipanel('Units','normalized',...
     'Tag','AuxPanel1',...
     'Parent',tab2);
 ax1 = subplot(1,2,1,'Parent',aP1,'Tag','Ax1');
-colormap(ax1,'jet');
+% colormap(ax1,'jet');
 title(ax1,'Variance Explained');
 c1 = colorbar(ax1,'Tag','Colorbar1');
 e1 = uicontrol('Units','normalized',...
@@ -308,7 +308,7 @@ e1.Position = [9/20     .01      w_button   2*w_button];
 e2.Position = [9/20     .9      w_button   2*w_button];
 
 ax2 = subplot(1,2,2,'Tag','Ax2','Parent',aP1,'NextPlot','replace');
-colormap(ax2,'jet');
+% colormap(ax2,'jet');
 title(ax2,'Peak Time (s)');
 c2 = colorbar(ax2,'Tag','Colorbar2');
 e1 = uicontrol('Units','normalized',...
@@ -342,11 +342,11 @@ aP2 = uipanel('Units','normalized',...
     'Tag','AuxPanel2',...
     'Parent',tab2);
 ax3 = subplot(1,2,1,'Parent',aP2,'Tag','Ax3');
-colormap(ax3,'jet');
+% colormap(ax3,'jet');
 title(ax3,'Peak Correlations');
 
 ax4 = subplot(1,2,2,'Tag','Ax4','Parent',aP2,'NextPlot','replace');
-colormap(ax4,'jet');
+% colormap(ax4,'jet');
 title(ax4,'Time Lag Correlation');
 c4 = colorbar(ax4,'Tag','Colorbar4');
 e3 = uicontrol('Units','normalized',...
@@ -382,7 +382,7 @@ aP3 = uipanel('Units','normalized',...
     'Tag','AuxPanel3',...
     'Parent',tab5);
 ax5 = subplot(1,1,1,'Parent',aP3,'Tag','Ax5','NextPlot','replacechildren');
-colormap(ax5,'jet');
+% colormap(ax5,'jet');
 ax5.YDir = 'reverse';
 caxis(ax5,[-1,1]);
 title(ax5,'Correlogram');
@@ -1071,6 +1071,7 @@ l_reg = findobj(lines_1,'Tag','Trace_Region');
 all_masks = [];
 all_labels = [];
 all_xtick_labels = [];
+sum_pixels = 0;
 C_map3 = [];
 C_map4 = [];
 for i =1:length(l_reg)
@@ -1087,8 +1088,9 @@ for i =1:length(l_reg)
     C_map4 = [C_map4;mean(c_map_reg,'omitnan')];
     
     all_labels = [all_labels; {cur_name}];
-    all_xtick_labels = [all_xtick_labels; {cur_name};repmat({''},[size(c_map_reg,1),1])];
+    all_xtick_labels = [all_xtick_labels; {cur_name};repmat({''},[size(c_map_reg,1)-1,1])];
     all_masks = cat(3,all_masks,cur_mask);
+    sum_pixels = [sum_pixels;size(c_map_reg,1)];
 end
 
 % Displaying all pixels
@@ -1119,15 +1121,14 @@ set(ax, 'TickLength', [0 0]);
 ax.XLim = [lags(1)*step, lags(end)*step];
 ax.YLim = [.5, size(C_map3,1)+.5];
 ax.YDir = 'reverse';
-% % ticks
-% [~,imax] = max(C_map3,[],2,'omitnan');
-% ydat = [];
-% for kk=1:size(C_map3,1)
-%     ydat = [ydat;step*lags(imax(kk))];
-% end
-% line('YData',1:size(C_map3,1),'XData',ydat,'Parent',ax,...
-%     'LineStyle','none','MarkerSize',1,'Marker','o',...
-%     'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+% lines
+cum_pixels = cumsum(sum_pixels);
+for i =1:length(cum_pixels)
+    line('XData',[ax.XLim(1) ax.XLim(2)],'YData',[cum_pixels(i) cum_pixels(i)],'Parent',ax,...
+    	'LineStyle','-','Color','k','Linewidth',1,...
+        'MarkerSize',1,'Marker','none','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+end
+
 ax.YTick = 1:size(C_map3,1);
 ax.YTickLabel = all_xtick_labels;
 
@@ -1178,7 +1179,7 @@ for ii = 1:n_rows
         ax.Title.String = sprintf('t = %.2f s',step*lags(index));
         ax.Visible = 'on';
         all_axes = [all_axes;ax];
-        colormap(ax,'jet');
+        % colormap(ax,'jet');
         hold(ax,'on');
     end
 end

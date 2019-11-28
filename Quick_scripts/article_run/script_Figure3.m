@@ -3,15 +3,16 @@
 % to run after batch fUS_Correlation 
 % Display (and save figure) mean correlation patterns
 
-function script_Figure3(cur_list,timegroup,gather_regions)
+function script_Figure3(cur_list,timegroup,flag_grouped,flag_sorted)
 
 close all;
-if nargin <3
-    gather_regions = false;
+if nargin <4
+    flag_sorted = true;
 end
 
-flag_grouped = true;
-flag_sorted = true;
+if nargin <3
+    flag_grouped = true;
+end
 
 [D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup,flag_grouped);
 plot1_Figure3(D,S,list_regions,R,flag_sorted)
@@ -20,13 +21,10 @@ end
 
 function [D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup,flag_grouped)
 
-%timegroup = 'RUN';
-%cur_list = 'CORONAL';
-%folder = 'I:\fUSLAB\fLab_Statistics\fUS_Correlation';
-%all_files = dir(fullfile(folder,'*_E'));
-
-flag_mainchannel = false;
-folder = 'I:\NEUROLAB\NLab_Statistics\fUS_Correlation';
+flag_mainlfp = false;
+%seed = 'I:';
+seed = '/Volumes/Toni_HD2/';
+folder = fullfile(seed,'NEUROLAB','NLab_Statistics','fUS_Correlation');
 all_files = dir(fullfile(folder,'*_E'));
 D = struct('file','','reference','','all_regions','','timegroup','','plane','','main_channel','');
 index = 0;
@@ -58,9 +56,9 @@ for i = 1:length(all_files)
     d = dir(fullfile(folder,cur_file,timegroup,'Ref-*'));
     
     % Getting main channel
-    if exist(fullfile('I:\NEUROLAB\NLab_DATA',strrep(cur_file,'_E','_E_nlab'),'Config.mat'),'file')
-        data_config = load(fullfile('I:\NEUROLAB\NLab_DATA',strrep(cur_file,'_E','_E_nlab'),'Config.mat'),'File');
-        D(index).main_channel = data_config.File.mainchannel ;
+    if exist(fullfile(seed,'NEUROLAB','NLab_DATA',strrep(cur_file,'_E','_E_nlab'),'Config.mat'),'file')
+        data_config = load(fullfile(seed,'NEUROLAB','NLab_DATA',strrep(cur_file,'_E','_E_nlab'),'Config.mat'),'File');
+        D(index).main_channel = data_config.File.mainlfp ;
     end
     
     flag_ref=false;
@@ -72,7 +70,7 @@ for i = 1:length(all_files)
             if length(ind_keep)>1
                 % Selecting
                 % main channel
-                if flag_mainchannel
+                if flag_mainlfp
                     ind_keep2 = find(contains({d(ind_keep).name}',D(index).main_channel)==1);
                     if length(ind_keep2)==1
                         reference = char(d(ind_keep(ind_keep2)).name);
@@ -238,7 +236,7 @@ for index = 1:length(D)
     end
     
     % Loading background image
-    folder_im = 'I:\NEUROLAB\NLab_DATA';
+    folder_im = fullfile(seed,'NEUROLAB','NLab_DATA');
     try
         data_im = load(fullfile(folder_im,strcat(cur_file,'_nlab'),'Config.mat'),'Current_Image');
     catch
@@ -292,7 +290,7 @@ colorbar(ax1,'northoutside');
 % Ax2
 ax2 = subplot(122);
 m = mean(tmax_regions,1,'omitnan');
-s_sem = std(tmax_regions,[],1,'omitnan')./sum(~isnan(tmax_regions),1);
+s_sem = std(tmax_regions,[],1,'omitnan')./sqrt(sum(~isnan(tmax_regions),1));
 ax1.YLim = [0, 1];
 % sort timing
 if flag_sorted
@@ -338,6 +336,47 @@ for i =1:length(list_regions_sorted)
     b1(ind_b1).FaceColor=cmap(i,:);
     %b1(ind_b1).FaceColor=cmap_sorted(i,:);
     b1(ind_b1).EdgeColor='none';
+end
+
+% Drawing results
+f1 = figure;
+colormap(f1,'parula');
+clrmenu(f1);
+cmap = f1.Colormap;
+
+% Ax1
+ax1 = axes('Parent',f1);
+%rmax_regions = rmax_regions.^2;
+m_r = mean(rmax_regions,1,'omitnan');
+m_t = mean(tmax_regions,1,'omitnan');
+s_sem = std(tmax_regions,[],1,'omitnan')./sqrt(sum(~isnan(tmax_regions),1));
+
+% Box Plot
+n_bars = size(rmax_regions,2);
+positions = m_t;
+ind_colors = 1:63/(n_bars-1):64;
+colors = cmap(round(ind_colors),:);
+boxplot(rmax_regions,...
+    'MedianStyle','target',...
+    'positions',positions,...
+    'colors',colors,...
+    'Width',50,...
+    'OutlierSize',1,...
+    'PlotStyle','compact',...
+    'Parent',ax1);
+ax1.YLabel.String = 'rmax';
+ax1.YGrid = 'on';
+ax1.XLim= [1,3];
+ax1.YLim= [-.2,1];
+ax1.XTick = positions(ind_sorted_t);
+ax1.XTickLabel = list_regions_sorted_t;
+ax1.XTickLabelRotation = 45;
+
+% lines
+colors_= flipud(colors);
+for i =1:length(m_t)
+    line('XData',[m_t(i)-s_sem(i) m_t(i)+s_sem(i)],'YData',[m_r(i) m_r(i)],'Color',colors_(i,:),...
+        'LineStyle',':','LineWidth',1,'Parent',ax1);
 end
 
 % Drawing Rmax/Tmax_pattern
