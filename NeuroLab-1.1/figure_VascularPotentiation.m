@@ -11,7 +11,7 @@ if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')||~exis
     warning('Missing File Time_Tags.mat or Time_Reference.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     return;
 end
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images','TimeTags_strings');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_images','TimeTags_strings');
 load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst');
 
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
@@ -65,6 +65,14 @@ e3 = uicontrol('Units','normalized','Style','edit','HorizontalAlignment','center
     'String',margin_w,'Tag','Edit3','Tooltipstring','margin_w');
 e4 = uicontrol('Units','normalized','Style','edit','HorizontalAlignment','center','Parent',iP,...
     'String',margin_h,'Tag','Edit4','Tooltipstring','margin_h');
+e5 = uicontrol('Units','normalized','Style','edit','HorizontalAlignment','center','Parent',iP,...
+    'String',.005,'Tag','Edit5','Tooltipstring','Slope+ min threshold');
+e6 = uicontrol('Units','normalized','Style','edit','HorizontalAlignment','center','Parent',iP,...
+    'String',-.005,'Tag','Edit6','Tooltipstring','Slope- min threshold');
+e7 = uicontrol('Units','normalized','Style','edit','HorizontalAlignment','center','Parent',iP,...
+    'String',.1,'Tag','Edit7','Tooltipstring','Slope+ max threshold');
+e8 = uicontrol('Units','normalized','Style','edit','HorizontalAlignment','center','Parent',iP,...
+    'String',-.1,'Tag','Edit8','Tooltipstring','Slope- max threshold');
 
 % Buttons 
 br = uicontrol('Units','normalized','Style','pushbutton','Parent',iP,...
@@ -84,10 +92,14 @@ bb.UserData.CFCData = [];
 % position
 t1.Position = [0     .4    .25   .5];
 t2.Position = [0     -.1    .25   .5];
-e1.Position = [.25     .5    .05   .5];
-e2.Position = [.25     0    .05   .5];
-e3.Position = [.35     .5    .05   .5];
-e4.Position = [.35     0    .05   .5];
+e1.Position = [.25     .5    .04   .5];
+e2.Position = [.25     0    .04   .5];
+e3.Position = [.3     .5    .04   .5];
+e4.Position = [.3     0    .04   .5];
+e5.Position = [.35     .5    .04   .5];
+e6.Position = [.35     0    .04   .5];
+e7.Position = [.4     .5    .04   .5];
+e8.Position = [.4     0    .04   .5];
 bc.Position = [7/10     .5      .1   .5];
 br.Position = [7/10     0      .1   .5];
 bss.Position = [8/10     .5      .1   .5];
@@ -110,12 +122,17 @@ tab0 = uitab('Parent',tabgp,...
 
 tracePanel = uipanel('Parent',tab0,...
     'Units','normalized',...
-    'Position',[0 0 .5 1],...
+    'Position',[0 0 .33 1],...
     'Title','Traces',...
     'Tag','TracePanel');
+tagPanel = uipanel('Parent',tab0,...
+    'Units','normalized',...
+    'Position',[.335 0 .33 1],...
+    'Title','Time Tags',...
+    'Tag','TagPanel');
 groupPanel = uipanel('Parent',tab0,...
     'Units','normalized',...
-    'Position',[.5 0 .5 1],...
+    'Position',[.67 0 .33 1],...
     'Title','Time Groups',...
     'Tag','GroupPanel');
 
@@ -133,7 +150,7 @@ for i =1:length(lines)
     D=[D;{lines(i).UserData.Name, lines(i).Tag}];
 end
 
-tt = uitable('Units','normalized',...
+rt = uitable('Units','normalized',...
     'ColumnName','',...
     'RowName',{},...
     'ColumnFormat',{'char','char'},...
@@ -145,9 +162,28 @@ tt = uitable('Units','normalized',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
     'Parent',tracePanel);
-%tt.UserData.Selection = find(strcmp(tt.Data(:,2),'Trace_Region')==1);
+%rt.UserData.Selection = find(strcmp(rt.Data(:,2),'Trace_Region')==1);
+rt.UserData.Selection = [];
+f.UserData.lines_name = rt.Data(:,1);
+
+tt = uitable('Units','normalized',...
+    'ColumnName','',...
+    'RowName',{},...
+    'ColumnFormat',{'char'},...
+    'ColumnEditable',false,...
+    'ColumnWidth',{120},...
+    'Data',{TimeTags(:).Tag}',...
+    'Position',[0 0 1 1],...
+    'Tag','Tag_table',...
+    'CellSelectionCallback',@template_uitable_select,...
+    'RowStriping','on',...
+    'Parent',tagPanel);
 tt.UserData.Selection = [];
-f.UserData.lines_name = tt.Data(:,1);
+tt.UserData.TimeTags = TimeTags;
+tt.UserData.TimeTags_cell = TimeTags_cell;
+tt.UserData.TimeTags_images = TimeTags_images;
+tt.UserData.TimeTags_strings = TimeTags_strings;
+
 gt = uitable('Units','normalized',...
     'ColumnName','',...
     'RowName',{},...
@@ -222,15 +258,11 @@ drawnow;
 handles.MainFigure.UserData.success = false;
 
 % Select Time indices
-sel1 = handles.Group_table.UserData.Selection;
-if isempty(sel1)
-    start_im = str2double(handles.Edit1.String);
-    end_im = str2double(handles.Edit2.String);
-    Time_indices = (handles.MainFigure.UserData.time_ref.X>=start_im).*(handles.MainFigure.UserData.time_ref.X<=end_im);
-    str_title = sprintf('CURRENT[%d-%d]',start_im,end_im);
-else
-    sel1 = sel1(1);
-    TimeTags_images = handles.Group_table.UserData.TimeGroups_S(sel1).TimeTags_images;
+sel2 = handles.Tag_table.UserData.Selection;
+sel3 = handles.Group_table.UserData.Selection;
+if ~isempty(sel2)
+    % Time Tag Selection
+    TimeTags_images = handles.Tag_table.UserData.TimeTags_images(sel2,:);
     Time_indices = zeros(size(handles.MainFigure.UserData.time_ref.X));
     for i =1:size(TimeTags_images,1)
         im1 = TimeTags_images(i,1);
@@ -238,16 +270,35 @@ else
         ind_keep = (handles.MainFigure.UserData.time_ref.X>=im1).*(handles.MainFigure.UserData.time_ref.X<=im2);
         Time_indices(ind_keep==1)=1;
     end
-    str_title = sprintf('TimeGroup-%s',char(handles.Group_table.UserData.TimeGroups_name(sel1)));
+    str_title = strcat(handles.Tag_table.UserData.TimeTags(sel2(1)).Tag,...
+        '---',handles.Tag_table.UserData.TimeTags(sel2(end)).Tag);
+elseif ~isempty(sel3)
+    % Time Group Selection
+    % keeping first
+    sel3 = sel3(1);
+    TimeTags_images = handles.Group_table.UserData.TimeGroups_S(sel3).TimeTags_images;
+    Time_indices = zeros(size(handles.MainFigure.UserData.time_ref.X));
+    for i =1:size(TimeTags_images,1)
+        im1 = TimeTags_images(i,1);
+        im2 = TimeTags_images(i,2);
+        ind_keep = (handles.MainFigure.UserData.time_ref.X>=im1).*(handles.MainFigure.UserData.time_ref.X<=im2);
+        Time_indices(ind_keep==1)=1;
+    end
+    str_title = sprintf('TimeGroup-%s',char(handles.Group_table.UserData.TimeGroups_name(sel3)));
+else 
+    start_im = str2double(handles.Edit1.String);
+    end_im = str2double(handles.Edit2.String);
+    Time_indices = (handles.MainFigure.UserData.time_ref.X>=start_im).*(handles.MainFigure.UserData.time_ref.X<=end_im);
+    str_title = sprintf('CURRENT[%d-%d]',start_im,end_im);
 end
 
 % Select Regions
-sel2 = handles.Trace_table.UserData.Selection;
-if isempty(sel2)
+sel1 = handles.Trace_table.UserData.Selection;
+if isempty(sel1)
     ind_regions = find(strcmp(handles.Trace_table.Data(:,2),'Trace_Region')==1);
     handles.Trace_table.UserData.Selection = ind_regions;
 else
-    ind_regions = sel2;
+    ind_regions = sel1;
 end
 %str_regions = handles.Trace_table.Data(ind_regions,1);
 
@@ -310,23 +361,41 @@ imagesc(Offset_Map,'parent',ax1);
 title(sprintf('Offset (%s)',str_title))
 colorbar(ax1);
 
+thresh_sup_min = str2double(handles.Edit5.String);
+thresh_inf_min = str2double(handles.Edit6.String);
+thresh_sup_max = str2double(handles.Edit7.String);
+thresh_inf_max= str2double(handles.Edit8.String);
+
 Mmax = max(max(Slope_Map(:),0));
 Mmin = min(min(Slope_Map(:),0));
 ax2 = axes('Parent',tab0);
-im = imagesc(Slope_Map,'parent',ax2);
-im.AlphaData = Slope_Map>0;
+im1 = imagesc(Slope_Map,'parent',ax2);
+im1.AlphaData = Slope_Map>thresh_sup_min;
+im1.UserData.Slope_Map = Slope_Map;
+im1.UserData.index = 1;
 %title(sprintf('slope + (%d-%d)',start_im,end_im))
 title(sprintf('Slope + (%s)',str_title));
-colorbar(ax2);
-ax2.CLim = [0 Mmax];
+c2 = colorbar(ax2);
+%ax2.CLim = [thresh_sup_min Mmax];
+ax2.CLim = [thresh_sup_min thresh_sup_max];
 
 ax3 = axes('Parent',tab0);
-im = imagesc(Slope_Map,'parent',ax3);
-im.AlphaData = Slope_Map<0;
+%im = imagesc(Slope_Map,'parent',ax3);
+im2 = imagesc(abs(Slope_Map),'parent',ax3);
+im2.AlphaData = Slope_Map<thresh_inf_min;
+im2.UserData.Slope_Map = Slope_Map;
+im2.UserData.index = 2;
 %title(sprintf('slope - (%d-%d)',start_im,end_im))
 title(sprintf('Slope - (%s)',str_title))
-colorbar(ax3);
-ax3.CLim = [Mmin 0];
+c3 = colorbar(ax3);
+%ax3.CLim = [Mmin 0];
+%ax3.CLim = [abs(thresh_inf_min) abs(Mmin)];
+ax3.CLim = [abs(thresh_inf_min) abs(thresh_inf_max)];
+
+handles.Edit5.Callback = {@update_caxis,ax2,c2,im1,1};
+handles.Edit6.Callback  = {@update_caxis,ax3,c3,im2,1};
+handles.Edit7.Callback = {@update_caxis,ax2,c2,im1,2};
+handles.Edit8.Callback  = {@update_caxis,ax3,c3,im2,2};
 
 ax1.Position = [margin_w margin_h 1/3-4*margin_w 1-2*margin_h];
 ax1.Visible = 'off';
@@ -480,4 +549,22 @@ for j=1:length(ind_group)
 end
 handles.Group_table.UserData.Selection = ind_group;
 
+end
+
+function update_caxis(hObj,~,ax,c,im,value)
+for i=1:length(ax)
+    switch value
+        case 1
+            ax(i).CLim(1) = abs(str2double(hObj.String));
+            switch im.UserData.index 
+                case 1
+                    im.AlphaData = im.UserData.Slope_Map>str2double(hObj.String);
+                case 2
+                    im.AlphaData = im.UserData.Slope_Map<str2double(hObj.String);
+            end
+        case 2
+            ax(i).CLim(2) = abs(str2double(hObj.String));
+    end
+end
+c.Limits = ax.CLim;
 end

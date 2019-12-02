@@ -22,8 +22,8 @@ end
 function [D,R,S,list_regions] = compute_script_Figure3(cur_list,timegroup,flag_grouped)
 
 flag_mainlfp = false;
-%seed = 'I:';
-seed = '/Volumes/Toni_HD2/';
+seed = 'I:';
+%seed = '/Volumes/Toni_HD2/';
 folder = fullfile(seed,'NEUROLAB','NLab_Statistics','fUS_Correlation');
 all_files = dir(fullfile(folder,'*_E'));
 D = struct('file','','reference','','all_regions','','timegroup','','plane','','main_channel','');
@@ -43,9 +43,11 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
     '20160630_114317_E';'20160701_130444_E'};
 
+
 % list of references to search (in order)
-%list_ref = {'SPEED';'ACCEL'};
- list_ref = {'Power-theta'};
+list_ref = {'SPEED'};
+% list_ref = {'SPEED';'ACCEL'};
+% list_ref = {'Power-theta'};
 
 for i = 1:length(all_files)
     
@@ -356,17 +358,17 @@ n_bars = size(rmax_regions,2);
 positions = m_t;
 ind_colors = 1:63/(n_bars-1):64;
 colors = cmap(round(ind_colors),:);
-boxplot(rmax_regions,...
+boxplot(rmax_regions.^2,...
     'MedianStyle','target',...
     'positions',positions,...
     'colors',colors,...
-    'Width',50,...
-    'OutlierSize',1,...
+    'Width',.025,...
     'PlotStyle','compact',...
+    'OutlierSize',1,...
     'Parent',ax1);
 ax1.YLabel.String = 'rmax';
 ax1.YGrid = 'on';
-ax1.XLim= [1,3];
+ax1.XLim= [0.0,3.0];
 ax1.YLim= [-.2,1];
 ax1.XTick = positions(ind_sorted_t);
 ax1.XTickLabel = list_regions_sorted_t;
@@ -375,7 +377,7 @@ ax1.XTickLabelRotation = 45;
 % lines
 colors_= flipud(colors);
 for i =1:length(m_t)
-    line('XData',[m_t(i)-s_sem(i) m_t(i)+s_sem(i)],'YData',[m_r(i) m_r(i)],'Color',colors_(i,:),...
+    line('XData',[m_t(i)-s_sem(i) m_t(i)+s_sem(i)],'YData',.1*([m_r(i) m_r(i)].^2),'Color',colors_(i,:),...
         'LineStyle',':','LineWidth',1,'Parent',ax1);
 end
 

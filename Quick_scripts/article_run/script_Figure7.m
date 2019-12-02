@@ -290,7 +290,7 @@ for ii = 1:n_rows
             %rho_mean(isnan(rho_mean))=0;
             %rho_sem(isnan(rho_sem))=0;
             polarplot([theta_tick(k) theta_tick(k)],[abs(rho_mean)-rho_sem abs(rho_mean)+rho_sem],'Parent',pax,...
-                'Color','k','Marker','o','MarkerSize',2,'LineStyle','-',...
+                'Color','k','Marker','o','MarkerSize',1,'LineStyle','-','LineWidth',.5,...
                 'MarkerFaceColor',f_colors(k,:),'MarkerEdgeColor','k');
 
         end
@@ -308,7 +308,7 @@ for ii = 1:n_rows
         end
         
         % Title and label
-        pax.RLim = [0 1];
+        pax.RLim = [0 .5];
         pax.Title.String = list_lfp(index);
         pax.ThetaAxisUnits = 'radian';
         pax.ThetaTick = theta_tick;
@@ -398,7 +398,8 @@ for i =1:length(list_lfp)
             ydata = S(i,index).R_data2_scaled;
             %xdata = S(i,index).R_data1;
             %ydata = S(i,index).R_data2;
-            r = corr(xdata,ydata,'rows','complete');
+            corr_type = 'Kendall';
+            r = corr(xdata,ydata,'rows','complete','type',corr_type);
 %             %All rats
 %             line('XData',xdata,'YData',ydata,'Parent',ax,...
 %                 'Color',f_colors(index,:),'Marker','.','MarkerSize',5,...
@@ -431,7 +432,7 @@ f.Position = [195          59        1045         919];
 if flag_save
     for k = 1:length(all_tabs)
         tabgp.SelectedTab = all_tabs(k);
-        str_fig = strrep(strcat('_',char(all_tabs(k).Title)),filesep,'');
+        str_fig = strrep(strcat('_',char(all_tabs(k).Title),'_',corr_type),filesep,'');
         saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
         fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
     end
