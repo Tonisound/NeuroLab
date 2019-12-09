@@ -6,10 +6,10 @@
 function script_Figure5(cur_list,timegroup,gather_regions)
 
 if nargin <3
-    gather_regions = false;
+    gather_regions = true;
 end
 
-flag_grouped = false;
+flag_grouped = true;
 flag_save = true;
 
 [D,Q,R,S,list_regions,list_lfp] = compute_script_Figure5(cur_list,timegroup,flag_grouped);
@@ -40,7 +40,8 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
-    '20160630_114317_E';'20160701_130444_E'};
+    '20160630_114317_E'};
+%;'20160701_130444_E'
 
 % list of references to search (in order)
 %list_ref = {'SPEED';'ACCEL'};

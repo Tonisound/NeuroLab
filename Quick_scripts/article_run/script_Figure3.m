@@ -143,7 +143,7 @@ if strcmp(cur_list,'CORONAL')
     else
         list_regions = {'AC';'S1BF';'LPtA';'RS';...
             'DG';'CA1';'CA2';'CA3';...
-            'dThal';'Po';'VPM';'Thalamus'};
+            'dThal';'Po';'VPM';'HypothalRg'};
     end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
@@ -258,6 +258,10 @@ function plot1_Figure3(D,S,list_regions,R,flag_sorted)
 rmax_regions = R.rmax_regions;
 tmax_regions = R.tmax_regions;
 
+if sum(strcmp({D(:).plane}','DIAGONAL'))==length(D)
+    tmax_regions= tmax_regions+.2;
+end
+
 % Drawing results
 f = figure;
 %colormap(f,'parula');
@@ -347,7 +351,8 @@ clrmenu(f1);
 cmap = f1.Colormap;
 
 % Ax1
-ax1 = axes('Parent',f1);
+%ax1 = axes('Parent',f1);
+ax1 = subplot(211,'Parent',f1);
 %rmax_regions = rmax_regions.^2;
 m_r = mean(rmax_regions,1,'omitnan');
 m_t = mean(tmax_regions,1,'omitnan');
@@ -358,28 +363,50 @@ n_bars = size(rmax_regions,2);
 positions = m_t;
 ind_colors = 1:63/(n_bars-1):64;
 colors = cmap(round(ind_colors),:);
+colors_= colors(ind_sorted_t,:);
 boxplot(rmax_regions.^2,...
     'MedianStyle','target',...
     'positions',positions,...
-    'colors',colors,...
+    'colors',colors_,...
     'Width',.025,...
-    'PlotStyle','compact',...
     'OutlierSize',1,...
     'Parent',ax1);
-ax1.YLabel.String = 'rmax';
+%'PlotStyle','compact',...
+ax1.YLabel.String = 'rmax^2';
 ax1.YGrid = 'on';
 ax1.XLim= [0.0,3.0];
-ax1.YLim= [-.2,1];
-ax1.XTick = positions(ind_sorted_t);
-ax1.XTickLabel = list_regions_sorted_t;
-ax1.XTickLabelRotation = 45;
-
-% lines
-colors_= flipud(colors);
-for i =1:length(m_t)
-    line('XData',[m_t(i)-s_sem(i) m_t(i)+s_sem(i)],'YData',.1*([m_r(i) m_r(i)].^2),'Color',colors_(i,:),...
-        'LineStyle',':','LineWidth',1,'Parent',ax1);
+ax1.YLim= [0,1];
+ax1.YTick = ax1.YLim(1):.2:ax1.YLim(end); 
+for i =1:length(list_regions)
+    text(positions(i),(m_r(i))^2,char(list_regions(i)));
 end
+ax1.XTick = ax1.XLim(1):.5:ax1.XLim(2);
+xticklabel = [];
+for i =1:length(ax1.XTick)
+    xticklabel = [xticklabel;{sprintf('%.1f',ax1.XTick(i))}];
+end
+ax1.XTickLabel = xticklabel;
+grid(ax1,'on');
+% ax1.XTickLabelRotation = 45;
+
+ax2 = subplot(212,'Parent',f1);
+ax2.YLabel.String = 'Activation Sequence';
+% lines
+m_t_ = m_t(ind_sorted_t);
+s_sem_ = s_sem(ind_sorted_t);
+for i =1:length(m_t_)
+    line('XData',[m_t_(i)-s_sem_(i) m_t_(i)+s_sem_(i)],'YData',[i i],'Color',colors_(i,:),...
+        'LineStyle','-','LineWidth',1,'Parent',ax2);
+    text(m_t_(i)-.1,i+.4,char(list_regions_sorted_t(i)));
+    text(m_t_(i)-s_sem_(i)-.1,i+.4,sprintf('%.2f',m_t_(i)-s_sem_(i)));
+    text(m_t_(i)+s_sem_(i)-.1,i+.4,sprintf('%.2f',m_t_(i)+s_sem_(i)));
+end
+ax2.YLim= [0 length(m_t)+1];
+ax2.XLim= ax1.XLim;
+ax2.XTick = ax1.XTick;
+ax2.XTickLabel = ax1.XTickLabel;
+ax2.YTick = [];
+ax2.XGrid = 'on';
 
 % Drawing Rmax/Tmax_pattern
 f2 = figure;

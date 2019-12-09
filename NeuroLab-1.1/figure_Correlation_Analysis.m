@@ -803,7 +803,16 @@ handles.Cmax_0.String = sprintf('%.1f',handles.CenterAxes.CLim(2));
 if strcmp(rec_mode,'BURST')
     % new code
     % add NaN values between bursts
-    length_burst = 59;
+    try
+        length_burst = 30;
+        n_burst = length(y)/length_burst;
+        y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
+    catch
+        length_burst = 1181;
+        n_burst = length(y)/length_burst;
+        y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
+    end
+            length_burst = 1181;
     %n_burst = LAST_IM/length_burst;
     n_burst = n_images/length_burst;
     xdat = reshape(xdata(1:end-1),[length_burst,n_burst]);
@@ -888,7 +897,7 @@ if handles.TextBox.Value
     status = 'on';
 else
     status = 'off';
-end
+end 
 for k=1:size(Cor,1)
     for j=1:size(Cor,2)
         text(j-.4,k,sprintf('%0.2f',Cor(k,j,lags==0)),...
@@ -914,6 +923,7 @@ cla(handles.Ax1);
 im1 = imagesc('CData',im_max,...
     'Parent',handles.Ax1,...
     'Tag','MaxVarImage');
+%im1.AlphaData = im_max>.2;
 set(handles.Ax1, 'TickLength', [0 0]);
 handles.Ax1.YDir = 'reverse';
 handles.Ax1.XLim = [.5 size(im_max,2)+.5];
@@ -1004,7 +1014,7 @@ end
 
 % Display Time-Shift Correlogram
 cla(handles.Ax4);
-resample = true;
+resample = false;
 switch resample
     case true
         lags_ = lags_resampled;
@@ -1375,7 +1385,6 @@ lags = handles.Slider.Min:handles.Slider.Max;
 ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name),'/','-');
 save_dir = fullfile(DIR_FIG,'fUS_Correlation',FILES(CUR_FILE).recording,folder_name,ref_name);
 work_dir = fullfile(save_dir,'Frames');
-
 
 % Removing old folder
 if isdir(save_dir)

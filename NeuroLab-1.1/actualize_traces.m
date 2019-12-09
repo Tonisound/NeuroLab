@@ -52,10 +52,15 @@ tm = findobj(handles.RightAxes,'Tag','Trace_Mean');
 if t_gauss>0
     if strcmp(rec_mode,'BURST')
         y = mean(mean(IM,2,'omitnan'),1,'omitnan');
-        % length_burst = 30;
-        length_burst = 59;
-        n_burst = length(y)/length_burst;
-        y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
+        try
+            length_burst = 59;
+            n_burst = length(y)/length_burst;
+            y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
+        catch
+            length_burst = 1181;
+            n_burst = length(y)/length_burst;
+            y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
+        end
         y_conv = nanconv(y_reshape(:),w,'same');
         y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
         y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);
@@ -113,10 +118,15 @@ for idx =1:length(graphics)
         
         if strcmp(rec_mode,'BURST')
             % gaussian nan convolution + nan padding (only for burst_recording)
-            % length_burst = 30;
-            length_burst = 59;
-            n_burst = length(y)/length_burst;
-            y_reshape = [reshape(y,[length_burst,n_burst]);NaN(length(w),n_burst)];
+            try
+                length_burst = 59;
+                n_burst = length(y)/length_burst;
+                y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
+            catch
+                length_burst = 1181;
+                n_burst = length(y)/length_burst;
+                y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
+            end
             y_conv = nanconv(y_reshape(:),w,'same');
             y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
             y_final = reshape(y_reshaped(1:length_burst,:),[length_burst*n_burst,1]);

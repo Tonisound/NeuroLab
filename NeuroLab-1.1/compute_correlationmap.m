@@ -41,7 +41,9 @@ fprintf('Computing Correlation map (%s,%s) \nLags: %s...',str1,str2,mat2str(lags
 count=0;
 C_map = NaN(size(im,1),size(im,2),length(lags));
 P_val = NaN(size(im,1),size(im,2),length(lags));
+h = waitbar(0,'Computing correlation map: 0.0 % completed.');
 for k=1:length(lags)
+    tic
     t = lags(k);
     count=count+1;
     i = max(1,1+t);
@@ -55,6 +57,10 @@ for k=1:length(lags)
     p = reshape(p,[size(im,1),size(im,2)]);
     C_map(:,:,count)=c;
     P_val(:,:,count)=p;
+     fprintf('> Lag %d/%d completed.\n',k,length(lags));
+    waitbar(k/length(lags),h,sprintf('Computing correlation map: %.1f %% completed.',100*k/length(lags)));
+    toc
 end
+close(h);
 fprintf('... Done.\n');
 end
