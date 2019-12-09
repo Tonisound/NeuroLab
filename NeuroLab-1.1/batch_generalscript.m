@@ -525,8 +525,9 @@ for i = 1:length(ind_files)
                 case 'Detect Left-Right Runs'
                     success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                         
-                case 'Sleep Score'
-                    success = sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
+                case 'Perform sleep scoring'
+                    %success = sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
+                    tempSleepScoring_NeuroLab(myhandles,0);
                     
                 case 'Export LFP bands'
                     % in this case 1 select band manually, else 0 for all bands

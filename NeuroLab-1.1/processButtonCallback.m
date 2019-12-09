@@ -18,9 +18,6 @@ switch strtrim(str(val,:))
     case 'Detect Left-Right Runs'
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-    case 'Sleep Score'
-        sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-        
     case 'Import LFP Traces'
         import_lfptraces(FILES(CUR_FILE),handles);
         
@@ -36,8 +33,9 @@ switch strtrim(str(val,:))
     case 'Convert Neuroshop Masks'
         convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE),handles);
         
-%     case 'Filter LFP for theta'
-%         filter_lfp_theta(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+    case 'Perform sleep scoring'
+        % sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        tempSleepScoring_NeuroLab(handles);
 
     case 'Export Patches'
         export_patches(handles);
