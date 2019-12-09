@@ -26,8 +26,8 @@ path_traces = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP');
 oldFolder = 'C:\Users\Marta\Documents\MATLAB\NeuroLab';
 
 % check if LFP traces imported
-cd(path_traces);
-listing = dir('*LFP*.mat');
+%cd(path_traces);
+listing = dir(fullfile(path_traces,'*LFP*.mat'));
 if isempty(listing)
     disp('LFP not found, please import LFP traces')
 end
@@ -50,14 +50,19 @@ else
 end
 
 % Loading SleepScore file
-if exist('C:\Users\Marta\Documents\MATLAB\NeuroLab\SleepScore.mat','file')
-    load('C:\Users\Marta\Documents\MATLAB\NeuroLab\SleepScore');
+cur_rep = pwd;
+if exist(fullfile(cur_rep,'SleepScore.mat'),'file')
+    load(fullfile(cur_rep,'SleepScore.mat'));
 else
     disp('File SleepScore.mat not found.');
+    %return;
 end
 
-file_info = strsplit(FILES(CUR_FILE).recording,'_');
-date = file_info(1); animal_id = file_info(2); recording = file_info(3); type = file_info(4);
+file_info = strsplit(FILES(CUR_FILE).recording,'_'); 
+date = file_info(1); 
+animal_id = file_info(2); 
+recording = file_info(3); 
+type = file_info(4);
 
 SleepScore(CUR_FILE) = struct('Animal_ID',animal_id,'Date',date,...
     'Recording',recording,'Type',type,...
@@ -65,11 +70,11 @@ SleepScore(CUR_FILE) = struct('Animal_ID',animal_id,'Date',date,...
     'INT_mean',[],'INT_dur',[]);
 
 % Import traces
-cd(path_traces);
-list_EMG = dir('*EMG*.mat');
-list_ACC = dir('*ACC*.mat');
-list_GYR = dir('*GYR*.mat');
-list_LFP = dir('*LFP_*.mat');
+%cd(path_traces);
+list_EMG = dir(fullfile(path_traces,'*EMG*.mat'));
+list_ACC = dir(fullfile(path_traces,'*ACC*.mat'));
+list_GYR = dir(fullfile(path_traces,'*GYR*.mat'));
+list_LFP = dir(fullfile(path_traces,'*LFP_*.mat'));
 
 
 % Create figure
@@ -491,7 +496,7 @@ linkaxes([ax1,ax2,ax3,ax4,ax5],'x');
 ax1.XLim = [fig.UserData.MOVdata.x_start,fig.UserData.MOVdata.x_end];
 fig.Visible = 'on';
 set(fig, 'KeyPressFcn', @myKeyPressFcn)
-cd(oldFolder);
+%cd(oldFolder);
 fig.UserData.clicks = 0;
 
 % graphical rendering
