@@ -155,7 +155,7 @@ ft.UserData.Selection = [];
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
 D = [{'Clear Sources_LFP'};{'Delete Region Traces'};cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit Anatomical Regions'};{'Edit LFP Configuration'}];
+    {'Trace Edition'};{'Import Time Tags'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit Anatomical Regions'};{'Edit LFP Configuration'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -512,6 +512,9 @@ for i = 1:length(ind_files)
                         
                 case 'Import Anatomical Regions'
                     success = import_regions(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
+                    
+                case 'Import Time Tags'
+                    success = import_time_tags(FILES(ii).fullpath,fullfile(DIR_SAVE,FILES(ii).nlab));
                     
                 case 'Import LFP Traces'
                     success = import_lfptraces(FILES(CUR_FILE),myhandles,0);

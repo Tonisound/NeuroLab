@@ -99,4 +99,5 @@ for i=1:length(ind_time)
 fprintf('Time Tags importation successful [%s].\n',fullfile(dir_tags,dir_time(ind_time(i)).name));
 end
 
+success = true;
 end

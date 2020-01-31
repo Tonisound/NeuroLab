@@ -45,8 +45,8 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
 
 
 % list of references to search (in order)
-list_ref = {'SPEED'};
-% list_ref = {'SPEED';'ACCEL'};
+% list_ref = {'SPEED'};
+list_ref = {'SPEED';'ACCEL'};
 % list_ref = {'Power-theta'};
 
 for i = 1:length(all_files)
@@ -258,9 +258,9 @@ function plot1_Figure3(D,S,list_regions,R,flag_sorted)
 rmax_regions = R.rmax_regions;
 tmax_regions = R.tmax_regions;
 
-if sum(strcmp({D(:).plane}','DIAGONAL'))==length(D)
-    tmax_regions= tmax_regions+.2;
-end
+% if sum(strcmp({D(:).plane}','DIAGONAL'))==length(D)
+%     tmax_regions= tmax_regions+.2;
+% end
 
 % Drawing results
 f = figure;
@@ -270,7 +270,7 @@ clrmenu(f);
 cmap = f.Colormap;
 
 % Ax1
-ax1 = subplot(121);
+ax1 = subplot(131);
 %rmax_regions = rmax_regions.^2;
 m = mean(rmax_regions,1,'omitnan');
 s_sem = std(rmax_regions,[],1,'omitnan')./sum(~isnan(rmax_regions),1);
@@ -294,10 +294,9 @@ end
 colorbar(ax1,'northoutside');
 
 % Ax2
-ax2 = subplot(122);
+ax2 = subplot(132);
 m = mean(tmax_regions,1,'omitnan');
 s_sem = std(tmax_regions,[],1,'omitnan')./sqrt(sum(~isnan(tmax_regions),1));
-ax1.YLim = [0, 1];
 % sort timing
 if flag_sorted
     [~,ind_sorted_t] = sort(m,'ascend');
@@ -327,6 +326,37 @@ ax2.YLim = [0, 3.5];
 %[1.2, 1.6];
 colorbar(ax2,'northoutside');
 
+% relative timing
+test_relative = true;
+if test_relative
+    ind_relative = find(strcmpi(list_regions,'dg'));
+    if ~isempty(ind_relative)
+        t_relative =  repmat(tmax_regions(:,ind_relative),[1 size(tmax_regions,2)]);
+        tmax_regions_relative = tmax_regions-t_relative; 
+    end
+end
+% Ax3
+ax3 = subplot(133);
+m = mean(tmax_regions_relative,1,'omitnan');
+s_sem = std(tmax_regions_relative,[],1,'omitnan')./sqrt(sum(~isnan(tmax_regions_relative),1));
+%ax3.YLim = [0, 1];
+
+b3 = bar(diag(m(ind_sorted)),'stacked','Parent',ax3);
+hold on;
+e3 = errorbar(diag(m(ind_sorted)),diag(s_sem(ind_sorted)),'Color','k',...
+    'Parent',ax3,'LineStyle','none','LineWidth',1);
+% dots = 
+x_dots = repmat(1:length(list_regions_sorted),[length(D) 1]);
+plot(x_dots',tmax_regions_relative(:,ind_sorted)','Linestyle','none','Linewidth',.1,'Color','k',...
+    'Marker','o','MarkerSize',3,'MarkerFaceColor','k','MarkerEdgeColor','none','Parent',ax3);
+ax3.XTick = 1:length(list_regions_sorted);
+ax3.XTickLabel = regexprep(list_regions_sorted,'.mat','');
+ax3.XTickLabelRotation = 45;
+ax3.YLabel.String = 'tmax-relative';
+ax3.YLim = [-1, 1.5];
+%[1.2, 1.6];
+colorbar(ax3,'northoutside');
+
 % colors
 %ind_cmap = round(1:length(cmap)/length(b1):length(cmap));
 cmap = cmap(1:floor(length(cmap)/length(b1)):end,:);
@@ -335,8 +365,10 @@ list_regions_sorted = list_regions_sorted_r;
 for i =1:length(list_regions_sorted)
     ind_b2 = find(strcmp(ax2.XTickLabel,list_regions_sorted(i))==1);
     b2(ind_b2).FaceColor = cmap(i,:);
-    %b2(ind_b2).FaceColor = cmap_sorted(i,:);
     b2(ind_b2).EdgeColor='none';
+    
+    b3(ind_b2).FaceColor = cmap(i,:);
+    b3(ind_b2).EdgeColor='none';
     
     ind_b1 = find(strcmp(ax1.XTickLabel,list_regions_sorted(i))==1);
     b1(ind_b1).FaceColor=cmap(i,:);
