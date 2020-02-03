@@ -3,8 +3,10 @@ function copy_graphicdata(RightAxes,ax1,ax2,mode,save_dir,val)
 % Copy children in Userdata children in ax1
 
 data_t = load(fullfile(save_dir,'Time_Reference.mat'),'n_burst','length_burst','time_ref');
-n_burst = data_t.n_burst;
-length_burst = data_t.length_burst;
+% n_burst = data_t.n_burst;
+% length_burst = data_t.length_burst;
+n_burst = 1;
+length_burst = data_t.length_burst*data_t.n_burst;
 time_ref = data_t.time_ref;
 
 if nargin <6

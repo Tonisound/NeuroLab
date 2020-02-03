@@ -27,12 +27,17 @@ set(0, 'DefaultUiControlFontName',fontname);
 
 % Time Reference Loading
 if ~isempty(FILES) && exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
+    data_c = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
+    length_burst = size(IM,3);
+    n_burst = 1;
+    time_ref = data_c.time_ref;
+    rec_mode = data_c.rec_mode;
 else
     %warning('Missing File Time_Reference.mat');
     length_burst = size(IM,3);
     n_burst = 1;
 end
+
 
 % handles.MainFigure
 f = figure('Units','normalized',...
@@ -148,7 +153,7 @@ uimenu(m2,'Label','Edit Time Groups','Tag','EditMenu_TimeGroupEdition');
 uimenu(m2,'Label','Edit LFP Configuration','Tag','EditMenu_LFPConfig');
 uimenu(m2,'Label','Edit Anatomical Regions','Tag','EditMenu_AnatRegions');
 
-uimenu(m2,'Label','Lauch Neuroshop','Tag','EditMenu_Neuroshop','Separator','on');
+uimenu(m2,'Label','Register Atlas (Neuroshop)','Tag','EditMenu_Neuroshop','Separator','on');
 
 uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','on');
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
@@ -273,8 +278,9 @@ if t_gauss>0 && length(hl.YData)>3
     y = hl.YData(1:end-1);
     if strcmp(rec_mode,'BURST')
         % gaussian nan convolution + nan padding (only for burst_recording)
-        length_burst_smooth = 1181;
-        % length_burst_smooth = 30;
+        %length_burst_smooth = 1181;
+        %length_burst_smooth = 59;
+        length_burst_smooth = data_c.length_burst;
         n_burst_smooth = length(y)/length_burst_smooth;
         y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
         y_conv = nanconv(y_reshape(:),w,'same');

@@ -59,6 +59,8 @@ if ~strcmp(old,new)
             % Recreate Mean and Mean Label
             try
                 load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
+                %length_burst = length(time_ref.Y);
+                %n_burst = 1;
             catch
                 warning('Missing File Time_Reference.mat');
                 length_burst = size(IM,3);
@@ -99,12 +101,12 @@ if ~strcmp(old,new)
         end
         
     % Loading Video file
-    import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
-%     try
-%         import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
-%     catch
-%         warning('Unable to import video file [%s].',fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video));
-%     end
+%    import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+    try
+        import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+    catch
+        warning('Unable to import video file [%s].',fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video));
+    end
         
     else
         IM = zeros(88,169,2);

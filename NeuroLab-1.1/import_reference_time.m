@@ -149,10 +149,10 @@ ind_jumps = find([0;diff(trigger(:))]>GImport.jump_thresh);
 jump_value = length(ind_jumps);
 if length(unique(diff(ind_bursts)))==1
     rec_mode = 'BURST';
-%     n_burst = 1+length(ind_bursts);
-%     length_burst = unique(diff(ind_bursts));
-    n_burst = 1;
-    length_burst = length(trigger); 
+    n_burst = 1+length(ind_bursts);
+    length_burst = unique(diff(ind_bursts));
+%     n_burst = 1;
+%     length_burst = length(trigger); 
 elseif ~isempty(ind_bursts)
     rec_mode = 'BURST-IRREGULAR';
     n_burst = 1;
@@ -179,7 +179,8 @@ end
 save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst',...
     'rec_mode','jump_value','ind_jumps','ind_bursts',...
     'length_burst','n_images','reference','padding','-v7.3');
-fprintf('Succesful Reference Time Importation\n===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));
+fprintf('Succesful Reference Time Importation [%s,%d,%d]\n',rec_mode,n_burst,length_burst);
+fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));
 
 success = true;
 
@@ -350,6 +351,7 @@ if exist(fullfile(F.fullpath,F.dir_fus,F.acq),'file')
     end
 else
     warning('Impossible to load acq file [%s].',fullfile(F.fullpath,F.dir_fus,F.acq));
+    f_acq = f_def;
 end
 
 trigger = (0:n_frames-1)'/f_acq;
