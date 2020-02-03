@@ -28,12 +28,13 @@ fig = figure('units', 'pixels', ...
 pathname = fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).dir_fus);
 if exist(fullfile(pathname,'Mask.mat'),'file')
     d = load(fullfile(pathname,'Mask.mat'));
+    fprintf('Loading existant Mask [%s].\n',fullfile(pathname,'Mask.mat'));
 else
     d=[];
 end
 
 if ~isempty(d) && isfield(d,'xyfig')
-    fprintf('Loading Mask.mat previously created via Neuroshop.\n');
+    
     NeuroShop.AtlasType = d.AtlasType;
     NeuroShop.AtlasName = d.AtlasName;
     NeuroShop.AtlasOn = d.AtlasOn;
@@ -153,10 +154,15 @@ if filename~=0
     theta = NeuroShop.theta;
     phi = NeuroShop.phi;
     
+    % Saving ROIS
+    [line_x,line_z]=rot(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.XY*NeuroShop.scaleX,...
+        NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Z*NeuroShop.scaleZ,NeuroShop.theta);
+    %plot(x,z,'LineWidth',1,'Color',atlascolor);
+    
     %save([pathname filename],'Mask','AtlasName','FigName');
     save([pathname filename],'Mask','AtlasType','AtlasOn','AtlasName',...
         'scaleX','scaleY','scaleZ','xyfig','FigName','PatchCorner',...
-        'BregmaXY','BregmaZ','theta','phi');
+        'BregmaXY','BregmaZ','theta','phi','line_x','line_z');
     fprintf('Mask.mat file created via Neuroshop.\n==> [%s].\n',[pathname filename]);
 end
 end

@@ -32,12 +32,12 @@ all_files = {...'20141216_225758_E','20141216_225559_V6_U';...
 %     '20150728_134238_E','20150728_123904_V6_U';...
 %     '20151126_170516_E','20151126_160624_V6_U';...
 %     '20151127_120039_E','20151127_110119_V6_U';...
-    '20151128_133929_E','20151128_123945_V6_U';...
+%     '20151128_133929_E','20151128_123945_V6_U';...
 %     '20151201_144024_E','20151201_134136_V6_U';...
 %     '20151202_141449_E','20151202_141503_R_6BMU';...
 %     '20151203_113703_E','20151203_103726_V6_U';...
 %     '20151204_135022_E','20151204_125057_V6_U'};%;...
-%     '20160622_122940_E','20160622_122937_R_6BMU';...
+    '20160622_122940_E','20160622_122937_R_6BMU';...
 %     '20160622_191334_E','20160622_191350_R_6BMU';...
 %     '20160623_123336_E','20160623_123326_6BMU';...
 %     '20160623_163228_E','20160623_163213_6BMU';...
@@ -56,8 +56,8 @@ files_E = all_files(:,1);
 files_U = all_files(:,2);
 
 % repo architecture
-% repo_iq = 'F:\DATA_6BMU';
-repo_iq = 'F:\DATA_V6_U';
+repo_iq = 'F:\DATA_6BMU';
+% repo_iq = 'F:\DATA_V6_U';
 repo_original = 'I:\DATA\PHD-fUS-VIDEO';
 repo_hd = 'I:\DATA\PHD-fUS-VIDEO_HD';
 
@@ -89,8 +89,8 @@ for index_file =1:length(all_files)
     file_out = fullfile(repo_hd,folder_hd,'Doppler.mat');
     
     % parameters
-    extension = 'IQandMore*.mat';
-    %extension = 'IQUF*.mat';
+    %extension = 'IQandMore*.mat';
+    extension = 'IQUF*.mat';
     NbFrames = 100;
     n_overlap = 95;
     fcut = 60;
@@ -99,6 +99,21 @@ for index_file =1:length(all_files)
     % searching IQ files
     d = dir (fullfile(folder_in,extension));
     n_burst = length(d);
+    
+%     % keeping only full bursts
+%     ind_keep = false(n_burst,1);
+%     for i=1:n_burst
+%         fprintf('Loading [%s]...',fullfile(d(i).folder,d(i).name));
+%         data_iq = load(fullfile(d(i).folder,d(i).name));
+%         fprintf(' done.\n');
+%         if isfield(data_iq,'IQ')
+%             ind_keep(i)=true;
+%         else
+%             ind_keep(i)=false;
+%         end
+%     end
+%     d = d(ind_keep);
+%     n_burst = length(d);
     
     for i=1:n_burst
         

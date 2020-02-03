@@ -59,8 +59,8 @@ if ~strcmp(old,new)
             % Recreate Mean and Mean Label
             try
                 load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
-                %length_burst = length(time_ref.Y);
-                %n_burst = 1;
+                length_burst = length(time_ref.Y);
+                n_burst = 1;
             catch
                 warning('Missing File Time_Reference.mat');
                 length_burst = size(IM,3);
