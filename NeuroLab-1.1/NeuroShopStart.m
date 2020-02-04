@@ -1,4 +1,4 @@
-function NeuroShopStart()
+function NeuroShopStart(handles)
 % Script written by Thomas Deffieux
 % Edited by Antoine Bergel to run on NeuroLab
 % 16/09/2018
@@ -8,7 +8,7 @@ setappdata(0,'UseNativeSystemDialogs',0);
 % global variables
 clear global NeuroShop
 %global NeuroShop
-global NeuroShop FILES CUR_FILE;
+global NeuroShop FILES CUR_FILE DIR_SAVE;
 set(0,'DefaultLineLineSmoothing','on')
 set(0,'DefaultPatchLineSmoothing','on')
 
@@ -25,10 +25,10 @@ fig = figure('units', 'pixels', ...
     'NumberTitle','off');
 
 % Trying to load Neuroshop
-pathname = fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).dir_fus);
-if exist(fullfile(pathname,'Mask.mat'),'file')
-    d = load(fullfile(pathname,'Mask.mat'));
-    fprintf('Loading existant Mask [%s].\n',fullfile(pathname,'Mask.mat'));
+pathname = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
+if exist(fullfile(pathname,'Atlas.mat'),'file')
+    d = load(fullfile(pathname,'Atlas.mat'));
+    fprintf('Loading existing mask [%s].\n',fullfile(pathname,'Atlas.mat'));
 else
     d=[];
 end
@@ -100,7 +100,7 @@ uimenu(m,'Label','View Doppler','Callback',{@CreateMask,0});
 uimenu(m,'Label','Atlas based Mask','Callback',{@CreateMask,1},'Separator','on');
 uimenu(m,'Label','ROI based Mask','Callback',{@CreateMask,3});
 uimenu(m,'Label','Unsupervised Mask','Callback',{@CreateMask,2});
-uimenu(m,'Label','Export Mask','Callback',@NeuroShop_ExportMask,'Separator','on');
+uimenu(m,'Label','Export Mask','Callback',{@NeuroShop_ExportMask,handles},'Separator','on');
 uimenu(m,'Label','Config','Callback',@NeuroShop_ConfigMask);
 
 tr = uimenu('Label','Processing');
@@ -132,11 +132,14 @@ switch choice
 end
 end
 
-function NeuroShop_ExportMask(obj,event)
-global NeuroShop FILES CUR_FILE;
-%[filename,pathname] = uiputfile('Mask.mat','Save last mask');
-pathname = fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).dir_fus);
-[filename,pathname] = uiputfile(fullfile(pathname,'Mask.mat'),'Save last mask');
+function NeuroShop_ExportMask(obj,event,handles)
+global NeuroShop DIR_SAVE FILES CUR_FILE;
+
+% Loading Config.mat
+data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'));
+
+pathname = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
+[filename,pathname] = uiputfile(fullfile(pathname,'Atlas.mat'),'Save last mask');
 
 if filename~=0
     Mask = NeuroShop.Data.Mask(1:4:end,1:4:end,:);
@@ -157,13 +160,29 @@ if filename~=0
     % Saving ROIS
     [line_x,line_z]=rot(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.XY*NeuroShop.scaleX,...
         NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Z*NeuroShop.scaleZ,NeuroShop.theta);
-    %plot(x,z,'LineWidth',1,'Color',atlascolor);
+    % rescaling
+    Doppler=NeuroShop.Data.DopplerView;
+    Z=(((1:size(Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
+    X=(((1:size(Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
     
-    %save([pathname filename],'Mask','AtlasName','FigName');
+%     line_x = rescale(line_x,0,data_config.Y);
+%     line_z = rescale(line_z,0,data_config.X);
+    line_x = ((line_x-X(1))/(X(end)-X(1)))*data_config.Y;
+    line_z = ((line_z-Z(1))/(Z(end)-Z(1)))*data_config.X;
+
+    % Saving Atlas.mat
     save([pathname filename],'Mask','AtlasType','AtlasOn','AtlasName',...
         'scaleX','scaleY','scaleZ','xyfig','FigName','PatchCorner',...
         'BregmaXY','BregmaZ','theta','phi','line_x','line_z');
-    fprintf('Mask.mat file created via Neuroshop.\n==> [%s].\n',[pathname filename]);
+    fprintf('File Atlas.mat created via Neuroshop.\n==> [%s].\n',[pathname filename]);
+    
+    %Exporting Mask atlas
+    linewidth = 1;
+    atlascolor = 'w';
+    delete(findobj(handles.CenterAxes,'Tag','AtlasMask'));
+    line('XData',line_x,'YData',line_z,'Tag','AtlasMask',...
+        'LineWidth',linewidth,'Color',atlascolor,'Parent',handles.CenterAxes);
+    boxAtlas_Callback(handles.AtlasBox,[],handles);
 end
 end
 

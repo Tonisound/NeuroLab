@@ -1,9 +1,10 @@
 function success = convert_neuroshop_masks(folder_name,F,handles,val)
 % Converting Neuroshop masks to binary file format (.U8)
-% Looking for Mask.mat in dir_fus/ Storing U8 masks in dir_regions
+% Looking for Atlas.mat in dir_save/F.nlab Storing U8 masks in dir_regions
 % Uses Neuroshop txt files to get region name
 
 success = false;
+global DIR_SAVE;
 
 % If nargin > 2 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
@@ -34,9 +35,9 @@ if val==1
 end
 
 % Check for import folder
-if exist(fullfile(F.fullpath,F.dir_fus,'Mask.mat'),'file')
-    % Loading Mask.mat
-    data_r = load(fullfile(F.fullpath,F.dir_fus,'Mask.mat'));
+if exist(fullfile(DIR_SAVE,F.nlab,'Atlas.mat'),'file')
+    % Loading Atlas.mat
+    data_r = load(fullfile(DIR_SAVE,F.nlab,'Atlas.mat'));
     X = size(data_r.Mask,2);
     Y = size(data_r.Mask,1);
     z = 0;
