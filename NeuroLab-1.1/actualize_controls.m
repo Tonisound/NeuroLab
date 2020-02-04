@@ -15,6 +15,7 @@ set(handles.RightPanelPopup,'Value',uivalues.RightPanelPopup);
 set(handles.LabelBox,'Value',uivalues.LabelBox);
 set(handles.PatchBox,'Value',uivalues.PatchBox);
 set(handles.MaskBox,'Value',uivalues.MaskBox);
+set(handles.AtlasBox,'Value',uivalues.AtlasBox);
 handles.TagButton.UserData = uivalues.TagSelection;
 %Video Menu
 handles.DisplayMenu_Video.Checked = uivalues.video_status;

@@ -18,6 +18,7 @@ function save_graphicdata(savedir,handles)
     UiValues.LabelBox = handles.LabelBox.Value;
     UiValues.PatchBox = handles.PatchBox.Value;
     UiValues.MaskBox = handles.MaskBox.Value;
+    UiValues.AtlasBox = handles.AtlasBox.Value; 
     UiValues.video_status = handles.DisplayMenu_Video.Checked;
     handles.DisplayMenu_Video.Checked;
     Current_Image = IM(:,:,CUR_IM);
