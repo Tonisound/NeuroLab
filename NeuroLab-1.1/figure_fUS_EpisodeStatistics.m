@@ -825,7 +825,7 @@ hold(ax,'on');
 gpwidth = min(.8,n_bars/(n_bars+1.5));
 for i = 1:n_bars
     %bar color
-    ind_color = round(i*length(cmap)/n_bars-1)+1;
+      = max(round(i*length(cmap)/n_bars-1)+1,1);
     b(i).FaceColor = cmap(ind_color,:);
     % Calculate center of each bar
     factor = gpwidth/2 - (2*(i)-1) *(gpwidth/(2*n_bars));
@@ -936,7 +936,7 @@ hold(ax,'on');
 gpwidth = min(.8,n_bars/(n_bars+1.5));
 for i = 1:n_bars
     %bar color
-    ind_color = round(i*length(cmap)/n_bars-1)+1;
+    ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
     b(i).FaceColor = cmap(ind_color,:);
     % Calculate center of each bar
     factor = gpwidth/2 - (2*(i)-1) *(gpwidth/(2*n_bars));
@@ -1037,7 +1037,7 @@ ax.Position = [.05 .05 .8 .9];
 b= bar(dummy_data,'Parent',ax_dummy);
 for i=1:length(b)
     %bar color
-    ind_color = round(i*length(cmap)/n_bars-1)+1;
+    ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
     b(i).FaceColor = cmap(ind_color,:);
     b(i).EdgeColor = 'k';
     b(i).LineWidth = .1;
@@ -1154,7 +1154,7 @@ ax.Position = [.05 .05 .8 .9];
 b= bar(dummy_data,'Parent',ax_dummy);
 for i=1:length(b)
     %bar color
-    ind_color = round(i*length(cmap)/n_bars-1)+1;
+    ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
     b(i).FaceColor = cmap(ind_color,:);
     b(i).EdgeColor = 'k';
     b(i).LineWidth = .1;

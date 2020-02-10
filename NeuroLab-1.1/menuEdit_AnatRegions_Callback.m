@@ -413,8 +413,16 @@ if ~isempty(selection) && length(selection)>1
     end
     prefix = pattern(1:count-1);
     
-    while strcmp(prefix(end),'-') || strcmp(prefix(end),'_')
-        prefix = prefix(1:end-1);
+    if ~isempty(prefix)
+        while strcmp(prefix(end),'-') || strcmp(prefix(end),'_')
+            prefix = prefix(1:end-1);
+        end
+    else
+        prefix = sprintf('MergedRegion(%d)[',size(D,1));
+        for i=1:size(D,1)
+            prefix = strcat(prefix,char(D(i,:)),'-');
+        end
+        prefix = strcat(prefix(1:end-1),']');
     end
     
     % Mask
