@@ -77,7 +77,7 @@ else
 end
 
 % Update YData for Mean, Lines and Boxes
-graphics = findobj(handles.CenterAxes,'Type','Patch','-or','Type','Line');
+graphics = findobj(handles.CenterAxes,'Type','Patch','-or','Type','Line','-not','Tag','AtlasMask');
 
 for idx =1:length(graphics)
     fprintf('Actualizing trace %d (%s)... ',idx,graphics(idx).UserData.UserData.Name);
