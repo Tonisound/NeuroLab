@@ -51,20 +51,24 @@ switch index
 end
 
 % Gaussian window
-load(fullfile(folder_name,'Time_Reference.mat'),'time_ref','rec_mode');
+data_tr = load(fullfile(folder_name,'Time_Reference.mat'),...
+    'n_burst','length_burst','time_ref','rec_mode');
+time_ref = data_tr.time_ref;
+rec_mode = data_tr.rec_mode;
+
 t_gauss = GTraces.GaussianSmoothing;
 delta =  time_ref.Y(2)-time_ref.Y(1);
 w = gausswin(round(2*t_gauss/delta));
 w = w/sum(w);
 % Smoothing Doopler
 if t_gauss>0
-    %if strcmp(rec_mode,'BURST')
-    try
+    %try
+    if strcmp(rec_mode,'BURST')
         for i=1:size(IM,1)
             for j=1:size(IM,2)
                 y = IM(i,j,:);
-                length_burst = 1181;
-                % length_burst = 30;
+                length_burst = data_tr.length_burst;
+                % length_burst = 1181;
                 n_burst = length(y)/length_burst;
                 y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
                 y_conv = nanconv(y_reshape(:),w,'same');
@@ -74,9 +78,8 @@ if t_gauss>0
             end
             fprintf('Smoothing Doppler [%.1f s] - %d/%d\n',t_gauss,i,size(IM,1));
         end
-
-    %else
-    catch
+    %catch
+    else
         for i=1:size(IM,1)
             for j=1:size(IM,2)
                 y_smooth =  squeeze(IM(i,j,:));

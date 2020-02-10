@@ -2,7 +2,7 @@ function S = read_imofile()
 % Read Doppler_movie from IMO file for Spikoscope readout
 
 % if exist(fullfile(foldername,'Time_Reference.mat'),'file')
-%     data_c = load(fullfile(foldername,'Time_Reference.mat'),'time_ref');
+%     data_tr = load(fullfile(foldername,'Time_Reference.mat'),'time_ref');
 % end
 
 dir_save = '/Users/tonio/Documents/NEUROLAB/Nlab_Files/NRegions/template_E/template_US';

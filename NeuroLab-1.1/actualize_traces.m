@@ -31,8 +31,10 @@ end
 
 %loading Time Reference
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
+    data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
         'time_ref','length_burst','n_burst','rec_mode');
+    time_ref = data_tr.time_ref;
+    rec_mode = data_tr.rec_mode;
 else
     errordlg('Missing File [%s]',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
     return;
@@ -51,16 +53,9 @@ tm = findobj(handles.RightAxes,'Tag','Trace_Mean');
 % Smoothing mean
 if t_gauss>0
     if strcmp(rec_mode,'BURST')
+        length_burst = data_tr.length_burst;
+        n_burst = data_tr.n_burst;
         y = mean(mean(IM,2,'omitnan'),1,'omitnan');
-%         try
-%             length_burst = 59;
-%             n_burst = length(y)/length_burst;
-%             y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
-%         catch
-%             length_burst = 1181;
-%             n_burst = length(y)/length_burst;
-%             y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
-%         end
         y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
         y_conv = nanconv(y_reshape(:),w,'same');
         y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);
@@ -119,15 +114,8 @@ for idx =1:length(graphics)
         
         if strcmp(rec_mode,'BURST')
             % gaussian nan convolution + nan padding (only for burst_recording)
-%             try
-%                 length_burst = 59;
-%                 n_burst = length(y)/length_burst;
-%                 y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
-%             catch
-%                 length_burst = 1181;
-%                 n_burst = length(y)/length_burst;
-%                 y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
-%             end
+            length_burst = data_tr.length_burst;
+            n_burst = data_tr.n_burst;
             y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
             y_conv = nanconv(y_reshape(:),w,'same');
             y_reshaped = reshape(y_conv,[length_burst+length(w),n_burst]);

@@ -1,8 +1,7 @@
 function processButtonCallback(~,~,handles)
 % 213 -- Process List Callbacks
 
-global DIR_SAVE FILES CUR_FILE SEED_SPIKO ;
-%global DIR_SAVE FILES CUR_FILE SEED SEED_REGION LAST_IM CUR_IM START_IM END_IM IM DIR_SYNT;
+global DIR_SAVE FILES CUR_FILE;
 
 val = get(handles.ProcessListPopup,'Value');
 str = get(handles.ProcessListPopup,'String');
@@ -42,10 +41,6 @@ switch strtrim(str(val,:))
         
     case 'Export Anatomical Regions'
         export_regions(handles,FILES(CUR_FILE).recording);
-        
-    case 'Export IMO file'
-        export_imofile(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),SEED_SPIKO,FILES(CUR_FILE).session);
-        
         
 end
 

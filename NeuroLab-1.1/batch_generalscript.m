@@ -424,7 +424,7 @@ GImport.Doppler_loading_index = handles.Popup3.Value;
 GImport.Doppler_loading = char(str(handles.Popup3.Value));
 
 % Loading graphic data or Doppler if changed
-global CUR_FILE DIR_SAVE FILES SEED SEED_REGION SEED_SPIKO;
+global CUR_FILE DIR_SAVE FILES;
 if flag_gload
     load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);
 end
@@ -595,9 +595,6 @@ for i = 1:length(ind_files)
                     
                 case 'Save UF Params'
                     success = saving_UFParams(fullfile(FILES(ii).fullpath,FILES(ii).dir_fus),fullfile(DIR_SAVE,FILES(ii).nlab));
-                      
-                case 'Export IMO file'
-                    success = export_imofile(fullfile(DIR_SAVE,FILES(ii).nlab),SEED_SPIKO,FILES(ii).session);
                                     
                 otherwise
                     c2 = now;

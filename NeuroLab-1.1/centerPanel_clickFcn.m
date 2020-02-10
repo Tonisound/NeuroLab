@@ -11,7 +11,12 @@ n_pixels = length(findobj(handles.CenterAxes,'Tag','Pixel'));
 n_boxes = length(findobj(handles.CenterAxes,'Tag','Box'));
 
 try
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
+    data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
+        'time_ref','length_burst','n_burst','rec_mode');
+    rec_mode = data_tr.rec_mode;
+    time_ref = data_tr.time_ref;
+    length_burst = length(time_ref.Y);
+    n_burst = 1;
 catch
     warning('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
     length_burst = size(IM,3);
@@ -59,18 +64,10 @@ if pt_cp(1,1)>Xlim(1) && pt_cp(1,1)<Xlim(2) && pt_cp(1,2)>Ylim(1) && pt_cp(1,2)<
                     y = hl.YData(1:end-1);
                     if strcmp(rec_mode,'BURST')
                         % gaussian nan convolution + nan padding (only for burst_recording)
-                        % length_burst_smooth = 30;
-                        % n_burst_smooth = length(y)/length_burst_smooth;
-                        % y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
-                        try
-                            length_burst_smooth = 59;
-                            n_burst_smooth = length(y)/length_burst_smooth;
-                            y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
-                        catch
-                            length_burst_smooth = 1181;
-                            n_burst_smooth = length(y)/length_burst_smooth;
-                            y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
-                        end
+                        % length_burst_smooth = 1181;
+                        length_burst_smooth = data_tr.length_burst;
+                        n_burst_smooth = length(y)/length_burst_smooth;
+                        y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
                         y_conv = nanconv(y_reshape(:),w,'same');
                         y_reshaped = reshape(y_conv,[length_burst_smooth+length(w),n_burst_smooth]);
                         y_final = reshape(y_reshaped(1:length_burst_smooth,:),[length_burst_smooth*n_burst_smooth,1]);
@@ -113,18 +110,10 @@ if pt_cp(1,1)>Xlim(1) && pt_cp(1,1)<Xlim(2) && pt_cp(1,2)>Ylim(1) && pt_cp(1,2)<
                     y = hr.YData(1:end-1);
                     if strcmp(rec_mode,'BURST')
                         % gaussian nan convolution + nan padding (only for burst_recording)
-                        % length_burst_smooth = 30;
-                        % n_burst_smooth = length(y)/length_burst_smooth;
-                        % y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
-                        try
-                            length_burst_smooth = 59;
-                            n_burst_smooth = length(y)/length_burst_smooth;
-                            y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
-                        catch
-                            length_burst_smooth = 1181;
-                            n_burst_smooth = length(y)/length_burst_smooth;
-                            y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];                            
-                        end
+                        % length_burst_smooth = 1181;
+                        length_burst_smooth = data_tr.length_burst;
+                        n_burst_smooth = length(y)/length_burst_smooth;
+                        y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
                         y_conv = nanconv(y_reshape(:),w,'same');
                         y_reshaped = reshape(y_conv,[length_burst_smooth+length(w),n_burst_smooth]);
                         y_final = reshape(y_reshaped(1:length_burst_smooth,:),[length_burst_smooth*n_burst_smooth,1]);

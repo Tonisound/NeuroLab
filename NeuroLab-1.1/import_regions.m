@@ -190,7 +190,12 @@ end
 
 % Direct Region Loading
 if exist(fullfile(foldername,'Time_Reference.mat'),'file')
-    load(fullfile(foldername,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
+    data_tr = load(fullfile(foldername,'Time_Reference.mat'),...
+        'time_ref','length_burst','n_burst','rec_mode');
+    rec_mode = data_tr.rec_mode;
+    time_ref = data_tr.time_ref;
+    length_burst = length(time_ref.Y);
+    n_burst = 1;
 else
     errordlg(sprintf('Missing File %s',fullfile(folder_name,'Time_Reference.mat')));
     return;
@@ -330,8 +335,8 @@ for i=1:length(ind_regions)
         y = hl.YData(1:end-1); 
         if strcmp(rec_mode,'BURST')
             % gaussian nan convolution + nan padding (only for burst_recording)
-            % length_burst_smooth = 30;
-            length_burst_smooth = 1181;
+            %length_burst_smooth = 1181;
+            length_burst_smooth = data_tr.length_burst;
             n_burst_smooth = length(y)/length_burst_smooth;
             y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
             y_conv = nanconv(y_reshape(:),w,'same');

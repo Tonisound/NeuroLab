@@ -4,8 +4,8 @@ function success = initialize_Preferences()
 success = false;
 
 % Default options
-str_disk_1 = fullfile('G:','DATA');
-str_disk_2 = fullfile('D:','DATA');
+str_disk_1 = fullfile('D:','DATA');
+str_disk_2 = fullfile('G:','DATA');
 str_disk_3 = fullfile(filesep,'Volumes','ETNA','DATA');
 str_disk_4 = fullfile(filesep,'Volumes','Toni_HD2','DATA_NLAB');
 str_disk_5 = fullfile(filesep,'Users','tonio','Documents','DATA_NLAB');
@@ -57,9 +57,7 @@ switch strtrim(char(answer(2)))
 end
 
 % Data Disk
-%GParams.SEED = fullfile(str_disk,'DATA');
 GParams.SEED = fullfile(str_disk);
-GParams.SEED_SPIKO = fullfile(str_disk,'ATLAS_NLAB');
 % Local Disk
 GParams.DIR_SAVE = fullfile(str_save,'NLab_DATA');
 GParams.DIR_FIG = fullfile(str_save,'NLab_Figures');

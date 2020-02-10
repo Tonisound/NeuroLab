@@ -16,7 +16,7 @@ for i=1:length(ind_crossfreq)
     ind_2 = ~(cellfun('isempty',strfind(temp,char(CFC_Selection(i,2)))));
     ind_3 = ~(cellfun('isempty',strfind(temp,'Source_filtered_for_thet')));
     if isempty(find(ind_3==1))
-        errordlg('Missing Phase Signal. Import Spikoscope Traces.');
+        errordlg('Missing Phase Signal. Import Traces.');
         return;
     end
     ind_power = find(ind_1&ind_2==1);

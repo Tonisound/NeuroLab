@@ -79,23 +79,6 @@ else
     tt_data = load(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_images','TimeTags_strings');
 end
 
-% % Loading Regions
-% if ~exist(fullfile(folder_name,'Spikoscope_Regions.mat'),'file')
-%     errordlg('Impossible to pick regions.\n File Spikoscope_Regions.mat not found.');
-%     return;
-% else
-%     r_data = load(fullfile(folder_name,'Spikoscope_Regions.mat'),'regions','X','Y');
-% end
-% % Picking Whole region
-% ind_whole = find(strcmpi({r_data.regions(:).name}','whole')==1);
-% if length(ind_rem)~=1 
-%     errordlg(sprintf('%d region(s) corresponding to Whole found.',length(ind_whole)));
-%     return;
-% else
-%     whole_mask = r_data.regions(ind_whole).mask;
-%     whole_mask(whole_mask==0) = NaN;
-% end
-
 
 % Picking REM and AW distribution
 ind_rem = find(strcmpi(tg_data.TimeGroups_name,'rem')==1);

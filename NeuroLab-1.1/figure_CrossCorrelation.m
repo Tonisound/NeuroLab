@@ -4,7 +4,12 @@ global DIR_SAVE FILES CUR_FILE START_IM END_IM;
 
 % Loading Time Reference
 if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file'))
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','n_burst','length_burst','rec_mode');
+    data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
+        'time_ref','n_burst','length_burst','rec_mode');
+    time_ref = data_tr.time_ref;
+    rec_mode = data_tr.rec_mode;
+    length_burst = data_tr.length_burst;
+    n_burst = data_tr.n_burst;
 else
     warning('Missing Reference Time File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     return;
@@ -690,7 +695,7 @@ end
 
 function update_cbv_traces(handles,myhandles)
 
-global LAST_IM;
+%global LAST_IM;
 ax1 = handles.Ax_fUS;
 t_gauss = str2double(handles.Edit4.String);
 x_im = [handles.MainFigure.UserData.time_ref.Y;NaN];
@@ -773,8 +778,8 @@ y_whole = lines_whole.YData;
 % Reshaping if rec_mode = BURST
 if strcmp(rec_mode,'BURST')
     f_samp = .1;
-    length_burst = 59;
-    n_burst = LAST_IM/length_burst;
+    %length_burst_smooth = 1181;
+    %n_burst = LAST_IM/length_burst_smooth;
     xq = x_start:f_samp:x_end;
     yq = NaN(4,size(xq,2));
     % add NaN values between bursts

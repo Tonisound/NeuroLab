@@ -27,11 +27,11 @@ set(0, 'DefaultUiControlFontName',fontname);
 
 % Time Reference Loading
 if ~isempty(FILES) && exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
-    data_c = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
+    data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst','rec_mode');
     length_burst = size(IM,3);
     n_burst = 1;
-    time_ref = data_c.time_ref;
-    rec_mode = data_c.rec_mode;
+    time_ref = data_tr.time_ref;
+    rec_mode = data_tr.rec_mode;
 else
     %warning('Missing File Time_Reference.mat');
     length_burst = size(IM,3);
@@ -186,8 +186,6 @@ uimenu(m2c,'Label','Batch Processing','Tag','SynthesisMenu_Batch','Accelerator',
 m2d = uimenu('Label','Export','Tag','Export Menu','Parent',f);
 uimenu(m2d,'Label','Export Time Tags','Tag','ExportMenu_TimeTags');
 uimenu(m2d,'Label','Export Anatomical Regions','Tag','ExportMenu_Regions');
-uimenu(m2d,'Label','Export IMO file','Tag','ExportMenu_IMOfile');
-
 
 
 % handles.ColorMapsMenu
@@ -278,9 +276,7 @@ if t_gauss>0 && length(hl.YData)>3
     y = hl.YData(1:end-1);
     if strcmp(rec_mode,'BURST')
         % gaussian nan convolution + nan padding (only for burst_recording)
-        %length_burst_smooth = 1181;
-        %length_burst_smooth = 59;
-        length_burst_smooth = data_c.length_burst;
+        length_burst_smooth = data_tr.length_burst;
         n_burst_smooth = length(y)/length_burst_smooth;
         y_reshape = [reshape(y,[length_burst_smooth,n_burst_smooth]);NaN(length(w),n_burst_smooth)];
         y_conv = nanconv(y_reshape(:),w,'same');
@@ -627,8 +623,6 @@ set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_
 
 set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
 set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-% set(myhandles.ImportMenu_LoadTraces,'Callback','load_lfptraces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-% set(myhandles.ImportMenu_LoadRegions,'Callback','load_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
 
 % handles.EditMenu
@@ -660,7 +654,6 @@ set(myhandles.SynthesisMenu_VascularSurge,'Callback','synthesis_VascularSurges()
 set(myhandles.SynthesisMenu_PeakCount,'Callback','synthesis_PeakCount();');
 
 % handles.ExportMenu
-set(myhandles.ExportMenu_IMOfile,'Callback','export_imofile(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),SEED_SPIKO,FILES(CUR_FILE).session);');
 set(myhandles.ExportMenu_Regions,'Callback','export_patches(myhandles);');
 set(myhandles.ExportMenu_TimeTags,'Callback','export_time_tags(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 

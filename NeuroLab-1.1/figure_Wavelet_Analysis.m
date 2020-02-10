@@ -2056,7 +2056,7 @@ end
  end
 
 function export_wavelet_Callback(~,~,handles,val)
-% Export bands in Spikoscope_Traces.mat
+% Export bands in Cereplex_Traces.mat
 % bands frequencies and smoothing defined in the Preferences.mat
 
 global DIR_SAVE FILES CUR_FILE;
@@ -2149,7 +2149,7 @@ for i =1:length(data)
     fprintf('Theta band [%.1f - %.1f] succesfully extracted and smoothed [%.1f].\n',val_inf,val_sup,t_smooth);
 end
 
-% Save dans SpikoscopeTraces.mat
+% Save Cereplex_Traces.mat
 MetaData = [];
 if ~isempty(traces)
     save(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Cereplex_Traces.mat'),'traces','MetaData','-v7.3');

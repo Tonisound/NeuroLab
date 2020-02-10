@@ -706,9 +706,14 @@ function compute_Callback(hObj,~,handles)
 % Compute Correlation Map
 % Compute Correlogram
 
-global START_IM END_IM IM DIR_SAVE FILES CUR_FILE LAST_IM;
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
+global START_IM END_IM IM DIR_SAVE FILES CUR_FILE;
+data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
     'time_ref','length_burst','n_burst','rec_mode','n_images');
+time_ref = data_tr.time_ref;
+rec_mode = data_tr.rec_mode;
+n_images = data_tr.n_images;
+length_burst = length(time_ref.Y);
+n_burst = 1;
 
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch')
@@ -803,34 +808,25 @@ handles.Cmax_0.String = sprintf('%.1f',handles.CenterAxes.CLim(2));
 if strcmp(rec_mode,'BURST')
     % new code
     % add NaN values between bursts
-    try
-        length_burst = 30;
-        n_burst = length(y)/length_burst;
-        y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
-    catch
-        length_burst = 1181;
-        n_burst = length(y)/length_burst;
-        y_reshape = [reshape(squeeze(y),[length_burst,n_burst]);NaN(length(w),n_burst)];
-    end
-            length_burst = 1181;
-    %n_burst = LAST_IM/length_burst;
-    n_burst = n_images/length_burst;
-    xdat = reshape(xdata(1:end-1),[length_burst,n_burst]);
-    xdat = reshape(xdat,[length_burst*n_burst,1]);
+    %length_burst_smooth = 1181;
+    length_burst_smooth = data_tr.length_burst;
+    n_burst_smooth = n_images/length_burst_smooth;
+    xdat = reshape(xdata(1:end-1),[length_burst_smooth,n_burst_smooth]);
+    xdat = reshape(xdat,[length_burst_smooth*n_burst_smooth,1]);
     xdat(Time_indices==0) = NaN;
     % Adding NaN Values between each burst
-    Xdat = [reshape(xdat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
+    Xdat = [reshape(xdat,[length_burst_smooth,n_burst_smooth]);NaN(length(lags),n_burst_smooth)];
     Xdat = Xdat(:);
     data = Xdat;
     for k=1:length(h_other)
         color = h_other(k).Color;
         ydata = h_other(k).YData;
         % Reshaping ydat
-        ydat = reshape(ydata(1:end-1),[length_burst,n_burst]);
-        ydat = reshape(ydat,[length_burst*n_burst,1]);
+        ydat = reshape(ydata(1:end-1),[length_burst_smooth,n_burst_smooth]);
+        ydat = reshape(ydat,[length_burst_smooth*n_burst_smooth,1]);
         ydat(Time_indices==0) = NaN;
         % Adding NaN Values between each burst
-        Ydat = [reshape(ydat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
+        Ydat = [reshape(ydat,[length_burst_smooth,n_burst_smooth]);NaN(length(lags),n_burst_smooth)];
         Ydat = Ydat(:);
         data = [data,Ydat];
     end
