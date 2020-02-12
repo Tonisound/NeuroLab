@@ -24,8 +24,7 @@ if exist(fullfile(savedir,'Trace_light.mat'),'file')
                 copy_graphicdata([data1.h(2);data2.h(2)],handles.CenterAxes,handles.RightAxes,'loading',savedir);
             catch
                 copy_graphicdata(data1.h(2),handles.CenterAxes,handles.RightAxes,'loading',savedir);
-            end
-            
+            end       
     end
 else
     warning('No Graphic Format detected.\n');
@@ -53,6 +52,18 @@ uistack(cursor,'top');
 
 %Update Box Patches
 boxPatch_Callback(handles.PatchBox,[],handles);
+
+% Loading Atlas.mat
+if exist(fullfile(savedir,'Atlas.mat'),'file')
+    try
+        delete(findobj(handles.CenterAxes,'Tag','AtlasMask'));
+        data_a = load(fullfile(savedir,'Atlas.mat'),'line_x','line_z');
+        line('XData',data_a.line_x,'YData',data_a.line_z,'Tag','AtlasMask','Parent',handles.CenterAxes);
+        boxAtlas_Callback(handles.AtlasBox,[],handles.CenterAxes);
+    catch
+        warning('Impossible to display Atlas [%s].\n',fullfile(savedir,'Atlas.mat'));
+    end
+end
 
 success = true;
 toc;

@@ -422,6 +422,9 @@ cb = uicontrol(f,'Style','checkbox',...
 % Updating box values
 pb.Value = UiValues.PatchBox;
 mb.Value = UiValues.MaskBox;
+ab.Value = UiValues.AtlasBox;
+cb.Value = UiValues.CLimBox;
+
 % Resizing
 pb.Position = [0 28/30 2/30 1.5/30];
 mb.Position = [0 26.5/30 2/30 1.5/30];
@@ -447,6 +450,7 @@ h42 = uicontrol(f,'Style','checkbox',...
     'Tag','LabelBox',...
     'Value',0,...
     'Parent',rightPanel);
+h42.Value = UiValues.LabelBox;
 % AutoScale Button
 % handles.AutoScaleButton
 h43 = uicontrol(f,'Style','pushbutton',...
@@ -680,7 +684,7 @@ set(myhandles.addTagButton,'Callback',{@menuEdit_addTag_Callback,myhandles});
 set(myhandles.ScaleButton,'Callback',{@buttonScale_Callback,myhandles.RightAxes});
 set(myhandles.PatchBox,'Callback',{@boxPatch_Callback,myhandles});
 set(myhandles.MaskBox,'Callback',{@boxMask_Callback,myhandles});
-set(myhandles.AtlasBox,'Callback',{@boxAtlas_Callback,myhandles});
+set(myhandles.AtlasBox,'Callback',{@boxAtlas_Callback,myhandles.CenterAxes});
 set(myhandles.CLimBox,'Callback',{@boxCLim_Callback,myhandles});
 
 end

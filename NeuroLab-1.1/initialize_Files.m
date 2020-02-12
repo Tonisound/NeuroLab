@@ -16,6 +16,7 @@ UiValues.LabelBox = 0;
 UiValues.PatchBox = 0;
 UiValues.AtlasBox = 0;
 UiValues.MaskBox = 0;
+UiValues.CLimBox = 0;
 UiValues.video_status = 'off';
 UiValues_default = UiValues;
 

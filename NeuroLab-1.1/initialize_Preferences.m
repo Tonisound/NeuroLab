@@ -190,15 +190,20 @@ GFilt.ripple_inf = 150;
 GFilt.ripple_sup = 300;
 GFilt.ripple_smooth = .5;
 
+GColors.atlas_color = [1 1 1];
+GColors.atlas_width = 1;
+GColors.atlas_transparency = .5;
+
 GImport_default = GImport;
 GParams_default = GParams;
 GDisp_default = GDisp;
 GTraces_default = GTraces;
 GFilt_default = GFilt;
+GColors_default = GColors;
 selected_tab = 'General';
 
-save('Preferences.mat','GParams','GDisp','GTraces','GImport','GFilt',...
-    'GParams_default','GDisp_default','GTraces_default','GImport_default','GFilt_default','selected_tab');
+save('Preferences.mat','GParams','GDisp','GTraces','GImport','GFilt','GColors',...
+    'GParams_default','GDisp_default','GTraces_default','GImport_default','GFilt_default','GColors_default','selected_tab');
 fprintf('File Preferences.mat created %s.\n',fullfile(pwd,'Preferences.mat'));
 success = true;
 

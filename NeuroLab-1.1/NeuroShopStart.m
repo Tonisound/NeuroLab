@@ -139,7 +139,8 @@ global NeuroShop DIR_SAVE FILES CUR_FILE;
 data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'));
 
 pathname = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
-[filename,pathname] = uiputfile(fullfile(pathname,'Atlas.mat'),'Save last mask');
+%[filename,pathname] = uiputfile(fullfile(pathname,'Atlas.mat'),'Save last mask');
+filename = 'Atlas.mat';
 
 if filename~=0
     Mask = NeuroShop.Data.Mask(1:4:end,1:4:end,:);
@@ -171,18 +172,26 @@ if filename~=0
     line_z = ((line_z-Z(1))/(Z(end)-Z(1)))*data_config.X;
 
     % Saving Atlas.mat
-    save([pathname filename],'Mask','AtlasType','AtlasOn','AtlasName',...
+    if exist(fullfile(pathname,filename),'file')
+        delete(fullfile(pathname,filename));
+        fprintf('File Atlas.mat updated.\n==> [%s].\n',fullfile(pathname,filename));
+    else
+        fprintf('File Atlas.mat created via Neuroshop.\n==> [%s].\n',fullfile(pathname,filename));
+    end
+    save(fullfile(pathname,filename),'Mask','AtlasType','AtlasOn','AtlasName',...
         'scaleX','scaleY','scaleZ','xyfig','FigName','PatchCorner',...
         'BregmaXY','BregmaZ','theta','phi','line_x','line_z');
-    fprintf('File Atlas.mat created via Neuroshop.\n==> [%s].\n',[pathname filename]);
     
     %Exporting Mask atlas
     linewidth = 1;
     atlascolor = 'w';
+    transparency = 1;
     delete(findobj(handles.CenterAxes,'Tag','AtlasMask'));
-    line('XData',line_x,'YData',line_z,'Tag','AtlasMask',...
+    l = line('XData',line_x,'YData',line_z,'Tag','AtlasMask',...
         'LineWidth',linewidth,'Color',atlascolor,'Parent',handles.CenterAxes);
-    boxAtlas_Callback(handles.AtlasBox,[],handles);
+    l.Color(4) = transparency;
+    boxAtlas_Callback(handles.AtlasBox,[],handles.CenterAxes);
+    close(NeuroShop.fig);
 end
 end
 

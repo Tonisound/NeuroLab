@@ -290,6 +290,8 @@ t101 = uicontrol(f,'Units','normalized','Style','text',...
 % Display Controls
 cb1 = uicontrol(f,'Units','normalized',...
     'Style','Checkbox','TooltipString','CLimMode Movies');
+cb_atlas = uicontrol(f,'Units','normalized','Value',handles.AtlasBox.Value,...
+    'Style','Checkbox','String','Atlas','TooltipString','Atlas Display');
 e1 = uicontrol(f,'Units','normalized','Style','edit',...
     'String',sprintf('%.1f',handles.CenterAxes.CLim(1)),...
     'Visible','off','TooltipString','CLim min');
@@ -428,6 +430,11 @@ cbar = colorbar(ax_im,'Parent',f);
 % colormap(ax_im2,'parula');
 image(rgb_video(:,:,:,1),'Parent',ax_im2);
 ax_im2.Visible = 'off';
+
+% adding Atlas
+am = findobj(handles.CenterAxes,'Tag','AtlasMask');
+copyobj(am,ax_im);
+cb_atlas.Callback = {@boxAtlas_Callback,ax_im};
 
 % Color tag patches
 default_color = [.5 .5 .5];
@@ -610,6 +617,7 @@ e2.Position = [.005 .11 .04 .05];
 cb2.Position = [.92 .01 .08 .05];
 e3.Position = [.955 .06 .04 .05];
 cb3.Position = [.01 .9 .1 .05];
+cb_atlas.Position = [.01 .95 .1 .05];
 e4.Position = [.005 .8 .04 .05];
 e5.Position = [.005 .85 .04 .05];
 t100.Position = [.9-(.45*t_factor)/(2*f.UserData.t_lfp) .05 (.45*t_factor)/(2*f.UserData.t_lfp) .005];
@@ -629,7 +637,7 @@ i = START_IM;
 while i>=START_IM && i<=END_IM
     if ishandle(f)
         tic
-        disp('coucou')
+        %disp('coucou')
         f.UserData.i = i;
         t_lfp = f.UserData.t_lfp;
         
