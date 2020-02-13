@@ -206,7 +206,7 @@ all_colors(1:6,:) = [0 .45 .74;...
     .64 .08 .18];
 all_visible = [true;true;true;true;false;false];
 all_checked = [true;true;true;true;true;true];
-all_transp = [.5;.5;.5;.5;.5;.2];
+all_transp = [.5;.5;.5;.5;.25;.25];
 for i =1:size(all_names,1)
     GColors.TimeGroups(i).Name = char(all_names(i));
     GColors.TimeGroups(i).String = char(all_strings(i));

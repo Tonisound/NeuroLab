@@ -183,6 +183,28 @@ t2.CellSelectionCallback = {@trace_uitable2_select,t1,t3};
         save(fullfile(folder_name,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
         fprintf('Time_Groups.mat saved at %s.mat\n',fullfile(folder_name,'Time_Groups.mat'));
         
+        % Time Patches
+        load('Preferences.mat','GColors');
+        delete(findobj(handles.RightAxes,'Tag','TimePatch'));
+        for index = 1:length(GColors.TimeGroups)
+            name = char(GColors.TimeGroups(index).Name);
+            if sum(strcmp(TimeGroups_name,name))>0
+                %create patch
+                index_group = find(strcmp(TimeGroups_name,name)==1);
+                xdata = TimeGroups_S(index_group).TimeTags_images;
+                %ylim = [handles.RightAxes.YLim];
+                for j = 1:size(xdata,1)
+                    p = patch('XData',[xdata(j,1) xdata(j,2) xdata(j,2) xdata(j,1)],'YData',NaN(1,4),...
+                        'Parent',handles.RightAxes,'Tag','TimePatch','HitTest','off');
+                    p.UserData.Name = name;
+                    p.UserData.tt_images = TimeGroups_S(index_group).TimeTags_images(j,:);
+                    p.UserData.tt_strings = TimeGroups_S(index_group).TimeTags_strings(j,:);
+                    temp = (datenum(TimeGroups_S(index_group).TimeTags_strings(j,:)))';
+                    p.UserData.tt_seconds = (temp-round(temp))*24*3600;
+                end
+            end
+        end
+        boxTimePatch_Callback(handles.TimePatchBox,[],handles.RightAxes);
         close(f2);
     end
 

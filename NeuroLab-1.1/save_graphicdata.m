@@ -16,6 +16,7 @@ function save_graphicdata(savedir,handles)
     UiValues.RightPanelPopup = handles.RightPanelPopup.Value;
     UiValues.TagSelection = handles.TagButton.UserData;
     UiValues.LabelBox = handles.LabelBox.Value;
+    UiValues.TimePatchBox = handles.TimePatchBox.Value;
     UiValues.PatchBox = handles.PatchBox.Value;
     UiValues.MaskBox = handles.MaskBox.Value;
     UiValues.AtlasBox = handles.AtlasBox.Value;

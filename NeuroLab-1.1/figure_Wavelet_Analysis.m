@@ -483,6 +483,11 @@ skb.Units='normalized';
 tb.Units='normalized';
 ptb.Units='normalized';
 ntb.Units='normalized';
+% Checkbox Time Patches
+cb_tp = copyobj(myhandles.TimePatchBox,tP);
+%cb_tp.Tag = 'TimePatchBox';
+cb_tp.Units='normalized';
+
 % TopPanel Position
 tpos = [0 0 1 1];
 sb.Position=[tpos(3)*56/60 tpos(4)*8.5/10 tpos(3)*3/60 tpos(4)/10];
@@ -494,6 +499,7 @@ skb.Position=[tpos(3)*56/60 tpos(4)*3.5/10 tpos(3)*3/60 tpos(4)/10];
 tb.Position=[tpos(3)*56/60 tpos(4)*2.5/10 tpos(3)*3/60 tpos(4)/10];
 ptb.Position=[tpos(3)*56/60 tpos(4)*1.5/10 tpos(3)*3/60 tpos(4)/10];
 ntb.Position=[tpos(3)*56/60 tpos(4)*.5/10 tpos(3)*3/60 tpos(4)/10];
+cb_tp.Position = [0 0 .02 .1];
 
 % BotPanel
 cb11 = uicontrol('Units','normalized',...
@@ -965,6 +971,21 @@ for j=bands+1:8
 end
 %checkbox11_Callback(handles.Checkbox11,[],handles);
 %checkbox12_Callback(handles.Checkbox12,[],handles);
+
+% Adding Time Patches
+all_timepatchaxes = [all_topaxes;all_botaxes];
+%all_timepatchaxes = [all_topaxes];
+all_patches = findobj(old_handles.RightAxes,'Tag','TimePatch');
+delete(findobj(all_timepatchaxes,'Tag','TimePatch'));
+for i=1:length(all_timepatchaxes)
+    ax = all_timepatchaxes(i);
+    for j=1:length(all_patches)
+        p = copyobj(all_patches(j),ax);
+        p.XData = [p.UserData.tt_seconds(1) p.UserData.tt_seconds(2) p.UserData.tt_seconds(2) p.UserData.tt_seconds(1)];
+        p.YData = [ax.YLim(1) ax.YLim(1) ax.YLim(2) ax.YLim(2)];
+    end
+end
+set(handles.TimePatchBox,'Callback',{@boxTimePatch_Callback,all_timepatchaxes});
 
 set(handles.Edit1,'Callback',{@edit_Callback,all_axes});
 set(handles.Edit2,'Callback',{@edit_Callback,all_axes});

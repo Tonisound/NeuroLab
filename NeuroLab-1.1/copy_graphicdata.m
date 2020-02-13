@@ -49,6 +49,7 @@ switch val
         lines = lines_spiko(ind_keep==0);
 end
 
+% Copying lines
 h_line = copyobj(lines,ax2);
 for i=length(h_line):-1:1
     s = struct('Name',[]);
@@ -187,8 +188,12 @@ for i=length(h_line):-1:1
             end
         otherwise
             warning('Unidentified Trace Format.\n')
-
     end
 end
+
+% Copying Time Patches
+delete(findobj(ax2,'Tag','TimePatch'));
+time_patches = findobj(RightAxes,'Tag','TimePatch');
+copyobj(time_patches,ax2);
 
 end

@@ -13,6 +13,7 @@ set(handles.ProcessListPopup,'Value',uivalues.ProcessListPopup);
 set(handles.RightPanelPopup,'Value',uivalues.RightPanelPopup);
 
 set(handles.LabelBox,'Value',uivalues.LabelBox);
+set(handles.TimePatchBox,'Value',uivalues.TimePatchBox);
 set(handles.PatchBox,'Value',uivalues.PatchBox);
 set(handles.MaskBox,'Value',uivalues.MaskBox);
 set(handles.AtlasBox,'Value',uivalues.AtlasBox);

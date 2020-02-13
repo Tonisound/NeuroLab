@@ -444,23 +444,42 @@ patch_colors = repmat(default_color,[size(TimeTags_seconds,1),1]);
 face_alpha = default_face_alpha*ones(size(TimeTags_seconds,1),1);
 edge_color = 'none';
 y_inf = 1e6;
+
+% % Group Coloring
+% g_colors = get(groot,'defaultAxesColorOrder');
+% g_colors(5,:) = f.Colormap(1,:);
+% %g_list = {'QW','REM-TONIC','NREM','REM-PHASIC','AW'};
+% g_list = {'QW','AW','NREM','REM'};
+% g_colors(4,:) = g_colors(2,:);
+% for i=1:length(g_list)
+%     ind_group = strcmp(tg_data.TimeGroups_name,char(g_list(i)));
+%     if sum(ind_group)~=0
+%         ind_tags = tg_data.TimeGroups_S(ind_group).Selected;
+%         %ind_tags = contains(tt_data.TimeTags,char(g_list(i)));
+%         patch_colors(ind_tags,:) = repmat(g_colors(i,:),[length(ind_tags),1]);
+%         % Highlight REM-PHASIC
+%         if strcmp(g_list(i),'REM-PHASIC')
+%             face_alpha(ind_tags) = .75;
+%         else
+%             face_alpha(ind_tags) = alpha_value;
+%         end
+%     end
+% end
+
 % Group Coloring
-g_colors = get(groot,'defaultAxesColorOrder');
-g_colors(5,:) = f.Colormap(1,:);
-%g_list = {'QW','REM-TONIC','NREM','REM-PHASIC','AW'};
+load('Preferences.mat','GColors');
 g_list = {'QW','AW','NREM','REM'};
-g_colors(4,:) = g_colors(2,:);
 for i=1:length(g_list)
     ind_group = strcmp(tg_data.TimeGroups_name,char(g_list(i)));
     if sum(ind_group)~=0
         ind_tags = tg_data.TimeGroups_S(ind_group).Selected;
-        %ind_tags = contains(tt_data.TimeTags,char(g_list(i)));
-        patch_colors(ind_tags,:) = repmat(g_colors(i,:),[length(ind_tags),1]);
-        % Highlight REM-PHASIC
-        if strcmp(g_list(i),'REM-PHASIC')
-            face_alpha(ind_tags) = .75;
+        % finding color in GColors
+        ind_group = find(strcmp({GColors.TimeGroups(:).Name}',char(g_list(i))));
+        if isempty(ind_group)
+            continue;
         else
-            face_alpha(ind_tags) = alpha_value;
+            patch_colors(ind_tags,:) = repmat(GColors.TimeGroups(ind_group).Color,[length(ind_tags),1]);
+            face_alpha(ind_tags) = GColors.TimeGroups(ind_group).Transparency;    
         end
     end
 end
