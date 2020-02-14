@@ -506,7 +506,7 @@ for i = 1:length(ind_files)
                     
                 case 'Compute Normalized Movie'
                     success = compute_normalizedmovie(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
-                       
+                        
                 case 'Edit Time Groups'
                     success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                         
@@ -531,9 +531,12 @@ for i = 1:length(ind_files)
                 case 'Detect Left-Right Runs'
                     success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                         
+                case 'Register Atlas'
+                    success = NeuroShopStart(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                       
                 case 'Perform sleep scoring'
                     %success = sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
-                    tempSleepScoring_NeuroLab(myhandles,0);
+                    f2 = tempSleepScoring_NeuroLab(myhandles,0);
                     
                 case 'Export LFP bands'
                     % in this case 1 select band manually, else 0 for all bands
@@ -552,13 +555,13 @@ for i = 1:length(ind_files)
                     success = convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii),myhandles,0);
                     
                 case '(Figure) Global Episode Display'
-                    f2=figure_GlobalDisplay(myhandles,0,str_tag);
-                    
+                    f2 = figure_GlobalDisplay(myhandles,0,str_tag);
+                     
                 case '(Figure) Correlation Analysis'
-                    f2=figure_Correlation_Analysis(myhandles,0,str_group);
+                    f2 = figure_Correlation_Analysis(myhandles,0,str_group);
                     
                 case '(Figure) LFP Wavelet Analysis'
-                    f2=figure_Wavelet_Analysis(myhandles,0,str_tag);
+                    f2 = figure_Wavelet_Analysis(myhandles,0,str_tag);
                     
                 case '(Figure) fUS Episode Statistics'
                     f2 = figure_fUS_EpisodeStatistics(myhandles,0,str_group);

@@ -334,9 +334,9 @@ pl = uicontrol(f,'Style','popup',...
     'Tag','ProcessListPopup',...
     'FontSize',fontsize,...
     'Parent',botPanel);
-pl_str = 'Compute Normalized Movie|Detect Vascular Surges|Detect Left-Right Runs|Convert Neuroshop Masks';
-pl_str = strcat(pl_str,'|Perform sleep scoring|Import Anatomical Regions|Import LFP Traces|Import External Files');
-pl_str = strcat(pl_str,'|Export LFP bands|Export Patches|Export Anatomical Regions|Export IMO file');
+pl_str = 'Compute Normalized Movie|Register Atlas|Convert Neuroshop Masks|Import Anatomical Regions|Import LFP Traces|Import External Files';
+pl_str = strcat(pl_str,'|Perform sleep scoring|Detect Vascular Surges|Detect Left-Right Runs');
+pl_str = strcat(pl_str,'|Export LFP bands|Export Patches|Export Anatomical Regions');
 pl.String = pl_str;
 
 % Process Button
@@ -645,7 +645,7 @@ set(myhandles.EditMenu_TimeTagEdition,'Callback','menuEdit_TimeTagEdition_Callba
 set(myhandles.EditMenu_TimeGroupEdition,'Callback','menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.EditMenu_LFPConfig,'Callback','menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.EditMenu_AnatRegions,'Callback','menuEdit_AnatRegions_Callback(FILES(CUR_FILE),myhandles);');
-set(myhandles.EditMenu_Neuroshop,'Callback','NeuroShopStart(myhandles);');
+set(myhandles.EditMenu_Neuroshop,'Callback','NeuroShopStart(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhandles});
 set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});

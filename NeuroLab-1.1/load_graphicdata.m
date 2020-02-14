@@ -52,6 +52,10 @@ uistack(cursor,'top');
 
 %Update Box Patches
 boxPatch_Callback(handles.PatchBox,[],handles);
+%Update Box Atlas
+boxAtlas_Callback(handles.AtlasBox,[],handles.CenterAxes);
+%Update Box TimePatch
+boxTimePatch_Callback(handles.TimePatchBox,[],handles.RightAxes);
 
 % Loading Atlas.mat
 if exist(fullfile(savedir,'Atlas.mat'),'file')
