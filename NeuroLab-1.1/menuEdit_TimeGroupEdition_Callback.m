@@ -169,7 +169,8 @@ t2.CellSelectionCallback = {@trace_uitable2_select,t1,t3};
         
         % Filling table 3
         data = t1.Data(indices,:);
-        t3.Data = [strcat(sprintf('(%s)',group_name),data(:,1)),data(:,2:3)];
+        %t3.Data = [strcat(sprintf('(%s)',group_name),data(:,1)),data(:,2:3)];
+        t3.Data = [strcat(data(:,1)),data(:,2:3)];
         
     end
 
@@ -246,7 +247,8 @@ for i=1:length(indices)
     group_name = char(hObj.Data(k,1));
     ind_selected= S(k).Selected;
     data = t1.Data(ind_selected,:);
-    t3.Data = [t3.Data;strcat(sprintf('(%s)',group_name),data(:,1)),data(:,2:3)];
+    % t3.Data = [t3.Data;strcat(sprintf('(%s)',group_name),data(:,1)),data(:,2:3)];
+    t3.Data = [t3.Data;strcat(data(:,1)),data(:,2:3)];
 end
 
 end

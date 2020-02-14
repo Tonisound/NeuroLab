@@ -538,6 +538,9 @@ for i = 1:length(ind_files)
                     %success = sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
                     f2 = tempSleepScoring_NeuroLab(myhandles,0);
                     
+                case 'Generate Time Groups'
+                    success = generate_time_groups(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                    
                 case 'Export LFP bands'
                     % in this case 1 select band manually, else 0 for all bands
                     success = export_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);

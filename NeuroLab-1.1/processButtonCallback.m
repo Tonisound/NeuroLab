@@ -36,6 +36,9 @@ switch strtrim(str(val,:))
     case 'Detect Left-Right Runs'
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Generate Time Groups'
+        generate_time_groups(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+    
     case 'Export LFP bands'
         export_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
             
