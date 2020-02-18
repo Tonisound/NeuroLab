@@ -54,6 +54,7 @@ for i = 1:length(tg_modified)
         ind_remove(strcmp(tg_data.TimeGroups_name,tg_modified(i).Name)) = true;
     end
 end
+list_removed = tg_data.TimeGroups_name(ind_remove);
 tg_data.TimeGroups_name = tg_data.TimeGroups_name(~ind_remove);
 tg_data.TimeGroups_frames = tg_data.TimeGroups_frames(~ind_remove);
 tg_data.TimeGroups_duration = tg_data.TimeGroups_duration(~ind_remove);
@@ -94,10 +95,22 @@ for i=1:size(all_names,1)
 end
 
 % Concatenate & save
+list_added = TimeGroups_name;
 TimeGroups_name = [tg_data.TimeGroups_name;TimeGroups_name];
 TimeGroups_frames = [tg_data.TimeGroups_frames;TimeGroups_frames];
 TimeGroups_duration = [tg_data.TimeGroups_duration;TimeGroups_duration];
 TimeGroups_S = [tg_data.TimeGroups_S;TimeGroups_S];
+
+fprintf('Time Groups Removed: [');
+for i =1:length(list_removed)-1
+    fprintf('%s - ',char(list_removed(i)));
+end
+fprintf('%s].\n',char(list_removed(end)));
+fprintf('Time Groups Added: [');
+for i =1:length(list_added)-1
+    fprintf('%s - ',char(list_added(i)));
+end
+fprintf('%s].\n',char(list_added(end)));
 save(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
 fprintf('===> Saved at %s.mat\n',fullfile(savedir,'Time_Groups.mat'));
 

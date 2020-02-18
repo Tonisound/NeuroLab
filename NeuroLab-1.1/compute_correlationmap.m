@@ -7,8 +7,10 @@ global DIR_SAVE FILES CUR_FILE;
 try
     data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
         'time_ref','length_burst','n_burst','rec_mode');
-    length_burst = data_tr.length_burst;
-    n_burst = data_tr.n_burst;
+%     length_burst = data_tr.length_burst;
+%     n_burst = data_tr.n_burst;
+    length_burst = length(data_tr.time_ref.Y);
+    n_burst = 1;
 catch
     warning('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
     length_burst = size(IM,3);

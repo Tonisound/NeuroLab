@@ -1162,9 +1162,16 @@ ax.YTickLabel = all_labels;
 %Fourth Tab
 margin_w = .01;
 margin_h = .02;
-n_columns = 6;
-n_rows = ceil(length(lags)/n_columns);
+n_columns = 5;
+n_rows_max = 6;
 
+if length(lags)>n_columns*n_rows_max
+    n_rows = n_rows_max;
+    index_lags = round(rescale(1:n_columns*n_rows_max,1,length(lags)));
+else
+    n_rows = ceil(length(lags)/n_columns);
+    index_lags = 1:length(lags);
+end
 % Creating axes
 delete(handles.FourthTab.Children);
 all_axes = [];
@@ -1182,7 +1189,8 @@ for ii = 1:n_rows
         ax = axes('Parent',handles.FourthTab);
         ax.Position= [x+2*margin_w y+margin_h (1/n_columns)-3*margin_w (1/n_rows)-3*margin_h];
         ax.YDir ='reverse';
-        ax.Title.String = sprintf('t = %.2f s',step*lags(index));
+        % ax.Title.String = sprintf('t = %.2f s',step*lags(index));
+        ax.Title.String = sprintf('t = %.2f s',step*lags(index_lags(index)));
         ax.Visible = 'on';
         all_axes = [all_axes;ax];
         % colormap(ax,'jet');
@@ -1192,8 +1200,10 @@ end
 %all_axes = flipud(all_axes);
 
 % plot regions
-for i =1:length(all_axes)
+for i = 1:length(all_axes)
     ax  = all_axes(i);
+    index_lags(i)
+        
     for j=1:length(lines_1)
         l = lines_1(j);
         region = l.UserData.Name;
@@ -1211,7 +1221,8 @@ for i =1:length(all_axes)
         % mask
         mask  = l.UserData.Mask;
         im = imagesc(255*mask,'Parent',ax);
-        im.AlphaData = mask*abs(A0(ind_keep,i));
+%         im.AlphaData = mask*abs(A0(ind_keep,i));
+        im.AlphaData = mask*abs(A0(ind_keep,index_lags(i)));
     end
 %     if i==length(all_axes)
 %         c = colorbar(ax,'eastoutside');
