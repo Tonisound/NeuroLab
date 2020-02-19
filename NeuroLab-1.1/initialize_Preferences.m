@@ -190,6 +190,12 @@ GFilt.ripple_inf = 150;
 GFilt.ripple_sup = 300;
 GFilt.ripple_smooth = .5;
 
+GColors.patch_color = [.5 .5 .5];
+GColors.patch_width = .1;
+GColors.patch_transparency = .5;
+GColors.mask_color = [.75 .75 .75];
+GColors.mask_width = .1;
+GColors.mask_transparency = .5;
 GColors.atlas_color = [1 1 1];
 GColors.atlas_width = 1;
 GColors.atlas_transparency = .5;

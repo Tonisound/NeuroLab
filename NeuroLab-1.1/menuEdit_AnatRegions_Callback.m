@@ -43,7 +43,6 @@ table_region = uitable('Units','normalized',...
     'Data',[],...
     'RowName','',...
     'Tag','Region_table',...
-    'CellSelectionCallback',@uitable_select,...
     'RowStriping','on',...
     'Parent',f);
 table_region.CellEditCallback = {@uitable_edit};
@@ -192,6 +191,7 @@ cancelButton.Position = [.825 .05 .15 .05];
 
 
 handles2 = guihandles(f);
+table_region.CellSelectionCallback = {@uitable_select,handles2};    
 set(newButton,'Callback',{@newButton_callback,handles2});
 set(drawButton,'Callback',{@drawButton_callback,handles2});
 set(applyButton,'Callback',{@applyButton_callback,handles2});
@@ -560,6 +560,8 @@ region_table = findobj(src.Parent,'Tag','Region_table');
 selection = region_table.UserData.Selection;
 list_selected = region_table.Data(selection);
 
+delete(findobj(handles.AxEdit,'Tag','Mask'));
+        
 if src.Value 
     %draw mask 
     for i =1:length(hm)
@@ -575,18 +577,25 @@ if src.Value
                 'Hittest','off',...
                 'AlphaData',alpha*mask);
         else
-            image('CData',color_mask,...
+            B = bwboundaries(mask);
+            boundary = B{1};
+            line('XData',boundary(:,2),'YData',boundary(:,1),...
+                'Color',color,...
                 'Parent',handles.AxEdit,...
                 'Tag','Mask',...
-                'Hittest','off',...
-                'AlphaData',alpha*edge(mask,'canny'));
+                'Hittest','off');
+%             image('CData',color_mask,...
+%                 'Parent',handles.AxEdit,...
+%                 'Tag','Mask',...
+%                 'Hittest','off',...
+%                 'AlphaData',alpha*edge(mask,'canny'));
         end
         hm(i).Visible = 'off';
     end
     
 else
     %draw mask
-    delete(findobj(handles.AxEdit,'Tag','Mask'));
+   %delete(findobj(handles.AxEdit,'Tag','Mask'));
     for i =1:length(hm)
         hm(i).Visible = 'on';
     end
@@ -605,7 +614,7 @@ end
 
 end
 
-function uitable_select(hObj,evnt)
+function uitable_select(hObj,evnt,handles)
 
 if ~isempty(evnt.Indices)
     %hObj.UserData.Selection = unique(evnt.Indices(1,1));
@@ -629,6 +638,8 @@ if ~isempty(selection)
         patches(index).FaceColor = patches(index).EdgeColor;
     end
 end
+
+boxMask_Callback(handles.boxMask,[],handles);
 
 end
 

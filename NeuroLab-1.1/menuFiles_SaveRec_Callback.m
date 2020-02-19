@@ -19,6 +19,7 @@ defname = fullfile(SEED_SWL,strcat(FILES(CUR_FILE).parent,'.txt'));
 if file == 0
     return;
 else
+    % Nlab list
     filename = fullfile(path,file);
     fid = fopen(filename, 'wt' );
     for i=1:length(FILES)
@@ -28,7 +29,20 @@ else
     end
     fclose(fid);
     
-    filename = fullfile(path,strcat(file(1:end-4),'_S',file(end-3:end)));
+    % Source list
+    if ispc
+        path_source = fullfile(SEED_SWL,'Source_pc');
+    elseif ismac
+        path_source = fullfile(SEED_SWL,'Source_mac');
+    else
+        path_source = fullfile(SEED_SWL,'Source_undefinied');
+    end
+    % creating if dir is missing
+    if ~exist(path_source,'dir')
+        mkdir(path_source);
+    end
+    filename = fullfile(path_source,strcat(file(1:end-4),'_S',file(end-3:end)));
+    % filename = fullfile(path,strcat(file(1:end-4),'_S',file(end-3:end)));
     fid = fopen(filename, 'wt' );
     for i=1:length(FILES)
         % Saving seed files
