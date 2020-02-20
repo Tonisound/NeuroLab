@@ -1,4 +1,4 @@
-function success = NeuroShopStart(savedir,handles,val)
+function success = NeuroShopStart(savedir,file_recording,handles,val)
 % Script written by Thomas Deffieux
 % Edited by Antoine Bergel to run on NeuroLab
 % 16/09/2018
@@ -6,7 +6,7 @@ function success = NeuroShopStart(savedir,handles,val)
 % If nargin > 2 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
 success = false;
-if nargin == 2
+if nargin < 4
     val=1;
 end
 
@@ -106,7 +106,7 @@ uimenu(m,'Label','View Doppler','Callback',{@CreateMask,0});
 uimenu(m,'Label','Atlas based Mask','Callback',{@CreateMask,1},'Separator','on');
 uimenu(m,'Label','ROI based Mask','Callback',{@CreateMask,3});
 uimenu(m,'Label','Unsupervised Mask','Callback',{@CreateMask,2});
-uimenu(m,'Label','Export Mask','Callback',{@NeuroShop_ExportMask,savedir,handles},'Separator','on');
+uimenu(m,'Label','Export Mask','Callback',{@NeuroShop_ExportMask,savedir,file_recording,handles},'Separator','on');
 uimenu(m,'Label','Config','Callback',@NeuroShop_ConfigMask);
 
 tr = uimenu('Label','Processing');
@@ -144,9 +144,9 @@ switch choice
 end
 end
 
-function NeuroShop_ExportMask(obj,event,savedir,handles)
+function NeuroShop_ExportMask(obj,event,savedir,file_recording,handles)
 
-global NeuroShop;
+global NeuroShop FILES CUR_FILE;
 
 % Loading Config.mat
 data_config = load(fullfile(savedir,'Config.mat'));
@@ -193,6 +193,23 @@ save(fullfile(savedir,filename),'Mask','AtlasType','AtlasOn','AtlasName',...
     'scaleX','scaleY','scaleZ','xyfig','FigName','PatchCorner',...
     'BregmaXY','BregmaZ','theta','phi','line_x','line_z');
 
+atlas_type = AtlasType;
+if strcmp(AtlasType,'RatAtlasCor')
+    atlas_type = 'Coronal';
+end
+if strcmp(AtlasType,'RatAtlasSag')
+    atlas_type = 'Sagittal';
+end
+% updating config.mat
+data_c = load(fullfile(savedir,'Config.mat'),'File');
+File = data_c.File;
+File.atlas_type = atlas_type;
+File.bregma_xy = BregmaXY;
+File.bregma_z = BregmaZ;
+FILES(CUR_FILE)=File;
+save(fullfile(savedir,'Config.mat'),'File','-append');
+fprintf('File Config.mat updated [%s].\n',fullfile(savedir,'Config.mat'));
+
 %Exporting Mask atlas
 linewidth = 1;
 atlascolor = 'w';
@@ -207,6 +224,8 @@ boxAtlas_Callback(handles.AtlasBox,[],handles.CenterAxes);
 %     close(NeuroShop.fig);
 % end 
 close(NeuroShop.fig);
+% Converting masks in binary files
+convert_neuroshop_masks(savedir,file_recording,handles);
 
 end
 

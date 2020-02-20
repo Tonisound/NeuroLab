@@ -1,10 +1,10 @@
-function success = convert_neuroshop_masks(folder_name,F,handles,val)
+function success = convert_neuroshop_masks(folder_name,file_recording,handles,val)
 % Converting Neuroshop masks to binary file format (.U8)
-% Looking for Atlas.mat in dir_save/F.nlab Storing U8 masks in dir_regions
-% Uses Neuroshop txt files to get region name
+% Looking for Atlas.mat in folder_name
+% Storing U8 masks in dir_regions
+% Uses Neuroshop txt files to get region names
 
 success = false;
-global DIR_SAVE;
 
 % If nargin > 2 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
@@ -35,9 +35,9 @@ if val==1
 end
 
 % Check for import folder
-if exist(fullfile(DIR_SAVE,F.nlab,'Atlas.mat'),'file')
+if exist(fullfile(folder_name,'Atlas.mat'),'file')
     % Loading Atlas.mat
-    data_r = load(fullfile(DIR_SAVE,F.nlab,'Atlas.mat'));
+    data_r = load(fullfile(folder_name,'Atlas.mat'));
     X = size(data_r.Mask,2);
     Y = size(data_r.Mask,1);
     z = 0;
@@ -67,7 +67,6 @@ if exist(atlas_txt,'file')
     fclose(fileID);
 end
 
-
 % Creating binary masks
 all_masks = [];
 region_name = [];
@@ -82,18 +81,42 @@ for i = 1:max(max(data_r.Mask(:,:,1)))
             %atlas name
             if length(ind_keep)>1
                 ind_keep = ind_keep(1);
-                %warning('Several regions found under index %d. Keeping first. [%s]',i,atlas_txt);
-                fprintf('Warning: Several regions found under index %d. Keeping first. [%s]\n',i,atlas_txt);
+                warning('Several regions found under index %d. Keeping first. [%s]',i,atlas_txt);
+                %fprintf('Warning: Several regions found under index %d. Keeping first. [%s]\n',i,atlas_txt);
             end
             aname = atlas_name(ind_keep(1));
-            rname = {sprintf('Nshop-reg_%s_%d_%d.U8',char(aname),X,Y)};
+            rname = {sprintf('Nshop_%s_%d_%d.U8',char(aname),X,Y)};
             region_name = [region_name;rname];
         else
             %default name
-            region_name = [region_name;{sprintf('Nshop-reg_reg-%03d_%d_%d.U8',i,X,Y)}];
+            region_name = [region_name;{sprintf('Nshop_reg-%03d_%d_%d.U8',i,X,Y)}];
         end
     end
 end
+
+% Removing duplicates
+% indices to unique values in region_name
+[~, ind] = unique(region_name);
+duplicate_ind = setdiff(1:size(region_name,1),ind);
+duplicate_value = region_name(duplicate_ind);
+ind_remove = [];
+for i = 1:size(duplicate_value,1)
+    ind_merge = find(strcmp(region_name,duplicate_value(i))==1);
+    new_mask = double(sum(all_masks(:,:,ind_merge),3)>0);
+    % updating all masks
+    all_masks(:,:,ind_merge(1)) = new_mask;
+    ind_remove = [ind_remove;ind_merge(2:end)];
+end
+all_masks(:,:,ind_remove)=[];
+region_name(ind_remove)=[];
+region_index(ind_remove)=[];
+
+% Removing unnamed regions
+pattern_unnamed = 'region';
+ind_remove = find(contains(region_name,pattern_unnamed)==1);
+all_masks(:,:,ind_remove)=[];
+region_name(ind_remove)=[];
+region_index(ind_remove)=[];
 
 % Adding whole region if test_whole is true
 if test_whole
@@ -102,13 +125,13 @@ if test_whole
     k = convhull(x,y);
     new_mask = double(poly2mask(y(k),x(k),size(whole_mask,1),size(whole_mask,2)));
     all_masks = cat(3,all_masks,new_mask);
-    region_name = [region_name;{sprintf('Nshop-reg_Whole-reg_%d_%d.U8',X,Y)}];
+    region_name = [region_name;{sprintf('Nshop_Whole-reg_%d_%d.U8',X,Y)}];
     region_index = [region_index;0];
 end
 
 % Create export folder
 global SEED_REGION;
-dir_regions = fullfile(SEED_REGION,F.recording);
+dir_regions = fullfile(SEED_REGION,file_recording);
 if test_erase && exist(dir_regions,'dir')
     rmdir(dir_regions,'s')
 end

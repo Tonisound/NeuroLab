@@ -532,8 +532,11 @@ for i = 1:length(ind_files)
                     success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                         
                 case 'Register Atlas'
-                    success = NeuroShopStart(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                    success = NeuroShopStart(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                        
+                case 'Convert Neuroshop Masks'
+                    success = convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
+                    
                 case 'Perform sleep scoring'
                     %success = sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
                     f2 = tempSleepScoring_NeuroLab(myhandles,0);
@@ -554,9 +557,6 @@ for i = 1:length(ind_files)
                 case 'Edit LFP Configuration'
                     success = menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
-                case 'Convert Neuroshop Masks'
-                    success = convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii),myhandles,0);
-                    
                 case '(Figure) Global Episode Display'
                     f2 = figure_GlobalDisplay(myhandles,0,str_tag);
                      

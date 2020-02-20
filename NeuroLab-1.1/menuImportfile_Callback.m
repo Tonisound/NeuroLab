@@ -3,14 +3,13 @@ function F = menuImportfile_Callback(~,~,handles,flag)
 % Searches for EEG, fUS and video files
 
 global SEED SEED_SWL DIR_SAVE;
-global CUR_IM START_IM END_IM LAST_IM;
+%global CUR_IM START_IM END_IM LAST_IM;
 
 % Initialization
-F = struct('session',{},'recording',{},'parent',{},'fullpath',{},...
-    'info',{},'video',{},'dir_lfp',{},'dir_fus',{},'dir_ext',{},'acq',{},'dop',{},'biq',{},...
-    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},...
-    'nev',{},'ccf',{},'rcf',{},'ncf',{},'mainlfp',{},'mainemg',{},'nlab',{},'type',{});
-
+F = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},...
+    'video',{},'dir_lfp',{},'dir_fus',{},'dir_ext',{},'acq',{},'dop',{},'biq',{},...
+    'ns1',{},'ns2',{},'ns3',{},'ns4',{},'ns5',{},'ns6',{},'nev',{},'ccf',{},'rcf',{},'ncf',{},...
+    'mainlfp',{},'mainemg',{},'atlas_type',{},'bregma_xy',{},'bregma_z',{},'nlab',{},'type',{});
 
 if flag == 1
     % Manual Import
