@@ -561,7 +561,7 @@ for i = 1:length(ind_files)
                     f2 = figure_GlobalDisplay(myhandles,0,str_tag);
                      
                 case '(Figure) Correlation Analysis'
-                    f2 = figure_Correlation_Analysis(myhandles,0,str_group);
+                    f2 = figure_Correlation_Analysis(myhandles,0,str_group,str_traces);
                     
                 case '(Figure) LFP Wavelet Analysis'
                     f2 = figure_Wavelet_Analysis(myhandles,0,str_tag);

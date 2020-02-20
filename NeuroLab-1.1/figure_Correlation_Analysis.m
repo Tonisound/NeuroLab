@@ -1,4 +1,4 @@
-function f2 = figure_Correlation_Analysis(myhandles,val,str_group)
+function f2 = figure_Correlation_Analysis(myhandles,val,str_group,str_traces)
 
 global DIR_SAVE CUR_IM START_IM END_IM FILES CUR_FILE;
 
@@ -588,9 +588,10 @@ tabgp.SelectedTab = tab6;
 
 % If nargin > 3 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
-% str_group contains group names 
+% str_group contains group names
+% str_traces contains traces names 
 if val==0
-    batch_Correlation_Callback(handles2.ButtonBatch,[],handles2,str_group,1);
+    batch_Correlation_Callback(handles2.ButtonBatch,[],handles2,str_group,str_traces,1);
 end
 
 end
@@ -1451,6 +1452,8 @@ switch tag
     case {'Trace_Cerep'}
         handles.Edit1.String = -5;
         handles.Edit2.String = 15;
+%         handles.Edit1.String = -100;
+%         handles.Edit2.String = 500;
 end
 
 handles.Edit1.UserData.Previous = handles.Edit1.String;
@@ -1463,7 +1466,7 @@ drawnow;
 
 end
 
-function batch_Correlation_Callback(hObj,~,handles,str_group,v)
+function batch_Correlation_Callback(hObj,~,handles,str_group,str_traces,v)
 
 data_config = handles.MainFigure.UserData.data_config;
 data_tg = handles.MainFigure.UserData.data_tg;
@@ -1494,14 +1497,21 @@ for i=1:length(ind_group)
     hObj.UserData.folder_name = char(data_tg.TimeGroups_name(ii));
     handles.Tag_table.UserData.Selection = data_tg.TimeGroups_S(ii).Selected';
     
-%     % Selecting main channel
-%     if ~isempty(data_config.File.mainlfp)
-%         str_ref = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
-%     else
-%         str_ref = [{'SPEED'};{'ACCEL-POWER'}];
-%     end
-    str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
-        {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'};{'X(m)'};{'Y(m)'}];
+    %     % Selecting main channel
+    %     if ~isempty(data_config.File.mainlfp)
+    %         str_ref = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
+    %     else
+    %         str_ref = [{'SPEED'};{'ACCEL-POWER'}];
+    %     end
+    
+    % If str_traces (from batch menu) is not empty use it as str_ref
+    % Else use str_ref defined here
+    if isempty(str_traces)
+        str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
+            {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'};{'X(m)'};{'Y(m)'}];
+    else
+        str_ref = str_traces;
+    end
     
     % Compute
     p1 = handles.Popup1;
