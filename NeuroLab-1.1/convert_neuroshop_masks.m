@@ -16,6 +16,7 @@ end
 global SEED_ATLAS;
 load('Preferences.mat','GImport');
 pixel_thresh = GImport.pixel_thresh; % minimum region size (pixels);
+pattern_unnamed = GImport.pattern_unnamed; % minimum region size (pixels);
 test_whole = 1; %adding whole-reg (largest cover from Neuroshop regions)
 test_erase = 0; %empty region folder
 
@@ -112,7 +113,7 @@ region_name(ind_remove)=[];
 region_index(ind_remove)=[];
 
 % Removing unnamed regions
-pattern_unnamed = 'region';
+%pattern_unnamed = 'region';
 ind_remove = find(contains(region_name,pattern_unnamed)==1);
 all_masks(:,:,ind_remove)=[];
 region_name(ind_remove)=[];
