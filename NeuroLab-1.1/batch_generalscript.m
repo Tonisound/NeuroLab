@@ -552,7 +552,7 @@ for i = 1:length(ind_files)
                     success = export_regions(myhandles,FILES(ii).recording,0);
                     
                 case 'Edit Anatomical Regions'
-                    success = menuEdit_AnatRegions_Callback(FILES(ii),myhandles,0);
+                    success = menuEdit_AnatRegions_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
                 case 'Edit LFP Configuration'
                     success = menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);

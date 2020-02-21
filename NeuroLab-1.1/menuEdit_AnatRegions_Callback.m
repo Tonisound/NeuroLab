@@ -1,10 +1,11 @@
-function success = menuEdit_AnatRegions_Callback(F,handles,val)
+function success = menuEdit_AnatRegions_Callback(folder_name,file_recording,handles,val)
 
-global IM CUR_IM DIR_SAVE;
-folder_name = fullfile(DIR_SAVE,F.nlab);
+global IM CUR_IM;
 success = true;
 
-if nargin<3
+% If nargin > 3 batch processing
+% val indicates callback provenance (0 : batch mode - 1 : user mode)
+if nargin == 3
     val=1;
 end
 
@@ -37,8 +38,25 @@ delete(findobj(ax,'Tag','Box','-or','Tag','Pixel'));
 % Region Table
 w_col = 60;
 w_margin = 4;
-table_region = uitable('Units','normalized',...
+
+mP = uipanel('Units','normalized',...
+    'bordertype','etchedin',...
+    'Tag','MainPanel',...
+    'Parent',f);
+tabgp = uitabgroup('Units','normalized',...
     'Position',[0 0 1 1],...
+    'Parent',mP,...
+    'Tag','TabGroup');
+tab1 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Regions',...
+    'Tag','MainTab');
+tab2 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Groups',...
+    'Tag','SecondTab');
+
+table_region = uitable('Units','normalized',...
     'ColumnFormat',{'char'},...
     'ColumnWidth',{w_col},...
     'ColumnEditable',false,...
@@ -47,15 +65,76 @@ table_region = uitable('Units','normalized',...
     'RowName','',...
     'Tag','Region_table',...
     'RowStriping','on',...
-    'Parent',f);
+    'Parent',tab1);
 table_region.CellEditCallback = {@uitable_edit};
-% Adjust Columns
-table_region.Units = 'pixels';
-table_region.ColumnWidth ={table_region.Position(3)-w_margin};
-table_region.Units = 'normalized';
 table_region.UserData.Selection = [];
 
-% OK & CANCEL Buttons
+% Checkboxes
+boxPref = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Keep prefix',...
+    'Enable','off',...
+    'TooltipString','Keep/remove largest prefix upon region importation',...
+    'Value',0,...
+    'Tag','boxPref',...
+    'Parent',f);
+boxSuf = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Keep suffix',...
+    'Enable','off',...
+    'TooltipString','Keep/remove largest suffix upon region importation',...
+    'Value',0,...
+    'Tag','boxSuf',...
+    'Parent',f);
+% radioMask = uicontrol('Style','radiobutton',...
+%     'Units','normalized',...
+%     'String','Patches|Masks',...
+%     'TooltipString','Display masks or patches',...
+%     'Value',1,...
+%     'Tag','radioMask',...
+%     'Parent',f);
+bg = uibuttongroup('Visible','on',...
+    'Units','normalized',...
+    'Position',[0 0 .2 1],...
+    'Tag','radioMask');
+% Create three radio buttons in the button group.
+uicontrol(bg,'Style','radiobutton',...
+    'Units','normalized',...
+    'String','Patches',...
+    'Position',[0 .5 1 .5],...
+    'Tag','radioPatches',...
+    'HandleVisibility','off');
+uicontrol(bg,'Style','radiobutton',...
+    'Units','normalized',...
+    'String','Masks',...
+    'Tag','radioMasks',...
+    'Position',[0 0 1 .5],...
+    'HandleVisibility','off');
+
+boxAtlas = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Atlas Display',...
+    'TooltipString','Display last registered atlas',...
+    'Value',0,...
+    'Tag','boxAtlas',...
+    'Parent',f);
+boxAtlas.Value = handles.AtlasBox.Value;
+boxEdit = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Edit names',...
+    'TooltipString','Enable Table Edition',...
+    'Value',0,...
+    'Tag','boxEdit',...
+    'Parent',f);
+boxSticker = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Stickers',...
+    'TooltipString','Show stickers to select/deselect regions',...
+    'Value',1,...
+    'Tag','boxSticker',...
+    'Parent',f);
+
+% Edition buttons
 newButton = uicontrol('Style','pushbutton',... 
     'Units','normalized',...
     'String','New',...
@@ -82,14 +161,36 @@ mergeButton = uicontrol('Style','pushbutton',...
     'Tag','mergeButton',...
     'Parent',f);
 
+% Import buttons
+registerButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Register Atlas',...
+    'Enable','off',...
+    'Tag','registerButton',...
+    'Parent',f);
+importButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Import',...
+    'Tag','importButton',...
+    'Parent',f);
+set(importButton,'Callback',{@importButton_Callback,file_recording});
+exportButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Export',...
+    'Tag','exportButton',...
+    'Parent',f);
+set(exportButton,'Callback',{@exportButton_Callback,file_recording});
 
+% Time controls
 l_mean = findobj(handles.RightAxes,'Tag','Trace_Mean');
 l_cursor = findobj(handles.RightAxes,'Tag','Cursor');
-ax_mean = axes('Parent',f,'YTick',[],'Tag','AxMean','FontSize',8,...
+ax_mean = axes('Parent',f,'YTick',[],'Tag','AxMean','FontSize',7,...
     'YTickLabel','','YLim',[min(l_mean.YData,[],'omitnan') max(l_mean.YData,[],'omitnan')]);
 %set(ax_mean,'ButtonDownFcn',{@template_axes_clickFcn,ax_mean});
 f.UserData.l_mean = copyobj(l_mean,ax_mean);
 ax_mean.XLim = [min(l_mean.XData) max(l_mean.XData)];
+% ax_mean.XTick = l_mean.XData(1):100:l_mean.XData(end);
+% ax_mean.XTickLabel = cell2(l_mean.XData(1):100:l_mean.XData(end));
 l_cursor = copyobj(l_cursor,ax_mean);
 l_cursor.YData = ax_mean.YLim;
 f.UserData.l_cursor = l_cursor;
@@ -103,6 +204,7 @@ t1 = uicontrol('Style','text',...
     'String',sprintf('%d / %d',l_cursor.XData(1),f.UserData.data_config.LAST_IM),...
     'Tag','Text1',...
     'HorizontalAlignment','right',...
+    'FontSize',8,...
     'Parent',f);
 pu1 = uicontrol('Style','popupmenu',...
     'Units','normalized',...
@@ -111,55 +213,7 @@ pu1 = uicontrol('Style','popupmenu',...
     'Parent',f);
 set(pu1,'Callback',{@pu1_Callback,folder_name});
 
-importButton = uicontrol('Style','pushbutton',...
-    'Units','normalized',...
-    'String','Import',...
-    'Tag','importButton',...
-    'Parent',f);
-set(importButton,'Callback',{@importButton_Callback,F});
-exportButton = uicontrol('Style','pushbutton',...
-    'Units','normalized',...
-    'String','Export',...
-    'Tag','exportButton',...
-    'Parent',f);
-set(exportButton,'Callback',{@exportButton_Callback,F});
-boxPref = uicontrol('Style','checkbox',...
-    'Units','normalized',...
-    'String','Keep prefix',...
-    'TooltipString','Keep/remove largest prefix upon region importation',...
-    'Value',0,...
-    'Tag','boxPref',...
-    'Parent',f);
-boxSuf = uicontrol('Style','checkbox',...
-    'Units','normalized',...
-    'String','Keep suffix',...
-    'TooltipString','Keep/remove largest suffix upon region importation',...
-    'Value',0,...
-    'Tag','boxSuf',...
-    'Parent',f);
-
-boxMask = uicontrol('Style','checkbox',...
-    'Units','normalized',...
-    'String','Mask Display',...
-    'TooltipString','Display masks instead of patches',...
-    'Value',0,...
-    'Tag','boxMask',...
-    'Parent',f);
-boxAtlas = uicontrol('Style','checkbox',...
-    'Units','normalized',...
-    'String','Atlas Display',...
-    'TooltipString','Display last registered atlas',...
-    'Value',0,...
-    'Tag','boxAtlas',...
-    'Parent',f);
-boxAtlas.Value = handles.AtlasBox.Value;
-boxEdit = uicontrol('Style','checkbox',...
-    'Units','normalized',...
-    'String','Edit names',...
-    'TooltipString','Enable Table Edition',...
-    'Value',0,...
-    'Tag','boxEdit',...
-    'Parent',f);
+% OK/Cancel buttons
 okButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
     'String','OK',...
@@ -174,31 +228,38 @@ cancelButton = uicontrol('Style','pushbutton',...
 %Graphic position
 ax.Position = [.2 .05 .6 .9];
 f.Position = [.1 .3 .55 .5];
-table_region.Position = [.025 .05 .15 .75];
-
-boxMask.Position = [.01 .92 .09 .03];
-boxAtlas.Position = [.01 .89 .09 .03];
+mP.Position = [.01 .05 .18 .75];
+%table_region.Position = [.025 .05 .15 .75];
+table_region.Position = [0 0 1 1];
+% Adjust Columns
+mP.Units = 'pixels';
+table_region.ColumnWidth ={mP.Position(3)-w_margin};
+mP.Units = 'normalized';
+%table_region.ColumnWidth = 1;
+bg.Position = [.01 .89 .09 .06];
+boxAtlas.Position = [.11 .89 .09 .03];
 boxEdit.Position = [.01 .86 .09 .03];
-boxPref.Position = [.11 .92 .09 .03];
-boxSuf.Position = [.11 .89 .09 .03];
-
+boxSticker.Position = [.11 .92 .09 .03];
+boxPref.Position = [.11 .86 .09 .03];
+boxSuf.Position = [.11 .83 .09 .03];
 newButton.Position = [.825 .9 .15 .05];
 drawButton.Position = [.825 .85 .15 .05];
 applyButton.Position = [.825 .8 .15 .05];
 removeButton.Position = [.825 .75 .15 .05];
 mergeButton.Position = [.825 .7 .15 .05];
-
+registerButton.Position = [.825 .55 .15 .05];
 importButton.Position = [.825 .5 .15 .05];
 exportButton.Position = [.825 .45 .15 .05];
-
-t1.Position = [.925 .3 .05 .04];
-pu1.Position = [.825 .3 .1 .05];
+t1.Position = [.915 .3 .06 .04];
+pu1.Position = [.825 .3 .09 .05];
 ax_mean.Position = [.825 .2 .15 .1];
 okButton.Position = [.825 .1 .15 .05];
 cancelButton.Position = [.825 .05 .15 .05];
 
+% callback attribution
 handles2 = guihandles(f);
-table_region.CellSelectionCallback = {@uitable_select,handles2};    
+table_region.CellSelectionCallback = {@uitable_select,handles2};
+bg.SelectionChangedFcn = {@radioMask_selection,handles2};
 set(newButton,'Callback',{@newButton_callback,handles2});
 set(drawButton,'Callback',{@drawButton_callback,handles2});
 set(applyButton,'Callback',{@applyButton_callback,handles2});
@@ -206,9 +267,9 @@ set(removeButton,'Callback',{@removeButton_callback,handles2});
 set(mergeButton,'Callback',{@mergeButton_callback,handles2});
 set(okButton,'Callback',{@okButton_callback,handles,handles2,val});
 set(cancelButton,'Callback',{@cancelButton_callback,handles2});
-set(boxMask,'Callback',{@boxMask_Callback,handles2});
 set(boxAtlas,'Callback',{@boxAtlas_Callback,handles2.AxEdit});
 set(boxEdit,'Callback',{@boxEdit_Callback,handles2});
+set(boxSticker,'Callback',{@boxSticker_Callback,handles2});
  
 
 % Changing main image
@@ -223,8 +284,6 @@ im.AlphaData = ones(size(main_im));
 
 % Building str_popup
 patches = flipud(findobj(ax,'Tag','Region'));
-
-
 str_popup = [];
 for i = 1:length(patches)
     str_popup = [str_popup;{patches(i).UserData.UserData.Name}];
@@ -232,9 +291,11 @@ end
 
 % Searching patches
 for i = 1:length(patches)
+    alpha = patches(i).FaceAlpha;
     %patches(i).FaceAlpha = 0;
+    color = patches(i).FaceColor;
     patches(i).Visible = 'on';
-    patches(i).EdgeColor = patches(i).FaceColor;
+    patches(i).EdgeColor = color;
     patches(i).FaceColor ='none';
     patches(i).LineWidth = 1;
     patches(i).MarkerSize = 1;
@@ -246,10 +307,48 @@ for i = 1:length(patches)
     patches(i).Tag = patches(i).UserData.UserData.Name;
     name = patches(i).UserData.UserData.Name;
     mask = patches(i).UserData.UserData.Mask;
+    % adding mask
+    cdata = repmat(permute(color,[3,1,2]),[size(mask,1),size(mask,2)]);
+    im_mask = image('CData',cdata,...
+        'Parent',ax,...
+        'Tag','ImageMask',...
+        'Hittest','off',...
+        'AlphaData',alpha*mask,...
+        'Visible','off');
+    % adding boundary
+    B = bwboundaries(mask);
+    line_boundary=[];
+    for j=1:length(B)
+        boundary = B{j};
+        l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+            'Color',color,...
+            'Parent',ax,...
+            'Tag','Boundary',...
+            'Hittest','off',...
+            'Visible','off');
+        line_boundary=[line_boundary;l];
+    end
+    % adding sticker
+    sticker = text(mean(boundary(:,2)),mean(boundary(:,1)),name,...
+        'FontSize',6,...
+        'BackgroundColor',color,...
+        'EdgeColor','k',...
+        'Parent',ax,...
+        'Tag','Sticker',...
+        'Visible','on');
+    set(sticker,'ButtonDownFcn',{@click_sticker,patches(i),handles2});
+    
     patches(i).UserData = [];
     patches(i).UserData.Name = name;
     patches(i).UserData.Mask = mask;
-
+    patches(i).UserData.Line_Boundary = line_boundary;
+    patches(i).UserData.ImMask = im_mask;
+    patches(i).UserData.Selected = 0;
+    patches(i).UserData.Color = color;
+    patches(i).UserData.Alpha = alpha;
+    patches(i).UserData.Line_boundary = line_boundary;
+    patches(i).UserData.Sticker = sticker;
+    
 end
 
 if ~isempty(str_popup)
@@ -559,58 +658,6 @@ actualize_traces(handles);
 
 end
 
-function boxMask_Callback(src,~,handles)
-
-hm = findobj(handles.AxEdit,'Type','Patch','-not','Tag','Box');
-im = findobj(handles.AxEdit,'Tag','MainImage');
-region_table = findobj(src.Parent,'Tag','Region_table');
-selection = region_table.UserData.Selection;
-list_selected = region_table.Data(selection);
-
-delete(findobj(handles.AxEdit,'Tag','Mask'));
-        
-if src.Value 
-    %draw mask 
-    for i =1:length(hm)
-        color = hm(i).EdgeColor;
-        color_mask = cat(3, color(1)*ones(size(im.CData)),color(2)*ones(size(im.CData)),color(3)*ones(size(im.CData)));
-        mask = hm(i).UserData.Mask;
-        alpha = hm(i).FaceAlpha;
-
-        if sum(strcmp(list_selected,hm(i).UserData.Name))>0
-            image('CData',color_mask,...
-                'Parent',handles.AxEdit,...
-                'Tag','Mask',...
-                'Hittest','off',...
-                'AlphaData',alpha*mask);
-        else
-            B = bwboundaries(mask);
-            for j=1:length(B)
-                boundary = B{j};
-                line('XData',boundary(:,2),'YData',boundary(:,1),...
-                    'Color',color,...
-                    'Parent',handles.AxEdit,...
-                    'Tag','Mask',...
-                    'Hittest','off');
-                %             image('CData',color_mask,...
-                %                 'Parent',handles.AxEdit,...
-                %                 'Tag','Mask',...
-                %                 'Hittest','off',...
-                %                 'AlphaData',alpha*edge(mask,'canny'));
-            end
-        end
-        hm(i).Visible = 'off';
-    end
-    
-else
-    %draw mask
-   %delete(findobj(handles.AxEdit,'Tag','Mask'));
-    for i =1:length(hm)
-        hm(i).Visible = 'on';
-    end
-end
-
-end
 
 function boxEdit_Callback(src,~,handles)
 
@@ -619,6 +666,70 @@ if src.Value
     table.ColumnEditable = true;
 else
     table.ColumnEditable = false;
+end
+
+end
+
+function boxSticker_Callback(src,~,handles)
+
+sticks = findobj(handles.AxEdit,'Tag','Sticker');
+for i =1:length(sticks)
+    if src.Value
+        sticks(i).Visible = 'on';
+    else
+        sticks(i).Visible = 'off';
+    end
+end 
+
+end
+
+function radioMask_selection(~,~,handles)
+
+src = handles.radioMask;
+all_patches = findobj(handles.AxEdit,'Type','Patch');
+%all_boundaries = findobj(handles.AxEdit,'Tag','Boundary');
+%all_imagemasks = findobj(handles.AxEdit,'Tag','ImageMask');
+
+if strcmp(src.SelectedObject.String,'Patches')
+    %Patch visible
+    for i =1:length(all_patches)
+        all_patches(i).Visible = 'on';
+        color = all_patches(i).UserData.Color;
+        % check selected
+        if all_patches(i).UserData.Selected
+            all_patches(i).FaceColor=color;
+            all_patches(i).EdgeColor='k';
+        else
+            all_patches(i).FaceColor='none';
+            all_patches(i).EdgeColor=color;
+        end
+        % turn off masks
+        for j =1:length(all_patches(i).UserData.Line_Boundary)
+            all_patches(i).UserData.Line_Boundary(j).Visible = 'off';
+        end
+        all_patches(i).UserData.ImMask.Visible = 'off';
+    end
+
+elseif strcmp(src.SelectedObject.String,'Masks')
+    %Patch visible
+    for i =1:length(all_patches)
+         % turn off patches
+        all_patches(i).Visible = 'off';
+        color = all_patches(i).UserData.Color;
+        % check selected
+        if all_patches(i).UserData.Selected      
+            all_patches(i).UserData.ImMask.Visible = 'on';
+            for j =1:length(all_patches(i).UserData.Line_Boundary)
+                all_patches(i).UserData.Line_Boundary(j).Visible = 'off';
+            end
+        else
+            all_patches(i).UserData.ImMask.Visible = 'off';
+            for j =1:length(all_patches(i).UserData.Line_Boundary)
+                all_patches(i).UserData.Line_Boundary(j).Visible = 'on';
+            end
+        end
+
+    end
 end
 
 end
@@ -632,23 +743,24 @@ else
     hObj.UserData.Selection = [];
 end
 
-% Highlight patch
+% Deselect all patches
 patches = hObj.UserData.patches;
 for i =1:length(patches)
-     patches(i).LineWidth = 1;
-     patches(i).FaceColor = 'none';
+     patches(i).UserData.Selected = 0;
+     patches(i).UserData.Sticker.EdgeColor = 'k';
 end
-
+% Select  patches
 selection = hObj.UserData.Selection;
 if ~isempty(selection)
     for j =1:length(selection)
         index = selection(j);
-        patches(index).LineWidth = 2;
-        patches(index).FaceColor = patches(index).EdgeColor;
+        patches(index).UserData.Selected = 1;
+        patches(index).UserData.Sticker.EdgeColor = 'w';
     end
 end
 
-boxMask_Callback(handles.boxMask,[],handles);
+% update selection aspect
+radioMask_selection([],[],handles);
 
 end
 
@@ -658,7 +770,6 @@ patches = hObj.UserData.patches;
 selection = evnt.Indices(1);
 
 if ~strcmp(patches(selection).UserData.Name,evnt.PreviousData)
-    %disp('warning');
     warning('Problem updating region name (Selection/Name Mismatch).');
 else
     patches(selection).UserData.Name = char(evnt.NewData);
@@ -675,6 +786,21 @@ ax.UserData = 1;
 f.Pointer = 'hand';
 set(f,'WindowButtonMotionFcn', {@figure_motionFcn,ax});
 set(f,'WindowButtonUpFcn', {@unclickFcn,ax});
+
+end
+
+function click_sticker(hObj,~,patch,handles)
+
+if patch.UserData.Selected
+    patch.UserData.Selected = 0;
+    hObj.EdgeColor = 'k';
+else
+    patch.UserData.Selected = 1;
+    hObj.EdgeColor = 'w';
+end
+
+% update selection aspect
+radioMask_selection([],[],handles);
 
 end
 
@@ -742,15 +868,15 @@ im.CData = f.UserData.IM(:,:,cur_im);
 
 end
 
-function exportButton_Callback(hObj,~,F)
+function exportButton_Callback(hObj,~,file_recording)
 
 global SEED_REGION;
 f = hObj.Parent;
 region_table = findobj(f,'Tag','Region_table');
 
-if ~exist(fullfile(SEED_REGION,F.recording),'dir')
-    %rmdir(fullfile(SEED_REGION,F.recording),'s');
-    mkdir(fullfile(SEED_REGION,F.recording));
+if ~exist(fullfile(SEED_REGION,file_recording),'dir')
+    %rmdir(fullfile(SEED_REGION,file_recording),'s');
+    mkdir(fullfile(SEED_REGION,file_recording));
 end
 
 % Export Selection
@@ -770,7 +896,7 @@ for i=1:length(ind_export)
     z=0;
     % Writing into file
     filename = strcat('NLab-reg_',p.UserData.Name,sprintf('_%d_%d.U8',X,Y));
-    filename_full = fullfile(SEED_REGION,F.recording,filename);
+    filename_full = fullfile(SEED_REGION,file_recording,filename);
     fileID = fopen(filename_full,'w');
     fwrite(fileID,z,'uint8');
     fwrite(fileID,z,'uint8');
@@ -784,11 +910,11 @@ for i=1:length(ind_export)
     fclose(fileID);
     fprintf('NLab region successfully exported [%s].\n',filename);
 end
-%fprintf('NLab regions successfully exported [%s].\n',fullfile(SEED_REGION,F.recording));
+%fprintf('NLab regions successfully exported [%s].\n',fullfile(SEED_REGION,file_recording));
 
 end
 
-function importButton_Callback(hObj,~,F)
+function importButton_Callback(hObj,~,file_recording)
 
 global SEED_REGION;
 f = hObj.Parent;
@@ -797,7 +923,7 @@ ax = findobj(f,'Tag','AxEdit');
 cb1 = findobj(f,'Tag','boxPref');
 cb2 = findobj(f,'Tag','boxSuf');
 
-[files_regions,dir_regions] = uigetfile(fullfile(SEED_REGION,F.recording,'*.U8'),'Select Regions to Import','MultiSelect','on');
+[files_regions,dir_regions] = uigetfile(fullfile(SEED_REGION,file_recording,'*.U8'),'Select Regions to Import','MultiSelect','on');
 
 if dir_regions==0
     return;
