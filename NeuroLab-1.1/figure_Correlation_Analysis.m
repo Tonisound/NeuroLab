@@ -1450,10 +1450,10 @@ switch tag
         handles.Edit1.String = -10;
         handles.Edit2.String = 10;
     case {'Trace_Cerep'}
-        handles.Edit1.String = -5;
-        handles.Edit2.String = 15;
-%         handles.Edit1.String = -100;
-%         handles.Edit2.String = 500;
+%         handles.Edit1.String = -5;
+%         handles.Edit2.String = 15;
+        handles.Edit1.String = -100;
+        handles.Edit2.String = 500;
 end
 
 handles.Edit1.UserData.Previous = handles.Edit1.String;

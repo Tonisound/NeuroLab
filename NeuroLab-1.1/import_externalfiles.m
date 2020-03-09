@@ -137,7 +137,7 @@ for i=1:length(ind_traces)
     t = strrep(t,'BEHAVIOR_0_Position_continuous_estimate__Body_speed_(m/s)_B0_B0[B0]','SPEED');
     %t = regexprep(t,'[B0]','');
     % ACCEL
-    %t = regexprep(t,'Accelerometer_LFP_','');
+    t = regexprep(t,'[Accelerometer_LFP_','[');
     t = strrep(t,'ACCELEROMETER_0_Posture_power','ACCEL_POWER');
     t = strrep(t,'ACCELEROMETER_0_Source_filtered_for_posture','ACCEL');
     % EMG
@@ -161,7 +161,8 @@ for i=1:length(ind_traces)
         lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
         lines(ind_overwrite).XData = Xtemp;
         lines(ind_overwrite).YData = Ytemp;
-        fprintf('External Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
+        % fprintf('External Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
+        fprintf('External Trace successfully updated (%s)\n',t);
     else
         %line creation
         %str = lower(char(traces(ind_traces(i)).fullname));

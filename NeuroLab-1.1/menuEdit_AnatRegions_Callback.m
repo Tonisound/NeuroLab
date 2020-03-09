@@ -173,13 +173,11 @@ importButton = uicontrol('Style','pushbutton',...
     'String','Import',...
     'Tag','importButton',...
     'Parent',f);
-set(importButton,'Callback',{@importButton_Callback,file_recording});
 exportButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
     'String','Export',...
     'Tag','exportButton',...
     'Parent',f);
-set(exportButton,'Callback',{@exportButton_Callback,file_recording});
 
 % Time controls
 l_mean = findobj(handles.RightAxes,'Tag','Trace_Mean');
@@ -270,7 +268,8 @@ set(cancelButton,'Callback',{@cancelButton_callback,handles2});
 set(boxAtlas,'Callback',{@boxAtlas_Callback,handles2.AxEdit});
 set(boxEdit,'Callback',{@boxEdit_Callback,handles2});
 set(boxSticker,'Callback',{@boxSticker_Callback,handles2});
- 
+set(importButton,'Callback',{@importButton_Callback,file_recording,handles2});
+set(exportButton,'Callback',{@exportButton_Callback,file_recording});
 
 % Changing main image
 % n_images = 100;
@@ -329,24 +328,28 @@ for i = 1:length(patches)
         line_boundary=[line_boundary;l];
     end
     % adding sticker
+    if boxSticker.Value
+        sticker_status = 'on';
+    else
+        sticker_status = 'off';
+    end
     sticker = text(mean(boundary(:,2)),mean(boundary(:,1)),name,...
         'FontSize',6,...
         'BackgroundColor',color,...
         'EdgeColor','k',...
         'Parent',ax,...
         'Tag','Sticker',...
-        'Visible','on');
+        'Visible',sticker_status);
     set(sticker,'ButtonDownFcn',{@click_sticker,patches(i),handles2});
     
     patches(i).UserData = [];
     patches(i).UserData.Name = name;
     patches(i).UserData.Mask = mask;
-    patches(i).UserData.Line_Boundary = line_boundary;
-    patches(i).UserData.ImMask = im_mask;
     patches(i).UserData.Selected = 0;
     patches(i).UserData.Color = color;
     patches(i).UserData.Alpha = alpha;
-    patches(i).UserData.Line_boundary = line_boundary;
+    patches(i).UserData.Line_Boundary = line_boundary;
+    patches(i).UserData.ImMask = im_mask;
     patches(i).UserData.Sticker = sticker;
     
 end
@@ -381,35 +384,79 @@ end
 drawButton_callback(handles.drawButton,[],handles);
 
 % Patch creation
+load('Preferences.mat','GColors');
 color = rand(1,3);
+alpha = GColors.patch_transparency;
+patch_width = GColors.patch_width;
+alpha_mask = GColors.mask_transparency;
+
 hq = patch('XData',handles.drawButton.UserData.xdata,...
     'YData',handles.drawButton.UserData.ydata,...
     'FaceColor','none',...
     'EdgeColor',color,...
     'Tag',char(answer),...
-    'FaceAlpha',.5,...
-    'LineWidth',1,...
+    'FaceAlpha',alpha,...
+    'LineWidth',patch_width,...
     'Visible','on',...
     'Parent',handles.AxEdit);
 delete(findobj(handles.AxEdit,'Tag','Marker'));
 delete(findobj(handles.AxEdit,'Tag','Line'));
 handles.drawButton.UserData = [];
 
-
 % mask creation
 x_mask = handles.EditFigure.UserData.data_config.X;
 y_mask = handles.EditFigure.UserData.data_config.Y;
 new_mask = double(poly2mask(hq.XData,hq.YData,x_mask,y_mask));
+% adding mask
+cdata = repmat(permute(color,[3,1,2]),[size(new_mask,1),size(new_mask,2)]);
+im_mask = image('CData',cdata,...
+    'Parent',handles.AxEdit,...
+    'Tag','ImageMask',...
+    'Hittest','off',...
+    'AlphaData',alpha_mask*new_mask,...
+    'Visible','off');
+% adding boundary
+B = bwboundaries(new_mask);
+line_boundary=[];
+for j=1:length(B)
+    boundary = B{j};
+    l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+        'Color',color,...
+        'Parent',handles.AxEdit,...
+        'Tag','Boundary',...
+        'Hittest','off',...
+        'Visible','off');
+    line_boundary=[line_boundary;l];
+end
+% adding sticker
+if handles.boxSticker.Value
+    sticker_status = 'on';
+else
+    sticker_status = 'off';
+end
+sticker = text(mean(boundary(:,2)),mean(boundary(:,1)),char(answer),...
+    'FontSize',6,...
+    'BackgroundColor',color,...
+    'EdgeColor','k',...
+    'Parent',handles.AxEdit,...
+    'Tag','Sticker',...
+    'Visible',sticker_status);
+set(sticker,'ButtonDownFcn',{@click_sticker,hq,handles});
 
 % Updating UserData
 s.Name = char(answer);
 s.Mask = new_mask;
+s.Selected = 0;
+s.Color = color;
+s.Alpha = alpha;
+s.Line_Boundary = line_boundary;
+s.ImMask = im_mask;
+s.Sticker = sticker;
 hq.UserData = s;
 
 %update table
 handles.Region_table.UserData.patches = [handles.Region_table.UserData.patches;hq];
 handles.Region_table.Data = [handles.Region_table.Data;answer];
-
 
 end
 
@@ -460,6 +507,7 @@ end
 function applyButton_callback(~,~,handles)
 % Apply changes in the Edit Figure
 
+load('Preferences.mat','GColors');
 global IM;
 
 if ~isempty(handles.drawButton.UserData)
@@ -475,11 +523,35 @@ if ~isempty(handles.drawButton.UserData)
         p.XData = xdata;
         p.YData = ydata;
         
-        % mask creation
+        % mask update
         x_mask = size(IM,1);
         y_mask = size(IM,2);
         new_mask = double(poly2mask(p.XData,p.YData,x_mask,y_mask));
         p.UserData.Mask = new_mask;
+        
+        % update mask image
+        alpha_mask = GColors.mask_transparency;
+        p.UserData.ImMask.AlphaData = alpha_mask*new_mask;
+
+        % update boundary
+        delete(p.UserData.Line_Boundary);
+        B = bwboundaries(new_mask);
+        line_boundary = [];
+        for j=1:length(B)
+            boundary = B{j};
+            l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+                'Color',p.FaceColor,...
+                'Parent',handles.AxEdit,...
+                'Tag','Boundary',...
+                'Hittest','off',...
+                'Visible','off');
+            line_boundary = [line_boundary;l];
+        end
+        p.UserData.Line_Boundary = line_boundary;
+        
+        % update sticker
+        p.UserData.Sticker.Position(1) = mean(boundary(:,2));
+        p.UserData.Sticker.Position(2) = mean(boundary(:,1));
     else
         errordlg('Select region to update.');
         return;
@@ -498,10 +570,18 @@ function removeButton_callback(~,~,handles)
 selection = handles.Region_table.UserData.Selection;
 
 if ~isempty(handles.drawButton.UserData)
+    % deleting after Draw button
     delete(findobj(handles.AxEdit,'Tag','Marker'));
     delete(findobj(handles.AxEdit,'Tag','Line'));
     handles.drawButton.UserData = [];
 elseif ~isempty(selection)
+    % deleting Region
+    for i=1:length(selection)
+        index = selection(i);
+        delete(handles.Region_table.UserData.patches(index).UserData.Line_Boundary);
+        delete(handles.Region_table.UserData.patches(index).UserData.ImMask);
+        delete(handles.Region_table.UserData.patches(index).UserData.Sticker);
+    end
     delete(handles.Region_table.UserData.patches(selection));   
     handles.Region_table.UserData.patches(selection)=[];
     handles.Region_table.Data(selection,:)=[];
@@ -517,6 +597,10 @@ function mergeButton_callback(~,~,handles)
 % Merge selected patches
 
 selection = handles.Region_table.UserData.Selection;
+load('Preferences.mat','GColors');
+alpha = GColors.patch_transparency;
+patch_width = GColors.patch_width;
+alpha_mask = GColors.mask_transparency;
 
 if ~isempty(selection) && length(selection)>1
     
@@ -545,15 +629,16 @@ if ~isempty(selection) && length(selection)>1
     P = handles.Region_table.UserData.patches(selection);
     all_mask = [];
     all_colors = [];
+    all_sticker_positions = [];
     for i=1:length(P)
         mask = P(i).UserData.Mask;
         all_mask = cat(3,all_mask,mask);
-        all_colors = cat(3,all_colors,P(i).EdgeColor);
+        all_colors = cat(3,all_colors,P(i).UserData.Color);
+        all_sticker_positions = [all_sticker_positions;P(i).UserData.Sticker.Position(1) P(i).UserData.Sticker.Position(2)];
     end
     new_mask = double(sum(all_mask,3)>0);
     new_color = mean(all_colors,3);
     % Patch
-    % Adding whole region
     [y,x]= find(new_mask'==1);
     k = convhull(x,y);
     pxdata = x(k);
@@ -565,19 +650,60 @@ if ~isempty(selection) && length(selection)>1
         'FaceColor','none',...
         'EdgeColor',new_color,...
         'Tag',prefix,...
-        'FaceAlpha',.5,...
-        'LineWidth',1,...
+        'FaceAlpha',alpha,...
+        'LineWidth',patch_width,...
         'Visible','on',...
         'Parent',handles.AxEdit);
+    % adding mask
+    cdata = repmat(permute(new_color,[3,1,2]),[size(new_mask,1),size(new_mask,2)]);
+    im_mask = image('CData',cdata,...
+        'Parent',handles.AxEdit,...
+        'Tag','ImageMask',...
+        'Hittest','off',...
+        'AlphaData',alpha_mask*new_mask,...
+        'Visible','off');
+    % adding boundary
+    B = bwboundaries(new_mask);
+    line_boundary=[];
+    for j=1:length(B)
+        boundary = B{j};
+        l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+            'Color',new_color,...
+            'Parent',handles.AxEdit,...
+            'Tag','Boundary',...
+            'Hittest','off',...
+            'Visible','off');
+        line_boundary=[line_boundary;l];
+    end
+    % adding sticker
+    if handles.boxSticker.Value
+        sticker_status = 'on';
+    else
+        sticker_status = 'off';
+    end
+    sticker = text(mean(all_sticker_positions(:,1)),mean(all_sticker_positions(:,2)),prefix,...
+        'FontSize',6,...
+        'BackgroundColor',new_color,...
+        'EdgeColor','k',...
+        'Parent',handles.AxEdit,...
+        'Tag','Sticker',...
+        'Visible',sticker_status);
+    set(sticker,'ButtonDownFcn',{@click_sticker,hq,handles});
+    
     % Updating UserData
     s.Name = prefix;
     s.Mask = new_mask;
+    s.Selected = 0;
+    s.Color = new_color;
+    s.Alpha = alpha;
+    s.Line_Boundary = line_boundary;
+    s.ImMask = im_mask;
+    s.Sticker = sticker;
     hq.UserData = s;
     
     %update table
     handles.Region_table.UserData.patches = [handles.Region_table.UserData.patches;hq];
     handles.Region_table.Data = [handles.Region_table.Data;s.Name];
-
 end
 
 end
@@ -636,7 +762,7 @@ for i =1:length(patches)
         %set([hq;hl],'Visible','on');
         set(hl,'Visible','on');
     end
-    boxLabel_Callback(handles.LabelBox,[],handles);
+    % boxLabel_Callback(handles.LabelBox,[],handles);
     boxPatch_Callback(handles.PatchBox,[],handles);
     
     % Updating UserData
@@ -658,7 +784,6 @@ actualize_traces(handles);
 
 end
 
-
 function boxEdit_Callback(src,~,handles)
 
 table = handles.Region_table;
@@ -679,6 +804,8 @@ for i =1:length(sticks)
     else
         sticks(i).Visible = 'off';
     end
+    % bringing on top
+    uistack(sticks(i),'top');
 end 
 
 end
@@ -728,9 +855,19 @@ elseif strcmp(src.SelectedObject.String,'Masks')
                 all_patches(i).UserData.Line_Boundary(j).Visible = 'on';
             end
         end
-
     end
 end
+
+% updating selection
+selection = [];
+for ii =1:length(all_patches)
+    if all_patches(ii).UserData.Selected
+        index = find(strcmp(handles.Region_table.Data,all_patches(ii).UserData.Name)==1);
+        selection = [selection ;index(1)];
+    end
+end
+handles.Region_table.UserData.Selection = selection;
+% handles.Region_table.Data(selection)
 
 end
 
@@ -868,53 +1005,7 @@ im.CData = f.UserData.IM(:,:,cur_im);
 
 end
 
-function exportButton_Callback(hObj,~,file_recording)
-
-global SEED_REGION;
-f = hObj.Parent;
-region_table = findobj(f,'Tag','Region_table');
-
-if ~exist(fullfile(SEED_REGION,file_recording),'dir')
-    %rmdir(fullfile(SEED_REGION,file_recording),'s');
-    mkdir(fullfile(SEED_REGION,file_recording));
-end
-
-% Export Selection
-[ind_export,v] = listdlg('Name','Region Exportation','PromptString','Select Regions to export',...
-        'SelectionMode','multiple','ListString',region_table.Data,'InitialValue',[],'ListSize',[300 500]);
-
-% return if selection empty
-if v==0 || isempty(ind_export)
-    return;
-end
-
-for i=1:length(ind_export)
-    p = region_table.UserData.patches(ind_export(i));
-    mask = p.UserData.Mask;
-    X = size(p.UserData.Mask,2);
-    Y = size(p.UserData.Mask,1);
-    z=0;
-    % Writing into file
-    filename = strcat('NLab-reg_',p.UserData.Name,sprintf('_%d_%d.U8',X,Y));
-    filename_full = fullfile(SEED_REGION,file_recording,filename);
-    fileID = fopen(filename_full,'w');
-    fwrite(fileID,z,'uint8');
-    fwrite(fileID,z,'uint8');
-    fwrite(fileID,z,'uint8');
-    fwrite(fileID,X,'uint8');
-    fwrite(fileID,z,'uint8');
-    fwrite(fileID,z,'uint8');
-    fwrite(fileID,z,'uint8');
-    fwrite(fileID,Y,'uint8');
-    fwrite(fileID,mask,'uint8');
-    fclose(fileID);
-    fprintf('NLab region successfully exported [%s].\n',filename);
-end
-%fprintf('NLab regions successfully exported [%s].\n',fullfile(SEED_REGION,file_recording));
-
-end
-
-function importButton_Callback(hObj,~,file_recording)
+function importButton_Callback(hObj,~,file_recording,handles)
 
 global SEED_REGION;
 f = hObj.Parent;
@@ -922,6 +1013,11 @@ region_table = findobj(f,'Tag','Region_table');
 ax = findobj(f,'Tag','AxEdit');
 cb1 = findobj(f,'Tag','boxPref');
 cb2 = findobj(f,'Tag','boxSuf');
+
+load('Preferences.mat','GColors');
+alpha = GColors.patch_transparency;
+patch_width = GColors.patch_width;
+alpha_mask = GColors.mask_transparency;
 
 [files_regions,dir_regions] = uigetfile(fullfile(SEED_REGION,file_recording,'*.U8'),'Select Regions to Import','MultiSelect','on');
 
@@ -1034,14 +1130,102 @@ for i = 1:length(regions)
         'LineWidth',1,...
         'Visible','on',...
         'Parent',ax);
+    % adding mask
+    cdata = repmat(permute(color,[3,1,2]),[size(regions(i).mask,1),size(regions(i).mask,2)]);
+    im_mask = image('CData',cdata,...
+        'Parent',ax,...
+        'Tag','ImageMask',...
+        'Hittest','off',...
+        'AlphaData',alpha_mask*regions(i).mask,...
+        'Visible','off');
+    % adding boundary
+    B = bwboundaries(regions(i).mask);
+    line_boundary=[];
+    for j=1:length(B)
+        boundary = B{j};
+        l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+            'Color',color,...
+            'Parent',ax,...
+            'Tag','Boundary',...
+            'Hittest','off',...
+            'Visible','off');
+        line_boundary = [line_boundary;l];
+    end
+    % adding sticker
+    if handles.boxSticker.Value
+        sticker_status = 'on';
+    else
+        sticker_status = 'off';
+    end
+    sticker = text(mean(boundary(:,2)),mean(boundary(:,1)),char(regions(i).name),...
+        'FontSize',6,...
+        'BackgroundColor',color,...
+        'EdgeColor','k',...
+        'Parent',ax,...
+        'Tag','Sticker',...
+        'Visible',sticker_status);
+    set(sticker,'ButtonDownFcn',{@click_sticker,hq,handles});
+    
     % Updating UserData
     s.Name = char(regions(i).name);
     s.Mask = regions(i).mask;
+    s.Selected = 0;
+    s.Color = color;
+    s.Alpha = alpha;
+    s.Line_Boundary = line_boundary;
+    s.ImMask = im_mask;
+    s.Sticker = sticker;
     hq.UserData = s;
     
     %update table
     region_table.UserData.patches = [region_table.UserData.patches;hq];
     region_table.Data = [region_table.Data;{regions(i).name}];
 end
+
+end
+
+function exportButton_Callback(hObj,~,file_recording)
+
+global SEED_REGION;
+f = hObj.Parent;
+region_table = findobj(f,'Tag','Region_table');
+
+if ~exist(fullfile(SEED_REGION,file_recording),'dir')
+    %rmdir(fullfile(SEED_REGION,file_recording),'s');
+    mkdir(fullfile(SEED_REGION,file_recording));
+end
+
+% Export Selection
+[ind_export,v] = listdlg('Name','Region Exportation','PromptString','Select Regions to export',...
+        'SelectionMode','multiple','ListString',region_table.Data,'InitialValue',[],'ListSize',[300 500]);
+
+% return if selection empty
+if v==0 || isempty(ind_export)
+    return;
+end
+
+for i=1:length(ind_export)
+    p = region_table.UserData.patches(ind_export(i));
+    mask = p.UserData.Mask;
+    X = size(p.UserData.Mask,2);
+    Y = size(p.UserData.Mask,1);
+    z=0;
+    % Writing into file
+    filename = strcat('NLab-reg_',p.UserData.Name,sprintf('_%d_%d.U8',X,Y));
+    filename_full = fullfile(SEED_REGION,file_recording,filename);
+    fileID = fopen(filename_full,'w');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,X,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,z,'uint8');
+    fwrite(fileID,Y,'uint8');
+    fwrite(fileID,mask,'uint8');
+    fclose(fileID);
+    fprintf('NLab region successfully exported [%s].\n',filename);
+end
+%fprintf('NLab regions successfully exported [%s].\n',fullfile(SEED_REGION,file_recording));
 
 end
