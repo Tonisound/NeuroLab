@@ -5,6 +5,7 @@
 % User : Marta MATEI marta.matei@hotmail.fr
 % GUI opening function
 clear;
+clear global;
 close;
 
 % Addpath

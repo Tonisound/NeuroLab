@@ -30,7 +30,7 @@ ax.XTickLabel = '';
 ax.YTickLabel = '';
 ax.XLabel.String ='';
 ax.YLabel.String ='';
-axis(ax,'off');
+%axis(ax,'off');
 
 % Removing Pixel and Boxes
 delete(findobj(ax,'Tag','Box','-or','Tag','Pixel'));
@@ -195,7 +195,6 @@ f.UserData.l_cursor = l_cursor;
 l_cursor.Tag = 'T2';
 l_cursor.Color = 'r';
 l_cursor.HitTest = 'on';
-set(l_cursor,'ButtonDownFcn',{@click_l_cursor});
 
 t1 = uicontrol('Style','text',...
     'Units','normalized',...
@@ -254,7 +253,7 @@ ax_mean.Position = [.825 .2 .15 .1];
 okButton.Position = [.825 .1 .15 .05];
 cancelButton.Position = [.825 .05 .15 .05];
 
-% callback attribution
+% Callback attribution
 handles2 = guihandles(f);
 table_region.CellSelectionCallback = {@uitable_select,handles2};
 bg.SelectionChangedFcn = {@radioMask_selection,handles2};
@@ -270,6 +269,11 @@ set(boxEdit,'Callback',{@boxEdit_Callback,handles2});
 set(boxSticker,'Callback',{@boxSticker_Callback,handles2});
 set(importButton,'Callback',{@importButton_Callback,file_recording,handles2});
 set(exportButton,'Callback',{@exportButton_Callback,file_recording});
+
+% Interactive Control
+set(l_cursor,'ButtonDownFcn',{@click_l_cursor});
+set(ax,'ButtonDownFcn',{@axedit_clickFcn,handles2});
+% set(ax,'ButtonDownFcn','disp(1)');
 
 % Changing main image
 % n_images = 100;
@@ -340,6 +344,7 @@ for i = 1:length(patches)
         'Parent',ax,...
         'Tag','Sticker',...
         'Visible',sticker_status);
+    sticker.UserData.Patch = patches(i);
     set(sticker,'ButtonDownFcn',{@click_sticker,patches(i),handles2});
     
     patches(i).UserData = [];
@@ -441,6 +446,7 @@ sticker = text(mean(boundary(:,2)),mean(boundary(:,1)),char(answer),...
     'Parent',handles.AxEdit,...
     'Tag','Sticker',...
     'Visible',sticker_status);
+sticker.UserData.Patch = hq;
 set(sticker,'ButtonDownFcn',{@click_sticker,hq,handles});
 
 % Updating UserData
@@ -688,6 +694,7 @@ if ~isempty(selection) && length(selection)>1
         'Parent',handles.AxEdit,...
         'Tag','Sticker',...
         'Visible',sticker_status);
+    sticker.UserData.Patch = hq;
     set(sticker,'ButtonDownFcn',{@click_sticker,hq,handles});
     
     % Updating UserData
@@ -813,7 +820,7 @@ end
 function radioMask_selection(~,~,handles)
 
 src = handles.radioMask;
-all_patches = findobj(handles.AxEdit,'Type','Patch');
+all_patches = findobj(handles.AxEdit,'Type','Patch','-not','Tag','Movable_Box');
 %all_boundaries = findobj(handles.AxEdit,'Tag','Boundary');
 %all_imagemasks = findobj(handles.AxEdit,'Tag','ImageMask');
 
@@ -1164,6 +1171,7 @@ for i = 1:length(regions)
         'Parent',ax,...
         'Tag','Sticker',...
         'Visible',sticker_status);
+    sticker.UserData.Patch = hq;
     set(sticker,'ButtonDownFcn',{@click_sticker,hq,handles});
     
     % Updating UserData
@@ -1227,5 +1235,101 @@ for i=1:length(ind_export)
     fprintf('NLab region successfully exported [%s].\n',filename);
 end
 %fprintf('NLab regions successfully exported [%s].\n',fullfile(SEED_REGION,file_recording));
+
+end
+
+function axedit_clickFcn(hObj,~,handles)
+% Called when user clicks into AxEdit for sticker selection
+
+f = hObj.Parent;
+
+%load('Preferences.mat','GDisp','GTraces');
+pt_cp = round(get(hObj,'CurrentPoint'));
+Xlim = get(hObj,'XLim');
+Ylim = get(hObj,'YLim');
+
+% finding stickers positions
+all_stickers = findobj(handles.AxEdit,'Tag','Sticker');
+all_stickers_positions = [];
+for i=1:length(all_stickers)
+    all_stickers_positions = [all_stickers_positions ; all_stickers(i).Position];
+end
+all_stickers_positions = all_stickers_positions(:,1:2);
+
+if pt_cp(1,1)>Xlim(1) && pt_cp(1,1)<Xlim(2) && pt_cp(1,2)>Ylim(1) && pt_cp(1,2)<Ylim(2)
+    set(f,'Pointer','crosshair');            
+    
+    % User click in RightAxes for Box Selection
+    x = [pt_cp(1,1),pt_cp(1,1),pt_cp(1,1),pt_cp(1,1)];
+    y = [pt_cp(1,2),pt_cp(1,2),pt_cp(1,2),pt_cp(1,2)];
+    %Patch
+    patch('XData',x,'YData',y,...
+        'FaceColor','none',...
+        'EdgeColor','w',...
+        'Tag','Movable_Box',...
+        'FaceAlpha',.5,...
+        'LineWidth',1,...
+        'LineStyle',':',...
+        'Parent',handles.AxEdit);
+    
+    set(f,'WindowButtonMotionFcn', {@f_motionFcn,handles,all_stickers,all_stickers_positions});
+    set(f,'WindowButtonUpFcn',{@f_unclickFcn,handles,all_stickers,all_stickers_positions});
+end
+
+end
+
+function f_motionFcn(hObj,~,handles,all_stickers,all_stickers_positions)        
+
+pt2 = round(get(handles.AxEdit,'CurrentPoint'));
+Xlim2 = get(handles.AxEdit,'XLim');
+Ylim2 = get(handles.AxEdit,'YLim');
+
+if(pt2(1,1)>Xlim2(1) && pt2(1,1)<Xlim2(2) && pt2(1,2)>Ylim2(1) && pt2(1,2)<Ylim2(2))
+    if strcmp(get(hObj,'Pointer'),'arrow')
+        set(hObj,'Pointer','crosshair');
+    end
+    
+    if ~isempty(findobj(handles.AxEdit,'Tag','Movable_Box'))
+        reg = findobj(handles.AxEdit,'Tag','Movable_Box');
+        reg.XData(3) = pt2(1,1);
+        reg.XData(4) = pt2(1,1);
+        reg.YData(2) = pt2(1,2);
+        reg.YData(3) = pt2(1,2);
+    end
+    
+else
+    set(hObj,'Pointer','arrow');
+end
+
+end
+
+function f_unclickFcn(hObj,~,handles,all_stickers,all_stickers_positions)
+
+% finding selected sticker
+reg = findobj(handles.AxEdit,'Tag','Movable_Box');
+X = all_stickers_positions(:,1);
+Y = all_stickers_positions(:,2);
+X1 = reg.XData(2);
+X2 = reg.XData(3);
+Y1 = reg.YData(1);
+Y2 = reg.YData(2);
+ind_x = ((X-X1).*(X-X2))<=0;
+ind_y = ((Y-Y1).*(Y-Y2))<=0;
+%ind_xy = find(ind_x.*ind_y==1);
+selected_stickers = all_stickers(ind_x.*ind_y==1);
+
+% updating selection
+for i=1:length(selected_stickers)
+    p = selected_stickers(i).UserData.Patch;
+    p.UserData.Selected = 1-p.UserData.Selected;
+end
+% update layout
+radioMask_selection([],[],handles);
+
+% Delete Movable Box
+set(hObj,'Pointer','arrow');
+set(hObj,'WindowButtonMotionFcn','');
+set(hObj,'WindowButtonUp','');
+delete(reg);
 
 end
