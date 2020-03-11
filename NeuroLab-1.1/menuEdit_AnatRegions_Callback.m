@@ -51,11 +51,6 @@ tab1 = uitab('Parent',tabgp,...
     'Units','normalized',...
     'Title','Regions',...
     'Tag','MainTab');
-tab2 = uitab('Parent',tabgp,...
-    'Units','normalized',...
-    'Title','Groups',...
-    'Tag','SecondTab');
-
 table_region = uitable('Units','normalized',...
     'ColumnFormat',{'char'},...
     'ColumnWidth',{w_col},...
@@ -67,6 +62,24 @@ table_region = uitable('Units','normalized',...
     'RowStriping','on',...
     'Parent',tab1);
 table_region.UserData.Selection = [];
+table_region.UserData.patches = [];
+
+tab2 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Groups',...
+    'Tag','SecondTab');
+table_group = uitable('Units','normalized',...
+    'ColumnFormat',{'char'},...
+    'ColumnWidth',{w_col},...
+    'ColumnEditable',false,...
+    'ColumnName','',...
+    'Data',[],...
+    'RowName','',...
+    'Tag','Group_table',...
+    'RowStriping','on',...
+    'Parent',tab2);
+table_group.UserData.Selection = [];
+table_group.UserData.groups = [];
 
 % Checkboxes
 boxPref = uicontrol('Style','checkbox',...
@@ -85,13 +98,6 @@ boxSuf = uicontrol('Style','checkbox',...
     'Value',0,...
     'Tag','boxSuf',...
     'Parent',f);
-% radioMask = uicontrol('Style','radiobutton',...
-%     'Units','normalized',...
-%     'String','Patches|Masks',...
-%     'TooltipString','Display masks or patches',...
-%     'Value',1,...
-%     'Tag','radioMask',...
-%     'Parent',f);
 bg = uibuttongroup('Visible','on',...
     'Units','normalized',...
     'Position',[0 0 .2 1],...
@@ -120,10 +126,17 @@ boxAtlas = uicontrol('Style','checkbox',...
 boxAtlas.Value = handles.AtlasBox.Value;
 boxEdit = uicontrol('Style','checkbox',...
     'Units','normalized',...
-    'String','Edit names',...
-    'TooltipString','Enable Table Edition',...
+    'String','Edit regions',...
+    'TooltipString','Edit Region Table',...
     'Value',0,...
     'Tag','boxEdit',...
+    'Parent',f);
+boxEditGroup = uicontrol('Style','checkbox',...
+    'Units','normalized',...
+    'String','Edit groups',...
+    'TooltipString','Edit Group Table',...
+    'Value',0,...
+    'Tag','boxEditGroup',...
     'Parent',f);
 boxSticker = uicontrol('Style','checkbox',...
     'Units','normalized',...
@@ -158,6 +171,16 @@ mergeButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
     'String','Merge',...
     'Tag','mergeButton',...
+    'Parent',f);
+addgroupButton = uicontrol('Style','pushbutton',... 
+    'Units','normalized',...
+    'String','Add Group',...
+    'Tag','addgroupButton',...
+    'Parent',f);
+cleargroupButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Clear Group',...
+    'Tag','cleargroupButton',...
     'Parent',f);
 
 % Import buttons
@@ -227,14 +250,18 @@ f.Position = [.1 .3 .55 .5];
 mP.Position = [.01 .05 .18 .75];
 %table_region.Position = [.025 .05 .15 .75];
 table_region.Position = [0 0 1 1];
+table_group.Position = [0 0 1 1];
 % Adjust Columns
 mP.Units = 'pixels';
 table_region.ColumnWidth ={mP.Position(3)-w_margin};
+table_group.ColumnWidth ={mP.Position(3)-w_margin};
 mP.Units = 'normalized';
 %table_region.ColumnWidth = 1;
+
 bg.Position = [.01 .89 .09 .06];
 boxAtlas.Position = [.11 .89 .09 .03];
 boxEdit.Position = [.01 .86 .09 .03];
+boxEditGroup.Position = [.01 .83 .09 .03];
 boxSticker.Position = [.11 .92 .09 .03];
 boxPref.Position = [.11 .86 .09 .03];
 boxSuf.Position = [.11 .83 .09 .03];
@@ -243,9 +270,13 @@ editButton.Position = [.825 .85 .15 .05];
 duplicateButton.Position = [.825 .8 .15 .05];
 mergeButton.Position = [.825 .75 .15 .05];
 removeButton.Position = [.825 .7 .15 .05];
-registerButton.Position = [.825 .55 .15 .05];
-importButton.Position = [.825 .5 .15 .05];
-exportButton.Position = [.825 .45 .15 .05];
+
+addgroupButton.Position = [.825 .625 .15 .05];
+cleargroupButton.Position = [.825 .575 .15 .05];
+
+registerButton.Position = [.825 .5 .15 .05];
+importButton.Position = [.825 .45 .15 .05];
+exportButton.Position = [.825 .4 .15 .05];
 t1.Position = [.915 .3 .06 .04];
 pu1.Position = [.825 .3 .09 .05];
 ax_mean.Position = [.825 .2 .15 .1];
@@ -254,23 +285,30 @@ cancelButton.Position = [.825 .05 .15 .05];
 
 % Callback attribution
 handles2 = guihandles(f);
-table_region.CellSelectionCallback = {@uitable_select,handles2};
 bg.SelectionChangedFcn = {@radioMask_selection,handles2};
 set(newButton,'Callback',{@newButton_callback,handles2});
 set(editButton,'Callback',{@editButton_callback,handles2});
 set(duplicateButton,'Callback',{@duplicateButton_callback,handles2});
 set(removeButton,'Callback',{@removeButton_callback,handles2});
 set(mergeButton,'Callback',{@mergeButton_callback,handles2});
+set(addgroupButton,'Callback',{@addgroupButton_callback,handles2});
+set(cleargroupButton,'Callback',{@cleargroupButton_callback,handles2});
+
 set(okButton,'Callback',{@okButton_callback,handles,handles2,val});
 set(cancelButton,'Callback',{@cancelButton_callback,handles2});
 set(boxAtlas,'Callback',{@boxAtlas_Callback,handles2.AxEdit});
-set(boxEdit,'Callback',{@boxEdit_Callback,handles2});
+set(boxEdit,'Callback',{@boxEdit_Callback,handles2.Region_table});
+set(boxEditGroup,'Callback',{@boxEdit_Callback,handles2.Group_table});
 set(boxSticker,'Callback',{@boxSticker_Callback,handles2});
 set(importButton,'Callback',{@importButton_Callback,file_recording,handles2});
 set(exportButton,'Callback',{@exportButton_Callback,file_recording});
 
 % Interactive Control
+table_region.CellSelectionCallback = {@uitable_select,handles2};
 table_region.CellEditCallback = {@uitable_edit};
+
+table_group.CellSelectionCallback = {@uitablegroup_select,handles2};
+table_group.CellEditCallback = {@uitablegroup_edit};
 set(l_cursor,'ButtonDownFcn',{@click_l_cursor});
 set(ax,'ButtonDownFcn',{@axedit_clickFcn,handles2});
 % set(ax,'ButtonDownFcn','disp(1)');
@@ -495,9 +533,8 @@ if hObj.Value
         warning('Can only edit one region at once. Please select one region.');
         return;
     else
-        % converting region to markers and lines
+        % Converting region to line_marker
         p = handles.Region_table.UserData.patches(selection);
-        hObj.UserData.p = p;
         p.Visible = 'off';
         p.UserData.Line_Boundary.Visible = 'off';
         p.UserData.ImMask.Visible = 'off';
@@ -508,27 +545,33 @@ if hObj.Value
         xdata = [p.XData(:);p.XData(1)];
         ydata = [p.YData(:);p.YData(1)];
         
-        l_marker = line(xdata,ydata,'Tag','Marker','Marker',marker_type,'MarkerSize',marker_size,...
+        % drawing marker line
+        l_marker = line(xdata,ydata,'Tag','LineMarker','Marker',marker_type,'MarkerSize',marker_size,...
             'MarkerFaceColor',marker_color,'MarkerEdgeColor',marker_color,'Parent',ax,...
             'LineWidth',line_width,'LineStyle','-','Color',marker_color);
         set(l_marker,'ButtonDownFcn',{@click_l_marker,handles});
+        
+        % storing data
+        hObj.UserData.p = p;
         hObj.UserData.l_marker = l_marker;
     end
 else
-    % updating Region
+    % Converting region to line_marker
     p = hObj.UserData.p;
     l_marker = hObj.UserData.l_marker;
     % getting dots
     xdata = l_marker.XData;
     ydata = l_marker.YData;
     color = p.UserData.Color;
-    delete(findobj(handles.AxEdit,'Tag','Marker'));
+    
+    % clearing UserData
+    delete(findobj(handles.AxEdit,'Tag','LineMarker'));
+    hObj.UserData = [];
     
     % Patch update
     p.XData = xdata;
     p.YData = ydata;
     p.Visible = 'on';
-    
     % mask update
     x_mask = handles.EditFigure.UserData.data_config.X;
     y_mask = handles.EditFigure.UserData.data_config.Y;
@@ -538,7 +581,6 @@ else
     p.UserData.ImMask.AlphaData = alpha_mask*new_mask;
     p.UserData.ImMask.Visible = 'on';
     p.UserData.Mask = new_mask;
-    
     % adding boundary
     delete(p.UserData.Line_Boundary);
     B = bwboundaries(new_mask);
@@ -554,8 +596,7 @@ else
         line_boundary=[line_boundary;l];
     end
     p.UserData.Line_Boundary = line_boundary;
-    
-    % adding sticker
+    % sticker update
     if handles.boxSticker.Value
         sticker_status = 'on';
     else
@@ -569,8 +610,79 @@ end
 
 end
 
-function click_l_marker(hObj,~,handles)
-    disp('coucou');
+function click_l_marker(hObj,evnt,handles)
+
+ax = hObj.Parent;
+f = ax.Parent;
+
+% getting mouse click
+x = evnt.IntersectionPoint(1);
+y = evnt.IntersectionPoint(2);
+% finding closest marker
+D = (hObj.XData(1:end-1)-x).^2 + (hObj.YData(1:end-1)-y).^2;
+[val,index_closest] = min(D);
+% x_closest = hObj.XData(index_closest);
+% y_closest = hObj.YData(index_closest);
+if val<.1
+    clicked = 'marker';
+else
+    clicked = 'line';
+end
+% rounding x,y
+x = round(x);
+y = round(y);
+pt = [x;y;0];
+
+switch evnt.Button
+    case 1
+        % Left click
+        if strcmp(clicked,'marker')
+            % move marker until release            
+            f.Pointer = 'crosshair';
+            set(f,'WindowButtonMotionFcn', {@marker_motionFcn,hObj,index_closest});
+            set(f,'WindowButtonUpFcn', {@marker_unclickFcn});
+            
+        elseif strcmp(clicked,'line')
+            % adding marker
+            
+            % finding closest marker
+            index_v2 = index_closest;
+            index_v1 = index_closest-1;
+            if index_v1 == 0
+                index_v1 = length(hObj.XData)-1;
+            end
+            index_v3 = index_closest+1;
+            V2 = [hObj.XData(index_v2);hObj.YData(index_v2);0];
+            V1 = [hObj.XData(index_v1);hObj.YData(index_v1);0];
+            V3 = [hObj.XData(index_v3);hObj.YData(index_v3);0];
+            
+            % evaluate distance
+            d12 = point_to_line(pt,V1,V2);
+            d32 = point_to_line(pt,V3,V2);
+            if d32<d12
+                hObj.XData = [hObj.XData(1:index_closest),x,hObj.XData(index_closest+1:end)];
+                hObj.YData = [hObj.YData(1:index_closest),y,hObj.YData(index_closest+1:end)];
+            else
+                hObj.XData = [hObj.XData(1:index_closest-1),x,hObj.XData(index_closest:end)];
+                hObj.YData = [hObj.YData(1:index_closest-1),y,hObj.YData(index_closest:end)];
+            end
+        end
+        
+    case 3
+        % Right click
+        if strcmp(clicked,'marker')
+            % delete marker
+            hObj.XData(index_closest) = [];
+            hObj.YData(index_closest) = [];
+        end
+end
+
+end
+
+function d = point_to_line(pt,v1,v2)
+a = v1-v2;
+b = pt-v2;
+d = norm(cross(a,b))/norm(a);
 end
 
 function [xdata,ydata] = draw_patch(ax)
@@ -611,6 +723,10 @@ if length(xdata)>1
         'LineWidth',line_width,'Color',marker_color,'Parent',ax);
 end
 
+% rounding values
+xdata = round(xdata);
+ydata = round(ydata);
+
 end
 
 function removeButton_callback(~,~,handles)
@@ -632,6 +748,13 @@ if ~isempty(selection)
 else
     warning('Select region to remove.');
     return;
+end
+
+if handles.editButton.Value == 1
+    % clearing UserData
+    delete(findobj(handles.AxEdit,'Tag','LineMarker'));
+    handles.editButton.UserData = [];
+    handles.editButton.Value = 0;
 end
 
 end
@@ -853,6 +976,54 @@ end
 
 end
 
+function addgroupButton_callback(~,~,handles)
+% Add group of regions from selected patches
+
+selection = handles.Region_table.UserData.Selection;
+if isempty(selection)
+    warning('Please select regions to form group.');
+    return;
+end
+
+% adding existing groups
+
+% getting group name
+answer = inputdlg('Enter Group Name','Group creation',[1 60]);
+if ~isempty(handles.Group_table.Data)
+    while contains(char(answer),handles.Group_table.Data)
+        answer = inputdlg('Enter Group Name','Invalid name (Group already exists)',[1 60]);
+    end
+end
+
+if isempty(answer)
+    return;
+end
+
+group.Name = char(answer);
+group.Patches = handles.Region_table.UserData.patches(selection);
+
+%update table
+handles.Group_table.UserData.groups = [handles.Group_table.UserData.groups;group];
+handles.Group_table.Data = [handles.Group_table.Data;answer];
+
+end
+
+function cleargroupButton_callback(~,~,handles)
+% Remove group of regions
+
+selection = handles.Group_table.UserData.Selection;
+if ~isempty(selection)
+    % deleting Region
+    handles.Group_table.UserData.groups(selection)=[];
+    handles.Group_table.Data(selection,:)=[];
+    
+else
+    warning('Select group to remove.');
+    return;
+end
+
+end
+
 function cancelButton_callback(~,~,handles2)
     close(handles2.EditFigure);
 end
@@ -873,7 +1044,6 @@ end
 
 % Recreating new patches
 patches = handles2.Region_table.UserData.patches;
-
 for i =1:length(patches)
     p = patches(i);
     
@@ -918,7 +1088,6 @@ for i =1:length(patches)
     hl.UserData = s;
 end
 
-
 % Close figure and actualize traces
 handles2.EditFigure.UserData.success = true;
 % if val ==1
@@ -929,9 +1098,8 @@ actualize_traces(handles);
 
 end
 
-function boxEdit_Callback(src,~,handles)
+function boxEdit_Callback(src,~,table)
 
-table = handles.Region_table;
 if src.Value
     table.ColumnEditable = true;
 else
@@ -1045,6 +1213,7 @@ end
 
 % update selection aspect
 radioMask_selection([],[],handles);
+handles.Group_table.UserData.Selection = [];
 
 end
 
@@ -1061,6 +1230,59 @@ if sum(strcmp(tdata,evnt.NewData))>0
     hObj.Data(selection) = {evnt.PreviousData};
 else
     patches(selection).UserData.Name = char(evnt.NewData);
+end
+
+end
+
+function uitablegroup_select(hObj,evnt,handles)
+
+if ~isempty(evnt.Indices)
+    %hObj.UserData.Selection = unique(evnt.Indices(1,1));
+    hObj.UserData.Selection = unique(evnt.Indices(:,1));
+else
+    hObj.UserData.Selection = [];
+end
+
+% Deselect all patches
+patches = handles.Region_table.UserData.patches;
+for i =1:length(patches)
+     patches(i).UserData.Selected = 0;
+     patches(i).UserData.Sticker.EdgeColor = 'k';
+end
+
+% Select  patches
+selection = hObj.UserData.Selection;
+all_patches = [];
+if ~isempty(selection)
+    for j =1:length(selection)
+        index = selection(j);
+        patches = hObj.UserData.groups(index).Patches;
+        all_patches = [all_patches;patches];
+    end
+end
+for i = 1:length(all_patches)
+     all_patches(i).UserData.Selected = 1;
+     all_patches(i).UserData.Sticker.EdgeColor = 'w';
+end
+
+% update selection aspect
+radioMask_selection([],[],handles);
+handles.Region_table.UserData.Selection = [];
+
+end
+
+function uitablegroup_edit(hObj,evnt)
+
+tdata = hObj.Data;
+selection = evnt.Indices(1);
+tdata(selection)=[];
+
+if sum(strcmp(tdata,evnt.NewData))>0
+    warning('Group name already exists.');
+    %hObj.Data(selection) = {char(evnt.PreviousData)};
+    hObj.Data(selection) = {evnt.PreviousData};
+else
+    hObj.UserData.groups(selection).Name = char(evnt.NewData);
 end
 
 end
@@ -1115,6 +1337,29 @@ function unclickFcn(f,~,ax)
 set(f,'WindowButtonMotionFcn','');
 set(f,'WindowButtonUpFcn', '');
 ax.UserData = [];
+f.Pointer = 'arrow';
+
+end
+
+function marker_motionFcn(hObj,evnt,line_marker,index_closest)
+
+ax = line_marker.Parent;
+pt_rp = ax.CurrentPoint;
+Xlim = ax.XLim;
+Ylim = ax.YLim;
+
+%Move Cursor
+if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<Ylim(2))
+    line_marker.XData(index_closest) = round(pt_rp(1,1));
+    line_marker.YData(index_closest) = round(pt_rp(1,2));
+end
+
+end
+
+function marker_unclickFcn(f,~)
+
+set(f,'WindowButtonMotionFcn','');
+set(f,'WindowButtonUpFcn', '');
 f.Pointer = 'arrow';
 
 end
