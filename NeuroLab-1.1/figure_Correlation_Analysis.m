@@ -1507,8 +1507,10 @@ for i=1:length(ind_group)
     % If str_traces (from batch menu) is not empty use it as str_ref
     % Else use str_ref defined here
     if isempty(str_traces)
-        str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
-            {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'};{'X(m)'};{'Y(m)'}];
+%         str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
+%             {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'};{'X(m)'};{'Y(m)'}];
+        str_ref = [{'Power-theta/'};{'Power-gammalow/'};...
+            {'Power-gammamid/'};{'Power-gammahigh/'}];
     else
         str_ref = str_traces;
     end

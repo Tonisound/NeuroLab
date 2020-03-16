@@ -2,7 +2,7 @@ function success = import_lfptraces(F,handles,val)
 
 success = false;
 
-global DIR_SAVE DIR_CONFIG;
+global DIR_SAVE;
 load('Preferences.mat','GImport','GFilt');
 dir_save = fullfile(DIR_SAVE,F.nlab);
 
@@ -11,10 +11,19 @@ if nargin<3
     val=1;
 end
 
+% Loading Time_Reference.mat
 if exist(fullfile(dir_save,'Time_Reference.mat'),'file')
     data_t = load(fullfile(dir_save,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
 else
     errordlg(sprintf('Missing File %s',fullfile(dir_save,'Time_Reference.mat')));
+    return;
+end
+
+% Loading Config.mat
+if exist(fullfile(dir_save,'Config.mat'),'file')
+    data_c = load(fullfile(dir_save,'Config.mat'),'File','UiValues');
+else
+    errordlg(sprintf('Missing File %s',fullfile(dir_save,'Config.mat')));
     return;
 end
 
@@ -112,6 +121,7 @@ else
         % select all channels
         ind_channel = 1:length(channel_list);
         v = 1;
+        
     end
     
     if isempty(ind_channel)||v==0
@@ -212,6 +222,7 @@ switch GImport.Channel_loading
         traces = [traces_lfp,traces_remainder];   
 end
 
+
 % Direct Loading LFP traces
 load('Preferences.mat','GDisp','GTraces');
 g_colors = get(groot,'defaultAxesColorOrder');
@@ -222,6 +233,16 @@ if val ==1
 else
     ind_traces = 1:length(traces);
     ok = true;
+    
+%     % (additional code) importing only mainchannel in batch mode
+%     ind_mainchannel = find(strcmp({traces(:).fullname}',strcat('LFP/',data_c.File.mainlfp))==1);
+%     ind_traces = ind_mainchannel;
+%     ok = true;
+    
+    if isempty(ind_traces)
+        warning('Problem finding main lfp channel [%s].',folder_hd);
+        return;
+    end
 end
 
 if ~ok || isempty(ind_traces)
