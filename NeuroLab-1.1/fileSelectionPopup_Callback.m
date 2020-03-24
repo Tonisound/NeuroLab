@@ -139,6 +139,12 @@ actualize_controls(handles,UiValues)
 actualize_plot(handles);
 buttonAutoScale_Callback(handles.AutoScaleButton,[],handles);
 hObj.UserData = char(new);
+
+% Actualize BoxAtlas
+boxAtlas_Callback(handles.BoxAtlas,[],handles.CenterAxes);
+% Actualize BoxTimePatch
+boxTimePatch_Callback(handles.TimePatchBox,[],handles.RightAxes);
+
 set(handles.MainFigure, 'pointer', 'arrow');
 
 end

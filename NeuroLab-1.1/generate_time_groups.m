@@ -101,16 +101,20 @@ TimeGroups_frames = [tg_data.TimeGroups_frames;TimeGroups_frames];
 TimeGroups_duration = [tg_data.TimeGroups_duration;TimeGroups_duration];
 TimeGroups_S = [tg_data.TimeGroups_S;TimeGroups_S];
 
-fprintf('Time Groups Removed: [');
-for i =1:length(list_removed)-1
-    fprintf('%s - ',char(list_removed(i)));
+if ~isempty(list_removed)
+    fprintf('Time Groups Removed: [');
+    for i =1:length(list_removed)-1
+        fprintf('%s - ',char(list_removed(i)));
+    end
+    fprintf('%s].\n',char(list_removed(end)));
 end
-fprintf('%s].\n',char(list_removed(end)));
-fprintf('Time Groups Added: [');
-for i =1:length(list_added)-1
-    fprintf('%s - ',char(list_added(i)));
+if ~isempty(list_added)
+    fprintf('Time Groups Added: [');
+    for i =1:length(list_added)-1
+        fprintf('%s - ',char(list_added(i)));
+    end
+    fprintf('%s].\n',char(list_added(end)));
 end
-fprintf('%s].\n',char(list_added(end)));
 save(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
 fprintf('===> Saved at %s.mat\n',fullfile(savedir,'Time_Groups.mat'));
 

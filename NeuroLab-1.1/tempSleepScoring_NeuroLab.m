@@ -716,6 +716,7 @@ val = 1;
 MOV(handles,val)
 ACC(handles,val)
 LFP(handles,val)
+%LFP(handles,3)
 GetScore(handles)
 end
 
@@ -1408,21 +1409,3 @@ fig.UserData.score = score;
 fig.UserData.score_tag = score_tag;
 ShowScore(handles)
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
