@@ -11,9 +11,6 @@ switch strtrim(str(val,:))
     case 'Compute Normalized Movie'
         compute_normalizedmovie(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-    case 'Register Atlas'
-        NeuroShopStart(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,handles);
-
     case 'Convert Neuroshop Masks'
         convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,handles);
         

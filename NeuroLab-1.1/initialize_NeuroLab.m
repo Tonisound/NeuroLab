@@ -152,14 +152,11 @@ uimenu(m2,'Label','Edit Time Tags','Tag','EditMenu_TimeTagEdition');
 uimenu(m2,'Label','Edit Time Groups','Tag','EditMenu_TimeGroupEdition');
 uimenu(m2,'Label','Edit LFP Configuration','Tag','EditMenu_LFPConfig');
 uimenu(m2,'Label','Edit Anatomical Regions','Tag','EditMenu_AnatRegions');
-
-uimenu(m2,'Label','Register Atlas (Neuroshop)','Tag','EditMenu_Neuroshop','Separator','on');
-
+% uimenu(m2,'Label','Register Atlas (Neuroshop)','Tag','EditMenu_Neuroshop','Separator','on');
 uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','on');
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
 uimenu(m2,'Label','Delete Region Traces','Tag','EditMenu_Delete_Regions');
 uimenu(m2,'Label','Delete Cereplex Traces','Tag','EditMenu_Delete_Spiko');
-
 uimenu(m2,'Label','Actualize Traces','Tag','ImportMenu_ActualizeTraces','Separator','on');
 
 % handles.DisplayMenu
@@ -646,7 +643,7 @@ set(myhandles.EditMenu_TimeTagEdition,'Callback','menuEdit_TimeTagEdition_Callba
 set(myhandles.EditMenu_TimeGroupEdition,'Callback','menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.EditMenu_LFPConfig,'Callback','menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.EditMenu_AnatRegions,'Callback','menuEdit_AnatRegions_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,myhandles);');
-set(myhandles.EditMenu_Neuroshop,'Callback','NeuroShopStart(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,myhandles);');
+% set(myhandles.EditMenu_Neuroshop,'Callback','NeuroShopStart(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,myhandles);');
 set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhandles});
 set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});

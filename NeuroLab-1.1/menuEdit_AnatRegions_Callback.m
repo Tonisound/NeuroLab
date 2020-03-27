@@ -31,6 +31,8 @@ ax.YTickLabel = '';
 ax.XLabel.String ='';
 ax.YLabel.String ='';
 %axis(ax,'off');
+ax.UserData.NeuroShop = [];
+ax.UserData.data_atlas = [];
 
 % Removing Pixel and Boxes
 delete(findobj(ax,'Tag','Box','-or','Tag','Pixel'));
@@ -212,8 +214,19 @@ cleargroupButton = uicontrol('Style','pushbutton',...
 registerButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
     'String','Register Atlas',...
-    'Enable','off',...
     'Tag','registerButton',...
+    'Parent',f);
+register_okButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Ok',...
+    'Tag','register_okButton',...
+    'Visible','off',...
+    'Parent',f);
+register_cancelButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Cancel',...
+    'Tag','register_cancelButton',...
+    'Visible','off',...
     'Parent',f);
 importButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
@@ -300,11 +313,11 @@ edit_cancelButton.Position = [.9 .85 .075 .05];
 duplicateButton.Position = [.825 .8 .15 .05];
 mergeButton.Position = [.825 .75 .15 .05];
 removeButton.Position = [.825 .7 .15 .05];
-
 addgroupButton.Position = [.825 .625 .15 .05];
 cleargroupButton.Position = [.825 .575 .15 .05];
-
 registerButton.Position = [.825 .5 .15 .05];
+register_okButton.Position = [.825 .5 .075 .05];
+register_cancelButton.Position = [.9 .5 .075 .05];
 importButton.Position = [.825 .45 .15 .05];
 exportButton.Position = [.825 .4 .15 .05];
 t1.Position = [.915 .3 .06 .04];
@@ -329,14 +342,18 @@ set(mergeButton,'Callback',{@mergeButton_callback,handles2});
 set(addgroupButton,'Callback',{@addgroupButton_callback,handles2});
 set(cleargroupButton,'Callback',{@cleargroupButton_callback,handles2});
 
+set(importButton,'Callback',{@importButton_Callback,file_recording,handles2});
+set(exportButton,'Callback',{@exportButton_Callback,file_recording});
+set(registerButton,'Callback',{@registerButton_Callback,handles2,folder_name,handles2.AxEdit,val});
+set(register_okButton,'Callback',{@register_okButton_Callback,handles2,handles,folder_name,file_recording,handles2.AxEdit});
+set(register_cancelButton,'Callback',{@register_cancel_Callback,handles2,handles2.AxEdit});
+
 set(okButton,'Callback',{@okButton_callback,handles,handles2,val});
 set(cancelButton,'Callback',{@cancelButton_callback,handles2});
 set(boxAtlas,'Callback',{@boxAtlas_Callback,handles2.AxEdit});
 set(boxEdit,'Callback',{@boxEdit_Callback,handles2.Region_table});
 set(boxEditGroup,'Callback',{@boxEdit_Callback,handles2.Group_table});
 set(boxSticker,'Callback',{@boxSticker_Callback,handles2});
-set(importButton,'Callback',{@importButton_Callback,file_recording,handles2});
-set(exportButton,'Callback',{@exportButton_Callback,file_recording});
 
 % Interactive Control
 table_region.CellSelectionCallback = {@uitable_select,handles2};
@@ -440,7 +457,7 @@ else
     table_region.UserData.patches = [];
 end
 
-waitfor(f);
+%waitfor(f);
 success = true;
 
 end
@@ -1130,6 +1147,136 @@ else
     warning('Select group to remove.');
     return;
 end
+
+end
+
+function registerButton_Callback(hObj,~,handles,savedir,ax,val)
+% Allow for atlas registration onto axis ax
+
+% Trying to load existing Atlas 
+if exist(fullfile(savedir,'Atlas.mat'),'file')
+    data_atlas = load(fullfile(savedir,'Atlas.mat'));
+    fprintf('File Atlas.mat loaded [%s].\n',fullfile(savedir,'Atlas.mat'));
+else
+    data_atlas = [];
+    fprintf('No existing file Atlas.mat found [%s].\n',fullfile(savedir,'Atlas.mat'));
+end
+ax.UserData.data_atlas = data_atlas;
+
+% Keeping track
+hObj.UserData.cell_visible = handles.Region_table.Data(:,2);
+hObj.UserData.boxsticker_value = handles.boxSticker.Value;
+hObj.UserData.boxatlas_value = handles.boxAtlas.Value;
+
+% Turning all regions and stickers invisible
+handles.Region_table.Data(:,2) = repmat({'0'},[size(handles.Region_table.Data,1) 1]);
+radioMask_selection([],[],handles);
+handles.boxSticker.Value = 0;
+boxSticker_Callback(handles.boxSticker,[],handles);
+handles.boxAtlas.Value = 0;
+boxAtlas_Callback(handles.boxAtlas,[],ax);
+
+% Setting all buttons to off
+handles.registerButton.Visible ='off';
+all_buttons = findobj(handles.EditFigure,'Style','pushbutton',...
+    '-not','Tag','visibleButton','-not','Tag','invisibleButton');
+for i =1:length(all_buttons)
+    all_buttons(i).Enable = 'off';
+end
+handles.register_okButton.Visible ='on';
+handles.register_okButton.Enable ='on';
+handles.register_cancelButton.Visible ='on';
+handles.register_cancelButton.Enable ='on';
+
+% Initialize ax.UserData.NeuroShop depending on ax.UserData.data_atlas
+% Enable Interactive control on ax
+set_interactive_Neuroshop(ax,val);
+
+end
+
+function register_okButton_Callback(~,~,handles,old_handles,savedir,file_recording,ax)
+% Validate Altas registration
+
+% Create Atlas based Mask
+CreateMask(1,ax);
+
+% Export NeuroShop masks
+ExportMask(savedir,ax);
+
+% updating FILES
+% global FILES CUR_FILE;
+% data_c = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'File');
+% FILES(CUR_FILE) = data_c.File;
+
+% Converting masks in binary files
+convert_neuroshop_masks(savedir,file_recording,old_handles);
+
+% Updating Config.mat
+data_c = load(fullfile(savedir,'Config.mat'),'File');
+File = data_c.File;
+File.atlas_type = ax.UserData.NeuroShop.AtlasType;
+File.bregma_xy = ax.UserData.NeuroShop.BregmaXY;
+File.bregma_z = ax.UserData.NeuroShop.BregmaZ;
+save(fullfile(savedir,'Config.mat'),'File','-append');
+fprintf('File Config.mat updated [%s].\n',fullfile(savedir,'Config.mat'));
+
+% Updating Mask atlas in main GUI
+line_x = ax.UserData.NeuroShop.line_x;
+line_z = ax.UserData.NeuroShop.line_z;
+delete(findobj(old_handles.CenterAxes,'Tag','AtlasMask'));
+l = line('XData',line_x,'YData',line_z,'Tag','AtlasMask',...
+    'LineWidth',1,'Color','w','Parent',old_handles.CenterAxes);
+l.Color(4) = 1;
+boxAtlas_Callback(old_handles.AtlasBox,[],old_handles.CenterAxes);
+
+% Updating Current Atlas Edit GUI
+atlasmask = findobj(ax,'Tag','AtlasMask');
+atlasmask.XData = line_x;
+atlasmask.YData = line_z;
+
+% Turning things off
+register_cancel_Callback([],[],handles,ax);
+
+end
+
+function register_cancel_Callback(~,~,handles,ax)
+% Turning off AtLas registration
+
+ax.UserData.NeuroShop = [];
+ax.UserData.data_atlas = [];
+
+% Removing Atlas Handles
+delete(findobj(handles.EditFigure,'Tag','TemporaryAtlasMask'));
+delete(findobj(handles.EditFigure,'Tag','AtlasHandle'));
+ax.Title.String = '';
+ax.XLabel.String = '';
+ax.YLabel.String = '';
+
+% Turning off interactive control
+set (handles.EditFigure, 'WindowButtonDownFcn', '');
+set (handles.EditFigure, 'WindowButtonMotionFcn', '');
+set (handles.EditFigure, 'KeyPressFcn', '');
+set(handles.EditFigure,'Pointer','arrow');
+
+% Turning all regions and stickers visible
+% handles.Region_table.Data(:,2) = repmat({'1'},[size(handles.Region_table.Data,1) 1]);
+handles.Region_table.Data(:,2) = handles.registerButton.UserData.cell_visible;
+radioMask_selection([],[],handles);
+% handles.boxSticker.Value = 1;
+handles.boxSticker.Value = handles.registerButton.UserData.boxsticker_value;
+boxSticker_Callback(handles.boxSticker,[],handles);
+% handles.boxAtlas.Value = 1;
+handles.boxAtlas.Value = handles.registerButton.UserData.boxatlas_value;
+boxAtlas_Callback(handles.boxAtlas,[],ax);
+
+% Setting all buttons to on
+handles.register_okButton.Visible ='off';
+handles.register_cancelButton.Visible ='off';
+all_buttons = findobj(handles.EditFigure,'Style','pushbutton');
+for i =1:length(all_buttons)
+    all_buttons(i).Enable = 'on';
+end
+handles.registerButton.Visible ='on';
 
 end
 
@@ -1868,5 +2015,898 @@ set(hObj,'Pointer','arrow');
 set(hObj,'WindowButtonMotionFcn','');
 set(hObj,'WindowButtonUp','');
 delete(reg);
+
+end
+
+%% NeuroShop functions
+
+function success = set_interactive_Neuroshop(ax,val)
+% Add graphical controls for Atlas registration based on Neuroshop code
+% if ax.UserData.data_atlas not empty, uses existing parameters
+% else initialize NeuroShop structure 
+% Store registration in ax.UserData.NeuroShop
+
+success = false;
+
+% val indicates callback provenance (0 : batch mode - 1 : user mode)
+if nargin < 2
+    val=1;
+end
+
+% Initialization
+setappdata(0,'UseNativeSystemDialogs',0);
+set(0,'DefaultLineLineSmoothing','on')
+set(0,'DefaultPatchLineSmoothing','on')
+H = 750;
+
+fig = ax.Parent;
+%fig.UserData.success = false;
+fig.UserData.val = val;
+
+%test_temp  = false ;
+if ~isempty(ax.UserData.data_atlas)
+    d = ax.UserData.data_atlas;
+    NeuroShop.AtlasType = d.AtlasType;
+    NeuroShop.AtlasName = d.AtlasName;
+    NeuroShop.AtlasOn = d.AtlasOn;
+    NeuroShop.BregmaXY = d.BregmaXY;
+    NeuroShop.BregmaZ = d.BregmaZ;
+    NeuroShop.scaleX = d.scaleX;
+    NeuroShop.scaleY = d.scaleY;
+    NeuroShop.scaleZ = d.scaleZ;
+    NeuroShop.theta = d.theta;
+    NeuroShop.phi = d.phi;
+    NeuroShop.xyfig = d.xyfig;
+    NeuroShop.PatchCorner = d.PatchCorner;
+else
+    NeuroShop.AtlasType = 1;      % 1 = rat coronal ; 2 = rat sagital ; 3 =  souris coronal ; 4 = souris sagital
+    NeuroShop.AtlasName = 'RatAtlasCor';
+    NeuroShop.AtlasOn = 1;
+end
+% Initialize NeuroShop
+NeuroShop.JustMoved = 0;
+NeuroShop.fig = fig;
+NeuroShop.CustomROIs.Nb = 0;
+NeuroShop.MaskType = 0;
+NeuroShop.MaskErodeSize = 0;  % mm
+NeuroShop.MaskDiskNx = 15;
+NeuroShop.MaskDiskNz = 10;
+NeuroShop.MaskDiskWidth = 14; % mm
+NeuroShop.MaskDiskDepth = 10; % mm
+
+% Passing ax to NeuroShop
+NeuroShop.ax = ax;
+NeuroShop.hmsg = text(100,H/3,'[Loading Atlas data ...]',...
+    'Units','Pixels','FontSize',16,'Color',[0.6 0.6 0.6],...
+    'BackgroundColor','w','Parent',NeuroShop.ax);
+drawnow;
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+% default Atlas loading
+%fprintf('Loading Atlas data...');
+fig.Pointer = 'watch';
+drawnow;
+NeuroShop_LoadAtlas_Image(NeuroShop.AtlasType,ax);
+%fprintf(' done.\n');
+fig.Pointer = 'arrow';
+
+% Image loading
+% NeuroShop_LoadImage([],[],ax);
+
+%NeuroShop = UpdateView(NeuroShop,ax);
+UpdateView(ax);
+
+% Wait for figure closing
+% waitfor(fig);
+% NeuroShop.fig.UserData.success = true;
+success = true;
+
+end
+
+function NeuroShop_LoadAtlas_Image(type,ax)
+
+%global NeuroShop;
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+
+% Loading Atlas
+switch type
+    case 1
+        %load('./Atlas/Rat/AtlasCor.mat');
+        load('AtlasCor.mat');
+        NeuroShop.AtlasName='RatAtlasCor';
+        NeuroShop.Atlas=AtlasCor;
+        for fig=1:length(NeuroShop.Atlas.Fig)
+            for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id)
+                NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.x;
+            end
+        end
+        NeuroShop.Atlas.XY=NeuroShop.Atlas.X;
+        NeuroShop.Atlas.V=NeuroShop.Atlas.Y;
+    case 2
+        %load('./Atlas/Rat/AtlasSag.mat');
+        load('AtlasSag.mat');
+        NeuroShop.AtlasName='RatAtlasSag';
+        NeuroShop.Atlas=AtlasSag;
+        for fig=1:length(NeuroShop.Atlas.Fig);for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id);NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.y;end;end
+        NeuroShop.Atlas.XY=NeuroShop.Atlas.Y;
+        NeuroShop.Atlas.V=NeuroShop.Atlas.X;
+    case 3
+        %load('./Atlas/Mouse/MouseAtlasCor.mat');
+        load('MouseAtlasCor.mat');
+        NeuroShop.AtlasName='MouseAtlasCor';
+        NeuroShop.Atlas=AtlasCor;
+        for fig=1:length(NeuroShop.Atlas.Fig);for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id);NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.x;end;end
+        NeuroShop.Atlas.XY=NeuroShop.Atlas.X;
+        NeuroShop.Atlas.V=NeuroShop.Atlas.Y;
+    case 4
+        %load('./Atlas/Mouse/MouseAtlasSag.mat');
+        load('MouseAtlasSag.mat');
+        NeuroShop.AtlasName='MouseAtlasSag';
+        NeuroShop.Atlas=AtlasSag;
+        for fig=1:length(NeuroShop.Atlas.Fig);for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id);NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.y;end;end
+        NeuroShop.Atlas.XY=NeuroShop.Atlas.Y;
+        NeuroShop.Atlas.V=NeuroShop.Atlas.X;
+    case 5
+        %load('./Atlas/Mouse/MouseAtlasCorAllen.mat');
+        load('MouseAtlasCorAllen.mat');
+        NeuroShop.AtlasName='MouseAtlasCorAllen';
+        NeuroShop.Atlas=AtlasCor;
+        for fig=1:length(NeuroShop.Atlas.Fig);for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id);NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.x;end;end
+        NeuroShop.Atlas.XY=NeuroShop.Atlas.X;
+        NeuroShop.Atlas.V=NeuroShop.Atlas.Y;
+    case 6
+        NeuroShop.AtlasOn = ~NeuroShop.AtlasOn;
+        type = NeuroShop.AtlasType;
+end
+
+NeuroShop.AtlasType=type;
+% if ~isempty(obj)
+%     NeuroShop = UpdateView(NeuroShop,ax);
+% end
+
+% Loading Image
+im = findobj(ax.Parent,'Tag','MainImage');
+NeuroShop.Data.DopplerView = im.CData;
+if ~isfield(NeuroShop.Data,'dr')
+    NeuroShop.Data.dr=0.08;
+    NeuroShop.Data.drz=0.1;
+end
+NeuroShop.MaskVisibility=0;
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+end
+
+function UpdateView(ax)
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+
+set(0,'DefaultLineLineSmoothing','on')
+set(0,'DefaultPatchLineSmoothing','on')
+Doppler = NeuroShop.Data.DopplerView;
+
+s = size(Doppler);
+Mz1 = size(Doppler,1);
+My1 = size(Doppler,2);
+H = 1.2*Mz1;
+L = 1.2*(My1);
+lcolors = lines(32);
+atlascolor = [1 1 1];
+
+if ~isfield(NeuroShop,'BregmaXY')
+    NeuroShop.BregmaXY=round(My1/2);
+end
+if ~isfield(NeuroShop,'BregmaZ')
+    NeuroShop.BregmaZ=10;
+end
+
+if ~isfield(NeuroShop,'scaleX')
+    NeuroShop.scaleX=1;
+end
+if ~isfield(NeuroShop,'scaleY')
+    NeuroShop.scaleY=1;
+end
+if ~isfield(NeuroShop,'scaleZ')
+    NeuroShop.scaleZ=1;
+end
+
+% accelerate drawing
+if ~isfield(NeuroShop.Atlas.Fig{1},'XY')
+    for fig=1:length(NeuroShop.Atlas.Fig)
+        NeuroShop.Atlas.Fig{fig}.XY=[];
+        NeuroShop.Atlas.Fig{fig}.Z=[];
+        for k=2:length(NeuroShop.Atlas.Fig{fig}.Plot.Id)
+            NeuroShop.Atlas.Fig{fig}.XY=[NeuroShop.Atlas.Fig{fig}.XY -NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy*1e3 NaN];
+            NeuroShop.Atlas.Fig{fig}.Z=[NeuroShop.Atlas.Fig{fig}.Z NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.z*1e3 NaN];
+        end
+    end
+    
+%     if isfield(NeuroShop,'xyfig')
+%         NeuroShop = rmfield(NeuroShop,'xyfig');
+%     end
+end
+
+if ~isfield(NeuroShop,'theta')
+    NeuroShop.theta=0;
+    NeuroShop.phi=0;
+end
+
+if ~isfield(NeuroShop,'xyfig')
+    [a,b]=min(abs(NeuroShop.Atlas.V));
+    NeuroShop.xyfig=b;
+    %NeuroShop = CreateRegionMask(NeuroShop);
+end
+
+if ~isfield(NeuroShop,'AP_bregma')
+    NeuroShop.AP_bregma = 3.00 - ((NeuroShop.xyfig-11)/80)*9.96;
+end
+
+if ~isfield(NeuroShop,'AtlasVisible')
+    NeuroShop.AtlasVisible = 1;
+end
+
+% set(NeuroShop.hmsg,'String','');
+delete(NeuroShop.hmsg);
+
+Z = (((1:size(Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
+X = (((1:size(Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
+S.X = X;
+S.Z = Z;
+S.Doppler = Doppler;
+
+if NeuroShop.MaskVisibility==0
+
+    % Deleting existing objects
+    delete(findobj(NeuroShop.fig,'Tag','TemporaryAtlasMask'));
+    delete(findobj(NeuroShop.fig,'Tag','AtlasHandle'));
+    
+    if(NeuroShop.AtlasOn)
+        [line_x,line_z]=rot_scaled(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.XY*NeuroShop.scaleX,...
+            NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Z*NeuroShop.scaleZ,NeuroShop.theta,S);
+        line('XData',line_x,'YData',line_z,'LineWidth',1,'Color',atlascolor,...
+            'Tag','TemporaryAtlasMask','Parent',ax);
+    
+        mz = 2*NeuroShop.scaleZ;
+        mx = 2*NeuroShop.scaleX;
+        NeuroShop.PatchCorner{1}=[mz mx];
+        % hold on;
+        
+        % Storing NeuroShop in ax.UserData
+        ax.UserData.NeuroShop = NeuroShop;
+
+        [x,z]=rot_scaled([-mx mx],[0 0],NeuroShop.theta,S);
+        line('XData',x,'YData',z,'LineStyle','--','LineWidth',2,'Color',[1 1 1],'Parent',ax,'Tag','AtlasHandle');
+        [x,z]=rot_scaled([-mx mx],[mz mz],NeuroShop.theta,S);
+        line('XData',x,'YData',z,'LineStyle','--','LineWidth',1,'Color',[1 1 1],'Parent',ax,'Tag','AtlasHandle');
+        [x,z]=rot_scaled([mx mx],[0 mz],NeuroShop.theta,S);
+        line('XData',x,'YData',z,'LineStyle','--','LineWidth',1,'Color',[1 1 1],'Parent',ax,'Tag','AtlasHandle');
+        [x,z]=rot_scaled([-mx -mx],[0 mz],NeuroShop.theta,S);
+        line('XData',x,'YData',z,'LineStyle','--','LineWidth',1,'Color',[1 1 1],'Parent',ax,'Tag','AtlasHandle');
+        [x,z]=rot_scaled([-mx-0.5 -mx+0.5],[mz-1 mz+1],NeuroShop.theta,S);
+        line('XData',x,'YData',z,'LineWidth',2,'Color',[1 1 1],'Parent',ax,'Tag','AtlasHandle');
+        % Interactive Control
+        [x,z]=rot_scaled([2 2 -2 -2]*0.1,[2 -2 -2 2]*0.1,NeuroShop.theta,S);
+        patch(x,z,'w','ButtonDownFcn',{@ClickPatchBregma,ax},'Parent',ax,'Tag','AtlasHandle');
+        [x,z]=rot_scaled([2 2 -2 -2]*0.1,mz+[2 -2 -2 2]*0.1,NeuroShop.theta,S);
+        patch(x,z,'w','ButtonDownFcn',{@ClickPatchMove,ax},'Parent',ax,'Tag','AtlasHandle');
+        [x,z]=rot_scaled([2 2 -2 -2]*0.1+NeuroShop.Atlas.V(NeuroShop.xyfig)/4,[2 -2 -2 2]*0.1+Z(1),0,S);
+        patch(x,z,'w','ButtonDownFcn',{@ClickPatchViewPaxinos,ax},'Parent',ax,'Tag','AtlasHandle');
+        [x,z]=rot_scaled(mx+[2 2 -2 -2]*0.1,mz+[2 -2 -2 2]*0.1,NeuroShop.theta,S);
+        patch(x,z,'w','ButtonDownFcn',{@ClickPatchCorner,ax},'Parent',ax,'Tag','AtlasHandle');
+        [x,z]=rot_scaled(-mx+[2 2 -2 -2]*0.1,mz+[2 -2 -2 2]*0.1,NeuroShop.theta,S);
+        patch(x,z,'w','ButtonDownFcn',{@ClickPatchCornerRotate,ax},'Parent',ax,'Tag','AtlasHandle');
+        % Making Visible/invisible
+        all_temp = findobj(NeuroShop.fig,'Tag','TemporaryAtlasMask');
+        all_handles = findobj(NeuroShop.fig,'Tag','AtlasHandle');
+        if NeuroShop.AtlasVisible ==0
+            all_temp.Visible = 'off';
+            for i=1:length(all_handles)
+                all_handles(i).Visible ='off';
+            end
+        else
+            all_temp.Visible = 'on';
+            for i=1:length(all_handles)
+                all_handles(i).Visible ='on';
+            end
+        end
+                
+        ax.XLabel.String = 'mm';
+        ax.XLabel.FontSize = 16;
+        ax.YLabel.String = 'mm';
+        ax.XLabel.FontSize = 16;
+        
+        set(NeuroShop.fig,'KeyPressFcn',{@SlideChange,ax});
+    end
+else
+    % Drawing Mask
+    Mask = NeuroShop.Data.Mask(1:4:end,1:4:end,:);
+    hold(ax,'on');
+    im = imagesc('YData',1:size(Mask,1),'XData',1:size(Mask,2),'CData',squeeze(Mask(:,:,NeuroShop.MaskType)),...
+        'Parent',ax,'Tag','MaskImage','AlphaData',double(squeeze(Mask(:,:,NeuroShop.MaskType)))>0);
+    pause(1);
+    delete(im);
+    %colormap default;
+    %axis image;
+end
+
+if rem(NeuroShop.AtlasType,2)==1
+    % title(['Figure ' num2str(NeuroShop.xyfig)] ,'FontSize',16)
+    ax.Title.String = sprintf('[Atlas Coronal] Plate %d - Bregma = %.2f mm',NeuroShop.xyfig,NeuroShop.AP_bregma);
+    ax.Title.FontSize = 16;
+
+else
+    if NeuroShop.AtlasType == 2
+        pageSagittal=[180:-1:162 162:180];
+    else
+        pageSagittal=[132:-1:101 101:132];
+    end
+    % title(['Figure ' num2str(pageSagittal(NeuroShop.xyfig))] ,'FontSize',16)
+    ax.Title.String = ['Figure ' num2str(pageSagittal(NeuroShop.xyfig))];
+    ax.Title.FontSize = 16;  
+end
+
+%axis([X(1) X(end) Z(1) Z(end)])
+drawnow;
+
+end
+
+function [u,v] = rot_scaled(x,y,angle,S)
+
+X = S.X;
+Z = S.Z;
+Doppler = S.Doppler;
+
+Mrot=[cos(angle) -sin(angle); sin(angle) cos(angle)];
+if ~isempty(x)
+    uv=Mrot'*[x;y];
+    u=uv(1,:);
+    v=uv(2,:);   
+    u = ((u-X(1))/(X(end)-X(1)))*size(Doppler,2);
+    v = ((v-Z(1))/(Z(end)-Z(1)))*size(Doppler,1);      
+else
+    u=[];v=[];
+end
+
+end
+
+function SlideChange(~,src,ax)
+%global NeuroShop
+
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+
+switch src.Key
+    case 'b'
+        NeuroShop.AtlasVisible = 1-NeuroShop.AtlasVisible;
+    case 'leftarrow'
+        NeuroShop.BregmaXY=NeuroShop.BregmaXY-0.5;
+    case 'rightarrow'
+        NeuroShop.BregmaXY=NeuroShop.BregmaXY+0.5;
+    case 'uparrow'
+        NeuroShop.BregmaZ=NeuroShop.BregmaZ-0.5;
+    case 'downarrow'
+        NeuroShop.BregmaZ=NeuroShop.BregmaZ+0.5;
+    case 'z'
+        NeuroShop.xyfig = NeuroShop.xyfig+1;
+        NeuroShop.AP_bregma = 3.00 - ((NeuroShop.xyfig-11)/80)*9.96;
+    case 'x'
+        NeuroShop.xyfig=NeuroShop.xyfig-1;
+        NeuroShop.AP_bregma = 3.00 - ((NeuroShop.xyfig-11)/80)*9.96;
+    case 'c'
+        NeuroShop.theta=NeuroShop.theta-0.005;
+    case 'v'
+        NeuroShop.theta=NeuroShop.theta+0.005;
+    case 'n'
+        NeuroShop.scaleX=NeuroShop.scaleX-0.005;
+        NeuroShop.scaleY=NeuroShop.scaleY-0.005;
+        NeuroShop.scaleZ=NeuroShop.scaleZ-0.005;
+    case 'm'
+        NeuroShop.scaleX=NeuroShop.scaleX+0.005;
+        NeuroShop.scaleY=NeuroShop.scaleY+0.005;
+        NeuroShop.scaleZ=NeuroShop.scaleZ+0.005;
+end
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+UpdateView(ax);
+
+end
+
+% @ClickPatchBregma
+function ClickPatchBregma(~,~,ax)
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+fig = ax.Parent;
+
+if NeuroShop.JustMoved==1
+    NeuroShop.JustMoved=0;
+else
+    set(fig,'Pointer','cross');
+    set (fig, 'WindowButtonUpFcn', {@stopUpdateBregma,ax});
+    set (fig, 'WindowButtonMotionFcn', {@mouseMoveBregma,ax});
+    NeuroShop.JustMoved=1;
+end
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+end
+
+function mouseMoveBregma(~,~,ax)
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+Doppler = NeuroShop.Data.DopplerView;
+Z = (((1:size(Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
+X = (((1:size(Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
+
+A=get(NeuroShop.ax, 'CurrentPoint');
+u=A(1,1);
+v=A(1,2);
+
+% Rescaling coordinates
+u = X(1)+(X(end)-X(1))*(u/size(Doppler,2));
+v = Z(1)+(Z(end)-Z(1))*(v/size(Doppler,1));
+
+NeuroShop.BregmaZ = NeuroShop.BregmaZ+v/NeuroShop.Data.dr;
+NeuroShop.BregmaXY = NeuroShop.BregmaXY+u/NeuroShop.Data.dr;
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+UpdateView(ax);
+
+end
+
+function stopUpdateBregma(~,~,ax)
+
+fig = ax.Parent;
+ax.UserData.NeuroShop.JustMoved=0;
+
+%set (gcf, 'WindowButtonMotionFcn', @DisplayRegionInfo);
+set (fig, 'WindowButtonMotionFcn', '');
+%set (fig, 'WindowButtonDownFcn', '');
+set (fig, 'WindowButtonUpFcn', '');
+set(fig,'Pointer','arrow');
+%CreateRegionMask();
+
+end
+
+% @ClickPatchMove
+function ClickPatchMove(~,~,ax)
+
+disp('patch move');
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+fig = ax.Parent;
+
+if NeuroShop.JustMoved==1
+    NeuroShop.JustMoved=0;
+else
+    set(fig,'Pointer','cross');
+    set (fig, 'WindowButtonUpFcn', {@stopUpdateMove,ax});
+    set (fig, 'WindowButtonMotionFcn', {@mouseMoveMove,ax});
+    NeuroShop.JustMoved=1;
+end
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+end
+
+function mouseMoveMove(~,~,ax)
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+Doppler = NeuroShop.Data.DopplerView;
+Z = (((1:size(Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
+X = (((1:size(Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
+
+mzx=NeuroShop.PatchCorner{1};
+mz=mzx(1);
+A=get(NeuroShop.ax,'CurrentPoint');
+u=A(1,1);
+v=A(1,2);
+
+% Rescaling coordinates
+u = X(1)+(X(end)-X(1))*(u/size(Doppler,2));
+v = Z(1)+(Z(end)-Z(1))*(v/size(Doppler,1));
+
+NeuroShop.BregmaZ=NeuroShop.BregmaZ+(v-mz)/NeuroShop.Data.dr;
+NeuroShop.BregmaXY=NeuroShop.BregmaXY+u/NeuroShop.Data.dr;
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+UpdateView(ax);
+    
+end
+
+function stopUpdateMove(~,~,ax)
+
+fig = ax.Parent;
+ax.UserData.NeuroShop.JustMoved=0;
+%set (gcf, 'WindowButtonMotionFcn', @DisplayRegionInfo);
+set (fig, 'WindowButtonMotionFcn', '');
+%set (fig, 'WindowButtonDownFcn', '');
+set (fig, 'WindowButtonUpFcn', '');
+set(fig,'Pointer','arrow');
+%CreateRegionMask();
+
+end
+
+% @ClickPatchViewPaxinos
+function ClickPatchViewPaxinos(~,~,ax)
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+fig = ax.Parent;
+
+if NeuroShop.JustMoved==1
+    NeuroShop.JustMoved=0;
+else
+    set(fig,'Pointer','right');
+    set (fig, 'WindowButtonUpFcn', {@stopUpdatePaxinos,ax});
+    set (fig, 'WindowButtonMotionFcn', {@mouseMovePaxinos,ax});
+    NeuroShop.JustMoved=1;
+end
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+end
+
+function mouseMovePaxinos(~,~,ax)
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+Doppler = NeuroShop.Data.DopplerView;
+Z = (((1:size(Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
+X = (((1:size(Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
+
+A=get(NeuroShop.ax, 'CurrentPoint');
+u=A(1,1);
+v=A(1,2);
+
+% Rescaling coordinates
+u = X(1)+(X(end)-X(1))*(u/size(Doppler,2));
+v = Z(1)+(Z(end)-Z(1))*(v/size(Doppler,1));
+
+[a,b]=min(abs(NeuroShop.Atlas.V/4-u));
+NeuroShop.xyfig=b;
+NeuroShop.AP_bregma = 3.00 - ((NeuroShop.xyfig-11)/80)*9.96;
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+UpdateView(ax);
+
+end
+
+function stopUpdatePaxinos(~,~,ax)
+
+fig = ax.Parent;
+ax.UserData.NeuroShop.JustMoved=0;
+%set (gcf, 'WindowButtonMotionFcn', @DisplayRegionInfo);
+set (fig, 'WindowButtonMotionFcn', '');
+%set (fig, 'WindowButtonDownFcn', '');
+set (fig, 'WindowButtonUpFcn', '');
+set(fig,'Pointer','arrow');
+%CreateRegionMask();
+
+end
+
+% @ClickPatchCorner
+function ClickPatchCorner(~,~,ax)
+
+disp('patch corner');
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+fig = ax.Parent;
+
+if NeuroShop.JustMoved==1
+    NeuroShop.JustMoved=0;
+else
+    set(fig,'Pointer','cross');
+    set (fig, 'WindowButtonUpFcn', {@stopUpdateCorner,ax});
+    set (fig, 'WindowButtonMotionFcn', {@mouseMoveCorner,ax});
+    NeuroShop.JustMoved=1;
+end
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+end
+
+function mouseMoveCorner(~,~,ax)
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+Doppler = NeuroShop.Data.DopplerView;
+Z = (((1:size(Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
+X = (((1:size(Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
+
+A=get(NeuroShop.ax,'CurrentPoint');
+u=A(1,1);
+v=A(1,2);
+
+% Rescaling coordinates
+u = X(1)+(X(end)-X(1))*(u/size(Doppler,2));
+v = Z(1)+(Z(end)-Z(1))*(v/size(Doppler,1));
+
+scale1=NeuroShop.scaleZ*(v/NeuroShop.PatchCorner{1}(1));
+scale2=NeuroShop.scaleY*(u/NeuroShop.PatchCorner{1}(2));
+scale=1-min(1-scale1,1-scale2);
+NeuroShop.scaleX=scale2;
+NeuroShop.scaleY=scale2;
+NeuroShop.scaleZ=scale1;
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+UpdateView(ax);
+drawnow ; 
+
+end
+
+function stopUpdateCorner(~,~,ax)
+
+fig = ax.Parent;
+ax.UserData.NeuroShop.JustMoved=0;
+%set (gcf, 'WindowButtonMotionFcn', @DisplayRegionInfo);
+set (fig, 'WindowButtonMotionFcn', '');
+%set (fig, 'WindowButtonDownFcn', '');
+set (fig, 'WindowButtonUpFcn', '');
+set(fig,'Pointer','arrow');
+%CreateRegionMask();
+
+end
+
+% @ClickPatchCornerRotate
+function ClickPatchCornerRotate(~,~,ax)
+
+disp('patch move');
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+fig = ax.Parent;
+
+if NeuroShop.JustMoved==1
+    NeuroShop.JustMoved=0;
+else  
+    set(fig,'Pointer','cross');
+    set (fig, 'WindowButtonUpFcn', {@stopUpdateRotate,ax});
+    set (fig, 'WindowButtonMotionFcn', {@mouseMoveRotate,ax});
+    NeuroShop.JustMoved=1;
+end
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+end
+
+function mouseMoveRotate(~,~,ax)
+
+%global NeuroShop
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+Doppler = NeuroShop.Data.DopplerView;
+Z = (((1:size(Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
+X = (((1:size(Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
+
+A=get(NeuroShop.ax, 'CurrentPoint');
+u=A(1,1);
+v=A(1,2);
+
+% Rescaling coordinates
+u = X(1)+(X(end)-X(1))*(u/size(Doppler,2));
+v = Z(1)+(Z(end)-Z(1))*(v/size(Doppler,1));
+
+NeuroShop.theta=-atan((NeuroShop.PatchCorner{1}(1)-v)./(NeuroShop.PatchCorner{1}(2)-u));
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+UpdateView(ax);
+drawnow;
+
+end
+
+function stopUpdateRotate(~,~,ax)
+
+fig = ax.Parent;
+ax.UserData.NeuroShop.JustMoved=0;
+%set (gcf, 'WindowButtonMotionFcn', @DisplayRegionInfo);
+set (fig, 'WindowButtonMotionFcn', '');
+%set (fig, 'WindowButtonDownFcn', '');
+set (fig, 'WindowButtonUpFcn', '');
+set(fig,'Pointer','arrow');
+%CreateRegionMask();
+
+end
+
+function [u,v]=rot(x,y,angle)
+Mrot=[cos(angle) -sin(angle); sin(angle) cos(angle)];
+if ~isempty(x)
+uv=Mrot'*[x;y];
+u=uv(1,:);
+v=uv(2,:);
+else
+    u=[];v=[];
+end
+end
+
+function CreateMask(MaskType,ax)
+
+%global NeuroShop;
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+% S.Doppler = NeuroShop.Data.DopplerView;
+% S.Z = (((1:size(S.Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
+% S.X = (((1:size(S.Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
+
+% ROIs based mask
+[m,n]=size(NeuroShop.Data.DopplerView);
+Mask=zeros(4*m,4*n);
+N=length(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id);
+for k=2:N
+    [x,z]=rot(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.xy*NeuroShop.scaleX*1e3,...
+        NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.z*NeuroShop.scaleZ*1e3,NeuroShop.theta);
+%     [x,z]=rot_scaled(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.xy*NeuroShop.scaleX*1e3,...
+%         NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.z*NeuroShop.scaleZ*1e3,NeuroShop.theta,S);
+    xk=x/(NeuroShop.Data.dr/4)+NeuroShop.BregmaXY*4;
+    zk=z/(NeuroShop.Data.drz/4)+NeuroShop.BregmaZ*4;
+    Pk=poly2mask(xk,zk,4*m,4*n);
+    l=k;
+    Mask(find(Pk))=l;
+end
+
+Mask2=zeros(4*m,4*n);
+N=length(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id);
+se = ones(round(NeuroShop.MaskErodeSize/NeuroShop.Data.dr*4),round(NeuroShop.MaskErodeSize/NeuroShop.Data.drz*4));
+for k=2:N
+    Pk=(Mask==k);
+    Pk=imclose(Pk,ones(9,9));
+    if ~isempty(se)
+        Pk = imerode(Pk,se);
+    end
+    Mask2(find(Pk))=k;
+end
+
+% Correct bug Sagittal Atlas (Rat)
+if strcmp(NeuroShop.AtlasName,'RatAtlasSag')
+    Mask2 = fliplr(Mask2);
+end
+NeuroShop.Data.Mask(:,:,1)=Mask2;
+
+% Unsupervised mask
+Mask=zeros(4*m,4*n);
+MaskDiskPitchZ=NeuroShop.MaskDiskDepth/(NeuroShop.MaskDiskNz-1);
+MaskDiskPitchX=NeuroShop.MaskDiskWidth/(NeuroShop.MaskDiskNx-1);
+MaskDiskDiameter=min(MaskDiskPitchX,MaskDiskPitchZ)*0.9;
+
+[Z,X]=ndgrid((0:MaskDiskPitchZ:NeuroShop.MaskDiskDepth)*NeuroShop.scaleZ,(-NeuroShop.MaskDiskWidth/2:MaskDiskPitchX:NeuroShop.MaskDiskWidth/2)*NeuroShop.scaleX);
+[u,v]=rot(X(:)',Z(:)',NeuroShop.theta);X=reshape(u',size(X));Z=reshape(v',size(Z));
+% [u,v]=rot_scaled(X(:)',Z(:)',NeuroShop.theta,S);X=reshape(u',size(X));Z=reshape(v',size(Z));
+[Zm,Xm]=ndgrid(0:4*m-1,0:4*n-1);
+Zm=(Zm-NeuroShop.BregmaZ*4)*NeuroShop.Data.drz/4;
+Xm=(Xm-NeuroShop.BregmaXY*4)*NeuroShop.Data.dr/4;
+
+k=1;
+for i=1:size(X,1)
+    for j=1:size(X,2)
+        k=k+1;
+        M=(sqrt( (Xm-X(i,j)).^2+(Zm-Z(i,j)).^2 )<=MaskDiskDiameter/2*NeuroShop.scaleX);
+        Mask(find(M))=k;
+    end
+end
+
+NeuroShop.Data.Mask(:,:,2)=Mask;
+
+% Customs ROIs (roipoly)
+[m,n]=size(NeuroShop.Data.DopplerView);
+Mask=zeros(4*m,4*n);
+N=NeuroShop.CustomROIs.Nb;
+for k=1:N
+    [x,z]=rot(NeuroShop.CustomROIs.Ids{k}.xy*NeuroShop.scaleX,NeuroShop.CustomROIs.Ids{k}.z*NeuroShop.scaleZ,NeuroShop.theta);
+    % [x,z]=rot_scaled(NeuroShop.CustomROIs.Ids{k}.xy*NeuroShop.scaleX,NeuroShop.CustomROIs.Ids{k}.z*NeuroShop.scaleZ,NeuroShop.theta,S);
+    xk=x/(NeuroShop.Data.dr/4)+NeuroShop.BregmaXY*4;
+    zk=z/(NeuroShop.Data.drz/4)+NeuroShop.BregmaZ*4;
+    Pk=poly2mask(xk,zk,4*m,4*n);
+    l=k;
+    Mask(find(Pk))=l;
+end
+
+Mask2=zeros(4*m,4*n);
+N=NeuroShop.CustomROIs.Nb;
+se = ones(round(NeuroShop.MaskErodeSize/NeuroShop.Data.dr*4),round(NeuroShop.MaskErodeSize/NeuroShop.Data.drz*4));
+for k=1:N
+    Pk=(Mask==k);
+    Pk=imclose(Pk,ones(9,9));
+    if ~isempty(se)
+        Pk = imerode(Pk,se);
+    end
+    Mask2(find(Pk))=k;
+end
+NeuroShop.Data.Mask(:,:,3)=Mask2;
+
+if MaskType==0
+    NeuroShop.MaskVisibility=0;
+else
+    NeuroShop.MaskVisibility=1;
+end
+
+NeuroShop.MaskType=MaskType;
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
+
+UpdateView(ax);
+drawnow;
+
+end
+
+function ExportMask(savedir,ax)
+% Saves Mask information in Atlas.mat
+
+% global NeuroShop 
+% Retrieving NeuroShop from ax.UserData
+NeuroShop = ax.UserData.NeuroShop;
+fig = ax.Parent;
+
+Mask = NeuroShop.Data.Mask(1:4:end,1:4:end,:);
+AtlasType = NeuroShop.AtlasType;
+AtlasOn = NeuroShop.AtlasOn;
+AtlasName = NeuroShop.AtlasName;
+scaleX = NeuroShop.scaleX;
+scaleY = NeuroShop.scaleY;
+scaleZ = NeuroShop.scaleZ;
+FigName = NeuroShop.xyfig;
+xyfig = NeuroShop.xyfig;
+PatchCorner = NeuroShop.PatchCorner;
+BregmaXY = NeuroShop.BregmaXY;
+BregmaZ = NeuroShop.BregmaZ;
+theta = NeuroShop.theta;
+phi = NeuroShop.phi;
+AP_bregma = NeuroShop.AP_bregma;
+
+temp_atlas = findobj(fig,'Tag','TemporaryAtlasMask');
+line_x = temp_atlas.XData;
+line_z = temp_atlas.YData;
+NeuroShop.line_x = line_x;
+NeuroShop.line_z = line_z;
+
+% Saving Atlas.mat
+if exist(fullfile(savedir,'Atlas.mat'),'file')
+    delete(fullfile(savedir,'Atlas.mat'));
+    fprintf('File Atlas.mat updated.\n==> [%s].\n',fullfile(savedir,'Atlas.mat'));
+else
+    fprintf('File Atlas.mat created via Neuroshop.\n==> [%s].\n',fullfile(savedir,'Atlas.mat'));
+end
+save(fullfile(savedir,'Atlas.mat'),'Mask','AtlasType','AtlasOn','AtlasName',...
+    'scaleX','scaleY','scaleZ','xyfig','FigName','PatchCorner','AP_bregma',...
+    'BregmaXY','BregmaZ','theta','phi','line_x','line_z');
+
+% Storing NeuroShop in ax.UserData
+ax.UserData.NeuroShop = NeuroShop;
 
 end

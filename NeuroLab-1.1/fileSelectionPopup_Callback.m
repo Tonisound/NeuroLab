@@ -141,7 +141,7 @@ buttonAutoScale_Callback(handles.AutoScaleButton,[],handles);
 hObj.UserData = char(new);
 
 % Actualize BoxAtlas
-boxAtlas_Callback(handles.BoxAtlas,[],handles.CenterAxes);
+boxAtlas_Callback(handles.AtlasBox,[],handles.CenterAxes);
 % Actualize BoxTimePatch
 boxTimePatch_Callback(handles.TimePatchBox,[],handles.RightAxes);
 
