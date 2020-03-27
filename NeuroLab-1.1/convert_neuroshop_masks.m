@@ -4,7 +4,9 @@ function success = convert_neuroshop_masks(folder_name,file_recording,handles,va
 % Storing U8 masks in dir_regions
 % Uses Neuroshop txt files to get region names
 
+global SEED_REGION;
 success = false;
+dir_regions = fullfile(SEED_REGION,file_recording);
 
 % If nargin > 2 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
@@ -31,6 +33,7 @@ if val==1
         test_whole=str2num(answer{1});
         test_erase=str2num(answer{2});
     else
+        fprintf('Binary mask importation cancelled [%s].\n',dir_regions);
         return;
     end
 end
@@ -48,7 +51,7 @@ else
 end
 
 % Getting Region Name
-atlas_txt =  fullfile(SEED_ATLAS,data_r.AtlasName,sprintf('f%d.txt',data_r.FigName));
+atlas_txt =  fullfile(SEED_ATLAS,data_r.AtlasName,sprintf('f%d.txt',data_r.Plate));
 region_id = [];
 atlas_name = [];
 if exist(atlas_txt,'file')
@@ -131,8 +134,6 @@ if test_whole
 end
 
 % Create export folder
-global SEED_REGION;
-dir_regions = fullfile(SEED_REGION,file_recording);
 if test_erase && exist(dir_regions,'dir')
     rmdir(dir_regions,'s')
 end

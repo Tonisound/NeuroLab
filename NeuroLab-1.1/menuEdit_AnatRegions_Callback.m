@@ -1164,12 +1164,14 @@ end
 ax.UserData.data_atlas = data_atlas;
 
 % Keeping track
-hObj.UserData.cell_visible = handles.Region_table.Data(:,2);
+if ~isempty(handles.Region_table.Data)
+    hObj.UserData.cell_visible = handles.Region_table.Data(:,2);
+    handles.Region_table.Data(:,2) = repmat({'0'},[size(handles.Region_table.Data,1) 1]);
+end
 hObj.UserData.boxsticker_value = handles.boxSticker.Value;
 hObj.UserData.boxatlas_value = handles.boxAtlas.Value;
 
 % Turning all regions and stickers invisible
-handles.Region_table.Data(:,2) = repmat({'0'},[size(handles.Region_table.Data,1) 1]);
 radioMask_selection([],[],handles);
 handles.boxSticker.Value = 0;
 boxSticker_Callback(handles.boxSticker,[],handles);
@@ -1190,7 +1192,10 @@ handles.register_cancelButton.Enable ='on';
 
 % Initialize ax.UserData.NeuroShop depending on ax.UserData.data_atlas
 % Enable Interactive control on ax
-set_interactive_Neuroshop(ax,val);
+success = set_interactive_Neuroshop(ax,val);
+if ~success
+    register_cancel_Callback([],[],handles,ax);
+end
 
 end
 
@@ -1214,9 +1219,17 @@ convert_neuroshop_masks(savedir,file_recording,old_handles);
 % Updating Config.mat
 data_c = load(fullfile(savedir,'Config.mat'),'File');
 File = data_c.File;
-File.atlas_type = ax.UserData.NeuroShop.AtlasType;
-File.bregma_xy = ax.UserData.NeuroShop.BregmaXY;
-File.bregma_z = ax.UserData.NeuroShop.BregmaZ;
+File.atlas_name = ax.UserData.NeuroShop.AtlasName;
+File.atlas_plate = ax.UserData.NeuroShop.xyfig;
+if ~isempty(ax.UserData.NeuroShop.AP_mm)
+    File.atlas_coordinate = ax.UserData.NeuroShop.AP_mm;
+elseif ~isempty(ax.UserData.NeuroShop.ML_mm)
+    File.atlas_coordinate = ax.UserData.NeuroShop.ML_mm;
+else
+    File.atlas_coordinate = [];
+end
+
+File.ML_mm = ax.UserData.NeuroShop.ML_mm;
 save(fullfile(savedir,'Config.mat'),'File','-append');
 fprintf('File Config.mat updated [%s].\n',fullfile(savedir,'Config.mat'));
 
@@ -1231,8 +1244,10 @@ boxAtlas_Callback(old_handles.AtlasBox,[],old_handles.CenterAxes);
 
 % Updating Current Atlas Edit GUI
 atlasmask = findobj(ax,'Tag','AtlasMask');
-atlasmask.XData = line_x;
-atlasmask.YData = line_z;
+if ~isempty(atlasmask)
+    atlasmask.XData = line_x;
+    atlasmask.YData = line_z;
+end
 
 % Turning things off
 register_cancel_Callback([],[],handles,ax);
@@ -1260,7 +1275,9 @@ set(handles.EditFigure,'Pointer','arrow');
 
 % Turning all regions and stickers visible
 % handles.Region_table.Data(:,2) = repmat({'1'},[size(handles.Region_table.Data,1) 1]);
-handles.Region_table.Data(:,2) = handles.registerButton.UserData.cell_visible;
+if ~isempty(handles.Region_table.Data)
+    handles.Region_table.Data(:,2) = handles.registerButton.UserData.cell_visible;
+end
 radioMask_selection([],[],handles);
 % handles.boxSticker.Value = 1;
 handles.boxSticker.Value = handles.registerButton.UserData.boxsticker_value;
@@ -2059,8 +2076,17 @@ if ~isempty(ax.UserData.data_atlas)
     NeuroShop.xyfig = d.xyfig;
     NeuroShop.PatchCorner = d.PatchCorner;
 else
-    NeuroShop.AtlasType = 1;      % 1 = rat coronal ; 2 = rat sagital ; 3 =  souris coronal ; 4 = souris sagital
-    NeuroShop.AtlasName = 'RatAtlasCor';
+    % Select Atlas Type
+    all_atlas_names = {'Rat Coronal Paxinos';'Rat Sagital Paxinos';'Mouse Coronal Paxinos';'Mouse Sagital Paxinos';'Mouse Coronal Allen'};
+    [s,v] = listdlg('PromptString','Select an atlas to register:',...
+        'SelectionMode','single',...
+        'ListString',all_atlas_names);
+    if isempty(s) || v==0 
+        return;
+    end
+    NeuroShop.AtlasType = s; 
+    %NeuroShop.AtlasType = 1;      % 1 = rat coronal ; 2 = rat sagital ; 3 =  souris coronal ; 4 = souris sagital
+    NeuroShop.AtlasName = char(all_atlas_names(s));
     NeuroShop.AtlasOn = 1;
 end
 % Initialize NeuroShop
@@ -2076,7 +2102,7 @@ NeuroShop.MaskDiskDepth = 10; % mm
 
 % Passing ax to NeuroShop
 NeuroShop.ax = ax;
-NeuroShop.hmsg = text(100,H/3,'[Loading Atlas data ...]',...
+NeuroShop.hmsg = text(100,H/3,sprintf('[Loading Atlas (%s)]',NeuroShop.AtlasName),...'[Loading Atlas data ...]',...
     'Units','Pixels','FontSize',16,'Color',[0.6 0.6 0.6],...
     'BackgroundColor','w','Parent',NeuroShop.ax);
 drawnow;
@@ -2116,7 +2142,7 @@ switch type
     case 1
         %load('./Atlas/Rat/AtlasCor.mat');
         load('AtlasCor.mat');
-        NeuroShop.AtlasName='RatAtlasCor';
+        %NeuroShop.AtlasName='RatAtlasCor';
         NeuroShop.Atlas=AtlasCor;
         for fig=1:length(NeuroShop.Atlas.Fig)
             for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id)
@@ -2128,33 +2154,49 @@ switch type
     case 2
         %load('./Atlas/Rat/AtlasSag.mat');
         load('AtlasSag.mat');
-        NeuroShop.AtlasName='RatAtlasSag';
+        %NeuroShop.AtlasName='RatAtlasSag';
         NeuroShop.Atlas=AtlasSag;
-        for fig=1:length(NeuroShop.Atlas.Fig);for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id);NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.y;end;end
+        for fig=1:length(NeuroShop.Atlas.Fig)
+            for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id)
+                NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.y;
+            end
+        end
         NeuroShop.Atlas.XY=NeuroShop.Atlas.Y;
         NeuroShop.Atlas.V=NeuroShop.Atlas.X;
     case 3
         %load('./Atlas/Mouse/MouseAtlasCor.mat');
         load('MouseAtlasCor.mat');
-        NeuroShop.AtlasName='MouseAtlasCor';
+        %NeuroShop.AtlasName='MouseAtlasCor';
         NeuroShop.Atlas=AtlasCor;
-        for fig=1:length(NeuroShop.Atlas.Fig);for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id);NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.x;end;end
+        for fig=1:length(NeuroShop.Atlas.Fig)
+            for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id)
+                NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.x;
+            end
+        end
         NeuroShop.Atlas.XY=NeuroShop.Atlas.X;
         NeuroShop.Atlas.V=NeuroShop.Atlas.Y;
     case 4
         %load('./Atlas/Mouse/MouseAtlasSag.mat');
         load('MouseAtlasSag.mat');
-        NeuroShop.AtlasName='MouseAtlasSag';
+        %NeuroShop.AtlasName='MouseAtlasSag';
         NeuroShop.Atlas=AtlasSag;
-        for fig=1:length(NeuroShop.Atlas.Fig);for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id);NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.y;end;end
+        for fig=1:length(NeuroShop.Atlas.Fig)
+            for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id)
+                NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.y;
+            end
+        end
         NeuroShop.Atlas.XY=NeuroShop.Atlas.Y;
         NeuroShop.Atlas.V=NeuroShop.Atlas.X;
     case 5
         %load('./Atlas/Mouse/MouseAtlasCorAllen.mat');
         load('MouseAtlasCorAllen.mat');
-        NeuroShop.AtlasName='MouseAtlasCorAllen';
+        %NeuroShop.AtlasName='MouseAtlasCorAllen';
         NeuroShop.Atlas=AtlasCor;
-        for fig=1:length(NeuroShop.Atlas.Fig);for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id);NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.x;end;end
+        for fig=1:length(NeuroShop.Atlas.Fig)
+            for k=1:length(NeuroShop.Atlas.Fig{fig}.Plot.Id)
+                NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.xy=NeuroShop.Atlas.Fig{fig}.Plot.Id{k}.x;
+            end
+        end
         NeuroShop.Atlas.XY=NeuroShop.Atlas.X;
         NeuroShop.Atlas.V=NeuroShop.Atlas.Y;
     case 6
@@ -2241,10 +2283,6 @@ if ~isfield(NeuroShop,'xyfig')
     [a,b]=min(abs(NeuroShop.Atlas.V));
     NeuroShop.xyfig=b;
     %NeuroShop = CreateRegionMask(NeuroShop);
-end
-
-if ~isfield(NeuroShop,'AP_bregma')
-    NeuroShop.AP_bregma = 3.00 - ((NeuroShop.xyfig-11)/80)*9.96;
 end
 
 if ~isfield(NeuroShop,'AtlasVisible')
@@ -2335,19 +2373,19 @@ else
     %axis image;
 end
 
-if rem(NeuroShop.AtlasType,2)==1
+if NeuroShop.AtlasType==1 || NeuroShop.AtlasType==3%rem(NeuroShop.AtlasType,2)==1
     % title(['Figure ' num2str(NeuroShop.xyfig)] ,'FontSize',16)
-    ax.Title.String = sprintf('[Atlas Coronal] Plate %d - Bregma = %.2f mm',NeuroShop.xyfig,NeuroShop.AP_bregma);
+    ax.Title.String = sprintf('[Atlas Coronal] Plate %d - Bregma %.2f mm',NeuroShop.xyfig,NeuroShop.Atlas.V(NeuroShop.xyfig));
     ax.Title.FontSize = 16;
 
-else
+elseif NeuroShop.AtlasType==2 || NeuroShop.AtlasType==4
     if NeuroShop.AtlasType == 2
         pageSagittal=[180:-1:162 162:180];
     else
         pageSagittal=[132:-1:101 101:132];
     end
     % title(['Figure ' num2str(pageSagittal(NeuroShop.xyfig))] ,'FontSize',16)
-    ax.Title.String = ['Figure ' num2str(pageSagittal(NeuroShop.xyfig))];
+    ax.Title.String = sprintf('[Atlas Sagital] Plate %d - Lateral %.2f mm',NeuroShop.xyfig,NeuroShop.Atlas.V(NeuroShop.xyfig));
     ax.Title.FontSize = 16;  
 end
 
@@ -2394,10 +2432,16 @@ switch src.Key
         NeuroShop.BregmaZ=NeuroShop.BregmaZ+0.5;
     case 'z'
         NeuroShop.xyfig = NeuroShop.xyfig+1;
-        NeuroShop.AP_bregma = 3.00 - ((NeuroShop.xyfig-11)/80)*9.96;
+        %Keeping in bounds
+        if NeuroShop.xyfig > length(NeuroShop.Atlas.Fig)
+            NeuroShop.xyfig = NeuroShop.xyfig-1;
+        end
     case 'x'
         NeuroShop.xyfig=NeuroShop.xyfig-1;
-        NeuroShop.AP_bregma = 3.00 - ((NeuroShop.xyfig-11)/80)*9.96;
+        %Keeping in bounds
+        if NeuroShop.xyfig < 1
+            NeuroShop.xyfig = NeuroShop.xyfig+1;
+        end
     case 'c'
         NeuroShop.theta=NeuroShop.theta-0.005;
     case 'v'
@@ -2484,8 +2528,6 @@ end
 
 % @ClickPatchMove
 function ClickPatchMove(~,~,ax)
-
-disp('patch move');
 
 %global NeuroShop
 % Retrieving NeuroShop from ax.UserData
@@ -2589,7 +2631,12 @@ v = Z(1)+(Z(end)-Z(1))*(v/size(Doppler,1));
 
 [a,b]=min(abs(NeuroShop.Atlas.V/4-u));
 NeuroShop.xyfig=b;
-NeuroShop.AP_bregma = 3.00 - ((NeuroShop.xyfig-11)/80)*9.96;
+%Keeping in bounds
+if NeuroShop.xyfig > length(NeuroShop.Atlas.Fig)
+    NeuroShop.xyfig = NeuroShop.xyfig-1;
+elseif NeuroShop.xyfig < 1
+    NeuroShop.xyfig = NeuroShop.xyfig+1;
+end
 
 % Storing NeuroShop in ax.UserData
 ax.UserData.NeuroShop = NeuroShop;
@@ -2613,8 +2660,6 @@ end
 
 % @ClickPatchCorner
 function ClickPatchCorner(~,~,ax)
-
-disp('patch corner');
 
 %global NeuroShop
 % Retrieving NeuroShop from ax.UserData
@@ -2682,8 +2727,6 @@ end
 
 % @ClickPatchCornerRotate
 function ClickPatchCornerRotate(~,~,ax)
-
-disp('patch move');
 
 %global NeuroShop
 % Retrieving NeuroShop from ax.UserData
@@ -2792,8 +2835,8 @@ for k=2:N
     Mask2(find(Pk))=k;
 end
 
-% Correct bug Sagittal Atlas (Rat)
-if strcmp(NeuroShop.AtlasName,'RatAtlasSag')
+% Correct bug Sagital Atlas
+if NeuroShop.AtlasType == 2 || NeuroShop.AtlasType == 4
     Mask2 = fliplr(Mask2);
 end
 NeuroShop.Data.Mask(:,:,1)=Mask2;
@@ -2820,6 +2863,10 @@ for i=1:size(X,1)
     end
 end
 
+% % Correct bug Sagital Atlas
+% if NeuroShop.AtlasType == 2 || NeuroShop.AtlasType == 4
+%     Mask = fliplr(Mask);
+% end
 NeuroShop.Data.Mask(:,:,2)=Mask;
 
 % Customs ROIs (roipoly)
@@ -2847,6 +2894,11 @@ for k=1:N
     end
     Mask2(find(Pk))=k;
 end
+
+% % Correct bug Sagital Atlas
+% if NeuroShop.AtlasType == 2 || NeuroShop.AtlasType == 4
+%     Mask2 = fliplr(Mask2);
+% end
 NeuroShop.Data.Mask(:,:,3)=Mask2;
 
 if MaskType==0
@@ -2880,20 +2932,31 @@ AtlasName = NeuroShop.AtlasName;
 scaleX = NeuroShop.scaleX;
 scaleY = NeuroShop.scaleY;
 scaleZ = NeuroShop.scaleZ;
-FigName = NeuroShop.xyfig;
 xyfig = NeuroShop.xyfig;
 PatchCorner = NeuroShop.PatchCorner;
 BregmaXY = NeuroShop.BregmaXY;
 BregmaZ = NeuroShop.BregmaZ;
 theta = NeuroShop.theta;
 phi = NeuroShop.phi;
-AP_bregma = NeuroShop.AP_bregma;
+switch NeuroShop.AtlasType
+    case {1,3}
+        AP_mm = NeuroShop.Atlas.V(NeuroShop.xyfig);
+        ML_mm = [];
+    case {2,4}
+        ML_mm = NeuroShop.Atlas.V(NeuroShop.xyfig);
+        AP_mm = [];
+    otherwise
+        ML_mm = [];
+        AP_mm = [];
+end
 
 temp_atlas = findobj(fig,'Tag','TemporaryAtlasMask');
 line_x = temp_atlas.XData;
 line_z = temp_atlas.YData;
 NeuroShop.line_x = line_x;
 NeuroShop.line_z = line_z;
+NeuroShop.AP_mm = AP_mm;
+NeuroShop.ML_mm = ML_mm;
 
 % Saving Atlas.mat
 if exist(fullfile(savedir,'Atlas.mat'),'file')
@@ -2903,7 +2966,7 @@ else
     fprintf('File Atlas.mat created via Neuroshop.\n==> [%s].\n',fullfile(savedir,'Atlas.mat'));
 end
 save(fullfile(savedir,'Atlas.mat'),'Mask','AtlasType','AtlasOn','AtlasName',...
-    'scaleX','scaleY','scaleZ','xyfig','FigName','PatchCorner','AP_bregma',...
+    'scaleX','scaleY','scaleZ','xyfig','PatchCorner','AP_mm','ML_mm',...
     'BregmaXY','BregmaZ','theta','phi','line_x','line_z');
 
 % Storing NeuroShop in ax.UserData

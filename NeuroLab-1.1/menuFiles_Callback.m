@@ -415,7 +415,7 @@ if ~isempty(FILES)
         'BackgroundColor',backColor,...
         'HorizontalAlignment', 'left',...
         'String','',...
-        'TooltipString', 'Bregma XY',...
+        'TooltipString', 'Atlas Plate',...
         'Parent',tab1);
     e23c = uicontrol('Style','text',...
         'Units','characters',...
@@ -423,7 +423,7 @@ if ~isempty(FILES)
         'BackgroundColor',backColor,...
         'HorizontalAlignment', 'left',...
         'String','',...
-        'TooltipString', 'Bregma Z',...
+        'TooltipString', 'Atlas Coordinate (mm)',...
         'Parent',tab1);
     
     e100 = uicontrol('Style','text',...
@@ -470,9 +470,9 @@ if ~isempty(FILES)
     edits.dir_ext = e40;
     edits.norm = e21;
     edits.trigger = e22;
-    edits.atlas_type = e23a;
-    edits.bregma_xy = e23b;
-    edits.bregma_z = e23c;
+    edits.atlas_name = e23a;
+    edits.atlas_plate = e23b;
+    edits.atlas_coordinate = e23c;
     edits.info = e100;
 end
 
@@ -670,9 +670,9 @@ end
             edits.dir_lfp.String = files_temp(cur_file).dir_lfp;
             edits.dir_ext.String = files_temp(cur_file).dir_ext;
             edits.norm.String = data_norm.normalization;
-            edits.atlas_type.String = files_temp(cur_file).atlas_type;
-            edits.bregma_xy.String = files_temp(cur_file).bregma_xy;
-            edits.bregma_z.String = files_temp(cur_file).bregma_z;
+            edits.atlas_name.String = files_temp(cur_file).atlas_name;
+            edits.atlas_plate.String = files_temp(cur_file).atlas_plate;
+            edits.atlas_coordinate.String = files_temp(cur_file).atlas_coordinate;
             edits.trigger.String = sprintf('%s [%s]',data_ref.reference,data_ref.padding);
             
             try
