@@ -40,12 +40,13 @@ if ~strcmp(old,new)
     % Saving Previous File if FILES not empty
     if ~(strcmp(new,'')||strcmp(new,'<0>'))
         
-        data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
+        data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'File','CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
         UiValues = data_config.UiValues;
         START_IM = data_config.START_IM;
         CUR_IM = data_config.CUR_IM;
         END_IM = data_config.END_IM;
         LAST_IM = data_config.LAST_IM;
+        FILES(CUR_FILE) = data_config.File;      
         load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),data_config.UiValues.CenterPanelPopup);
         
         if exist(fullfile(DIR_SAVE,new_fus,'Trace_light.mat'),'file')

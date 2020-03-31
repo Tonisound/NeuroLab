@@ -228,14 +228,19 @@ register_cancelButton = uicontrol('Style','pushbutton',...
     'Tag','register_cancelButton',...
     'Visible','off',...
     'Parent',f);
+deleteAtlasButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Delete Atlas',...
+    'Tag','deleteAtlasButton',...
+    'Parent',f);
 importButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
-    'String','Import',...
+    'String','Import regions',...
     'Tag','importButton',...
     'Parent',f);
 exportButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
-    'String','Export',...
+    'String','Export regions',...
     'Tag','exportButton',...
     'Parent',f);
 
@@ -306,25 +311,29 @@ boxSuf.Position = [.11 .83 .09 .03];
 visibleButton.Position = [.035 0 .45 .07];
 invisibleButton.Position = [.515 0 .45 .07];
 
-newButton.Position = [.825 .9 .15 .05];
-editButton.Position = [.825 .85 .15 .05];
-edit_okButton.Position = [.825 .85 .075 .05];
-edit_cancelButton.Position = [.9 .85 .075 .05];
-duplicateButton.Position = [.825 .8 .15 .05];
-mergeButton.Position = [.825 .75 .15 .05];
-removeButton.Position = [.825 .7 .15 .05];
-addgroupButton.Position = [.825 .625 .15 .05];
-cleargroupButton.Position = [.825 .575 .15 .05];
-registerButton.Position = [.825 .5 .15 .05];
-register_okButton.Position = [.825 .5 .075 .05];
-register_cancelButton.Position = [.9 .5 .075 .05];
-importButton.Position = [.825 .45 .15 .05];
-exportButton.Position = [.825 .4 .15 .05];
+newButton.Position = [.825 .91 .15 .04];
+editButton.Position = [.825 .87 .15 .04];
+edit_okButton.Position = [.825 .87 .075 .04];
+edit_cancelButton.Position = [.9 .87 .075 .04];
+duplicateButton.Position = [.825 .83 .15 .04];
+mergeButton.Position = [.825 .79 .15 .04];
+removeButton.Position = [.825 .75 .15 .04];
+
+addgroupButton.Position = [.825 .66 .15 .04];
+cleargroupButton.Position = [.825 .62 .15 .04];
+
+registerButton.Position = [.825 .53 .15 .04];
+register_okButton.Position = [.825 .53 .075 .04];
+register_cancelButton.Position = [.9 .53 .075 .04];
+deleteAtlasButton.Position = [.825 .49 .15 .04];
+importButton.Position = [.825 .45 .15 .04];
+exportButton.Position = [.825 .41 .15 .04];
+
 t1.Position = [.915 .3 .06 .04];
 pu1.Position = [.825 .3 .09 .05];
 ax_mean.Position = [.825 .2 .15 .1];
-okButton.Position = [.825 .1 .15 .05];
-cancelButton.Position = [.825 .05 .15 .05];
+okButton.Position = [.825 .09 .15 .04];
+cancelButton.Position = [.825 .05 .15 .04];
 
 % Callback attribution
 handles2 = guihandles(f);
@@ -347,6 +356,7 @@ set(exportButton,'Callback',{@exportButton_Callback,file_recording});
 set(registerButton,'Callback',{@registerButton_Callback,handles2,folder_name,handles2.AxEdit,val});
 set(register_okButton,'Callback',{@register_okButton_Callback,handles2,handles,folder_name,file_recording,handles2.AxEdit});
 set(register_cancelButton,'Callback',{@register_cancel_Callback,handles2,handles2.AxEdit});
+set(deleteAtlasButton,'Callback',{@deleteAtlas_Callback,handles2,handles,folder_name,file_recording,handles2.AxEdit});
 
 set(okButton,'Callback',{@okButton_callback,handles,handles2,val});
 set(cancelButton,'Callback',{@cancelButton_callback,handles2});
@@ -457,7 +467,7 @@ else
     table_region.UserData.patches = [];
 end
 
-%waitfor(f);
+waitfor(f);
 success = true;
 
 end
@@ -1209,7 +1219,7 @@ CreateMask(1,ax);
 ExportMask(savedir,ax);
 
 % updating FILES
-% global FILES CUR_FILE;
+% 
 % data_c = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'File');
 % FILES(CUR_FILE) = data_c.File;
 
@@ -1228,10 +1238,15 @@ elseif ~isempty(ax.UserData.NeuroShop.ML_mm)
 else
     File.atlas_coordinate = [];
 end
-
-File.ML_mm = ax.UserData.NeuroShop.ML_mm;
 save(fullfile(savedir,'Config.mat'),'File','-append');
 fprintf('File Config.mat updated [%s].\n',fullfile(savedir,'Config.mat'));
+
+% Update FILES
+global FILES;
+ind_keep = find(strcmp({FILES(:).recording}',file_recording)==1);
+if length(ind_keep)==1
+    FILES(ind_keep) = File;
+end
 
 % Updating Mask atlas in main GUI
 line_x = ax.UserData.NeuroShop.line_x;
@@ -1299,6 +1314,51 @@ end
 
 function cancelButton_callback(~,~,handles2)
     close(handles2.EditFigure);
+end
+
+function deleteAtlas_Callback (~,~,handles,old_handles,savedir,file_recording,ax)
+
+global FILES;
+    
+if exist(fullfile(savedir,'Atlas.mat'),'file')
+    % test user
+    h = questdlg(sprintf('Are you sure you want to delete atlas file ?\n[%s]',savedir),...
+        'User confirmation required','Proceed', 'Cancel', 'Proceed');
+    if strcmp(h,'Cancel')
+        return;
+    end
+    
+    % Deleting Atlas.mat
+    delete(fullfile(savedir,'Atlas.mat'));
+    fprintf('File Atlas.mat deleted [%s].\n',fullfile(savedir,'Atlas.mat'));
+    
+    % Updating Config.mat
+    data_c = load(fullfile(savedir,'Config.mat'),'File');
+    File = data_c.File;
+    File.atlas_name = [];
+    File.atlas_plate = [];
+    File.atlas_coordinate = [];
+    save(fullfile(savedir,'Config.mat'),'File','-append');
+    fprintf('File Config.mat updated [%s].\n',fullfile(savedir,'Config.mat'));
+    
+    % Update FILES
+    ind_keep = find(strcmp({FILES(:).recording}',file_recording)==1);
+    if length(ind_keep)==1
+        FILES(ind_keep) = File;
+    end
+    
+    % Deleting Mask atlas in main GUI
+    delete(findobj(old_handles.CenterAxes,'Tag','AtlasMask'));
+    old_handles.AtlasBox.Value = 0;
+    
+    % Deleting Current Atlas Edit GUI
+    delete(findobj(ax,'Tag','AtlasMask'));
+    handles.boxAtlas.Value = 0;
+else
+    warning('No File Atlas.mat to delete [%s].\n',fullfile(savedir,'Atlas.mat'));
+    return;
+end
+
 end
 
 function okButton_callback(~,~,handles,handles2,val)
@@ -2077,15 +2137,14 @@ if ~isempty(ax.UserData.data_atlas)
     NeuroShop.PatchCorner = d.PatchCorner;
 else
     % Select Atlas Type
-    all_atlas_names = {'Rat Coronal Paxinos';'Rat Sagital Paxinos';'Mouse Coronal Paxinos';'Mouse Sagital Paxinos';'Mouse Coronal Allen'};
+    all_atlas_names = {'Rat Coronal Paxinos';'Rat Sagittal Paxinos';'Mouse Coronal Paxinos';'Mouse Sagittal Paxinos';'Mouse Coronal Allen'};
     [s,v] = listdlg('PromptString','Select an atlas to register:',...
         'SelectionMode','single',...
         'ListString',all_atlas_names);
     if isempty(s) || v==0 
         return;
     end
-    NeuroShop.AtlasType = s; 
-    %NeuroShop.AtlasType = 1;      % 1 = rat coronal ; 2 = rat sagital ; 3 =  souris coronal ; 4 = souris sagital
+    NeuroShop.AtlasType = s;      % 1 = rat coronal ; 2 = rat sagital ; 3 =  souris coronal ; 4 = souris sagital
     NeuroShop.AtlasName = char(all_atlas_names(s));
     NeuroShop.AtlasOn = 1;
 end
@@ -2385,7 +2444,7 @@ elseif NeuroShop.AtlasType==2 || NeuroShop.AtlasType==4
         pageSagittal=[132:-1:101 101:132];
     end
     % title(['Figure ' num2str(pageSagittal(NeuroShop.xyfig))] ,'FontSize',16)
-    ax.Title.String = sprintf('[Atlas Sagital] Plate %d - Lateral %.2f mm',NeuroShop.xyfig,NeuroShop.Atlas.V(NeuroShop.xyfig));
+    ax.Title.String = sprintf('[Atlas Sagittal] Plate %d - Lateral %.2f mm',NeuroShop.xyfig,NeuroShop.Atlas.V(NeuroShop.xyfig));
     ax.Title.FontSize = 16;  
 end
 
@@ -2803,24 +2862,27 @@ function CreateMask(MaskType,ax)
 %global NeuroShop;
 % Retrieving NeuroShop from ax.UserData
 NeuroShop = ax.UserData.NeuroShop;
-% S.Doppler = NeuroShop.Data.DopplerView;
-% S.Z = (((1:size(S.Doppler,1))-1)-NeuroShop.BregmaZ)*NeuroShop.Data.drz;
-% S.X = (((1:size(S.Doppler,2))-1)-NeuroShop.BregmaXY)*NeuroShop.Data.dr;
 
 % ROIs based mask
 [m,n]=size(NeuroShop.Data.DopplerView);
 Mask=zeros(4*m,4*n);
 N=length(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id);
+
+all_xk = [];
+all_zk = [];
 for k=2:N
+%     [x,z]=rot(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.xy*NeuroShop.scaleX*1e3,...
+%         NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.z*NeuroShop.scaleZ*1e3,NeuroShop.theta);
+%     xk=x/(NeuroShop.Data.dr/4)+NeuroShop.BregmaXY*4;
     [x,z]=rot(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.xy*NeuroShop.scaleX*1e3,...
-        NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.z*NeuroShop.scaleZ*1e3,NeuroShop.theta);
-%     [x,z]=rot_scaled(NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.xy*NeuroShop.scaleX*1e3,...
-%         NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.z*NeuroShop.scaleZ*1e3,NeuroShop.theta,S);
-    xk=x/(NeuroShop.Data.dr/4)+NeuroShop.BregmaXY*4;
-    zk=z/(NeuroShop.Data.drz/4)+NeuroShop.BregmaZ*4;
+        NeuroShop.Atlas.Fig{NeuroShop.xyfig}.Plot.Id{k}.z*NeuroShop.scaleZ*1e3,-NeuroShop.theta);
+    xk = -x/(NeuroShop.Data.dr/4)+NeuroShop.BregmaXY*4;
+    zk = z/(NeuroShop.Data.drz/4)+NeuroShop.BregmaZ*4;
     Pk=poly2mask(xk,zk,4*m,4*n);
     l=k;
     Mask(find(Pk))=l;
+    all_xk = [all_xk;xk(:)];
+    all_zk = [all_zk;zk(:)];
 end
 
 Mask2=zeros(4*m,4*n);
@@ -2833,11 +2895,6 @@ for k=2:N
         Pk = imerode(Pk,se);
     end
     Mask2(find(Pk))=k;
-end
-
-% Correct bug Sagital Atlas
-if NeuroShop.AtlasType == 2 || NeuroShop.AtlasType == 4
-    Mask2 = fliplr(Mask2);
 end
 NeuroShop.Data.Mask(:,:,1)=Mask2;
 
@@ -2849,10 +2906,9 @@ MaskDiskDiameter=min(MaskDiskPitchX,MaskDiskPitchZ)*0.9;
 
 [Z,X]=ndgrid((0:MaskDiskPitchZ:NeuroShop.MaskDiskDepth)*NeuroShop.scaleZ,(-NeuroShop.MaskDiskWidth/2:MaskDiskPitchX:NeuroShop.MaskDiskWidth/2)*NeuroShop.scaleX);
 [u,v]=rot(X(:)',Z(:)',NeuroShop.theta);X=reshape(u',size(X));Z=reshape(v',size(Z));
-% [u,v]=rot_scaled(X(:)',Z(:)',NeuroShop.theta,S);X=reshape(u',size(X));Z=reshape(v',size(Z));
 [Zm,Xm]=ndgrid(0:4*m-1,0:4*n-1);
 Zm=(Zm-NeuroShop.BregmaZ*4)*NeuroShop.Data.drz/4;
-Xm=(Xm-NeuroShop.BregmaXY*4)*NeuroShop.Data.dr/4;
+Xm=(-Xm-NeuroShop.BregmaXY*4)*NeuroShop.Data.dr/4;
 
 k=1;
 for i=1:size(X,1)
@@ -2862,11 +2918,6 @@ for i=1:size(X,1)
         Mask(find(M))=k;
     end
 end
-
-% % Correct bug Sagital Atlas
-% if NeuroShop.AtlasType == 2 || NeuroShop.AtlasType == 4
-%     Mask = fliplr(Mask);
-% end
 NeuroShop.Data.Mask(:,:,2)=Mask;
 
 % Customs ROIs (roipoly)
@@ -2875,12 +2926,16 @@ Mask=zeros(4*m,4*n);
 N=NeuroShop.CustomROIs.Nb;
 for k=1:N
     [x,z]=rot(NeuroShop.CustomROIs.Ids{k}.xy*NeuroShop.scaleX,NeuroShop.CustomROIs.Ids{k}.z*NeuroShop.scaleZ,NeuroShop.theta);
-    % [x,z]=rot_scaled(NeuroShop.CustomROIs.Ids{k}.xy*NeuroShop.scaleX,NeuroShop.CustomROIs.Ids{k}.z*NeuroShop.scaleZ,NeuroShop.theta,S);
-    xk=x/(NeuroShop.Data.dr/4)+NeuroShop.BregmaXY*4;
-    zk=z/(NeuroShop.Data.drz/4)+NeuroShop.BregmaZ*4;
+    % xk=x/(NeuroShop.Data.dr/4)+NeuroShop.BregmaXY*4;
+    xk = -x/(NeuroShop.Data.dr/4)+NeuroShop.BregmaXY*4;
+    zk = z/(NeuroShop.Data.drz/4)+NeuroShop.BregmaZ*4;
     Pk=poly2mask(xk,zk,4*m,4*n);
     l=k;
     Mask(find(Pk))=l;
+end
+% Correct bug Sagittal Atlas
+if NeuroShop.AtlasType == 2 || NeuroShop.AtlasType == 4
+    Mask = fliplr(Mask);
 end
 
 Mask2=zeros(4*m,4*n);
@@ -2894,11 +2949,6 @@ for k=1:N
     end
     Mask2(find(Pk))=k;
 end
-
-% % Correct bug Sagital Atlas
-% if NeuroShop.AtlasType == 2 || NeuroShop.AtlasType == 4
-%     Mask2 = fliplr(Mask2);
-% end
 NeuroShop.Data.Mask(:,:,3)=Mask2;
 
 if MaskType==0

@@ -51,7 +51,8 @@ else
 end
 
 % Getting Region Name
-atlas_txt =  fullfile(SEED_ATLAS,data_r.AtlasName,sprintf('f%d.txt',data_r.Plate));
+atlasName = strrep(data_r.AtlasName,' ','');
+atlas_txt =  fullfile(SEED_ATLAS,atlasName,sprintf('%s-plate%d.txt',atlasName,data_r.xyfig));
 region_id = [];
 atlas_name = [];
 if exist(atlas_txt,'file')
