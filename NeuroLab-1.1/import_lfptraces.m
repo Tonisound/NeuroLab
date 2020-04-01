@@ -379,7 +379,7 @@ TimeTags_strings = [tt_data.TimeTags_strings;TimeTags_strings];
 TimeTags_cell = [tt_data.TimeTags_cell;TimeTags_cell];
 TimeTags = [tt_data.TimeTags;TimeTags];
 save(fullfile(dir_save,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
-fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Time_Tags.mat'));
+fprintf('===> Time Tags updates [%s]\n',fullfile(dir_save,'Time_Tags.mat'));
 
 success = true;
 
