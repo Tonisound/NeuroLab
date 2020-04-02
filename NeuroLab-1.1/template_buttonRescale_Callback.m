@@ -7,7 +7,9 @@ end
 
 xlim1 = l.XData(1);
 xlim2 = l.XData(end);
-ax.XLim =[xlim1,xlim2];
+for i =1:length(ax)
+    ax(i).XLim =[xlim1,xlim2];
+end
 if nargin>3
     edits(1).String = datestr(xlim1/(24*3600),'HH:MM:SS.FFF');
     edits(2).String = datestr(xlim2/(24*3600),'HH:MM:SS.FFF');

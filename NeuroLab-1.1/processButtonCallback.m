@@ -36,9 +36,12 @@ switch strtrim(str(val,:))
     case 'Generate Time Groups'
         generate_time_groups(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
     
-    case 'Export LFP bands'
-        export_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+    case 'Filter LFP channels - Extract Power Envelope'
+        filter_lfp_extractenvelope(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
             
+    case 'Filter ACC/GYR/EMG channels - Extract Power Envelope'
+        filter_accgyremg_extractenvelope(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        
     case 'Export Patches'
         export_patches(handles);
         

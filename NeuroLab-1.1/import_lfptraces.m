@@ -161,9 +161,12 @@ for i=1:length(ind_channel)
     if contains(str,'temp')
         f1 = GFilt.temp_inf;
         f2 = GFilt.temp_sup;
-    elseif contains(str,{'acc';'gyr'})
+    elseif contains(str,'acc')
         f1 = GFilt.acc_inf;
         f2 = GFilt.acc_sup;
+    elseif contains(str,'gyr')
+        f1 = GFilt.gyr_inf;
+        f2 = GFilt.gyr_sup;
     elseif contains(str,'emg')
         f1 = GFilt.emg_inf;
         f2 = GFilt.emg_sup;

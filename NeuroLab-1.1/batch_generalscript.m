@@ -541,9 +541,13 @@ for i = 1:length(ind_files)
                 case 'Generate Time Groups'
                     success = generate_time_groups(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                     
-                case 'Export LFP bands'
-                    % in this case 1 select band manually, else 0 for all bands
-                    success = export_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                case 'Filter LFP channels - Extract Power Envelope'
+                    % in this case 1 select band manually, 
+                    % else 0 for main channel if specified else all
+                    success = filter_lfp_extractenvelope(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                    
+                case 'Filter ACC/GYR/EMG channels - Extract Power Envelope'
+                    success = filter_accgyremg_extractenvelope(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                                     
                 case 'Export Anatomical Regions'
                     success = export_regions(myhandles,FILES(ii).recording,0);
@@ -563,6 +567,9 @@ for i = 1:length(ind_files)
                 case '(Figure) LFP Wavelet Analysis'
                     f2 = figure_Wavelet_Analysis(myhandles,0,str_tag);
                     
+                case '(Figure) Sleep Scoring'
+                    f2 = figure_SleepScoring(myhandles,fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,0);                
+                
                 case '(Figure) fUS Episode Statistics'
                     f2 = figure_fUS_EpisodeStatistics(myhandles,0,str_group);
                 
@@ -581,9 +588,6 @@ for i = 1:length(ind_files)
                 case 'Trace Edition'
                     success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);
                     
-                case 'Import Reference Time'
-                    success = import_reference_time(FILES(ii),myhandles);
-                
                 case 'Import LFP Configuration'
                     success = import_lfpconfig(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
                     

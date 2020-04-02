@@ -1,9 +1,10 @@
 function template_buttonSkip_Callback(~,~,ax,edits)
 
+delta = ax(1).XLim(2)-ax(1).XLim(1);
+xlim1 = ax(1).XLim(2);
+xlim2 = ax(1).XLim(2)+delta;
+    
 for i=1:length(ax)
-    delta = ax(i).XLim(2)-ax(i).XLim(1);
-    xlim1 = ax(i).XLim(2);
-    xlim2 = ax(i).XLim(2)+delta;
     ax(i).XLim =[xlim1,xlim2];
 end
 

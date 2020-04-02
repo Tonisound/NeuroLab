@@ -1,7 +1,8 @@
-function success = export_lfp_bands(foldername,handles,val)
-% Export bands in Cereplex_Traces.mat
-% bands frequencies and smoothing defined in the Preferences.mat
-% user can select bands and channels manually
+function success = filter_lfp_extractenvelope(foldername,handles,val)
+% Filter LFP channels into bands defined in Gfilt (Preferences.mat)
+% Compute and smooth LFP power envelopes
+% User can select bands and channels manually
+% Selects only main channel (if specified) in batch mode
 
 success = false;
 
@@ -11,6 +12,14 @@ load('Preferences.mat','GFilt');
 % if val undefined, set val = 1 (default) user can select which channels to export
 if nargin <3
     val = 1;
+end
+
+% Loading Configuration
+if exist(fullfile(foldername,'Config.mat'),'file')
+    data_config = load(fullfile(foldername,'Config.mat'));
+else
+    errordlg(sprintf('Missing File %s',fullfile(foldername,'Config.mat')));
+    return;
 end
 
 % Time Reference loading
@@ -53,16 +62,23 @@ else
     channel_list = temp(ind_1);
 end
 
+% Initial selection
+ind_selected = find(strcmp(channel_list,strcat('LFP_',data_config.File.mainlfp,'.mat'))==1);
+if ~isempty(ind_selected)
+    ind_selected = ind_selected(1);
+else
+    ind_selected = 1:length(channel_list);
+end
 % asks for user input if val == 1
 if val == 1
+    % user mode
     [ind_lfp,v] = listdlg('Name','LFP Selection','PromptString','Select channels to export',...
-        'SelectionMode','multiple','ListString',channel_list,'InitialValue',[],'ListSize',[300 500]);
+        'SelectionMode','multiple','ListString',channel_list,'InitialValue',ind_selected,'ListSize',[300 500]);
 else
     % batch mode
-    ind_lfp = 1:length(channel_list);
+    ind_lfp = ind_selected;
     v = true;
 end
-
 % return if selection empty
 if v==0 || isempty(ind_lfp)
     warning('No trace selected .\n');
@@ -85,18 +101,22 @@ band_list = {'delta';'theta';'gammalow';'gammamid';'gammamidup';'gammahigh';'gam
 fband_inf = [GFilt.delta_inf;GFilt.theta_inf;GFilt.gammalow_inf;GFilt.gammamid_inf;GFilt.gammamidup_inf;GFilt.gammahigh_inf;GFilt.gammahighup_inf;GFilt.ripple_inf];
 fband_sup = [GFilt.delta_sup;GFilt.theta_sup;GFilt.gammalow_sup;GFilt.gammamid_sup;GFilt.gammamidup_sup;GFilt.gammahigh_sup;GFilt.gammahighup_sup;GFilt.ripple_sup];
 tband_smooth = [GFilt.delta_smooth;GFilt.theta_smooth;GFilt.gammalow_smooth;GFilt.gammamid_smooth;GFilt.gammamidup_smooth;GFilt.gammahigh_smooth;GFilt.gammahighup_smooth;GFilt.ripple_smooth];
-        
+  
+
+% Initial selection 
+pattern_list = {'Delta','Theta','Gamma Low','Gamma Mid','Gamma High','Ripple'};
+%pattern_list = {'Theta'};
+ind_selected = find(contains(str_band,pattern_list)==1);
+% asks for user input if val == 1
 if val == 1
+    % user mode
     [ind_band,v] = listdlg('Name','Band Selection','PromptString','Select bands to export',...
-        'SelectionMode','multiple','ListString',str_band,'InitialValue',[],'ListSize',[300 500]);
+        'SelectionMode','multiple','ListString',str_band,'InitialValue',ind_selected','ListSize',[300 500]);
 else
     % batch mode
-    pattern_list = {'Delta','Theta','Gamma Low','Gamma Mid','Gamma High','Ripple'};
-    %pattern_list = {'Theta'};
-    ind_band = contains(str_band,pattern_list);
+    ind_band = ind_selected;
     v = true;
 end
-
 % return if selection empty
 if v==0 || isempty(ind_band)
     warning('No band selected .\n');
@@ -216,20 +236,25 @@ traces = [traces_filter,traces_envelope];
 load('Preferences.mat','GDisp','GTraces');
 g_colors = get(groot,'DefaultAxesColorOrder');
 
+
+% Initial selection 
+pattern_list = {'Power';'LFP-theta'};
+ind_selected = find(contains({traces.fullname}',pattern_list)==1);
+% asks for user input if val == 1
 if val == 1
+    % user mode
     [ind_traces,ok] = listdlg('PromptString','Select Traces','SelectionMode','multiple',...
-        'ListString',{traces.fullname}','ListSize',[400 500]);
+        'ListString',{traces.fullname}','InitialValue',ind_selected,'ListSize',[400 500]);
 else
     % batch mode
-    % pattern_list = {'LFP'};
-    pattern_list = {'Power';'LFP-theta'};
-    ind_traces = find(contains({traces.fullname}',pattern_list)==1);
+    ind_traces = ind_selected;
     ok = true;
 end
-
+% return if selection empty
 if ~ok || isempty(ind_traces)
     return;
 end
+
 
 % getting lines name
 lines = findobj(handles.RightAxes,'Tag','Trace_Cerep');
