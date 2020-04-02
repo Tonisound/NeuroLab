@@ -281,6 +281,7 @@ for i=1:length(ind_traces)
         lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
         lines(ind_overwrite).XData = Xtemp;
         lines(ind_overwrite).YData = Ytemp;
+        save_name = regexprep(lines(ind_overwrite).UserData.Name,'/|\','_');
         fprintf('Cereplex Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
     else
         %line creation
@@ -317,9 +318,22 @@ for i=1:length(ind_traces)
         s.X = traces(ind_traces(i)).X;
         s.Y = traces(ind_traces(i)).Y;
         hl.UserData = s;
-        fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);
+        save_name = regexprep(s.Name,'/|\','_');
+        fprintf('Cereplex Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);        
     end
-    
+    % Saving trace
+    dir_source = fullfile(foldername,'Sources_LFP');
+    if ~exist(dir_source,'dir')
+        mkdir(dir_source);
+    end
+    X = traces(ind_traces(i)).X;
+    Y = traces(ind_traces(i)).Y;
+    f = X(2)-X(1);
+    x_start = X(1);
+    x_end = X(end);
+    save(fullfile(dir_source,strcat(save_name,'.mat')),'Y','f','x_start','x_end','-v7.3');
+    fprintf('Data Saved [%s]\n',fullfile(dir_source,strcat(save_name,'.mat')));
+        
 end
 
 success = true;
