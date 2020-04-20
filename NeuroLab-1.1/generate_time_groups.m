@@ -30,7 +30,8 @@ end
 if ~exist(fullfile(savedir,'Time_Tags.mat'),'file')
     tt_data = [];
 else
-    tt_data = load(fullfile(savedir,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_images','TimeTags_strings');
+    tt_data = load(fullfile(savedir,'Time_Tags.mat'),...
+        'TimeTags','TimeTags_cell','TimeTags_images','TimeTags_strings');
 end
 
 % Loading Preferences.mat

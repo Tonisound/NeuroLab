@@ -89,7 +89,8 @@ end
 
 
 % Sorting band info in array and vectors
-str_band = {sprintf('Delta [%.1f - %.1f Hz] (%.3f s)',GFilt.delta_inf,GFilt.delta_sup,GFilt.delta_smooth);...
+str_band = {sprintf('Broadband [%.1f - %.1f Hz] (%.3f s)',GFilt.broad_inf,GFilt.broad_sup,GFilt.broad_smooth);...
+    sprintf('Delta [%.1f - %.1f Hz] (%.3f s)',GFilt.delta_inf,GFilt.delta_sup,GFilt.delta_smooth);...
     sprintf('Theta [%.1f - %.1f Hz] (%.3f s)',GFilt.theta_inf,GFilt.theta_sup,GFilt.theta_smooth);...
     sprintf('Gamma Low [%.1f - %.1f Hz] (%.3f s)',GFilt.gammalow_inf,GFilt.gammalow_sup,GFilt.gammalow_smooth);...
     sprintf('Gamma Mid [%.1f - %.1f Hz] (%.3f s)',GFilt.gammamid_inf,GFilt.gammamid_sup,GFilt.gammamid_smooth);...
@@ -97,14 +98,14 @@ str_band = {sprintf('Delta [%.1f - %.1f Hz] (%.3f s)',GFilt.delta_inf,GFilt.delt
     sprintf('Gamma High [%.1f - %.1f Hz] (%.3f s)',GFilt.gammahigh_inf,GFilt.gammahigh_sup,GFilt.gammahigh_smooth);...
     sprintf('Gamma High Up [%.1f - %.1f Hz] (%.3f s)',GFilt.gammahighup_inf,GFilt.gammahighup_sup,GFilt.gammahighup_smooth);...
     sprintf('Ripple [%.1f - %.1f Hz] (%.3f s)',GFilt.ripple_inf,GFilt.ripple_sup,GFilt.ripple_smooth)};
-band_list = {'delta';'theta';'gammalow';'gammamid';'gammamidup';'gammahigh';'gammahighup';'ripple'};
-fband_inf = [GFilt.delta_inf;GFilt.theta_inf;GFilt.gammalow_inf;GFilt.gammamid_inf;GFilt.gammamidup_inf;GFilt.gammahigh_inf;GFilt.gammahighup_inf;GFilt.ripple_inf];
-fband_sup = [GFilt.delta_sup;GFilt.theta_sup;GFilt.gammalow_sup;GFilt.gammamid_sup;GFilt.gammamidup_sup;GFilt.gammahigh_sup;GFilt.gammahighup_sup;GFilt.ripple_sup];
-tband_smooth = [GFilt.delta_smooth;GFilt.theta_smooth;GFilt.gammalow_smooth;GFilt.gammamid_smooth;GFilt.gammamidup_smooth;GFilt.gammahigh_smooth;GFilt.gammahighup_smooth;GFilt.ripple_smooth];
+band_list = {'broadband';'delta';'theta';'gammalow';'gammamid';'gammamidup';'gammahigh';'gammahighup';'ripple'};
+fband_inf = [GFilt.broad_inf;GFilt.delta_inf;GFilt.theta_inf;GFilt.gammalow_inf;GFilt.gammamid_inf;GFilt.gammamidup_inf;GFilt.gammahigh_inf;GFilt.gammahighup_inf;GFilt.ripple_inf];
+fband_sup = [GFilt.broad_sup;GFilt.delta_sup;GFilt.theta_sup;GFilt.gammalow_sup;GFilt.gammamid_sup;GFilt.gammamidup_sup;GFilt.gammahigh_sup;GFilt.gammahighup_sup;GFilt.ripple_sup];
+tband_smooth = [GFilt.broad_smooth;GFilt.delta_smooth;GFilt.theta_smooth;GFilt.gammalow_smooth;GFilt.gammamid_smooth;GFilt.gammamidup_smooth;GFilt.gammahigh_smooth;GFilt.gammahighup_smooth;GFilt.ripple_smooth];
   
 
 % Initial selection 
-pattern_list = {'Delta','Theta','Gamma Low','Gamma Mid','Gamma High','Ripple'};
+pattern_list = {'Broadband','Delta','Theta','Gamma Low','Gamma Mid','Gamma High','Ripple'};
 %pattern_list = {'Theta'};
 ind_selected = find(contains(str_band,pattern_list)==1);
 % asks for user input if val == 1

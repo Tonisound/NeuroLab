@@ -54,12 +54,18 @@ end
 data_tr = load(fullfile(folder_name,'Time_Reference.mat'),...
     'n_burst','length_burst','time_ref','rec_mode');
 time_ref = data_tr.time_ref;
-rec_mode = data_tr.rec_mode;
-% if isfield(data_tr, 'rec_mode')
-%     rec_mode = data_tr.rec_mode;
-% else
-%     rec_mode = 'CONTINUOUS';
-% end
+try
+    % new format
+    rec_mode = data_tr.rec_mode;
+catch
+    % Recurring bug - Need to run import Time Reference
+    % old format
+    if isfield(data_tr, 'rec_mode')
+        rec_mode = data_tr.rec_mode;
+    else
+        rec_mode = 'CONTINUOUS';
+    end
+end
 
 t_gauss = GTraces.GaussianSmoothing;
 delta =  time_ref.Y(2)-time_ref.Y(1);
