@@ -119,7 +119,12 @@ end
 
 % Popup EMG
 d_emg = dir(fullfile(savedir,'Sources_LFP','EMG_*.mat'));
-emg_str = regexprep({d_emg(:).name}','.mat','');
+if isempty(d_emg)
+    emg_str = '.';
+else
+    emg_str = regexprep({d_emg(:).name}','.mat','');
+end
+    
 pu_emg = uicontrol('Units','normalized',...
     'Style','popupmenu',...
     'Parent',iP,...
@@ -145,7 +150,11 @@ pu_emg.UserData.channel_type = 'EMG';
 
 % Popup ACC
 d_acc = dir(fullfile(savedir,'Sources_LFP','ACC_*.mat'));
-acc_str = regexprep({d_acc(:).name}','.mat','');
+if isempty(d_acc)
+    acc_str = '.';
+else
+    acc_str = regexprep({d_acc(:).name}','.mat','');
+end
 pu_acc = uicontrol('Units','normalized',...
     'Style','popupmenu',...
     'Parent',iP,...
@@ -163,7 +172,7 @@ end
 if ~isempty(ind_mainacc)
     pu_acc.Value = ind_mainacc;
 else
-    pu_acc.Value = ind_mainacc;
+    pu_acc.Value = 1;
 end
 %path to data
 pu_acc.UserData.path = fullfile(savedir,'Sources_LFP');
@@ -732,6 +741,11 @@ f.Pointer = 'arrow';
 end
 
 function update_popup_accemg_Callback(pu,~,handles,ax)
+
+if strcmp(pu.String,'.')
+    pu.Enable = 'off';
+    return;
+end
 
 % Clearing ax
 delete(ax.Children);
