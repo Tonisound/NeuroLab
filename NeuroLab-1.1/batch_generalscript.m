@@ -534,10 +534,6 @@ for i = 1:length(ind_files)
                 case 'Convert Neuroshop Masks'
                     success = convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
-                case 'Perform sleep scoring'
-                    %success = sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
-                    f2 = tempSleepScoring_NeuroLab(myhandles,0);
-                    
                 case 'Generate Time Groups'
                     success = generate_time_groups(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                     

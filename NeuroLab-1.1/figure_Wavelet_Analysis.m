@@ -162,8 +162,8 @@ clrmenu(f2);
 
 %Parameters
 channels = 1;                % # channels (top) 
-% bands = min(length(traces),8);      % # lfp (bottom)
-bands = 2;                   % # lfp (bottom)
+bands = min(length(traces),8);      % # lfp (bottom)
+% bands = 2;                   % # lfp (bottom)
 L = 10;                      % Height top panels
 l = 1;                       % Height info panel
 cb1_def = 1;                 % freq correction

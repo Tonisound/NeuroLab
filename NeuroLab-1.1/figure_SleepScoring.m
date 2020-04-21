@@ -3,6 +3,7 @@ function f2 = figure_SleepScoring(old_handles,savedir,recording,val)
 %global DIR_SAVE FILES CUR_FILE START_IM END_IM;
 %savedir = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
 %recording = FILES(CUR_FILE).recording;
+global DIR_STATS;
 
 % Loading Config.mat
 data_config = load(fullfile(savedir,'Config.mat'));
@@ -70,6 +71,11 @@ f2.UserData.data_config = data_config;
 f2.UserData.SleepScore = data_ss;
 f2.UserData.TimeDisplay = old_handles.TimeDisplay.UserData;
 
+% Getting file_nlab
+temp = regexp(savedir,filesep,'split');
+file_nlab = char(temp(end));
+f2.UserData.file_nlab = file_nlab;
+
 % Information Panel
 iP = uipanel('Units','normalized',...
     'bordertype','etchedin',...
@@ -104,6 +110,12 @@ end
 %path to data
 pu_lfp.UserData.path = fullfile(savedir,'Sources_LFP');
 pu_lfp.UserData.channel_type = 'LFP';
+path_spectro= fullfile(DIR_STATS,'Wavelet_Analysis',file_nlab);
+if exist(path_spectro,'dir')
+    pu_lfp.UserData.path_spectro = path_spectro;
+else
+    pu_lfp.UserData.path_spectro = [];
+end
 
 % Popup EMG
 d_emg = dir(fullfile(savedir,'Sources_LFP','EMG_*.mat'));
@@ -188,9 +200,14 @@ pu_algo = uicontrol('Units','normalized',...
     'Value',1,...
     'ToolTipString','Sleep scoring Algorithm',...
     'Tag','Popup_Algo');
-d_algo = dir(fullfile('packages','Scoring','*.m'));
+d_algo = dir(fullfile('NeuroLab*','algos_scoring','*.m'));
 if ~isempty(d_algo)
     pu_algo.String = {d_algo(:).name}';
+%     all_paths = unique({d_algo(:).folder}');
+%     for i=1:length(all_paths)
+%         addpath(genpath(char(all_paths(i))));
+%     end
+    addpath(genpath(char(d_algo(1).folder)));
 else
     errordlg('No algorithm file found in packages/Scoring. Please update.\n');
     return;
@@ -227,6 +244,9 @@ e3 = uicontrol('Units','normalized',...
     'String','1',...
     'Parent',iP,...
     'Tag','Edit3');
+if ~isempty(data_ss)
+    e3.String = data_ss.z_score;
+end
 e4 = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
@@ -234,19 +254,22 @@ e4 = uicontrol('Units','normalized',...
     'String','3',...
     'Parent',iP,...
     'Tag','Edit4');
+if ~isempty(data_ss)
+    e4.String = data_ss.t_min;
+end
 
 cb1 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'Parent',iP,...
-    'Value',0,...
+    'Value',1,...
     'Tag','Checkbox1',...
-    'Tooltipstring','Show sources');
+    'Tooltipstring','Show/hide source/spectrogram');
 cb2 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'Parent',iP,...
     'Value',1,...
     'Tag','Checkbox2',...
-    'Tooltipstring','Show envelopes');
+    'Tooltipstring','Show/hide patches');
 cb3 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'Parent',iP,...
@@ -516,11 +539,14 @@ function checkbox1_Callback(hObj,~,ax)
 
 for i =1:length(ax)
     source = findobj(ax(i),'Tag','Source');
+    spectro = findobj(ax(i),'Tag','Spectro');
     for j=1:length(source)
         if hObj.Value
             source(j).Visible='on';
+            spectro(j).Visible='off';
         else
             source(j).Visible='off';
+            spectro(j).Visible='on';
         end
     end
 end
@@ -530,7 +556,7 @@ end
 function checkbox2_Callback(hObj,~,ax)
 
 for i =1:length(ax)
-    source = findobj(ax(i),'Tag','Power','-or','Tag','Threshold','-or','Tag','Threshold_patch');
+    source = findobj(ax(i),'Tag','Threshold','-or','Tag','Threshold_patch');
     for j=1:length(source)
         if hObj.Value
             source(j).Visible='on';
@@ -580,6 +606,8 @@ l_threshpatch = findobj(ax,'Tag','Threshold_patch');
 
 edit4 = findobj(ax.Parent.Parent,'Tag','Edit4');
 t_min = str2double(edit4.String);
+cb2 = findobj(ax.Parent.Parent,'Tag','Checkbox2');
+if cb2.Value visible2='on' ;else visible2='off' ;end
 
 delete(l_threshpatch);
 % Move thresh
@@ -587,36 +615,92 @@ if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<
     
     thresh = pt_rp(1,2);
     test = l_power.YData;
-    ind_keep = test>thresh;
-    
-    % Building ind_start, ind_end
-    ind_start = find(diff(ind_keep)==1)+1;
-    ind_end = find(diff(ind_keep)==-1);
+%     ind_keep = test>thresh;
+%     
+%     % Building ind_start, ind_end
+%     ind_start = find(diff(ind_keep)==1)+1;
+%     ind_end = find(diff(ind_keep)==-1);
+%     if ind_end(1)<ind_start(1)
+%         ind_start = [1;ind_start(:)];
+%     end
+%     if ind_start(end)>ind_end(end)
+%         ind_end = [ind_end(:);length(ind_keep)];
+%     end
+%     
+%     % Getting coordinates
+%     coordinates_up = [ind_start(:),ind_end(:)];
+%     times_up = [];
+%     for j =1:size(coordinates_up,1)
+%         times_up = [times_up;l_power.XData(ind_start(j)) l_power.XData(ind_end(j))];
+%     end
+%     
+%     % Removing small episodes
+%     ind_rm = (times_up(:,2)-times_up(:,1))<t_min;   
+%     temp = coordinates_up(ind_rm,:);
+%     for i=1:size(temp,1)
+%         ind_keep(temp(i,1):temp(i,2)) = false;
+%     end
+%     times_up(ind_rm,:) = [];
+%     coordinates_up(ind_rm,:) = [];
+%     ind_start(ind_rm)=[];
+%     ind_end(ind_rm)=[];
+
+% Dilation: Including short below-threshold episodes
+    ind_below = test<thresh;
+    % Building ind_start & ind_end
+    ind_start = find(diff(ind_below)==1)+1;
+    ind_end = find(diff(ind_below)==-1);
     if ind_end(1)<ind_start(1)
         ind_start = [1;ind_start(:)];
     end
     if ind_start(end)>ind_end(end)
-        ind_end = [ind_end(:);length(ind_keep)];
-    end
-    
+        ind_end = [ind_end(:);length(ind_below)];
+    end  
     % Getting coordinates
     coordinates_up = [ind_start(:),ind_end(:)];
     times_up = [];
     for j =1:size(coordinates_up,1)
         times_up = [times_up;l_power.XData(ind_start(j)) l_power.XData(ind_end(j))];
-    end
-    
-    % Removing small episodes
-    ind_rm = (times_up(:,2)-times_up(:,1))<t_min;   
+    end  
+    % Removing
+    ind_rm = (times_up(:,2)-times_up(:,1))<t_min;
     temp = coordinates_up(ind_rm,:);
     for i=1:size(temp,1)
-        ind_keep(temp(i,1):temp(i,2)) = false;
+        ind_below(temp(i,1):temp(i,2)) = false;
     end
     times_up(ind_rm,:) = [];
     coordinates_up(ind_rm,:) = [];
     ind_start(ind_rm)=[];
     ind_end(ind_rm)=[];
     
+    % Erosion: Removing short below-threshold episodes
+    ind_above = ~ind_below;
+    % Building ind_start & ind_end
+    ind_start = find(diff(ind_above)==1)+1;
+    ind_end = find(diff(ind_above)==-1);
+    if ind_end(1)<ind_start(1)
+        ind_start = [1;ind_start(:)];
+    end
+    if ind_start(end)>ind_end(end)
+        ind_end = [ind_end(:);length(ind_above)];
+    end  
+    % Getting coordinates
+    coordinates_up = [ind_start(:),ind_end(:)];
+    times_up = [];
+    for j =1:size(coordinates_up,1)
+        times_up = [times_up;l_power.XData(ind_start(j)) l_power.XData(ind_end(j))];
+    end  
+    % Removing
+    ind_rm = (times_up(:,2)-times_up(:,1))<t_min;
+    temp = coordinates_up(ind_rm,:);
+    for i=1:size(temp,1)
+        ind_above(temp(i,1):temp(i,2)) = false;
+    end
+    times_up(ind_rm,:) = [];
+    coordinates_up(ind_rm,:) = [];
+    ind_start(ind_rm)=[];
+    ind_end(ind_rm)=[];
+
     %Updating lines
     l_thresh.YData = [thresh, thresh];
     for i =1:size(coordinates_up,1)
@@ -625,13 +709,13 @@ if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<
         patch('XData',[l_power.XData(ind_start(i)) l_power.XData(ind_end(i)) l_power.XData(ind_end(i)) l_power.XData(ind_start(i))],...
             'YData',[ax.YLim(1) ax.YLim(1) ax.YLim(2) ax.YLim(2)],...
             'FaceColor','r','FaceAlpha',.5,'EdgeColor','none','LineWidth',.1,...
-            'Tag','Threshold_patch','Visible','on','HitTest','off');
+            'Tag','Threshold_patch','Visible',visible2,'HitTest','off');
     end   
     
     % Storing
     ax.UserData.ypower = test;
     ax.UserData.thresh = thresh;
-    ax.UserData.ind_keep = ind_keep;
+    ax.UserData.ind_keep = ind_above;
     ax.UserData.coordinates_up = coordinates_up;
     ax.UserData.times_up = times_up;
 
@@ -653,7 +737,6 @@ function update_popup_accemg_Callback(pu,~,handles,ax)
 delete(ax.Children);
 
 % Visible status
-if handles.Checkbox1.Value visible1='on' ;else visible1='off' ;end
 if handles.Checkbox2.Value visible2='on' ;else visible2='off' ;end
 
 % Loading data
@@ -678,7 +761,6 @@ else
     data_power = load(fullfile(path,strcat('Power-',channel,'.mat')));
 end
 
-
 switch channel_type
     case 'EMG'
         color = [.5 .5 .5];
@@ -690,9 +772,9 @@ switch channel_type
         color = g_colors(1,:);
 end
 
-X = (data_source.x_start:data_source.f:data_source.x_end)';
-Y = 1+rescale(data_source.Y,0,1);
-line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Source','HitTest','off','Visible',visible1);
+% X = (data_source.x_start:data_source.f:data_source.x_end)';
+% Y = 1+rescale(data_source.Y,0,1);
+% line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Source','HitTest','off','Visible',visible1);
 ax.YLabel.String = strrep(channel,'_','-');
 
 X = (data_power.x_start:data_power.f:data_power.x_end)';
@@ -702,7 +784,7 @@ Y = 1+rescale(log(1+data_power.Y),0,1);
 t_source = handles.MainFigure.UserData.t_source;
 Y = interp1(X,Y,t_source);
 X = t_source;
-line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Power','HitTest','off','Visible',visible2);
+line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Power','HitTest','off','Visible','on');
 
 % Setting threshold
 if isempty(pu.UserData.thresh_init)
@@ -728,11 +810,17 @@ function update_popup_lfp_Callback(pu,~,handles,ax)
 delete(ax.Children);
 
 % Visible status
-if handles.Checkbox1.Value visible1='on' ;else visible1='off' ;end
-if handles.Checkbox2.Value visible2='on' ;else visible2='off' ;end
+if handles.Checkbox1.Value 
+    visible1='on';
+    not_visible1='off';
+else
+    visible1='off';
+    not_visible1='on';
+end
 
 % Loading data
 path = pu.UserData.path;
+path_spectro = pu.UserData.path_spectro;
 channel_type = pu.UserData.channel_type;
 channel = char(pu.String(pu.Value,:));
 g_colors = handles.MainFigure.UserData.g_colors;
@@ -753,17 +841,37 @@ else
     data_source = load(fullfile(path,strcat(channel,'.mat')));
 end
 
-if ~exist(fullfile(path,strcat('Power-broadband',strrep(channel,'LFP',''),'.mat')),'file')
-    warning('Problem loading broadband channel [%s].',channel);
-    pu_ratio1.String = ' ';
-    pu_ratio1.Value = 1;
-    pu_ratio2.String = ' ';
-    pu_ratio2.Value = 1;
-    return;
+if ~isempty(path_spectro)  
+    handles.Checkbox1.Enable = 'on';
+    d_spectro = dir(fullfile(path_spectro,'*.mat'));
+    ind_channel = find(contains({d_spectro(:).name}',channel)==1);
+    if ~isempty(ind_channel)
+        ind_channel_whole = find(contains({d_spectro(:).name}',strcat(channel,'_Whole-LFP'))==1);
+        if ~isempty(ind_channel_whole)
+            ind_channel = ind_channel_whole;
+        elseif length(ind_channel)>1
+            ind_channel = ind_channel(1);
+        end
+        data_spectro = load(fullfile(path_spectro,d_spectro(ind_channel).name));
+    else
+        data_spectro = [];
+    end
 else
-    data_power = load(fullfile(path,strcat('Power-broadband',strrep(channel,'LFP',''),'.mat')));
+    handles.Checkbox1.Enable = 'off';
 end
 
+% if ~exist(fullfile(path,strcat('Power-broadband',strrep(channel,'LFP',''),'.mat')),'file')
+%     warning('Problem loading broadband channel [%s].',channel);
+%     pu_ratio1.String = ' ';
+%     pu_ratio1.Value = 1;
+%     pu_ratio2.String = ' ';
+%     pu_ratio2.Value = 1;
+%     return;
+% else
+%     data_power = load(fullfile(path,strcat('Power-broadband',strrep(channel,'LFP',''),'.mat')));
+% end
+
+% Plotting Source
 color = [0 0 0];
 X = (data_source.x_start:data_source.f:data_source.x_end)';
 Y = 1+rescale(data_source.Y,0,1);
@@ -773,13 +881,33 @@ ax.YLabel.String = strrep(channel,'_','-');
 % Storing X_source as time reference
 t_source = X;
 handles.MainFigure.UserData.t_source = t_source;
+delta_source = t_source(2)-t_source(1);
+handles.MainFigure.UserData.delta_source = delta_source;
 
-X = (data_power.x_start:data_power.f:data_power.x_end)';
-Y = 1+rescale(data_power.Y,0,1);
-% Interpolate to t_source
-Y = interp1(X,Y,t_source);
-X = t_source;
-line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Power','Visible',visible2);
+% Plotting Spectro
+delete(findobj(ax,'Tag','Spectro'));
+if ~isempty(data_spectro)
+    hold(ax,'on');
+    X_spectro = data_spectro.Xdata_sub;
+    %Y_spectro = rescale(data_spectro.fdom_min:data_spectro.fdom_step:data_spectro.fdom_max,0,1);
+    Y_spectro = 1:1/(length(X_spectro)-1):2;
+    C_spectro = data_spectro.Cdata_sub;
+    imagesc('XData',X_spectro,'YData',Y_spectro,'CData',C_spectro,...
+        'Parent',ax,'Tag','Spectro','Visible',not_visible1,'HitTest','off');
+    %ax.YTickLabel.String = []
+    hold(ax,'off');
+end
+
+% Storing X_source as time reference
+t_source = X;
+handles.MainFigure.UserData.t_source = t_source;
+
+% X = (data_power.x_start:data_power.f:data_power.x_end)';
+% Y = 1+rescale(data_power.Y,0,1);
+% % Interpolate to t_source
+% Y = interp1(X,Y,t_source);
+% X = t_source;
+% line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Power','Visible',visible2);
 
 % Updating pu_ratio1
 d_envelope = dir(fullfile(path,strcat('Power-*.mat')));
@@ -801,6 +929,9 @@ for i =1:length(temp)
         end
     end
 end
+% adding empty denominator
+temp2 = [temp2;temp];
+
 if isempty(temp2)
     warning('No Power trace found for this channel [%s].',channel);
     pu_ratio1.String = ' ';
@@ -810,8 +941,7 @@ if isempty(temp2)
     return;
 else
     % Popup 1
-    pu_ratio1.String = temp2;
-    
+    pu_ratio1.String = temp2;   
     if ~isempty(pu.UserData.channel_1)
         pu_ratio1.Value = find(contains(temp2,pu.UserData.channel_1)==1);
         pu.UserData.channel1 = [];
@@ -843,26 +973,48 @@ function update_popup_ratio_Callback(pu,~,handles,ax)
 delete(ax.Children);
 
 % Visible status
-if handles.Checkbox1.Value visible1='on' ;else visible1='off' ;end
-if handles.Checkbox2.Value visible2='on' ;else visible2='off' ;end
+if handles.Checkbox2.Value 
+    visible2='on';
+else
+    visible2='off';
+end
 
 d = pu.UserData.d_envelope;
 ratio = pu.String(pu.Value,:);
 %ax.YLabel.String = ratio;
 g_colors = handles.MainFigure.UserData.g_colors;
-
+t_source = handles.MainFigure.UserData.t_source;
+    
 % Finding traces
 temp = regexp(char(ratio),'/','split');
 numerator = char(temp(1));
-denominator = char(temp(2));
-ax.YLabel.String = sprintf('%s/\n%s',numerator,denominator);
-
-ind_num = find(contains({d(:).name}',strcat('Power-',numerator,'_'))==1);
-ind_den = find(contains({d(:).name}',strcat('Power-',denominator,'_'))==1);
-
 % Loading traces
+ind_num = find(contains({d(:).name}',strcat('Power-',numerator,'_'))==1);
 data_num = load(fullfile(d(ind_num).folder,d(ind_num).name));
-data_den = load(fullfile(d(ind_den).folder,d(ind_den).name));
+
+if length(temp)>1
+    % Loading traces
+    denominator = char(temp(2));
+    ax.YLabel.String = sprintf('%s/\n%s',numerator,denominator);
+    ind_den = find(contains({d(:).name}',strcat('Power-',denominator,'_'))==1);
+    data_den = load(fullfile(d(ind_den).folder,d(ind_den).name));
+    
+    % Interpolate to t_source
+    X1 = (data_num.x_start:data_num.f:data_num.x_end)';
+    Y1 = interp1(X1,data_num.Y,t_source);
+    X2 = (data_den.x_start:data_den.f:data_den.x_end)';
+    Y2 = interp1(X2,data_den.Y,t_source);
+    Y = Y1./Y2;
+    X = t_source;
+
+else
+    ax.YLabel.String = sprintf('%s',numerator);
+    
+    % Interpolate to t_source
+    X1 = (data_num.x_start:data_num.f:data_num.x_end)';
+    Y = interp1(X1,data_num.Y,t_source);
+    X = t_source;
+end
 
 % if data_num.f == data_den.f
 %     % Same sampling - Dot divide
@@ -885,22 +1037,13 @@ data_den = load(fullfile(d(ind_den).folder,d(ind_den).name));
 %     end
 % end
 
-% Interpolate to t_source
-t_source = handles.MainFigure.UserData.t_source;
-X1 = (data_num.x_start:data_num.f:data_num.x_end)';
-Y1 = interp1(X1,data_num.Y,t_source);
-X2 = (data_den.x_start:data_den.f:data_den.x_end)';
-Y2 = interp1(X2,data_den.Y,t_source);
-Y = Y1./Y2;
-X = t_source;
-
 switch ax.Tag
     case 'Ax5'
         color = g_colors(2,:);
     case 'Ax6'
         color = g_colors(3,:);
 end
-line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Power','HitTest','off','Visible',visible2);
+line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Power','HitTest','off','Visible','on');
 
 % Setting threshold
 if isempty(pu.UserData.thresh_init)
@@ -911,7 +1054,7 @@ else
     pu.UserData.thresh_init = [];
 end
 l = line('XData',[X(1) X(end)],'YData',[val val],'Parent',ax,...
-    'LineWidth',.5,'Color','k','Tag','Threshold');
+    'LineWidth',.5,'Color','k','Tag','Threshold','Visible',visible2);
 l.ButtonDownFcn = {@click_threshold,ax};
 
 % Update threshold patch
@@ -932,10 +1075,18 @@ for i =1:length(all_axes)
             all_lines = findobj(ax,'Type','Line','-not','Tag','Cursor','-and','Visible','on');
             l_main = all_lines(1);
             l_second = all_lines(2:end);
-        otherwise
+            l_spectro = [];
+        case 'Ax2'
             % Autoscale LFP, EMG, GYR Axes
+            l_main = findobj(ax,'Tag','Source','-and','Visible','on');
+            % l_second = findobj(ax,'Tag','Power','-and','Visible','on');
+            l_second = [];
+            l_spectro = findobj(ax,'Tag','Spectro');
+        otherwise
             l_main = findobj(ax,'Tag','Power','-and','Visible','on');
-            l_second = findobj(ax,'Tag','Source','-and','Visible','on');
+            l_second = [];
+            l_spectro = [];
+            
     end
     % Autoscaling
     if ~isempty(l_main)
@@ -957,6 +1108,17 @@ for i =1:length(all_axes)
         l_source.YData = factor*l_source.YData;
         ylim3 = min(l_source.YData(ind3:ind4),[],'omitnan');
         l_source.YData = l_source.YData -(ylim3-ylim1);
+    end 
+    % Spectro
+    for j=1:length(l_spectro)
+        l_spectro = l_spectro(j);
+        %l_spectro.YData = rescale(l_spectro.YData,ax.YLim(1),ax.YLim(2));
+        l_spectro.YData = ax.YLim(1):(ax.YLim(2)+1-ax.YLim(1))/(length(l_spectro.XData)-1):ax.YLim(2);
+        [~,ind5] = min((l_spectro.XData-xlim1).^2);
+        [~,ind6] = min((l_spectro.XData-xlim2).^2);
+        clim1 = min(min(l_spectro.CData(ind5:ind6),[],'omitnan'),[],'omitnan');
+        clim2 = max(max(l_spectro.CData(ind5:ind6),[],'omitnan'),[],'omitnan');
+        ax.CLim = [clim1,clim2];
     end 
     
     % Threshold Patch
@@ -996,9 +1158,14 @@ function update_threshpatch(ax)
 
 edit4 = findobj(ax.Parent.Parent,'Tag','Edit4');
 t_min = str2double(edit4.String);
+delta_source = ax.Parent.Parent.UserData.delta_source;
+step = round(t_min/delta_source);
 l_thresh = findobj(ax,'Tag','Threshold');
 l_power = findobj(ax,'Tag','Power');
-l_threshpatch = findobj(ax,'Tag','Threshold_patch');   
+l_threshpatch = findobj(ax,'Tag','Threshold_patch'); 
+
+cb2 = findobj(ax.Parent.Parent,'Tag','Checkbox2');
+if cb2.Value visible2='on' ;else visible2='off' ;end
 
 % Deleting existing patches
 delete(l_threshpatch);
@@ -1008,35 +1175,57 @@ if ~isempty(l_thresh)
     
     thresh = l_thresh.YData(1);
     test = l_power.YData;
-    ind_keep = test>thresh;
     
-%     if strcmp(ax.Tag,'Ax6')
-%         SE = strel('line',1000,0);
-%         ind_keep2 = imclose(ind_keep,SE);
-%     end
-    
+    % Dilation: Including short below-threshold episodes
+    ind_below = test<thresh;
     % Building ind_start & ind_end
-    ind_start = find(diff(ind_keep)==1)+1;
-    ind_end = find(diff(ind_keep)==-1);
+    ind_start = find(diff(ind_below)==1)+1;
+    ind_end = find(diff(ind_below)==-1);
     if ind_end(1)<ind_start(1)
         ind_start = [1;ind_start(:)];
     end
     if ind_start(end)>ind_end(end)
-        ind_end = [ind_end(:);length(ind_keep)];
-    end
-    
+        ind_end = [ind_end(:);length(ind_below)];
+    end  
     % Getting coordinates
     coordinates_up = [ind_start(:),ind_end(:)];
     times_up = [];
     for j =1:size(coordinates_up,1)
         times_up = [times_up;l_power.XData(ind_start(j)) l_power.XData(ind_end(j))];
-    end
-    
-    % Removing small episodes
+    end  
+    % Removing
     ind_rm = (times_up(:,2)-times_up(:,1))<t_min;
     temp = coordinates_up(ind_rm,:);
     for i=1:size(temp,1)
-        ind_keep(temp(i,1):temp(i,2)) = false;
+        ind_below(temp(i,1):temp(i,2)) = false;
+    end
+    times_up(ind_rm,:) = [];
+    coordinates_up(ind_rm,:) = [];
+    ind_start(ind_rm)=[];
+    ind_end(ind_rm)=[];
+    
+    % Erosion: Removing short below-threshold episodes
+    ind_above = ~ind_below;
+    % Building ind_start & ind_end
+    ind_start = find(diff(ind_above)==1)+1;
+    ind_end = find(diff(ind_above)==-1);
+    if ind_end(1)<ind_start(1)
+        ind_start = [1;ind_start(:)];
+    end
+    if ind_start(end)>ind_end(end)
+        ind_end = [ind_end(:);length(ind_above)];
+    end  
+    % Getting coordinates
+    coordinates_up = [ind_start(:),ind_end(:)];
+    times_up = [];
+    for j =1:size(coordinates_up,1)
+        times_up = [times_up;l_power.XData(ind_start(j)) l_power.XData(ind_end(j))];
+    end  
+    % Removing
+    ind_rm = (times_up(:,2)-times_up(:,1))<t_min;
+    temp = coordinates_up(ind_rm,:);
+    for i=1:size(temp,1)
+        ind_above(temp(i,1):temp(i,2)) = false;
     end
     times_up(ind_rm,:) = [];
     coordinates_up(ind_rm,:) = [];
@@ -1051,12 +1240,12 @@ if ~isempty(l_thresh)
         patch('XData',[l_power.XData(ind_start(j)) l_power.XData(ind_end(j)) l_power.XData(ind_end(j)) l_power.XData(ind_start(j))],...
             'YData',[ax.YLim(1) ax.YLim(1) ax.YLim(2) ax.YLim(2)],...
             'FaceColor','r','FaceAlpha',.5,'EdgeColor','none','LineWidth',.1,...
-            'Tag','Threshold_patch','Visible','on','HitTest','off','Parent',ax);
+            'Tag','Threshold_patch','Visible',visible2,'HitTest','off','Parent',ax);
     end
     % Storing
     ax.UserData.ypower = test;
     ax.UserData.thresh = thresh;
-    ax.UserData.ind_keep = ind_keep;
+    ax.UserData.ind_keep = ind_above;
     ax.UserData.coordinates_up = coordinates_up;
     ax.UserData.times_up = times_up;   
 else
@@ -1147,6 +1336,9 @@ handles.MainFigure.UserData.thresh_emg = S.thresh_emg;
 handles.MainFigure.UserData.thresh_ratio1 = S.thresh_ratio1;
 handles.MainFigure.UserData.thresh_ratio2 = S.thresh_ratio2;
 handles.MainFigure.UserData.algorithm = S.algorithm;
+
+handles.MainFigure.UserData.z_score = str2double(handles.Edit3.String);
+handles.MainFigure.UserData.t_min = str2double(handles.Edit4.String);
 
 end
 
@@ -1264,6 +1456,8 @@ all_times = T.all_times;
 timeData = T.timeData;
 algorithm = handles.MainFigure.UserData.algorithm;
 savedir = handles.MainFigure.UserData.savedir;
+z_score = handles.MainFigure.UserData.z_score;
+t_min = handles.MainFigure.UserData.t_min;
 
 % Building TimeTags from all_times
 n = size(all_times,1);
@@ -1343,7 +1537,7 @@ end
 
 % Saving data in stats dir
 filename = sprintf('%s_Sleep_Scoring(%s).mat',recording,strrep(channel_lfp,'.mat',''));
-save(fullfile(data_dir,filename),'recording','algorithm',...
+save(fullfile(data_dir,filename),'recording','algorithm','z_score','t_min',...
     't_source','t_sleepscored','all_times','timeData',...
     'channel_lfp','channel_acc','channel_emg','channel_1','channel_2',...
     'thresh_acc','thresh_emg','thresh_ratio1','thresh_ratio2',...
@@ -1362,7 +1556,7 @@ if val==0
 end
 
 % Saving Sleep_Scoring.mat
-save(fullfile(savedir,'Sleep_Scoring.mat'),'recording','algorithm',...
+save(fullfile(savedir,'Sleep_Scoring.mat'),'recording','algorithm','z_score','t_min',...
     't_source','t_sleepscored','all_times','timeData',...
     'channel_lfp','channel_acc','channel_emg','channel_1','channel_2',...
     'thresh_acc','thresh_emg','thresh_ratio1','thresh_ratio2');

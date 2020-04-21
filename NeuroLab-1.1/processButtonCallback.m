@@ -22,10 +22,6 @@ switch strtrim(str(val,:))
         
     case'Import External Files'
         import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-    
-    case 'Perform sleep scoring'
-        % sleep_score_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
-        tempSleepScoring_NeuroLab(handles);
 
     case 'Detect Vascular Surges'
         detect_vascular_surges(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

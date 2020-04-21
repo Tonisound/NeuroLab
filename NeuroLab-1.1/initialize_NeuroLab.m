@@ -334,7 +334,7 @@ pl = uicontrol(f,'Style','popup',...
 
 pl_str = 'Compute Normalized Movie|Register Atlas|Convert Neuroshop Masks|Import Anatomical Regions|Import LFP Traces|Import External Files';
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
-pl_str = strcat(pl_str,'|Perform sleep scoring|Detect Vascular Surges|Detect Left-Right Runs');
+pl_str = strcat(pl_str,'|Detect Vascular Surges|Detect Left-Right Runs');
 pl_str = strcat(pl_str,'|Generate Time Groups|Export Patches|Export Anatomical Regions');
 pl.String = pl_str;
 
