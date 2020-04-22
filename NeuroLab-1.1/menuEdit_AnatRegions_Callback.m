@@ -1712,9 +1712,17 @@ Xlim = ax.XLim;
 Ylim = ax.YLim;
 
 %Move Cursor
+
 if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<Ylim(2))
     line_marker.XData(index_closest) = round(pt_rp(1,1));
     line_marker.YData(index_closest) = round(pt_rp(1,2));
+    if index_closest ==1
+        line_marker.XData(end) = round(pt_rp(1,1));
+        line_marker.YData(end) = round(pt_rp(1,2));
+    elseif index_closest == length(line_marker.XData)
+        line_marker.XData(1) = round(pt_rp(1,1));
+        line_marker.YData(1) = round(pt_rp(1,2));
+    end
 end
 
 end

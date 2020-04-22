@@ -73,54 +73,66 @@ t1.Data = D;
     end
 
     function addButton_callback(~,~)
-        selection = size(t1.Data,1);
-        if ~isempty(t1.UserData)
-            selection = t1.UserData.Selection;
+        if isempty(t1.Data)
+            t1.Data = [{'NewTag'},{handles.TimeDisplay.UserData(1,:)},{handles.TimeDisplay.UserData(end,:)}];
+        elseif isempty(t1.UserData) || isempty(t1.UserData.Selection)
+            temp = [{sprintf('Copy_of_%s',char(t1.Data(end,1)))},t1.Data(end,2),t1.Data(end,3),t1.Data(end,4)];
+            t1.Data = [t1.Data;temp];
+        elseif ~isempty(t1.UserData.Selection)
+            index = max(t1.UserData.Selection);
+            temp = [{sprintf('Copy_of_%s',char(t1.Data(index,1)))},t1.Data(index,2),t1.Data(index,3),t1.Data(index,4)];
+            t1.Data = [t1.Data(1:index,:);temp;t1.Data(index+1:end,:)];
         end
-        index = max(selection);
-        t1.Data = [t1.Data(1:index,:);t1.Data(index,:);t1.Data(index+1:end,:)];
+
     end
 
     function removeButton_callback(~,~)
-        selection = t1.UserData.Selection;
-        t1.Data(selection,:)=[];
+        if isempty(t1.UserData) || isempty(t1.UserData.Selection)
+            warning('Empty Selection. Not tags to be removed.');
+        else
+            t1.Data(t1.UserData.Selection,:)=[];
+        end
     end
 
     function okButton_callback(~,~)
         
         n = size(t1.Data,1);
-        %TimeTags_strings
-        TimeTags_strings = t1.Data(:,2:3);
-        tts1 = datenum(TimeTags_strings(:,1));
-        tts2 = datenum(TimeTags_strings(:,2));
-        TimeTags_seconds = [(tts1-floor(tts1)),(tts2-floor(tts2))]*24*3600;
-        TimeTags_dur = datestr((TimeTags_seconds(:,2)-TimeTags_seconds(:,1))/(24*3600),'HH:MM:SS.FFF');
-        
+        TimeTags_strings = [];
+        TimeTags_images = zeros(0,2);
         % TimeTags_cell & TimeTags
         TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
         TimeTags_cell = cell(n+1,6);
         TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'};
-        
-        for k=1:n
-            TimeTags_cell(k+1,:) = {'',char(t1.Data(k,1)),char(t1.Data(k,2)),char(TimeTags_dur(k,:)),char(t1.Data(k,2)),''};
-            TimeTags(k,1).Episode = '';
-            TimeTags(k,1).Tag = char(t1.Data(k,1));
-            TimeTags(k,1).Onset = char(t1.Data(k,2));
-            TimeTags(k,1).Duration = char(TimeTags_dur(k,:));
-            TimeTags(k,1).Reference = char(t1.Data(k,2));
-            TimeTags(k,1).Tokens = '';
-        end
-        
-        % TimeTags_images
-        TimeTags_images = zeros(n,2);
-        tts = datenum(handles.TimeDisplay.UserData);
-        for k=1:size(TimeTags_strings,1)
-            min_time = tts1(k);
-            max_time = tts2(k);
-            [~, ind_min_time] = min(abs(tts-datenum(min_time)));
-            [~, ind_max_time] = min(abs(tts-datenum(max_time)));
-            %TimeTags_strings(k,:) = {min_time,max_time};
-            TimeTags_images(k,:) = [ind_min_time,ind_max_time];
+
+        if n~=0
+            %TimeTags_strings
+            TimeTags_strings = t1.Data(:,2:3);
+            tts1 = datenum(TimeTags_strings(:,1));
+            tts2 = datenum(TimeTags_strings(:,2));
+            TimeTags_seconds = [(tts1-floor(tts1)),(tts2-floor(tts2))]*24*3600;
+            TimeTags_dur = datestr((TimeTags_seconds(:,2)-TimeTags_seconds(:,1))/(24*3600),'HH:MM:SS.FFF');
+            
+            for k=1:n
+                TimeTags_cell(k+1,:) = {'',char(t1.Data(k,1)),char(t1.Data(k,2)),char(TimeTags_dur(k,:)),char(t1.Data(k,2)),''};
+                TimeTags(k,1).Episode = '';
+                TimeTags(k,1).Tag = char(t1.Data(k,1));
+                TimeTags(k,1).Onset = char(t1.Data(k,2));
+                TimeTags(k,1).Duration = char(TimeTags_dur(k,:));
+                TimeTags(k,1).Reference = char(t1.Data(k,2));
+                TimeTags(k,1).Tokens = '';
+            end
+            
+            % TimeTags_images
+            TimeTags_images = zeros(n,2);
+            tts = datenum(handles.TimeDisplay.UserData);
+            for k=1:size(TimeTags_strings,1)
+                min_time = tts1(k);
+                max_time = tts2(k);
+                [~, ind_min_time] = min(abs(tts-datenum(min_time)));
+                [~, ind_max_time] = min(abs(tts-datenum(max_time)));
+                %TimeTags_strings(k,:) = {min_time,max_time};
+                TimeTags_images(k,:) = [ind_min_time,ind_max_time];
+            end
         end
         
         % Saving

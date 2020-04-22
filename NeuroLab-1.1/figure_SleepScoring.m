@@ -24,12 +24,24 @@ end
 
 % Loading Time Tags
 if (exist(fullfile(savedir,'Time_Tags.mat'),'file'))
-    data_tt = load(fullfile(savedir,'Time_Tags.mat'),'TimeTags','TimeTags_strings','TimeTags_cell');
-    TimeTags = data_tt.TimeTags;
-    TimeTags_strings = data_tt.TimeTags_strings;
-    TimeTags_cell = data_tt.TimeTags_cell;
+    data_tt = load(fullfile(savedir,'Time_Tags.mat'));
+    if isempty(data_tt.TimeTags_strings)
+        data_tt = [];
+    end
 else
-    warning('Missing Time Tags File (%s)\n',savedir);
+    %warning('Missing Time Tags File (%s)\n',savedir);
+    data_tt = [];
+end
+
+% Loading Time Groups
+if (exist(fullfile(savedir,'Time_Groups.mat'),'file'))
+    data_tg = load(fullfile(savedir,'Time_Groups.mat'));
+    if isempty(data_tg.TimeGroups_S)
+        data_tg = [];
+    end
+else
+    %warning('Missing Time Tags File (%s)\n',savedir);
+    data_tg = [];
 end
 
 % Loading Sleep Scoring if exists
@@ -61,13 +73,12 @@ f2.UserData.n_burst = n_burst;
 f2.UserData.length_burst = length_burst;
 f2.UserData.xdat = xdat(:);
 f2.UserData.rec_mode = rec_mode;
-f2.UserData.TimeTags = TimeTags;
-f2.UserData.TimeTags_strings = TimeTags_strings;
-f2.UserData.TimeTags_cell = TimeTags_cell;
 f2.UserData.g_colors = get(groot,'DefaultAxesColorOrder');
 f2.UserData.savedir = savedir;
 f2.UserData.recording = recording;
 f2.UserData.data_config = data_config;
+f2.UserData.data_tt = data_tt;
+f2.UserData.data_tg = data_tg;
 f2.UserData.SleepScore = data_ss;
 f2.UserData.TimeDisplay = old_handles.TimeDisplay.UserData;
 
@@ -290,7 +301,7 @@ cb4 = uicontrol('Units','normalized',...
     'Parent',iP,...
     'Value',1,...
     'Tag','Checkbox4',...
-    'Tooltipstring','Overwrite Time Tags/Groups');
+    'Tooltipstring','Overwrite Time Tags');
 
 br = uicontrol('Units','normalized',...
     'Style','pushbutton',...
@@ -624,37 +635,8 @@ if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<
     
     thresh = pt_rp(1,2);
     test = l_power.YData;
-%     ind_keep = test>thresh;
-%     
-%     % Building ind_start, ind_end
-%     ind_start = find(diff(ind_keep)==1)+1;
-%     ind_end = find(diff(ind_keep)==-1);
-%     if ind_end(1)<ind_start(1)
-%         ind_start = [1;ind_start(:)];
-%     end
-%     if ind_start(end)>ind_end(end)
-%         ind_end = [ind_end(:);length(ind_keep)];
-%     end
-%     
-%     % Getting coordinates
-%     coordinates_up = [ind_start(:),ind_end(:)];
-%     times_up = [];
-%     for j =1:size(coordinates_up,1)
-%         times_up = [times_up;l_power.XData(ind_start(j)) l_power.XData(ind_end(j))];
-%     end
-%     
-%     % Removing small episodes
-%     ind_rm = (times_up(:,2)-times_up(:,1))<t_min;   
-%     temp = coordinates_up(ind_rm,:);
-%     for i=1:size(temp,1)
-%         ind_keep(temp(i,1):temp(i,2)) = false;
-%     end
-%     times_up(ind_rm,:) = [];
-%     coordinates_up(ind_rm,:) = [];
-%     ind_start(ind_rm)=[];
-%     ind_end(ind_rm)=[];
 
-% Dilation: Including short below-threshold episodes
+    % Dilation: Including short below-threshold episodes
     ind_below = test<thresh;
     % Building ind_start & ind_end
     ind_start = find(diff(ind_below)==1)+1;
@@ -789,7 +771,6 @@ end
 % X = (data_source.x_start:data_source.f:data_source.x_end)';
 % Y = 1+rescale(data_source.Y,0,1);
 % line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Source','HitTest','off','Visible',visible1);
-ax.YLabel.String = strrep(channel,'_','-');
 
 X = (data_power.x_start:data_power.f:data_power.x_end)';
 % Y = 1+rescale(data_power.Y,0,1);
@@ -799,6 +780,7 @@ t_source = handles.MainFigure.UserData.t_source;
 Y = interp1(X,Y,t_source);
 X = t_source;
 line('XData',X,'YData',Y,'Parent',ax,'Color',color,'Tag','Power','HitTest','off','Visible','on');
+ax.YLabel.String = strrep(channel,'_','-');
 
 % Setting threshold
 if isempty(pu.UserData.thresh_init)
@@ -1030,27 +1012,6 @@ else
     X = t_source;
 end
 
-% if data_num.f == data_den.f
-%     % Same sampling - Dot divide
-%     X = (data_num.x_start:data_num.f:data_num.x_end)';
-%     Y = (data_num.Y)./(data_den.Y);
-% else
-%     % Resampling interp1
-%     if data_num.f > data_den.f
-%         % interpolate denominator
-%         X = (data_num.x_start:data_num.f:data_num.x_end)';
-%         xq = (data_den.x_start:data_den.f:data_den.x_end)';
-%         yq = data_den.Y;
-%         Y = (data_num.Y)./(interp1(xq,yq,X));
-%     else
-%         % interpolate numerator
-%         X = (data_den.x_start:data_den.f:data_den.x_end)';
-%         xq = (data_num.x_start:data_num.f:data_num.x_end)';
-%         yq = data_num.Y;
-%         Y = (interp1(xq,yq,X))./(data_den.Y);
-%     end
-% end
-
 switch ax.Tag
     case 'Ax5'
         color = g_colors(2,:);
@@ -1108,7 +1069,9 @@ for i =1:length(all_axes)
         [~,ind2] = min((l_main.XData-xlim2).^2);
         ylim1 = min(l_main.YData(ind1:ind2),[],'omitnan');
         ylim2 = max(l_main.YData(ind1:ind2),[],'omitnan');
-        ax.YLim = [ylim1,ylim2];
+        if ~isnan(ylim1)&&~isnan(ylim2)
+            ax.YLim = [ylim1,ylim2];
+        end
     end
     % Secondary lines
     for j=1:length(l_second)
@@ -1335,11 +1298,6 @@ handles.MainFigure.UserData.t_source = t_source;
 handles.MainFigure.UserData.t_sleepscored = t_sleepscored;
 handles.MainFigure.UserData.T = T;
 % Storing
-% handles.MainFigure.UserData.channel_lfp = strcat(char(handles.Popup_LFP.String(handles.Popup_LFP.Value,:)),'.mat');
-% handles.MainFigure.UserData.channel_acc = strcat(char(handles.Popup_ACC.String(handles.Popup_ACC.Value,:)),'.mat');
-% handles.MainFigure.UserData.channel_emg = strcat(char(handles.Popup_EMG.String(handles.Popup_EMG.Value,:)),'.mat');
-% handles.MainFigure.UserData.channel_1 = strcat(char(handles.Popup_Ratio1.String(handles.Popup_Ratio1.Value,:)),'.mat');
-% handles.MainFigure.UserData.channel_2 = strcat(char(handles.Popup_Ratio2.String(handles.Popup_Ratio2.Value,:)),'.mat');
 handles.MainFigure.UserData.channel_lfp = char(handles.Popup_LFP.String(handles.Popup_LFP.Value,:));
 handles.MainFigure.UserData.channel_acc = char(handles.Popup_ACC.String(handles.Popup_ACC.Value,:));
 handles.MainFigure.UserData.channel_emg = char(handles.Popup_EMG.String(handles.Popup_EMG.Value,:));
@@ -1366,7 +1324,7 @@ index_ratio2 = S.index_ratio2;
 algorithm = char(regexprep(S.algorithm,'.m',''));
 
 % Scoring
-% t_sleepscored = sleep_score1(index_acc,index_emg,index_ratio1,index_ratio2);
+% t_sleepscored = sleep_score_rat(index_acc,index_emg,index_ratio1,index_ratio2);
 t_sleepscored = feval(algorithm,index_acc,index_emg,index_ratio1,index_ratio2);
 
 % Getting times
@@ -1507,7 +1465,7 @@ for k=1:size(TimeTags_strings,1)
     TimeTags_images(k,:) = [ind_min_time,ind_max_time];
 end
 
-% Building TimeGroups from TimeTags
+% % Building TimeGroups from TimeTags
 load('Preferences.mat','GColors');
 all_names = {'QW';'AW';'NREM';'REM'};
 all_strings = [];
@@ -1515,33 +1473,33 @@ for i=1:length(all_names)
     index = find(strcmp({GColors.TimeGroups(:).Name}',all_names(i))==1);
     all_strings = [all_strings;{GColors.TimeGroups(index(1)).String}'];
 end
-all_tags = {TimeTags(:).Tag}';
-TimeGroups_name = [];
-TimeGroups_frames = [];
-TimeGroups_duration = [];
-TimeGroups_S = [];
-for i=1:size(all_names,1)
-    %indices = find(contains(all_tags,all_strings(i))==1);
-    indices = find(startsWith(all_tags,all_strings(i))==1);
-    if isempty(indices)
-        continue;
-    end
-    group_name = all_names(i);
-    n_frames = sum(TimeTags_images(indices,2)+1-TimeTags_images(indices,1));
-    duration_s = sum(datenum(TimeTags_strings(indices,2))-datenum(TimeTags_strings(indices,1)));
-    duration = datestr(duration_s,'HH:MM:SS.FFF');
-    % Struct S
-    S.Name = {TimeTags(indices).Tag}';
-    S.Selected = indices;
-    S.TimeTags_strings = TimeTags_strings(indices,:);
-    S.TimeTags_images = TimeTags_images(indices,:);
-    
-    % Building objects
-    TimeGroups_name = [TimeGroups_name;group_name];
-    TimeGroups_frames = [TimeGroups_frames;{sprintf('%d',n_frames)}];
-    TimeGroups_duration = [TimeGroups_duration;{duration}];
-    TimeGroups_S = [TimeGroups_S;S];  
-end
+% all_tags = {TimeTags(:).Tag}';
+% TimeGroups_name = [];
+% TimeGroups_frames = [];
+% TimeGroups_duration = [];
+% TimeGroups_S = [];
+% for i=1:size(all_names,1)
+%     %indices = find(contains(all_tags,all_strings(i))==1);
+%     indices = find(startsWith(all_tags,all_strings(i))==1);
+%     if isempty(indices)
+%         continue;
+%     end
+%     group_name = all_names(i);
+%     n_frames = sum(TimeTags_images(indices,2)+1-TimeTags_images(indices,1));
+%     duration_s = sum(datenum(TimeTags_strings(indices,2))-datenum(TimeTags_strings(indices,1)));
+%     duration = datestr(duration_s,'HH:MM:SS.FFF');
+%     % Struct S
+%     S.Name = {TimeTags(indices).Tag}';
+%     S.Selected = indices;
+%     S.TimeTags_strings = TimeTags_strings(indices,:);
+%     S.TimeTags_images = TimeTags_images(indices,:);
+%     
+%     % Building objects
+%     TimeGroups_name = [TimeGroups_name;group_name];
+%     TimeGroups_frames = [TimeGroups_frames;{sprintf('%d',n_frames)}];
+%     TimeGroups_duration = [TimeGroups_duration;{duration}];
+%     TimeGroups_S = [TimeGroups_S;S];  
+% end
 
 % Creating Stats Directory
 data_dir = fullfile(DIR_STATS,'Sleep_Scoring',recording);
@@ -1555,8 +1513,8 @@ save(fullfile(data_dir,filename),'recording','algorithm','z_score','t_min',...
     't_source','t_sleepscored','all_times','timeData',...
     'channel_lfp','channel_acc','channel_emg','channel_1','channel_2',...
     'thresh_acc','thresh_emg','thresh_ratio1','thresh_ratio2',...
-    'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images',...
-    'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
+    'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
+%     'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
 if exist(fullfile(data_dir,filename),'file')
     fprintf('Data overwritten [%s].\n',fullfile(data_dir,filename));
 else
@@ -1581,11 +1539,12 @@ else
 end
 
 % Loading Time Tags
-if ~exist(fullfile(savedir,'Time_Tags.mat'),'file')
+tt_data = handles.MainFigure.UserData.data_tt;
+% tt_data = load(fullfile(savedir,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_images','TimeTags_strings');
+if isempty(tt_data)
     save(fullfile(savedir,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
     fprintf('===> Time Tags saved at %s.\n',fullfile(savedir,'Time_Tags.mat'));
 else
-    tt_data = load(fullfile(savedir,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_images','TimeTags_strings');
     if handles.Checkbox4.Value
         % Overwrite        
         temp ={tt_data.TimeTags(:).Tag}';
@@ -1602,38 +1561,43 @@ else
     TimeTags_cell = [TimeTags_cell(1,:);tt_data.TimeTags_cell(2:end,:);TimeTags_cell(2:end,:)];
     TimeTags = [tt_data.TimeTags;TimeTags];
     save(fullfile(savedir,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
-    fprintf('===> Time Tags saved at %s.\n',fullfile(savedir,'Time_Tags.mat'));
-end
-
-
-% Loading Time Groups
-if ~exist(fullfile(savedir,'Time_Groups.mat'),'file')
-    save(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
-    fprintf('===> Time Groups saved at %s\n',fullfile(savedir,'Time_Groups.mat'));
-else
-    tg_data = load(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
     if handles.Checkbox4.Value
-        % Overwrite
-        ind_keep = ones(size(tg_data.TimeGroups_name));
-        for i =1:length(all_names)
-            if sum(strcmp(tg_data.TimeGroups_name(i),all_names))>0
-                ind_keep(i)=0;
-            end
-        end
-        ind_keep = find(ind_keep==1);
-        tg_data.TimeGroups_name = tg_data.TimeGroups_name(ind_keep,:);
-        tg_data.TimeGroups_frames = tg_data.TimeGroups_frames(ind_keep,:);
-        tg_data.TimeGroups_duration = tg_data.TimeGroups_duration(ind_keep,:);
-        tg_data.TimeGroups_S = tg_data.TimeGroups_S(ind_keep);  
+        fprintf('===> Time Tags overwritten [%s].\n',fullfile(savedir,'Time_Tags.mat'));
+    else
+        fprintf('===> Time Tags concatenated [%s].\n',fullfile(savedir,'Time_Tags.mat'));
     end
-    % Concatenate Time_Groups.mat
-    TimeGroups_name = [tg_data.TimeGroups_name;TimeGroups_name];
-    TimeGroups_frames = [tg_data.TimeGroups_frames;TimeGroups_frames];
-    TimeGroups_duration = [tg_data.TimeGroups_duration;TimeGroups_duration];
-    TimeGroups_S = [tg_data.TimeGroups_S;TimeGroups_S];
-    save(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
-    fprintf('===> Time Groups saved at %s.\n',fullfile(savedir,'Time_Groups.mat'));
 end
+
+
+% % Loading Time Groups
+% tg_data = handles.MainFigure.UserData.data_tg;
+% %tg_data = load(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
+% if isempty(tg_data)
+%     save(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
+%     fprintf('===> Time Groups saved at %s\n',fullfile(savedir,'Time_Groups.mat'));
+% else
+%     if handles.Checkbox4.Value
+%         % Overwrite
+%         ind_keep = ones(size(tg_data.TimeGroups_name));
+%         for i =1:length(all_names)
+%             if sum(strcmp(tg_data.TimeGroups_name(i),all_names))>0
+%                 ind_keep(i)=0;
+%             end
+%         end
+%         ind_keep = find(ind_keep==1);
+%         tg_data.TimeGroups_name = tg_data.TimeGroups_name(ind_keep,:);
+%         tg_data.TimeGroups_frames = tg_data.TimeGroups_frames(ind_keep,:);
+%         tg_data.TimeGroups_duration = tg_data.TimeGroups_duration(ind_keep,:);
+%         tg_data.TimeGroups_S = tg_data.TimeGroups_S(ind_keep);  
+%     end
+%     % Concatenate Time_Groups.mat
+%     TimeGroups_name = [tg_data.TimeGroups_name;TimeGroups_name];
+%     TimeGroups_frames = [tg_data.TimeGroups_frames;TimeGroups_frames];
+%     TimeGroups_duration = [tg_data.TimeGroups_duration;TimeGroups_duration];
+%     TimeGroups_S = [tg_data.TimeGroups_S;TimeGroups_S];
+%     save(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
+%     fprintf('===> Time Groups saved at %s.\n',fullfile(savedir,'Time_Groups.mat'));
+% end
 
 end
 

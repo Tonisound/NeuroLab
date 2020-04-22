@@ -104,6 +104,7 @@ if ~isempty(TimeGroups_name)
     t2.Data = [TimeGroups_name,TimeGroups_frames,TimeGroups_duration];
 end
 t2.UserData.S = TimeGroups_S;
+t2.UserData.Selection = [];
 
 t3 = uitable('ColumnName',{'Name','Tag','Duration'},...
     'ColumnFormat',{'char','char','char'},...
@@ -210,14 +211,16 @@ t2.CellSelectionCallback = {@trace_uitable2_select,t1,t3};
     end
 
     function removeButton_callback(~,~)
-        if isempty(t2.UserData)||isempty(t2.UserData.Selection)
-            return
+        if isempty(t2.UserData) || isempty(t2.UserData.Selection)
+            warning('No Time groups to be removed.\n');
+            return;
+        else
+            indices = t2.UserData.Selection;
+            t2.UserData.Selection=[];
+            t2.Data(indices,:)=[];
+            t2.UserData.S(indices)=[];
+            t3.Data=[];
         end
-        indices = t2.UserData.Selection;
-        t2.UserData.Selection=[];
-        t2.Data(indices,:)=[];
-        t2.UserData.S(indices)=[];
-        t3.Data=[];
     end
 
 waitfor(f2);

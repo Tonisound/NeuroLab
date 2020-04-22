@@ -20,18 +20,28 @@ end
 
 % Loading Time Groups
 if ~exist(fullfile(savedir,'Time_Groups.mat'),'file')
-    errordlg('File Time_Groups.mat not found.');
-    return;
+%     errordlg('File Time_Groups.mat not found.');
+%     return;
+    tg_data.TimeGroups_name = [];
+    tg_data.TimeGroups_frames = [];
+    tg_data.TimeGroups_duration = [];
+    tg_data.TimeGroups_S = [];
 else
-    tg_data = load(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
+    tg_data = load(fullfile(savedir,'Time_Groups.mat'),...
+        'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
 end
 
 % Loading Time Tags
 if ~exist(fullfile(savedir,'Time_Tags.mat'),'file')
-    tt_data = [];
+    errordlg(sprintf('Impossible to generate Time Groups: Time_Tags.mat file not found [%s].',savedir));
+    return;
 else
     tt_data = load(fullfile(savedir,'Time_Tags.mat'),...
         'TimeTags','TimeTags_cell','TimeTags_images','TimeTags_strings');
+    if isempty(tt_data.TimeTags_strings)
+        errordlg(sprintf('Impossible to generate Time Groups: Empty file Time_Tags.mat [%s].',savedir));
+        return;
+    end
 end
 
 % Loading Preferences.mat
@@ -73,8 +83,10 @@ TimeGroups_duration = [];
 TimeGroups_S = [];
 
 for i=1:size(all_names,1)
-    %indices = find(contains(all_tags,all_strings(i))==1);
-    indices = find(startsWith(all_tags,all_strings(i))==1);
+    %indices = find(startsWith(all_tags,all_strings(i))==1);
+    % Looking for multiple patterns
+    all_patterns = regexp(char(all_strings(i)),'/','split');
+    indices = find(startsWith(all_tags,all_patterns)==1);
     if isempty(indices)
         continue;
     end

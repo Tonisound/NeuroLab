@@ -151,7 +151,7 @@ uimenu(m2,'Label','Edit Traces','Tag','EditMenu_Edition','Accelerator','T');
 uimenu(m2,'Label','Edit Time Tags','Tag','EditMenu_TimeTagEdition');
 uimenu(m2,'Label','Edit Time Groups','Tag','EditMenu_TimeGroupEdition');
 uimenu(m2,'Label','Edit LFP Configuration','Tag','EditMenu_LFPConfig');
-uimenu(m2,'Label','Edit Anatomical Regions','Tag','EditMenu_AnatRegions');
+uimenu(m2,'Label','Edit Anatomical Regions - Register Atlas','Tag','EditMenu_AnatRegions');
 % uimenu(m2,'Label','Register Atlas (Neuroshop)','Tag','EditMenu_Neuroshop','Separator','on');
 uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','on');
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
@@ -332,7 +332,7 @@ pl = uicontrol(f,'Style','popup',...
     'FontSize',fontsize,...
     'Parent',botPanel);
 
-pl_str = 'Compute Normalized Movie|Register Atlas|Convert Neuroshop Masks|Import Anatomical Regions|Import LFP Traces|Import External Files';
+pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Convert Neuroshop Masks|Import Anatomical Regions|Import LFP Traces|Import External Files';
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
 pl_str = strcat(pl_str,'|Detect Vascular Surges|Detect Left-Right Runs');
 pl_str = strcat(pl_str,'|Generate Time Groups|Export Patches|Export Anatomical Regions');

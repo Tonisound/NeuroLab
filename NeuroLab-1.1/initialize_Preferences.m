@@ -206,7 +206,7 @@ GColors.atlas_transparency = .5;
 GColors.TimeGroups = struct('Name','','String','','Color',[],'Transparency',[],'Checked',[],'Visible',[]);
 g_colors = get(groot,'DefaultAxesColorOrder');
 all_names = {'QW';'AW';'NREM';'REM';'REM-PHASIC';'REM-TONIC'};
-all_strings = {'QW-';'AW-';'NREM-';'REM-';'SURGE';'TONIC'};
+all_strings = {'QW-';'AW-';'NREM-/S1-';'REM-/S2-';'REM-PHASIC-/SURGE';'REM-TONIC-/TONIC'};
 all_colors = g_colors;
 all_colors(1:6,:) = [.47 .67 .19;...
     0 .45 .74;...

@@ -155,7 +155,7 @@ ft.UserData.Selection = [];
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
 D = [{'Clear Sources_LFP'};{'Delete Region Traces'};cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Import Reference Time'};{'Import Time Tags'};{'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit Anatomical Regions'};{'Edit LFP Configuration'}];
+    {'Import Reference Time'};{'Import Time Tags'};{'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit LFP Configuration'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -548,7 +548,7 @@ for i = 1:length(ind_files)
                 case 'Export Anatomical Regions'
                     success = export_regions(myhandles,FILES(ii).recording,0);
                     
-                case 'Edit Anatomical Regions'
+                case 'Edit Anatomical Regions - Register Atlas'
                     success = menuEdit_AnatRegions_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
                 case 'Edit LFP Configuration'
