@@ -16,14 +16,16 @@ if val==0
     thresh_surge = .5;      % Proportion of pixels to detect surges
     thresh_second = 3;      % seconds - minimum duration to keep surge
     flag_tag = true;        % Overwrite Time Tags
-    flag_group = true;      % Overwrite Time Groups
-    flag_surge = true;      % Save Time_Surges.mat
+%     flag_group = true;      % Overwrite Time Groups
 else
     % Input dialog
-    prompt={'Number std-devs';'Activation threshold (%)';'Minimum Surge Duration';...
-        'Overwrite Time Tags';'Overwrite Time Groups';'Save Time Surges'};
+%     prompt={'Number std-devs';'Activation threshold (%)';'Minimum Surge Duration';...
+%         'Overwrite Time Tags';'Overwrite Time Groups';'Save Time Surges'};
+%     name = 'Select Surge Detection Parameters';
+%     defaultans = {'1.0';'0.5';'3.0';'true';'true';'true'};
+    prompt={'Number std-devs';'Activation threshold (%)';'Minimum Surge Duration';'Overwrite Time Tags'};
     name = 'Select Surge Detection Parameters';
-    defaultans = {'1.0';'0.5';'3.0';'true';'true';'true'};
+    defaultans = {'1.0';'0.5';'3.0';'true'};
     answer = inputdlg(prompt,name,[1 100],defaultans);
     if isempty(answer)
         return;
@@ -36,16 +38,12 @@ else
     else
         flag_tag = false;
     end
-    if str2num(char(answer(5)))==1
-        flag_group = true;
-    else
-        flag_group = false;
-    end
-    if str2num(char(answer(6)))==1
-        flag_surge = true;
-    else
-        flag_surge = false;
-    end
+%     if str2num(char(answer(5)))==1
+%         flag_group = true;
+%     else
+%         flag_group = false;
+%     end
+
 end
 
 
@@ -235,6 +233,11 @@ end
 if sum(ind_surge)==0
     n_phasic = 0;
     n_tonic = sum(REM_images);
+    TimeTags_strings = [];
+    TimeTags_images = zeros(0,2);
+    TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
+    TimeTags_cell = cell(1,6);
+    TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'}; 
     fprintf('No surges detected for threshold %.1f and sigma %.1f.\n',thresh_surge,n_aw);   
 else
     % TimeTags_dur
@@ -247,7 +250,8 @@ else
     TimeTags_phasic = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
     TimeTags_cell_phasic = cell(n_phasic,6);
     for k=1:n_phasic
-        tag = sprintf('SURGE%d(%.1f/%.1f)',k,thresh_surge,n_aw);
+        % tag = sprintf('SURGE%d(%.1f/%.1f)',k,thresh_surge,n_aw);
+        tag = sprintf('REMPHASIC-%03d',k);
         onset = char(TimeTags_strings_phasic(k,1));
         dur = char(TimeTags_dur_phasic(k,:));
         TimeTags_cell_phasic(k,:) = {'',tag,onset,dur,onset,''};
@@ -269,7 +273,8 @@ else
     TimeTags_tonic = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
     TimeTags_cell_tonic = cell(n_tonic,6);
     for k=1:n_tonic
-        tag = sprintf('TONIC%d(%.1f/%.1f)',k,thresh_surge,n_aw);
+        % tag = sprintf('TONIC%d(%.1f/%.1f)',k,thresh_surge,n_aw);
+        tag = sprintf('REMTONIC-%03d',k);
         onset = char(TimeTags_strings_tonic(k,1));
         dur = char(TimeTags_dur_tonic(k,:));
         TimeTags_cell_tonic(k,:) = {'',tag,onset,dur,onset,''};
@@ -284,7 +289,7 @@ else
     % Erase previous TimeTags if flag_tag
     if flag_tag
         temp ={tt_data.TimeTags(:).Tag}';
-        ind_keep = ~contains(temp,["SURGE","TONIC"]);
+        ind_keep = ~contains(temp,["SURGE","TONIC","REMPHASIC-","REMTONIC-"]);
         tt_data.TimeTags_images = tt_data.TimeTags_images(ind_keep,:);
         tt_data.TimeTags_strings = tt_data.TimeTags_strings(ind_keep,:);
         tt_data.TimeTags_cell = [tt_data.TimeTags_cell(1,:);tt_data.TimeTags_cell(find(ind_keep==1)+1,:)];
@@ -298,58 +303,59 @@ else
     save(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
     fprintf('===> Saved at %s.mat\n',fullfile(folder_name,'Time_Tags.mat'));
     
-    %Save TimeGroups
-    if flag_group
-        ind_keep = ~contains(tg_data.TimeGroups_name,["REM-PHASIC";"REM-TONIC"]);
-        tg_data.TimeGroups_name = tg_data.TimeGroups_name(ind_keep);
-        tg_data.TimeGroups_frames = tg_data.TimeGroups_frames(ind_keep);
-        tg_data.TimeGroups_duration = tg_data.TimeGroups_duration(ind_keep);
-        tg_data.TimeGroups_S = tg_data.TimeGroups_S(ind_keep);
-    end
-    % Saving Surges as TimeGroups.mat
-    name_phasic = {'REM-PHASIC'};
-    frames_phasic = {sprintf('%d',sum(ind_surge))};
-    duration_phasic = {datestr(sum(TimeTags_seconds_phasic(:,2)-TimeTags_seconds_phasic(:,1))/(24*3600),'HH:MM:SS.FFF')};
-    S_phasic.Selected = length(tt_data.TimeTags)+(1:n_phasic)';
-    S_phasic.Name = {TimeTags(S_phasic.Selected).Tag}';
-    S_phasic.TimeTags_strings = TimeTags_strings_phasic;
-    S_phasic.TimeTags_images = TimeTags_images_phasic;
-    
-    % Saving tonic events as TimeGroups.mat
-    name_tonic = {'REM-TONIC'};
-    frames_tonic = {sprintf('%d',sum(ind_tonic))};
-    duration_tonic = {datestr(sum(TimeTags_seconds_tonic(:,2)-TimeTags_seconds_tonic(:,1))/(24*3600),'HH:MM:SS.FFF')};
-    S_tonic.Selected = length(tt_data.TimeTags)+n_phasic+(1:n_tonic)';
-    S_tonic.Name = {TimeTags(S_tonic.Selected).Tag}';
-    S_tonic.TimeTags_strings = TimeTags_strings_tonic;
-    S_tonic.TimeTags_images = TimeTags_images_tonic;
-    
-    % Concatenate
-    TimeGroups_name = [tg_data.TimeGroups_name;name_phasic;name_tonic];
-    TimeGroups_frames = [tg_data.TimeGroups_frames;frames_phasic;frames_tonic];
-    TimeGroups_duration = [tg_data.TimeGroups_duration;duration_phasic;duration_tonic];
-    TimeGroups_S = [tg_data.TimeGroups_S;S_phasic;S_tonic];
-    save(fullfile(folder_name,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
-    fprintf('===> Saved at %s.mat\n',fullfile(folder_name,'Time_Groups.mat'));
+%     %Save TimeGroups
+%     if flag_group
+%         ind_keep = ~contains(tg_data.TimeGroups_name,["REMPHASIC";"REMTONIC"]);
+%         tg_data.TimeGroups_name = tg_data.TimeGroups_name(ind_keep);
+%         tg_data.TimeGroups_frames = tg_data.TimeGroups_frames(ind_keep);
+%         tg_data.TimeGroups_duration = tg_data.TimeGroups_duration(ind_keep);
+%         tg_data.TimeGroups_S = tg_data.TimeGroups_S(ind_keep);
+%     end
+%     % Saving Surges as TimeGroups.mat
+%     name_phasic = {'REMPHASIC'};
+%     frames_phasic = {sprintf('%d',sum(ind_surge))};
+%     duration_phasic = {datestr(sum(TimeTags_seconds_phasic(:,2)-TimeTags_seconds_phasic(:,1))/(24*3600),'HH:MM:SS.FFF')};
+%     S_phasic.Selected = length(tt_data.TimeTags)+(1:n_phasic)';
+%     S_phasic.Name = {TimeTags(S_phasic.Selected).Tag}';
+%     S_phasic.TimeTags_strings = TimeTags_strings_phasic;
+%     S_phasic.TimeTags_images = TimeTags_images_phasic;
+%     
+%     % Saving tonic events as TimeGroups.mat
+%     name_tonic = {'REMTONIC'};
+%     frames_tonic = {sprintf('%d',sum(ind_tonic))};
+%     duration_tonic = {datestr(sum(TimeTags_seconds_tonic(:,2)-TimeTags_seconds_tonic(:,1))/(24*3600),'HH:MM:SS.FFF')};
+%     S_tonic.Selected = length(tt_data.TimeTags)+n_phasic+(1:n_tonic)';
+%     S_tonic.Name = {TimeTags(S_tonic.Selected).Tag}';
+%     S_tonic.TimeTags_strings = TimeTags_strings_tonic;
+%     S_tonic.TimeTags_images = TimeTags_images_tonic;
+%     
+%     % Concatenate
+%     TimeGroups_name = [tg_data.TimeGroups_name;name_phasic;name_tonic];
+%     TimeGroups_frames = [tg_data.TimeGroups_frames;frames_phasic;frames_tonic];
+%     TimeGroups_duration = [tg_data.TimeGroups_duration;duration_phasic;duration_tonic];
+%     TimeGroups_S = [tg_data.TimeGroups_S;S_phasic;S_tonic];
+%     save(fullfile(folder_name,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
+%     fprintf('===> Saved at %s.mat\n',fullfile(folder_name,'Time_Groups.mat'));
 end
 
 
-% Option Erase Previous Data
-if flag_tag
-    l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
-    for i = 1:length(l)
-        if ~isempty(strfind(l(i).UserData.Name,'Index-Surge'))||~isempty(strfind(l(i).UserData.Name,'Ratio-Surge'))...
-                ||~isempty(strfind(l(i).UserData.Name,'IndexSurge'))||~isempty(strfind(l(i).UserData.Name,'RatioSurge'))
-            delete(l(i));
-        end
+% Delete Previous Data if exists
+l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
+for i = 1:length(l)
+    if ~isempty(strfind(l(i).UserData.Name,sprintf('Index-Surge/(%.1f-%.1f)',thresh_surge,n_aw)))...
+            ||~isempty(strfind(l(i).UserData.Name,sprintf('Ratio-Surge/(%.1f)',n_aw)))...
+            ||~isempty(strfind(l(i).UserData.Name,sprintf('IndexSurge/(%.1f-%.1f)',thresh_surge,n_aw)))...
+            ||~isempty(strfind(l(i).UserData.Name,sprintf('RatioSurge/(%.1f)',n_aw)))
+        delete(l(i));
     end
 end
+
 
 % Creating line to keep a trace 
 hl = line('XData',1:last_im,...
     'YData',ind_surge*thresh_surge,...
     'Color','k',...
-    'LineWidth',2,...
+    'LineWidth',1,...
     'Tag','Trace_Cerep',...
     'Visible','on',...
     'HitTest','off',...
@@ -366,7 +372,7 @@ hl.UserData = s;
 hr = line('XData',1:last_im,...
     'YData',ratio_surge,...
     'Color',[.5 .5 .5],...
-    'LineWidth',2,...
+    'LineWidth',1,...
     'Tag','Trace_Cerep',...
     'Visible','on',...
     'HitTest','off',...
@@ -411,15 +417,14 @@ for i=1:n_phasic
 end
 
 % Saving Time_Surges.mat
-if flag_surge
-    %IM_DIFF = IM_DIFF(:,:,REM_images==1);
-    Doppler_Surge = IM_DIFF_ALL;
-    save(fullfile(folder_name,'Time_Surges.mat'),'n_aw','thresh_surge','thresh_second',...
-        'AW_images','IM_AW','STD_AW','REM_images','IM_REM','STD_REM',...
-        'ind_surge','ind_tonic','n_phasic','n_tonic','S_surges',...
-        'ratio_surge','intensity_surge','whole_mask','n_whole','Doppler_Surge','-v7.3');
-    fprintf('===> Saved at %s.mat\n',fullfile(folder_name,'Time_Surges.mat'));
-end
+%IM_DIFF = IM_DIFF(:,:,REM_images==1);
+Doppler_Surge = IM_DIFF_ALL;
+save(fullfile(folder_name,'Time_Surges.mat'),'n_aw','thresh_surge','thresh_second',...
+    'AW_images','IM_AW','STD_AW','REM_images','IM_REM','STD_REM',...
+    'ind_surge','ind_tonic','n_phasic','n_tonic','S_surges',...
+    'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images',...
+    'ratio_surge','intensity_surge','whole_mask','n_whole','Doppler_Surge','-v7.3');
+fprintf('===> Saved at %s.mat\n',fullfile(folder_name,'Time_Surges.mat'));
 
 success = true;
 

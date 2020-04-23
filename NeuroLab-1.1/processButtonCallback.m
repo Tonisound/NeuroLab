@@ -32,6 +32,9 @@ switch strtrim(str(val,:))
     case 'Detect Left-Right Runs'
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Generate Time Indexes'
+        generate_time_indexes(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        
     case 'Generate Time Groups'
         generate_time_groups(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
     

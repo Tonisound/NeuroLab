@@ -534,6 +534,9 @@ for i = 1:length(ind_files)
                 case 'Convert Neuroshop Masks'
                     success = convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
+                case 'Generate Time Indexes'
+                    success = generate_time_indexes(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                    
                 case 'Generate Time Groups'
                     success = generate_time_groups(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                     
