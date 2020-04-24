@@ -5,8 +5,6 @@ function success = filter_lfp_extractenvelope(foldername,handles,val)
 % Selects only main channel (if specified) in batch mode
 
 success = false;
-
-global DIR_SAVE FILES CUR_FILE;
 load('Preferences.mat','GFilt');
 
 % if val undefined, set val = 1 (default) user can select which channels to export
@@ -39,9 +37,9 @@ if isempty(dir_t)
 else
 
     temp = {dir_t(:).name}';
-    if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
+    if exist(fullfile(foldername,'Nconfig.mat'),'file')
         %sort if lfp configuration is found
-        data_lfp = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'channel_type','channel_id');
+        data_lfp = load(fullfile(foldername,'Nconfig.mat'),'channel_type','channel_id');
         channel_id = data_lfp.channel_id(strcmp(data_lfp.channel_type,'LFP'));
         channel_id_diff = strcat(channel_id(1:end-1),'$',channel_id(2:end)); 
         % sorting LFP
