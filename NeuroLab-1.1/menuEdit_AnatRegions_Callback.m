@@ -48,7 +48,7 @@ mP = uipanel('Units','normalized',...
 tabgp = uitabgroup('Units','normalized',...
     'Position',[0 .05 1 .95],...
     'Parent',mP,...
-    'Tag','TabGroup');
+    'Tag','MainTabGroup');
 tab1 = uitab('Parent',tabgp,...
     'Units','normalized',...
     'Title','Regions',...
@@ -71,9 +71,9 @@ tab2 = uitab('Parent',tabgp,...
     'Title','Groups',...
     'Tag','SecondTab');
 table_group = uitable('Units','normalized',...
-    'ColumnFormat',{'char'},...
-    'ColumnWidth',{w_col},...
-    'ColumnEditable',false,...
+    'ColumnFormat',{'char','char'},...
+    'ColumnWidth',{w_col w_col},...
+    'ColumnEditable',[false,false],...
     'ColumnName','',...
     'Data',[],...
     'RowName','',...
@@ -81,7 +81,7 @@ table_group = uitable('Units','normalized',...
     'RowStriping','on',...
     'Parent',tab2);
 table_group.UserData.Selection = [];
-table_group.UserData.groups = [];
+table_group.UserData.patches = [];
 %buttons
 visibleButton = uicontrol('Style','pushbutton',... 
     'Units','normalized',...
@@ -164,12 +164,12 @@ boxSticker = uicontrol('Style','checkbox',...
 % Edition buttons
 newButton = uicontrol('Style','pushbutton',... 
     'Units','normalized',...
-    'String','New',...
+    'String','New Region',...
     'Tag','newButton',...
     'Parent',f);
 editButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
-    'String','Edit',...
+    'String','Edit Region',...
     'Tag','editButton',...
     'Parent',f);
 edit_okButton = uicontrol('Style','pushbutton',...
@@ -191,23 +191,18 @@ removeButton = uicontrol('Style','pushbutton',...
     'Parent',f);
 duplicateButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
-    'String','Duplicate',...
+    'String','Duplicate Region',...
     'Tag','duplicateButton',...
     'Parent',f);
 mergeButton = uicontrol('Style','pushbutton',...
     'Units','normalized',...
-    'String','Merge',...
+    'String','Merge Regions',...
     'Tag','mergeButton',...
     'Parent',f);
-addgroupButton = uicontrol('Style','pushbutton',... 
+newgroupButton = uicontrol('Style','pushbutton',... 
     'Units','normalized',...
-    'String','Add Group',...
-    'Tag','addgroupButton',...
-    'Parent',f);
-cleargroupButton = uicontrol('Style','pushbutton',...
-    'Units','normalized',...
-    'String','Clear Group',...
-    'Tag','cleargroupButton',...
+    'String','New Group',...
+    'Tag','newgroupButton',...
     'Parent',f);
 
 % Import buttons
@@ -296,8 +291,8 @@ table_region.Position = [0 0 1 1];
 table_group.Position = [0 0 1 1];
 % Adjust Columns
 mP.Units = 'pixels';
-table_region.ColumnWidth ={mP.Position(3)/1.5-w_margin,mP.Position(3)/4-w_margin};
-table_group.ColumnWidth ={mP.Position(3)-w_margin};
+table_region.ColumnWidth = {mP.Position(3)/1.5-w_margin,mP.Position(3)/4-w_margin};
+table_group.ColumnWidth = {mP.Position(3)/1.5-w_margin,mP.Position(3)/4-w_margin};
 mP.Units = 'normalized';
 %table_region.ColumnWidth = 1;
 
@@ -317,21 +312,19 @@ edit_okButton.Position = [.825 .87 .075 .04];
 edit_cancelButton.Position = [.9 .87 .075 .04];
 duplicateButton.Position = [.825 .83 .15 .04];
 mergeButton.Position = [.825 .79 .15 .04];
-removeButton.Position = [.825 .75 .15 .04];
+newgroupButton.Position = [.825 .73 .15 .04];
+removeButton.Position = [.825 .67 .15 .04];
 
-addgroupButton.Position = [.825 .66 .15 .04];
-cleargroupButton.Position = [.825 .62 .15 .04];
+registerButton.Position = [.825 .57 .15 .04];
+register_okButton.Position = [.825 .57 .075 .04];
+register_cancelButton.Position = [.9 .57 .075 .04];
+deleteAtlasButton.Position = [.825 .53 .15 .04];
+importButton.Position = [.825 .49 .15 .04];
+exportButton.Position = [.825 .45 .15 .04];
 
-registerButton.Position = [.825 .53 .15 .04];
-register_okButton.Position = [.825 .53 .075 .04];
-register_cancelButton.Position = [.9 .53 .075 .04];
-deleteAtlasButton.Position = [.825 .49 .15 .04];
-importButton.Position = [.825 .45 .15 .04];
-exportButton.Position = [.825 .41 .15 .04];
-
-t1.Position = [.915 .3 .06 .04];
-pu1.Position = [.825 .3 .09 .05];
-ax_mean.Position = [.825 .2 .15 .1];
+t1.Position = [.915 .32 .06 .04];
+pu1.Position = [.825 .32 .09 .05];
+ax_mean.Position = [.825 .22 .15 .1];
 okButton.Position = [.825 .09 .15 .04];
 cancelButton.Position = [.825 .05 .15 .04];
 
@@ -348,8 +341,7 @@ set(edit_cancelButton,'Callback',{@edit_cancel_Button_callback,handles2});
 set(duplicateButton,'Callback',{@duplicateButton_callback,handles2});
 set(removeButton,'Callback',{@removeButton_callback,handles2});
 set(mergeButton,'Callback',{@mergeButton_callback,handles2});
-set(addgroupButton,'Callback',{@addgroupButton_callback,handles2});
-set(cleargroupButton,'Callback',{@cleargroupButton_callback,handles2});
+set(newgroupButton,'Callback',{@newgroupButton_callback,handles2});
 
 set(importButton,'Callback',{@importButton_Callback,file_recording,handles2});
 set(exportButton,'Callback',{@exportButton_Callback,file_recording});
@@ -366,11 +358,13 @@ set(boxEditGroup,'Callback',{@boxEdit_Callback,handles2.Group_table});
 set(boxSticker,'Callback',{@boxSticker_Callback,handles2});
 
 % Interactive Control
+%tabgp.SelectionChangedFcn = {@uitabgroup_select,handles2};
+tabgp.SelectionChangedFcn = {@radioMask_selection,handles2};
 table_region.CellSelectionCallback = {@uitable_select,handles2};
 table_region.CellEditCallback = {@uitable_edit};
-
 table_group.CellSelectionCallback = {@uitablegroup_select,handles2};
 table_group.CellEditCallback = {@uitablegroup_edit};
+
 set(l_cursor,'ButtonDownFcn',{@click_l_cursor});
 set(ax,'ButtonDownFcn',{@axedit_clickFcn,handles2});
 % set(ax,'ButtonDownFcn','disp(1)');
@@ -385,31 +379,27 @@ im.CData = main_im;
 % Intialization
 im.AlphaData = ones(size(main_im));
 
-% Building str_popup
-patches = flipud(findobj(ax,'Tag','Region'));
-str_popup = [];
-for i = 1:length(patches)
-    str_popup = [str_popup;{patches(i).UserData.UserData.Name}];
+% Importing Region Patches
+% Building str_region
+r_patches = flipud(findobj(ax,'Tag','Region'));
+str_region = [];
+for i = 1:length(r_patches)
+    str_region = [str_region;{r_patches(i).UserData.UserData.Name}];
 end
 
-% Searching patches
-for i = 1:length(patches)
-    alpha = patches(i).FaceAlpha;
-    %patches(i).FaceAlpha = 0;
-    color = patches(i).FaceColor;
-    patches(i).Visible = 'on';
-    patches(i).EdgeColor = color;
-    patches(i).FaceColor ='none';
-    patches(i).LineWidth = 1;
-    patches(i).MarkerSize = 1;
+% Searching r_patches
+for i = 1:length(r_patches)
+    alpha = r_patches(i).FaceAlpha;
+    %r_patches(i).FaceAlpha = 0;
+    color = r_patches(i).FaceColor;
+    r_patches(i).Visible = 'on';
+    r_patches(i).EdgeColor = color;
+    r_patches(i).FaceColor ='none';
+    r_patches(i).LineWidth = 1;
+    r_patches(i).MarkerSize = 1;
     
-    % changing Tag to handle patches
-    patches(i).Tag = patches(i).UserData.UserData.Name;
-    
-    % changing patches UserData
-    patches(i).Tag = patches(i).UserData.UserData.Name;
-    name = patches(i).UserData.UserData.Name;
-    mask = patches(i).UserData.UserData.Mask;
+    name = r_patches(i).UserData.UserData.Name;
+    mask = r_patches(i).UserData.UserData.Mask;
     % adding mask
     cdata = repmat(permute(color,[3,1,2]),[size(mask,1),size(mask,2)]);
     im_mask = image('CData',cdata,...
@@ -444,30 +434,112 @@ for i = 1:length(patches)
         'Parent',ax,...
         'Tag','Sticker',...
         'Visible',sticker_status);
-    sticker.UserData.Patch = patches(i);
-    set(sticker,'ButtonDownFcn',{@click_sticker,patches(i),handles2});
+    sticker.UserData.Patch = r_patches(i);
+    set(sticker,'ButtonDownFcn',{@click_sticker,r_patches(i),handles2});
     
-    patches(i).UserData = [];
-    patches(i).UserData.Name = name;
-    patches(i).UserData.Mask = mask;
-    patches(i).UserData.Selected = 0;
-    patches(i).UserData.Color = color;
-    patches(i).UserData.Alpha = alpha;
-    patches(i).UserData.Line_Boundary = line_boundary;
-    patches(i).UserData.ImMask = im_mask;
-    patches(i).UserData.Sticker = sticker;
+    r_patches(i).UserData = [];
+    r_patches(i).UserData.Name = name;
+    r_patches(i).UserData.Mask = mask;
+    r_patches(i).UserData.Selected = 0;
+    r_patches(i).UserData.Color = color;
+    r_patches(i).UserData.Alpha = alpha;
+    r_patches(i).UserData.Line_Boundary = line_boundary;
+    r_patches(i).UserData.ImMask = im_mask;
+    r_patches(i).UserData.Sticker = sticker;
     
 end
 
-if ~isempty(str_popup)
-    table_region.Data = [cellstr(str_popup),repmat({'1'},[length(str_popup),1])];
-    table_region.UserData.patches = patches;
+if ~isempty(str_region)
+    table_region.Data = [cellstr(str_region),repmat({'1'},[length(str_region),1])];
+    table_region.UserData.patches = r_patches;
 else
     table_region.Data = [];
     table_region.UserData.patches = [];
 end
 
-waitfor(f);
+% Importing Region Group Patches
+% Building str_region
+g_patches = flipud(findobj(ax,'Tag','RegionGroup'));
+str_group = [];
+for i = 1:length(g_patches)
+    str_group = [str_group;{g_patches(i).UserData.UserData.Name}];
+end
+
+% Searching patches
+for i = 1:length(g_patches)
+    alpha = g_patches(i).FaceAlpha;
+    %g_patches(i).FaceAlpha = 0;
+    color = g_patches(i).FaceColor;
+    g_patches(i).Visible = 'off';
+    g_patches(i).EdgeColor = color;
+    g_patches(i).FaceColor = 'none';
+    g_patches(i).LineWidth = 1;
+    g_patches(i).MarkerSize = 1;
+    
+    name = g_patches(i).UserData.UserData.Name;
+    mask = g_patches(i).UserData.UserData.Mask;
+    % adding mask
+    cdata = repmat(permute(color,[3,1,2]),[size(mask,1),size(mask,2)]);
+    im_mask = image('CData',cdata,...
+        'Parent',ax,...
+        'Tag','ImageMask',...
+        'Hittest','off',...
+        'AlphaData',alpha*mask,...
+        'Visible','off');
+    % adding boundary
+    B = bwboundaries(mask);
+    line_boundary=[];
+    all_xboundaries=[];
+    all_yboundaries=[];
+    for j=1:length(B)
+        boundary = B{j};
+        l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+            'Color',color,...
+            'Parent',ax,...
+            'Tag','Boundary',...
+            'Hittest','off',...
+            'Visible','off');
+        line_boundary=[line_boundary;l];
+        all_xboundaries = [all_xboundaries;boundary(:,2)];
+        all_yboundaries = [all_yboundaries;boundary(:,1)];
+    end
+    % adding sticker
+    if boxSticker.Value
+        sticker_status = 'on';
+    else
+        sticker_status = 'off';
+    end
+    sticker = text(mean(all_xboundaries),mean(all_yboundaries),name,...
+        'FontSize',6,...
+        'BackgroundColor',color,...
+        'EdgeColor','k',...
+        'Parent',ax,...
+        'Tag','Sticker',...
+        'Visible',sticker_status);
+    sticker.UserData.Patch = g_patches(i);
+    set(sticker,'ButtonDownFcn',{@click_sticker,g_patches(i),handles2});
+    
+    g_patches(i).UserData = [];
+    g_patches(i).UserData.Name = name;
+    g_patches(i).UserData.Mask = mask;
+    g_patches(i).UserData.Selected = 0;
+    g_patches(i).UserData.Color = color;
+    g_patches(i).UserData.Alpha = alpha;
+    g_patches(i).UserData.Line_Boundary = line_boundary;
+    g_patches(i).UserData.ImMask = im_mask;
+    g_patches(i).UserData.Sticker = sticker;
+    
+end
+
+if ~isempty(str_group)
+    table_group.Data = [cellstr(str_group),repmat({'1'},[length(str_group),1])];
+    table_group.UserData.patches = g_patches;
+else
+    table_group.Data = [];
+    table_group.UserData.patches = [];
+end
+
+%waitfor(f);
 success = true;
 
 end
@@ -505,7 +577,7 @@ hq = patch('XData',xdata,...
     'YData',ydata,...
     'FaceColor','none',...
     'EdgeColor',color,...
-    'Tag',char(answer),...
+    'Tag','Region',... 'Tag',char(answer),...
     'FaceAlpha',alpha,...
     'LineWidth',patch_width,...
     'Visible','on',...
@@ -849,21 +921,28 @@ end
 function removeButton_callback(~,~,handles)
 % Remove temporary or selected patch
 
-selection = handles.Region_table.UserData.Selection;
+switch handles.MainTabGroup.SelectedTab.Tag
+    case 'MainTab'
+        table = handles.Region_table;
+    case 'SecondTab'
+        table = handles.Group_table;
+end
+
+selection = table.UserData.Selection;
 if ~isempty(selection)
     % deleting Region
     for i=1:length(selection)
         index = selection(i);
-        delete(handles.Region_table.UserData.patches(index).UserData.Line_Boundary);
-        delete(handles.Region_table.UserData.patches(index).UserData.ImMask);
-        delete(handles.Region_table.UserData.patches(index).UserData.Sticker);
+        delete(table.UserData.patches(index).UserData.Line_Boundary);
+        delete(table.UserData.patches(index).UserData.ImMask);
+        delete(table.UserData.patches(index).UserData.Sticker);
     end
-    delete(handles.Region_table.UserData.patches(selection));   
-    handles.Region_table.UserData.patches(selection)=[];
-    handles.Region_table.Data(selection,:)=[];
+    delete(table.UserData.patches(selection));   
+    table.UserData.patches(selection)=[];
+    table.Data(selection,:)=[];
     
 else
-    warning('Select region to remove.');
+    warning('Select item to remove.');
     return;
 end
 
@@ -872,11 +951,18 @@ end
 function visibleButton_callback(~,~,handles)
 % Turn selected patches visible
 
-selection = handles.Region_table.UserData.Selection;
+switch handles.MainTabGroup.SelectedTab.Tag
+    case 'MainTab'
+        table = handles.Region_table;
+    case 'SecondTab'
+        table = handles.Group_table;
+end
+
+selection = table.UserData.Selection;
 if ~isempty(selection)
-    handles.Region_table.Data(selection,2) = repmat({'1'},[length(selection) 1]);   
+    table.Data(selection,2) = repmat({'1'},[length(selection) 1]);   
 else
-    warning('Select region to turn visible.');
+    warning('Select item to turn visible.');
     return;
 end
 
@@ -885,11 +971,18 @@ end
 function invisibleButton_callback(~,~,handles)
 % Turn selected patches invisible
 
-selection = handles.Region_table.UserData.Selection;
+switch handles.MainTabGroup.SelectedTab.Tag
+    case 'MainTab'
+        table = handles.Region_table;
+    case 'SecondTab'
+        table = handles.Group_table;
+end
+
+selection = table.UserData.Selection;
 if ~isempty(selection)
-    handles.Region_table.Data(selection,2) = repmat({'0'},[length(selection) 1]);   
+    table.Data(selection,2) = repmat({'0'},[length(selection) 1]);   
 else
-    warning('Select region to turn invisible.');
+    warning('Select item to turn invisible.');
     return;
 end
 
@@ -923,7 +1016,8 @@ if ~isempty(selection)
         
         % Patch creation
         hq = copyobj(p,handles.AxEdit);
-        hq.Tag = name;
+        %hq.Tag = name;
+        hq.Tag = 'Region';
         hq.FaceColor = 'none';
         hq.EdgeColor = color;
         % Mask creation
@@ -1047,7 +1141,7 @@ if ~isempty(selection) && length(selection)>1
         'YData',pxdata,...
         'FaceColor','none',...
         'EdgeColor',new_color,...
-        'Tag',prefix,...
+        'Tag','Region',...'Tag',prefix,...
         'FaceAlpha',alpha,...
         'LineWidth',patch_width,...
         'Visible','on',...
@@ -1112,7 +1206,7 @@ end
 
 end
 
-function addgroupButton_callback(~,~,handles)
+function newgroupButton_callback(~,~,handles)
 % Add group of regions from selected patches
 
 selection = handles.Region_table.UserData.Selection;
@@ -1120,8 +1214,6 @@ if isempty(selection)
     warning('Please select regions to form group.');
     return;
 end
-
-% adding existing groups
 
 % getting group name
 answer = inputdlg('Enter Group Name','Group creation',[1 60]);
@@ -1135,28 +1227,94 @@ if isempty(answer)
     return;
 end
 
-group.Name = char(answer);
-group.Patches = handles.Region_table.UserData.patches(selection);
+% Getting Patch Group parameters
+load('Preferences.mat','GColors');
+alpha = GColors.patch_transparency;
+patch_width = GColors.patch_width;
+alpha_mask = GColors.mask_transparency;
+
+all_patches = handles.Region_table.UserData.patches(selection);
+% group.Name = char(answer);
+% group.Patches = all_patches;
+
+all_colors = [];
+all_xdata = [];
+all_ydata = [];
+all_masks = zeros(size(all_patches(1).UserData.Mask));
+for i =1:length(all_patches)
+    all_colors = [all_colors ;all_patches(i).UserData.Color];
+    all_xdata = [all_xdata ; all_patches(i).XData(:); all_patches(i).XData(1)];
+    all_ydata = [all_ydata ; all_patches(i).YData(:); all_patches(i).YData(1)];
+    all_masks = all_masks+all_patches(i).UserData.Mask;
+end
+color = mean(all_colors,1);
+mask = all_masks>0;
+
+% Patch Group creation
+hq = patch('XData',all_xdata,...
+    'YData',all_ydata,...
+    'FaceColor','none',...
+    'EdgeColor',color,...
+    'Tag','RegionGroup',...
+    'FaceAlpha',alpha,...
+    'LineWidth',1,...
+    'Visible','on',...
+    'Parent',handles.AxEdit);
+% adding mask
+cdata = repmat(permute(color,[3,1,2]),[size(mask,1),size(mask,2)]);
+im_mask = image('CData',cdata,...
+    'Parent',handles.AxEdit,...
+    'Tag','ImageMask',...
+    'Hittest','off',...
+    'AlphaData',alpha_mask*mask,...
+    'Visible','off');
+% adding boundary
+B = bwboundaries(mask);
+line_boundary=[];
+all_xboundaries=[];
+all_yboundaries=[];
+for j=1:length(B)
+    boundary = B{j};
+    l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+        'Color',color,...
+        'Parent',handles.AxEdit,...
+        'Tag','Boundary',...
+        'Hittest','off',...
+        'Visible','off');
+    line_boundary = [line_boundary;l];
+    all_xboundaries = [all_xboundaries;boundary(:,2)];   
+    all_yboundaries = [all_yboundaries;boundary(:,1)];
+end
+% adding sticker
+if handles.boxSticker.Value
+    sticker_status = 'on';
+else
+    sticker_status = 'off';
+end
+sticker = text(mean(all_xboundaries),mean(all_yboundaries),char(answer),...
+    'FontSize',6,...
+    'BackgroundColor',color,...
+    'EdgeColor','k',...
+    'Parent',handles.AxEdit,...
+    'Tag','Sticker',...
+    'Visible',sticker_status);
+sticker.UserData.Patch = hq;
+set(sticker,'ButtonDownFcn',{@click_sticker,hq,handles});
+
+% Updating UserData
+s.Name = char(answer);
+s.Mask = mask;
+s.Selected = 0;
+s.Color = color;
+s.Alpha = alpha;
+s.Line_Boundary = line_boundary;
+s.ImMask = im_mask;
+s.Sticker = sticker;
+hq.UserData = s;
 
 %update table
-handles.Group_table.UserData.groups = [handles.Group_table.UserData.groups;group];
-handles.Group_table.Data = [handles.Group_table.Data;answer];
-
-end
-
-function cleargroupButton_callback(~,~,handles)
-% Remove group of regions
-
-selection = handles.Group_table.UserData.Selection;
-if ~isempty(selection)
-    % deleting Region
-    handles.Group_table.UserData.groups(selection)=[];
-    handles.Group_table.Data(selection,:)=[];
-    
-else
-    warning('Select group to remove.');
-    return;
-end
+handles.Group_table.UserData.patches = [handles.Group_table.UserData.patches;hq];
+handles.Group_table.Data = [handles.Group_table.Data;answer,{'1'}];
 
 end
 
@@ -1368,26 +1526,36 @@ function okButton_callback(~,~,handles,handles2,val)
 
 global LAST_IM;
 
+% Loading parameters
+load('Preferences.mat','GColors');
+patch_alpha = GColors.patch_transparency;
+patch_width = GColors.patch_width;
+patch_color = GColors.patch_color;
+% mask_alpha = GColors.mask_transparency;
+% mask_width = GColors.mask_width;
+% mask_color = GColors.mask_color;
+
 % Deleting old patches
-old_patches = findobj(handles.CenterAxes,'Tag','Region');
+old_patches = findobj(handles.CenterAxes,'Tag','Region','-or','Tag','RegionGroup');
 for i=1:length(old_patches)
     delete(old_patches(i).UserData);
     delete(old_patches(i));
 end
 
 % Recreating new patches
-patches = handles2.Region_table.UserData.patches;
-for i =1:length(patches)
-    p = patches(i);
+r_patches = handles2.Region_table.UserData.patches;
+for i =1:length(r_patches)
+    p = r_patches(i);
+    color = p.UserData.Color;
     
     % patch creation
     hq = patch('XData',p.XData,...
         'YData',p.YData,...
-        'FaceColor',p.EdgeColor,...
-        'EdgeColor','k',...
+        'FaceColor',color,...p.EdgeColor,...
+        'EdgeColor',patch_color,...
         'Tag','Region',...
-        'FaceAlpha',.5,...
-        'LineWidth',.5,...
+        'FaceAlpha',patch_alpha,...
+        'LineWidth',patch_width,...
         'ButtonDownFcn',{@click_RegionFcn,handles},...
         'Visible','off',...
         'Parent',handles.CenterAxes);
@@ -1398,7 +1566,7 @@ for i =1:length(patches)
     l_width = 1;
     hl = line('XData',X(:),...
         'YData',Y(:),...
-        'Color',p.EdgeColor,...
+        'Color',color,...p.EdgeColor,...
         'Tag','Trace_Region',...
         'HitTest','on',...
         'Visible','off',...
@@ -1416,6 +1584,52 @@ for i =1:length(patches)
     % Updating UserData
     s.Name = p.UserData.Name;
     s.Mask = p.UserData.Mask;
+    s.Graphic = hq;
+    hq.UserData = hl;
+    hl.UserData = s;
+end
+
+g_patches = handles2.Group_table.UserData.patches;
+for i =1:length(g_patches)
+    p = g_patches(i);
+    color = p.UserData.Color;
+    
+    % patch creation
+    hq = patch('XData',p.XData,...
+        'YData',p.YData,...
+        'FaceColor',color,...p.EdgeColor,...
+        'EdgeColor',patch_color,...
+        'Tag','RegionGroup',...
+        'FaceAlpha',patch_alpha,...
+        'LineWidth',patch_width,...
+        'ButtonDownFcn',{@click_RegionFcn,handles},...
+        'Visible','off',...
+        'Parent',handles.CenterAxes);
+        
+    % line creation
+    X = [(1:LAST_IM)';NaN];
+    Y = NaN(size(X));
+    l_width = 1;
+    hl = line('XData',X(:),...
+        'YData',Y(:),...
+        'Color',color,...p.EdgeColor,...
+        'Tag','Trace_RegionGroup',...
+        'HitTest','on',...
+        'Visible','off',...
+        'LineWidth',l_width,...
+        'Parent',handles.RightAxes);
+    set(hl,'ButtonDownFcn',{@click_lineFcn,handles});
+    
+%     if handles.RightPanelPopup.Value ==3
+%         %set([hq;hl],'Visible','on');
+%         set(hl,'Visible','on');
+%     end
+    % boxLabel_Callback(handles.LabelBox,[],handles);
+    boxPatch_Callback(handles.PatchBox,[],handles);
+    
+    % Updating UserData
+    s.Name = p.UserData.Name;
+    s.Mask = double(p.UserData.Mask);
     s.Graphic = hq;
     hq.UserData = hl;
     hl.UserData = s;
@@ -1443,12 +1657,19 @@ end
 
 function boxSticker_Callback(src,~,handles)
 
-all_patches = handles.Region_table.UserData.patches;
+switch handles.MainTabGroup.SelectedTab.Tag
+    case 'MainTab'
+        table = handles.Region_table;
+    case 'SecondTab'
+        table = handles.Group_table;
+end
+
+all_patches = table.UserData.patches;
 for i =1:length(all_patches)
     
     p = all_patches(i);
     % checking status_visible
-    if strcmp(char(handles.Region_table.Data(i,2)),'1')
+    if strcmp(char(table.Data(i,2)),'1')
         status_visible ='on';
     else
         status_visible ='off';
@@ -1456,7 +1677,6 @@ for i =1:length(all_patches)
     % checking boxSticker Value
     if src.Value
         p.UserData.Sticker.Visible = status_visible;
-
     else
         p.UserData.Sticker.Visible = 'off';
     end
@@ -1473,14 +1693,24 @@ end
 function radioMask_selection(~,~,handles)
 
 src = handles.radioMask;
-all_patches = handles.Region_table.UserData.patches;
 
+switch handles.MainTabGroup.SelectedTab.Tag
+    case 'MainTab'
+        visible_table = handles.Region_table;
+        invisible_table = handles.Group_table;
+    case 'SecondTab'
+        invisible_table = handles.Region_table;
+        visible_table = handles.Group_table;
+end
+
+% Visible Table
+all_patches = visible_table.UserData.patches;
 if strcmp(src.SelectedObject.String,'Patches')
     %Patch visible
     for i =1:length(all_patches)
         
         % getting status_visible
-        if strcmp(char(handles.Region_table.Data(i,2)),'1')
+        if strcmp(char(visible_table.Data(i,2)),'1')
             status_visible ='on';
         else
             status_visible ='off';
@@ -1510,7 +1740,7 @@ elseif strcmp(src.SelectedObject.String,'Masks')
     for i =1:length(all_patches)
         
         % checking status_visible
-        if strcmp(char(handles.Region_table.Data(i,2)),'1')
+        if strcmp(char(visible_table.Data(i,2)),'1')
             status_visible ='on';
         else
             status_visible ='off';
@@ -1541,12 +1771,24 @@ end
 selection = [];
 for ii =1:length(all_patches)
     if all_patches(ii).UserData.Selected
-        index = find(strcmp(handles.Region_table.Data(:,1),all_patches(ii).UserData.Name)==1);
+        index = find(strcmp(visible_table.Data(:,1),all_patches(ii).UserData.Name)==1);
         selection = [selection ;index(1)];
     end
 end
-handles.Region_table.UserData.Selection = selection;
-% handles.Region_table.Data(selection)
+visible_table.UserData.Selection = selection;
+
+% Invisible Table
+all_invisible_patches = invisible_table.UserData.patches;
+for i =1:length(all_invisible_patches)
+    
+    all_invisible_patches(i).Visible = 'off';
+    % turn off masks
+    for j =1:length(all_invisible_patches(i).UserData.Line_Boundary)
+        all_invisible_patches(i).UserData.Line_Boundary(j).Visible = 'off';
+        all_invisible_patches(i).UserData.Sticker.Visible = 'off';
+    end
+    all_invisible_patches(i).UserData.ImMask.Visible = 'off';
+end
 
 end
 
@@ -1577,7 +1819,7 @@ end
 
 % update selection aspect
 radioMask_selection([],[],handles);
-handles.Group_table.UserData.Selection = [];
+%handles.Group_table.UserData.Selection = [];
 
 end
 
@@ -1607,7 +1849,7 @@ else
 end
 
 % Deselect all patches
-patches = handles.Region_table.UserData.patches;
+patches = hObj.UserData.patches;
 for i =1:length(patches)
      patches(i).UserData.Selected = 0;
      patches(i).UserData.Sticker.EdgeColor = 'k';
@@ -1615,14 +1857,15 @@ end
 
 % Select  patches
 selection = hObj.UserData.Selection;
-all_patches = [];
-if ~isempty(selection)
-    for j =1:length(selection)
-        index = selection(j);
-        patches = hObj.UserData.groups(index).Patches;
-        all_patches = [all_patches;patches];
-    end
-end
+% all_patches = [];
+% if ~isempty(selection)
+%     for j =1:length(selection)
+%         index = selection(j);
+%         patches = hObj.UserData.groups(index).Patches;
+%         all_patches = [all_patches;patches];
+%     end
+% end
+all_patches = hObj.UserData.patches(selection);
 for i = 1:length(all_patches)
      all_patches(i).UserData.Selected = 1;
      all_patches(i).UserData.Sticker.EdgeColor = 'w';
@@ -1630,22 +1873,22 @@ end
 
 % update selection aspect
 radioMask_selection([],[],handles);
-handles.Region_table.UserData.Selection = [];
+%handles.Region_table.UserData.Selection = [];
 
 end
 
 function uitablegroup_edit(hObj,evnt)
 
-tdata = hObj.Data;
-selection = evnt.Indices(1);
+patches = hObj.UserData.patches;
+tdata = hObj.Data(:,1);
+selection = evnt.Indices(:,1);
 tdata(selection)=[];
 
 if sum(strcmp(tdata,evnt.NewData))>0
     warning('Group name already exists.');
-    %hObj.Data(selection) = {char(evnt.PreviousData)};
-    hObj.Data(selection) = {evnt.PreviousData};
+    hObj.Data(selection,1) = {evnt.PreviousData};
 else
-    hObj.UserData.groups(selection).Name = char(evnt.NewData);
+    patches(selection).UserData.Name = char(evnt.NewData);
 end
 
 end
@@ -1892,7 +2135,7 @@ for i = 1:length(regions)
         'YData',regions(i).patch_y,...
         'FaceColor','none',...
         'EdgeColor',color,...
-        'Tag',char(regions(i).name),...
+        'Tag','Region',... 'Tag',char(regions(i).name),... 
         'FaceAlpha',.5,...
         'LineWidth',1,...
         'Visible','on',...

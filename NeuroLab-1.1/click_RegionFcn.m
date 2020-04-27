@@ -2,6 +2,7 @@ function click_RegionFcn(hObj,~,handles)
 
 %disp(hObj);
 %disp(hObj.UserData.Name);
+load('Preferences.mat','GColors');
 l = hObj.UserData;
 disp(l.UserData.Name);
 
@@ -19,13 +20,15 @@ if strcmp(seltype,'normal')
         end
         
         hObj.EdgeColor = char2rgb('w');
-        hObj.LineWidth = 2;
+        hObj.LineWidth = 2*GColors.patch_width;
+        hObj.FaceAlpha = GColors.patch_transparency;
         hObj.Selected ='on';
         hObj.UserData.LineWidth=coeff_increase*hObj.UserData.LineWidth;
     else
         %hObj.EdgeColor = char2rgb('k');
-        hObj.EdgeColor = 'none';
-        hObj.LineWidth = 1;
+        hObj.EdgeColor = GColors.patch_color;
+        hObj.LineWidth = GColors.patch_width;
+        hObj.FaceAlpha = GColors.patch_transparency;
         hObj.Selected ='off';
         hObj.UserData.LineWidth=hObj.UserData.LineWidth/coeff_increase;
     end

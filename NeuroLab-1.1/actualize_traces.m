@@ -97,7 +97,7 @@ for idx =1:length(graphics)
             y = mean(mean(IM(i:I,j:J,:),2,'omitnan'),1,'omitnan');
             y = squeeze(y);
             
-        case 'Region'
+        case {'Region';'RegionGroup'}
             im_mask = graphics(idx).UserData.UserData.Mask;
             im_mask(im_mask==0)=NaN;
             im_mask = IM.*repmat(im_mask,1,1,size(IM,3));
