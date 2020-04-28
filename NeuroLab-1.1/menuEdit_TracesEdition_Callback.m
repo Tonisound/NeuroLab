@@ -109,9 +109,10 @@ pos = get(mainPanel,'Position');
 m = findobj(ax,'Tag','Trace_Mean');
 %l = flipud(findobj(ax,'Type','line','-not','Tag','Cursor','-not','Tag','Trace_Cerep','-not','Tag','Trace_Mean'));
 l1 = flipud(findobj(ax,'Tag','Trace_Region'));
-l2 = flipud(findobj(ax,'Tag','Trace_Pixel'));
-l3 = flipud(findobj(ax,'Tag','Trace_Box'));
-l = [l1;l2;l3];
+l2 = flipud(findobj(ax,'Tag','Trace_RegionGroup'));
+l3 = flipud(findobj(ax,'Tag','Trace_Pixel'));
+l4 = flipud(findobj(ax,'Tag','Trace_Box'));
+l = [l1;l2;l3;l4];
 t = flipud(findobj(ax,'Tag','Trace_Cerep'));
 lines = [m;l;t];
 
@@ -206,7 +207,8 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
         [~,ind_sorted]=sort(get_stackposition(lines,ax),'ascend');
         lines_s = lines(ind_sorted);
         for j =length(lines_s):-1:1
-            if strcmp(lines_s(j).Tag,'Trace_Region')||strcmp(lines_s(j).Tag,'Trace_Pixel')||strcmp(lines_s(j).Tag,'Trace_Box')
+            if strcmp(lines_s(j).Tag,'Trace_Region')||strcmp(lines_s(j).Tag,'Trace_RegionGroup')...
+                    ||strcmp(lines_s(j).Tag,'Trace_Pixel')||strcmp(lines_s(j).Tag,'Trace_Box')
                 uistack(lines_s(j).UserData.Graphic,'top');
             end
         end
@@ -229,7 +231,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
                     switch lines(j).Tag
                         case 'Trace_Pixel'
                             lines(j).UserData.Graphic.MarkerFaceColor = char2rgb(char(D(j,3)));
-                        case {'Trace_Box','Trace_Region'}
+                        case {'Trace_Box','Trace_Region','Trace_RegionGroup'}
                             lines(j).UserData.Graphic.FaceColor = char2rgb(char(D(j,3)));
                     end
                     
@@ -240,7 +242,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
                     % Update Visible
                     lines(j).Visible = char(D(j,6));
                     switch lines(j).Tag
-                        case {'Trace_Pixel','Trace_Box','Trace_Region'}
+                        case {'Trace_Pixel','Trace_Box','Trace_Region','Trace_RegionGroup'}
                             lines(j).UserData.Graphic.Visible = char(D(j,6));
                     end
             end
@@ -285,12 +287,17 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
             
             ind = find(strcmp(D(:,2),'Trace_Region'));
             for k =1:length(ind)
-                temp(ind(k),:) = {sprintf('SpikoRegion_%d',k),'Trace_Region',rgb2char(rand(1,3)),'-','0.5',char(status(3))};
+                temp(ind(k),:) = {sprintf('Region_%d',k),'Trace_Region',rgb2char(rand(1,3)),'-','0.5',char(status(3))};
+            end
+            
+            ind = find(strcmp(D(:,2),'Trace_RegionGroup'));
+            for k =1:length(ind)
+                temp(ind(k),:) = {sprintf('RegionGroup_%d',k),'Trace_RegionGroup',rgb2char(rand(1,3)),'-','0.5',char(status(3))};
             end
             
             ind = find(strcmp(D(:,2),'Trace_Cerep'));
             for k =1:length(ind)
-                temp(ind(k),:) = {sprintf('SpikoTrace_%d',k),'Trace_Cerep',rgb2char(rand(1,3)),'-','0.5',char(status(4))};
+                temp(ind(k),:) = {sprintf('Trace_%d',k),'Trace_Cerep',rgb2char(rand(1,3)),'-','0.5',char(status(4))};
             end
             
             for ii=1:length(indices)
@@ -340,7 +347,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
             %ui_T.Data = ui_T.Data(ind_keep,:);
             for k =1:length(ind_rm)
                 switch lines(ind_rm(k)).Tag
-                    case {'Trace_Pixel','Trace_Box','Trace_Region'}
+                    case {'Trace_Pixel','Trace_Box','Trace_Region','Trace_RegionGroup'}
                         ui_T.Data(ind_rm(k),:) = {'','.','','','','','',''};
                     case 'Trace_Cerep'
                         ui_T.Data(ind_rm(k),:) = {'','..','','','','','',''};

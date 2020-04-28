@@ -11,10 +11,11 @@ box = findobj(handles.CenterAxes,'Tag','Box');
 hp = findobj(handles.RightAxes,'Tag','Trace_Pixel','-or','Tag','Trace_Pixel_label');
 hb = findobj(handles.RightAxes,'Tag','Trace_Box','-or','Tag','Trace_Box_label');
 hr = findobj(handles.RightAxes,'Tag','Trace_Region','-or','Tag','Trace_Region_label');
+hs = findobj(handles.RightAxes,'Tag','Trace_RegionGroup','-or','Tag','Trace_RegionGroup_label');
 ht = findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Cerep_label');
 hlab = findobj(handles.RightAxes,'Type','text','-not','Tag','Trace_Mean_label');
 
-set([pix;box;hp;hb;hr;ht],'Visible','off');
+set([pix;box;hp;hb;hr;hs;ht],'Visible','off');
         
 switch strtrim(str(val,:))
     case {'Pixel Dynamics','Pixel'}
@@ -26,6 +27,9 @@ switch strtrim(str(val,:))
     case {'Region Dynamics','Region'}
         %set([reg;hr],'Visible','on');
         set(hr,'Visible','on');
+        
+    case {'Region Group Dynamics','RegionGroup'}
+        set(hs,'Visible','on');
         
     case {'Trace Dynamics'}
         set(ht,'Visible','on');

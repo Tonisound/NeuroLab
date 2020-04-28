@@ -42,7 +42,8 @@ flag_mask=false;
 im.AlphaData = ones(size(main_im));
 
 % Searching patches
-patches = findobj(ax,'Tag','Region');
+% patches = findobj(ax,'Tag','Region');
+patches = findobj(ax,'Tag','Region','-or','Tag','RegionGroup');
 patches_S = struct('Name',[],'XData',[],'YData',[],'Mask',[]);
 %patches = findobj(ax,'Tag','Region','-and','Visible','on');
 for i = 1:length(patches)

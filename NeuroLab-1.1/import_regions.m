@@ -324,8 +324,12 @@ for i=1:length(ind_regions)
     end
     
     % Line Visibility
-    if handles.RightPanelPopup.Value ==3
-        %set([hq;hl],'Visible','on');
+%     if handles.RightPanelPopup.Value ==3
+%         %set([hq;hl],'Visible','on');
+%         set(hl,'Visible','on');
+%     end
+    str_rpopup = strtrim(handles.RightPanelPopup.String(handles.RightPanelPopup.Value,:));
+    if strcmp(str_rpopup,'Region Dynamics')
         set(hl,'Visible','on');
     end
     

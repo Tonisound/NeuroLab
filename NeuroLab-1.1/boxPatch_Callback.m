@@ -3,7 +3,10 @@ function boxPatch_Callback(src,~,handles)
 
 load('Preferences.mat','GColors');
 % Find all visible patches
-hm = findobj(handles.CenterAxes,'Type','Patch','-and','Tag','Region');
+% hm = findobj(handles.CenterAxes,'Type','Patch','-and','Tag','Region');
+hm1 = findobj(handles.CenterAxes,'Type','Patch','-and','Tag','Region');
+hm2 = findobj(handles.CenterAxes,'Type','Patch','-and','Tag','RegionGroup');
+hm = [hm1;hm2];
 
 for i=1:length(hm)
     if src.Value

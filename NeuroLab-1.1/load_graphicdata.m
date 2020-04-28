@@ -35,7 +35,7 @@ hp= findobj(handles.CenterAxes,'Tag','Pixel');
 set(hp,'ButtonDownFcn',{@click_PixelFcn,handles});
 hq= findobj(handles.CenterAxes,'Tag','Box');
 set(hq,'ButtonDownFcn',{@click_PatchFcn,handles});
-hr= findobj(handles.CenterAxes,'Tag','Region');
+hr= findobj(handles.CenterAxes,'Tag','Region','-or','Tag','RegionGroup');
 set(hr,'ButtonDownFcn',{@click_RegionFcn,handles});
 
 % To ensure HitTest property

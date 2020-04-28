@@ -71,6 +71,10 @@ function save_graphicdata(savedir,handles)
             delete(ax2.Children);
             % copy LFP lines
             copy_graphicdata(handles.RightAxes,ax1,ax2,'saving',savedir,2);
+            
+            % deleting duplicate Time Patches
+            delete(findobj(ax2,'Tag','TimePatch'));
+            
             traces = generate_traces_data(ax2);
             h(1) = ax1;
             h(2) = ax2;
@@ -105,7 +109,7 @@ function traces = generate_traces_data(ax)
     % Saving lines name
     % Lines Array
     m = findobj(ax,'Tag','Trace_Mean');
-    l1 = flipud(findobj(ax,'Tag','Trace_Region'));
+    l1 = flipud(findobj(ax,'Tag','Trace_Region','-or','Tag','RegionGroup'));
     l2 = flipud(findobj(ax,'Tag','Trace_Pixel'));
     l3 = flipud(findobj(ax,'Tag','Trace_Box'));
     l = [l1;l2;l3];

@@ -14,6 +14,12 @@ switch val
             delete(l(i));
         end
     case 3
+        l = findobj(handles.RightAxes,'Tag','Trace_RegionGroup');
+        for i = 1:length(l)
+            delete(l(i).UserData.Graphic);
+            delete(l(i));
+        end
+    case 4
         l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
         for i = 1:length(l)
             delete(l(i));

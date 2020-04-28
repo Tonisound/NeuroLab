@@ -1243,8 +1243,8 @@ all_ydata = [];
 all_masks = zeros(size(all_patches(1).UserData.Mask));
 for i =1:length(all_patches)
     all_colors = [all_colors ;all_patches(i).UserData.Color];
-    all_xdata = [all_xdata ; all_patches(i).XData(:); all_patches(i).XData(1)];
-    all_ydata = [all_ydata ; all_patches(i).YData(:); all_patches(i).YData(1)];
+    all_xdata = [all_xdata ; all_patches(i).XData(:); all_patches(i).XData(1); all_patches(1).XData(1)];
+    all_ydata = [all_ydata ; all_patches(i).YData(:); all_patches(i).YData(1); all_patches(1).YData(1)];
     all_masks = all_masks+all_patches(i).UserData.Mask;
 end
 color = mean(all_colors,1);
@@ -1574,10 +1574,15 @@ for i =1:length(r_patches)
         'Parent',handles.RightAxes);
     set(hl,'ButtonDownFcn',{@click_lineFcn,handles});
     
-    if handles.RightPanelPopup.Value ==3
-        %set([hq;hl],'Visible','on');
+%     if handles.RightPanelPopup.Value ==3
+%         %set([hq;hl],'Visible','on');
+%         set(hl,'Visible','on');
+%     end
+    str_rpopup = strtrim(handles.RightPanelPopup.String(handles.RightPanelPopup.Value,:));
+    if strcmp(str_rpopup,'Region Dynamics')
         set(hl,'Visible','on');
     end
+    
     % boxLabel_Callback(handles.LabelBox,[],handles);
     boxPatch_Callback(handles.PatchBox,[],handles);
     
@@ -1622,6 +1627,10 @@ for i =1:length(g_patches)
     
 %     if handles.RightPanelPopup.Value ==3
 %         %set([hq;hl],'Visible','on');
+%         set(hl,'Visible','on');
+%     end
+%     str_rpopup = strtrim(handles.RightPanelPopup.String(handles.RightPanelPopup.Value,:));
+%     if strcmp(str_rpopup,'Trace Dynamics')
 %         set(hl,'Visible','on');
 %     end
     % boxLabel_Callback(handles.LabelBox,[],handles);

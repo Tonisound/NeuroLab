@@ -156,6 +156,7 @@ uimenu(m2,'Label','Edit Anatomical Regions - Register Atlas','Tag','EditMenu_Ana
 uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','on');
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
 uimenu(m2,'Label','Delete Region Traces','Tag','EditMenu_Delete_Regions');
+uimenu(m2,'Label','Delete Region Groups','Tag','EditMenu_Delete_RegionGroups');
 uimenu(m2,'Label','Delete Cereplex Traces','Tag','EditMenu_Delete_Spiko');
 uimenu(m2,'Label','Actualize Traces','Tag','ImportMenu_ActualizeTraces','Separator','on');
 
@@ -313,7 +314,7 @@ h12 = uicontrol(f,'Style','popup',...
 % handles.RightPanelPopup
 h13 = uicontrol(f,'Style','popup',...
     'Units','normalized',...
-    'String','Pixel Dynamics|Box Dynamics|Region Dynamics|Trace Dynamics',...
+    'String','Pixel Dynamics|Box Dynamics|Region Dynamics|Region Group Dynamics|Trace Dynamics',...
     'Value',UiValues.RightPanelPopup,...
     'Tag','RightPanelPopup',...
     'FontSize',fontsize,...
@@ -648,7 +649,8 @@ set(myhandles.EditMenu_AnatRegions,'Callback','menuEdit_AnatRegions_Callback(ful
 set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhandles});
 set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
-set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
+set(myhandles.EditMenu_Delete_RegionGroups,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
+set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,4});
 
 % handles.DisplayMenu
 set(myhandles.DisplayMenu_Video,'Callback',{@menuDisplay_Video_Callback,myhandles});

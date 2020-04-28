@@ -247,11 +247,15 @@ for i=1:length(ind_traces)
             'Tag','Trace_Cerep',...
             'Visible','off',...
             'HitTest','off',...
-            'Parent', handles.RightAxes);
-        
-        if handles.RightPanelPopup.Value==4
+            'Parent', handles.RightAxes);      
+%         if handles.RightPanelPopup.Value==4
+%             set(hl,'Visible','on');
+%         end
+        str_rpopup = strtrim(handles.RightPanelPopup.String(handles.RightPanelPopup.Value,:));
+        if strcmp(str_rpopup,'Trace Dynamics')
             set(hl,'Visible','on');
         end
+        
         % Updating UserData
         s.Name = regexprep(t,'_','-');
         s.X = traces(ind_traces(i)).X;

@@ -18,7 +18,7 @@ delete(findobj(ax1,'Type','Line','-not','Tag','Cursor','-or','Type','Patch'));
 delete(findobj(ax2,'Type','Line','-not','Tag','Cursor','-or','Type','Text'));
 
 all_lines = findobj(RightAxes,'Type','Line','-not','Tag','Cursor');
-lines_other = findobj(all_lines,'Tag','Trace_Pixel','-or','Tag','Trace_Box','-or','Tag','Trace_Region','-or','Tag','Trace_Mean');
+lines_other = findobj(all_lines,'Tag','Trace_Pixel','-or','Tag','Trace_Box','-or','Tag','Trace_Region','-or','Tag','Trace_RegionGroup','-or','Tag','Trace_Mean');
 lines_spiko = findobj(all_lines,'Tag','Trace_Cerep');
 
 ind_keep = ones(length(lines_spiko),1);
@@ -93,7 +93,7 @@ for i=length(h_line):-1:1
             end
             h_line(i).UserData = s;
             
-        case {'Trace_Region'}
+        case {'Trace_Region';'Trace_RegionGroup'}
             dir_save = fullfile(save_dir,'Sources_fUS');
                     
             switch mode

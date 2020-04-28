@@ -81,22 +81,22 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
         r = evnt.Indices(1);
         c = evnt.Indices(2);
         switch c
-            case 3,
+            case 3
                 hObj.Data{r,c} = rgb2char(char2rgb(evnt.EditData));
                 if isempty(hObj.Data{r,c}) && ismember(evnt.EditData,GDisp.colors_info)
                     [~,b] = ismember(evnt.EditData,GDisp.colors_info);
                     hObj.Data{r,c} = char(GDisp.colors(b));
                 end
                 
-            case 4,
+            case 4
                 if ~ismember(hObj.Data{r,c},GDisp.linestyle)
                     hObj.Data{r,c} = evnt.PreviousData;
                 end
-            case 5,
+            case 5
                 if ~isnumeric(eval(hObj.Data{r,c})) || eval(hObj.Data{r,c})<0
                     hObj.Data{r,c} = evnt.PreviousData;
                 end
-            case 6,
+            case 6
                 if ~ismember(hObj.Data{r,c},['on','off'])
                     hObj.Data{r,c} = evnt.PreviousData;
                 end
@@ -136,7 +136,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
             switch lines(j).Tag
                 case 'Trace_Pixel'
                     lines(j).UserData.Graphic.MarkerFaceColor = char2rgb(char(D(j,3)));
-                case {'Trace_Box','Trace_Region'}
+                case {'Trace_Box','Trace_Region','Trace_RegionGroup'}
                     lines(j).UserData.Graphic.FaceColor = char2rgb(char(D(j,3)));
             end
             
@@ -152,7 +152,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
                 status = 'off';
             end
             switch lines(j).Tag
-                case {'Trace_Pixel','Trace_Box','Trace_Region'}
+                case {'Trace_Pixel','Trace_Box','Trace_Region','Trace_RegionGroup'}
                     lines(j).UserData.Graphic.Visible = char(D(j,6));
             end 
         end
