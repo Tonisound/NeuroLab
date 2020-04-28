@@ -1,6 +1,18 @@
-function f2 = figure_Correlation_Analysis(myhandles,val,str_group,str_traces)
+function f2 = figure_Correlation_Analysis(myhandles,val,str_group,str_regions,str_traces)
+% Perform Seed-based Correlation Analysis
+% Time Tags are available in user mode
+% If no Time Tags selected the coomputation is done for all frames
+% Time Groups are available in batch mode
+% User can select Time Groups and click Batch or use Batch Menu
+% str_traces is collected from Batch Menu
 
 global DIR_SAVE CUR_IM START_IM END_IM FILES CUR_FILE;
+
+if nargin<3
+    str_group = [];
+    str_regions = [];
+    str_traces = [];
+end
 
 %Time_Reference
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
@@ -12,7 +24,7 @@ end
 
 %Time_Tags
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images','TimeTags_strings');
+    data_tt = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images','TimeTags_strings');
 else
     errordlg(sprintf('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat')));
     return;
@@ -47,6 +59,7 @@ ax_dummy = axes('Parent',f2,'Tag','Dummy','Visible','off');
 
 f2.UserData.data_config = data_config;
 f2.UserData.data_tg = data_tg;
+f2.UserData.data_tt = data_tt;
 
 % Information Panel
 iP = uipanel('Units','normalized',...
@@ -150,6 +163,12 @@ bc = uicontrol('Units','normalized',...
     'Parent',iP,...
     'String','Compute',...
     'Tag','ButtonCompute');
+bcl = uicontrol('Units','normalized',...
+    'Style','pushbutton',...
+    'Parent',iP,...
+    'String','Clear Tables',...
+    'Tag','ButtonClear',...
+    'TooltipString','Clear Table Selection');
 bi = uicontrol('Units','normalized',...
     'Style','pushbutton',...
     'Parent',iP,...
@@ -186,7 +205,8 @@ c2.Position = [5.2/10     0  1/20  1/6];
 s1.Position = [6/10    .5/10  1.5/10   1/5];
 e1.Position = [5.5/10    .5/10  .5/10   1/4];
 e2.Position = [7.5/10    .5/10  .5/10   1/4];
-bc.Position = [8/10     2/3      2/10   1/3];
+bc.Position = [8/10     2/3      1/10   1/3];
+bcl.Position = [9/10     2/3      1/10   1/3];
 br.Position = [8/10     1/3      1/10   1/3];
 bb.Position = [9/10     1/3      1/10   1/3];
 bs.Position = [8/10     0    1/10   1/3];
@@ -464,8 +484,10 @@ rt = uitable('Units','normalized',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
     'Parent',rPanel);
+% Intial Selection
 rt.UserData.Selection = strcmp(D(:,2),'Trace_Region');
 %rt.UserData.Selection = (1:size(D,1))';
+
 
 %Trace Panel
 tPanel = uipanel('Parent',tab6,...
@@ -490,6 +512,7 @@ tt = uitable('Units','normalized',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
     'Parent',tPanel);
+% Intial Selection
 tt.UserData.Selection = [];
 
 if isempty(tt.Data)
@@ -513,7 +536,7 @@ t = uitable('Units','normalized',...
     'ColumnEditable',[false,false,false],...
     'ColumnWidth',{70 70 70},...
     'Position',[0 0 1 1],...
-    'Data',TimeTags_cell(2:end,2:4),...
+    'Data',data_tt.TimeTags_cell(2:end,2:4),...
     'Tag','Tag_table',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
@@ -521,31 +544,45 @@ t = uitable('Units','normalized',...
 %Default Time tags Selection
 % t.UserData.Selection = (myhandles.TagButton.UserData.Selected)';
 t.UserData.Selection = [];
-t.UserData.TimeTags_images = TimeTags_images;
-t.UserData.TimeTags_strings = TimeTags_strings;
+t.UserData.TimeTags_images = data_tt.TimeTags_images;
+t.UserData.TimeTags_strings = data_tt.TimeTags_strings;
 
 
-%Episode Panel
-ePanel = uipanel('FontSize',10,...
+%Group Panel
+gPanel = uipanel('FontSize',10,...
     'Units','normalized',...
     'Position',[.75 0 .25 1],...
-    'Title','Episodes',...
-    'Tag','Episode_Panel',...
+    'Title','Time Groups',...
+    'Tag','Group_Panel',...
     'Parent',tab6);
 % UiTable
-et = uitable('Units','normalized',...
+gt = uitable('Units','normalized',...
     'ColumnName','',...
     'RowName',{},...
-    'ColumnFormat',{'char','char'},...
-    'ColumnEditable',[false,false],...
-    'ColumnWidth',{70 70},...
+    'ColumnFormat',{'char','char','char'},...
+    'ColumnEditable',[false,false,false],...
+    'ColumnWidth',{70 70 70},...
     'Position',[0 0 1 1],...
-    'Data','',...
-    'Tag','Episode_table',...
+    'Data',[data_tg.TimeGroups_name,data_tg.TimeGroups_duration,data_tg.TimeGroups_frames],...
+    'Tag','Group_table',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
-    'Parent',ePanel);
-et.UserData.Selection = [];
+    'Parent',gPanel);
+gt.UserData.Selection = [];
+gt.UserData.TimeGroups_name = data_tg.TimeGroups_name;
+gt.UserData.TimeGroups_frames = data_tg.TimeGroups_frames;
+gt.UserData.TimeGroups_name = data_tg.TimeGroups_duration;
+gt.UserData.TimeGroups_frames = data_tg.TimeGroups_S;
+
+if ~isempty(str_group)
+    ind_keep = zeros(size(gt.Data,1),1);
+    for i =1:size(gt.Data,1)
+        if sum(strcmp(str_group,char(gt.Data(i,1))))>0
+            ind_keep(i) = 1;
+        end
+    end
+    gt.UserData.Selection = find(ind_keep==1);
+end
 
 handles2 = guihandles(f2);
 delete(handles2.CenterAxes.Title);
@@ -571,10 +608,11 @@ set(handles2.MaskBox,'Callback',{@boxMask_Callback,handles2});
 
 set(handles2.Slider,'Callback',{@slider_Callback,handles2});  
 set(handles2.ButtonCompute,'Callback',{@compute_Callback,handles2});
+set(handles2.ButtonClear,'Callback',{@clear_Callback,handles2});
 set(handles2.ButtonSaveImage,'Callback',{@saveimage_Callback,handles2});
 set(handles2.ButtonSaveStats,'Callback',{@savestats_Callback,handles2});
 set(handles2.ButtonReset,'Callback',{@reset_Callback,handles2});
-set(handles2.ButtonBatch,'Callback',{@batch_Correlation_Callback,handles2});
+set(handles2.ButtonBatch,'Callback',{@batch_Correlation_Callback,handles2,[str_regions;str_traces]});
 set(handles2.TextBox,'Callback',{@textbox_Callback,handles2});
 set(handles2.Edit1,'Callback',{@edit_Callback,handles2});
 set(handles2.Edit2,'Callback',{@edit_Callback,handles2});
@@ -591,8 +629,16 @@ tabgp.SelectedTab = tab6;
 % str_group contains group names
 % str_traces contains traces names 
 if val==0
-    batch_Correlation_Callback(handles2.ButtonBatch,[],handles2,str_group,str_traces,1);
+    batch_Correlation_Callback(handles2.ButtonBatch,[],handles2,[str_regions;str_traces]);
 end
+
+end
+
+function clear_Callback(~,~,handles)
+% Clear Table Selection
+
+handles.Tag_table.UserData.Selection = [];
+handles.Group_table.UserData.Selection = [];
 
 end
 
@@ -768,17 +814,27 @@ else
 end
 
 % Selecting Time indices
-if isempty(handles.Tag_table.UserData.Selection)
+if ~isempty(handles.Group_table.UserData.Selection)
+    data_tg = handles.MainFigure.UserData.data_tg;
+    ind_group = handles.Group_table.UserData.Selection;
+    all_indexes = [];
+    for i=1:length(ind_group)
+        all_indexes = [all_indexes ;data_tg.TimeGroups_S(ind_group(i)).Selected];
+    end
+    handles.Tag_table.UserData.Selection = unique(all_indexes);
+end
+    
+if ~isempty(handles.Tag_table.UserData.Selection)
+    ind_tags = handles.Tag_table.UserData.Selection;
+    TimeTags = handles.Tag_table.Data(ind_tags,:);
+    TimeTags_strings = handles.Tag_table.UserData.TimeTags_strings(ind_tags,:);
+    TimeTags_images = handles.Tag_table.UserData.TimeTags_images(ind_tags,:);
+else
     % errordlg('Please Select Time Tags.');
     % return;
     TimeTags = [{'CURRENT'},{handles.Text3.UserData},{handles.Text4.UserData}];
     TimeTags_strings = [{handles.Text3.UserData},{handles.Text4.UserData}];
     TimeTags_images = [START_IM, END_IM];
-else
-    ind_tags = handles.Tag_table.UserData.Selection;
-    TimeTags = handles.Tag_table.Data(ind_tags,:);
-    TimeTags_strings = handles.Tag_table.UserData.TimeTags_strings(ind_tags,:);
-    TimeTags_images = handles.Tag_table.UserData.TimeTags_images(ind_tags,:);
 end
 
 % Building Time_indices
@@ -1074,7 +1130,7 @@ ind_rm = mean(isnan(C_map2),2)==1;
 C_map2 = C_map2(~ind_rm,:);
 
 % all pixels per regions
-l_reg = findobj(lines_1,'Tag','Trace_Region');
+l_reg = findobj(lines_1,'Tag','Trace_Region','-or','Tag','Trace_RegionGroup');
 all_masks = [];
 all_labels = [];
 all_xtick_labels = [];
@@ -1203,14 +1259,13 @@ end
 % plot regions
 for i = 1:length(all_axes)
     ax  = all_axes(i);
-    index_lags(i)
         
     for j=1:length(lines_1)
         l = lines_1(j);
         region = l.UserData.Name;
         ind_keep = find(strcmp(str_labels0,region)==1);
         
-        if ~strcmp(l.Tag,'Trace_Region')
+        if ~(strcmp(l.Tag,'Trace_Region')||strcmp(l.Tag,'Trace_RegionGroup'))
             continue;
         end
         % Patch
@@ -1446,7 +1501,7 @@ function adapt_slider_batch(tag,handles)
 
 % Slider step Update
 switch tag
-    case {'Trace_Mean';'Trace_Region';'Trace_Box';'Trace_Pixel'}
+    case {'Trace_Mean';'Trace_Region';'Trace_RegionGroup';'Trace_Box';'Trace_Pixel'}
         handles.Edit1.String = -10;
         handles.Edit2.String = 10;
     case {'Trace_Cerep'}
@@ -1466,29 +1521,14 @@ drawnow;
 
 end
 
-function batch_Correlation_Callback(hObj,~,handles,str_group,str_traces,v)
+function batch_Correlation_Callback(hObj,~,handles,str_ref)
 
 data_config = handles.MainFigure.UserData.data_config;
 data_tg = handles.MainFigure.UserData.data_tg;
 
-if nargin == 3
-    % If Manual Callback open inputdlg
-    [ind_group,v] = listdlg('Name','Group Selection','PromptString','Select Time Groups',...
-        'SelectionMode','multiple','ListString',data_tg.TimeGroups_name,'InitialValue','','ListSize',[300 500]);
-else
-    % If batch mode, keep only elements in str_group
-    ind_group = [];
-    temp = data_tg.TimeGroups_name;
-    for i=1:length(temp)
-        ind_keep = ~(cellfun('isempty',strfind(str_group,temp(i))));
-        if sum(ind_keep)>0
-            ind_group=[ind_group,i];
-        end
-    end  
-end
-
-if isempty(ind_group)||v==0
-    return;
+ind_group = handles.Group_table.UserData.Selection;
+if isempty(ind_group)
+    warning('No Time Groups Selected. Unable to perform batch computation');
 end
 
 for i=1:length(ind_group)
@@ -1497,22 +1537,21 @@ for i=1:length(ind_group)
     hObj.UserData.folder_name = char(data_tg.TimeGroups_name(ii));
     handles.Tag_table.UserData.Selection = data_tg.TimeGroups_S(ii).Selected';
     
-    %     % Selecting main channel
-    %     if ~isempty(data_config.File.mainlfp)
-    %         str_ref = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
-    %     else
-    %         str_ref = [{'SPEED'};{'ACCEL-POWER'}];
-    %     end
+%     % Selecting main channel
+%     if ~isempty(data_config.File.mainlfp)
+%         str_ref = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
+%     else
+%         str_ref = [{'SPEED'};{'ACCEL-POWER'}];
+%     end
     
-    % If str_traces (from batch menu) is not empty use it as str_ref
+    % If str_ref ([str_regions;str_traces] from batch menu) is not empty use it as str_ref
     % Else use str_ref defined here
-    if isempty(str_traces)
+    if isempty(str_ref)
 %         str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
 %             {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'};{'X(m)'};{'Y(m)'}];
         str_ref = [{'Power-theta/'};{'Power-gammalow/'};...
-            {'Power-gammamid/'};{'Power-gammahigh/'}];
-    else
-        str_ref = str_traces;
+            {'Power-gammamid/'};{'Power-gammahigh/'};...
+            {'Whole'}];
     end
     
     % Compute
@@ -1528,6 +1567,7 @@ for i=1:length(ind_group)
             delete('_info.txt');
         end
     end
+    hObj.UserData = [];
 end
 
 end

@@ -825,7 +825,7 @@ hold(ax,'on');
 gpwidth = min(.8,n_bars/(n_bars+1.5));
 for i = 1:n_bars
     %bar color
-      = max(round(i*length(cmap)/n_bars-1)+1,1);
+    ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
     b(i).FaceColor = cmap(ind_color,:);
     % Calculate center of each bar
     factor = gpwidth/2 - (2*(i)-1) *(gpwidth/(2*n_bars));
