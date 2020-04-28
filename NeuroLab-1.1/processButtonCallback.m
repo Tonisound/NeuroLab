@@ -47,8 +47,8 @@ switch strtrim(str(val,:))
     case 'Filter ACC/GYR/EMG channels - Extract Power Envelope'
         filter_accgyremg_extractenvelope(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-    case 'Export Patches'
-        export_patches(handles);
+    case 'Export Image Patches'
+        export_image_patches(handles,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
         
     case 'Export Anatomical Regions'
         export_regions(handles,FILES(CUR_FILE).recording);

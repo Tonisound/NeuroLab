@@ -554,6 +554,9 @@ for i = 1:length(ind_files)
                 case 'Export Anatomical Regions'
                     success = export_regions(myhandles,FILES(ii).recording,0);
                     
+                case 'Export Image Patches'
+                    success = export_image_patches(myhandles,fullfile(DIR_SAVE,FILES(ii).nlab),0);
+        
                 case 'Edit Anatomical Regions - Register Atlas'
                     success = menuEdit_AnatRegions_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     

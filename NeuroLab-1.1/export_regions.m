@@ -7,6 +7,7 @@ global SEED_REGION;
 %region_table = findobj(f,'Tag','Region_table');
 
 if nargin<3
+    % user mode
     val=1;
 end
 

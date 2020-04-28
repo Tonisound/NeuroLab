@@ -184,6 +184,7 @@ uimenu(m2c,'Label','Batch Processing','Tag','SynthesisMenu_Batch','Accelerator',
 m2d = uimenu('Label','Export','Tag','Export Menu','Parent',f);
 uimenu(m2d,'Label','Export Time Tags','Tag','ExportMenu_TimeTags');
 uimenu(m2d,'Label','Export Anatomical Regions','Tag','ExportMenu_Regions');
+uimenu(m2d,'Label','Export Image Patches','Tag','ExportMenu_Patches');
 
 
 % handles.ColorMapsMenu
@@ -336,7 +337,7 @@ pl = uicontrol(f,'Style','popup',...
 pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Convert Neuroshop Masks|Import Anatomical Regions|Import LFP Traces|Import External Files';
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Left-Right Runs');
-pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Export Patches|Export Anatomical Regions');
+pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Export Image Patches|Export Anatomical Regions');
 pl.String = pl_str;
 
 % Process Button
@@ -669,9 +670,9 @@ set(myhandles.SynthesisMenu_VascularSurge,'Callback','synthesis_VascularSurges()
 set(myhandles.SynthesisMenu_PeakCount,'Callback','synthesis_PeakCount();');
 
 % handles.ExportMenu
-set(myhandles.ExportMenu_Regions,'Callback','export_patches(myhandles);');
 set(myhandles.ExportMenu_TimeTags,'Callback','export_time_tags(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
-
+set(myhandles.ExportMenu_Patches,'Callback','export_image_patches(myhandles,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
+set(myhandles.ExportMenu_Regions,'Callback','export_regions(myhandles,FILES(CUR_FILE).recording);');
 
 % Control Callback Attribution
 set(myhandles.FileSelectPopup,'Callback', {@fileSelectionPopup_Callback,myhandles});

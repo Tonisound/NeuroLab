@@ -1,22 +1,47 @@
-function f = export_patches(handles,val)
+function success = export_image_patches(handles,foldername,val)
 
+success = false;
 %global DIR_SAVE FILES CUR_FILE 
-global START_IM END_IM IM CUR_IM;
+%global START_IM END_IM IM CUR_IM;
 
-if nargin <2
-    val = 1;
-end
-
-% Default status on (figure visible)
-if val == 0
-    status ='off';
+if exist(fullfile(foldername,'Config.mat'),'file')
+    data_config = load(fullfile(foldername,'Config.mat'));
 else
-    status ='on';
+    errordlg('Missing file Config.mat [%s].',foldername);
+    return;
 end
+
+% Default status_visible on (figure visible)
+status_visible ='off';
+if nargin <3
+    % user mode
+    val = 1;
+    status_visible ='on';
+end
+
+folder = fullfile(foldername,'patches');
 flag_save = true; % if flag_save save all patches in folder patches
 flag_merge = true; % if flag_merge save also merged patches 
 
-f = figure('Name','Patch Export','Visible',status);
+if val==1
+    % asks confirmation in user mode
+    prompt = [{'Export whole region'};{'Save Patches as images'};{'Saving Folder'}];
+    dlg_title = 'Export Options';
+    num_lines = 1;
+    def = [{sprintf('%d',flag_merge)};{sprintf('%d',flag_save)};{sprintf('%s',folder)}];
+    answer = inputdlg(prompt,dlg_title,num_lines,def);
+    
+    if ~isempty(answer)
+        flag_merge = str2num(answer{1});
+        flag_save = str2num(answer{2});
+        folder = char(answer{3});
+    else
+        fprintf('Image patches exportation cancelled [%s].\n',foldername);
+        return;
+    end
+end
+
+f = figure('Name','Patch Export','Visible',status_visible);
 colormap(f,'gray');
 clrmenu(f);
 %colormap(f,'jet');
@@ -27,12 +52,14 @@ ax.XTickLabel = '';
 ax.YTickLabel = '';
 ax.XLabel.String ='';
 ax.YLabel.String ='';
-ax.Title.String = sprintf('Image %d (time %s)',CUR_IM,handles.TimeDisplay.UserData(CUR_IM,:));
+%ax.Title.String = sprintf('Image %d (time %s)',CUR_IM,handles.TimeDisplay.UserData(CUR_IM,:));
+ax.Title.String = 'Export Image Patches';
 axis(ax,'off');
 
 % Changing main image
-%main_im = mean(IM(:,:,START_IM:END_IM),3);
-main_im = IM(:,:,CUR_IM);
+% main_im = mean(IM(:,:,START_IM:END_IM),3);
+% main_im = IM(:,:,CUR_IM);
+main_im = data_config.Current_Image;
 im = findobj(ax,'Tag','MainImage');
 im.CData = main_im;
 
@@ -85,7 +112,7 @@ ax.CLim = handles.CenterAxes.CLim;
 
 load('Preferences.mat','GTraces');
 if flag_save
-    folder = 'patches';
+    %folder = 'patches';
     if exist(folder,'dir')
         rmdir(folder,'s');
     end
@@ -150,5 +177,7 @@ if flag_save
     close(f);
     close(f2);
 end
+
+success = true;
 
 end
