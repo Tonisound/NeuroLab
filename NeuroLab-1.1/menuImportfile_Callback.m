@@ -13,11 +13,15 @@ F = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},...
 
 if flag == 1
     % Manual Import
-    FileName = uigetdir(SEED,'Select file');
-    if FileName==0
+%     FileName = uigetdir(SEED,'Select file');
+%     if FileName==0
+%         return;
+%     else
+%         FileList = {FileName};
+%     end
+    FileList = uigetdir2(SEED,'Select file');
+    if isempty(FileList)
         return;
-    else
-        FileList = {FileName};
     end
     
 else
@@ -72,7 +76,7 @@ for i = 1:length(FileList)
         % Searches recording
         d = [dir(fullfile(FileName,'*_pre'));dir(fullfile(FileName,'*_per'));dir(fullfile(FileName,'*_post'));dir(fullfile(FileName,'*_E'));dir(fullfile(FileName,'*_R'))];
         if isempty(d)
-            warning('File skipped [No recording in session] %s.\n',FileName);
+            warning('File skipped [No recording in session] %s.',FileName);
         else
             all_files = cell(length(d),1);
             for j=1:length(d)
@@ -82,12 +86,13 @@ for i = 1:length(FileList)
             FileList_converted = [FileList_converted;all_files];
         end
     else
-        warning('File skipped [Incorrect path] %s.\n',FileName);
+        warning('File skipped [Incorrect path] %s.',FileName);
     end
 end
 FileList = FileList_converted;
 %fprintf('%d recording detected. Proceed.\n',length(FileList));
 
+ind_failed = [];
 for i = 1:length(FileList)
     % Extracting FileName
     ind_file = i;
@@ -133,6 +138,8 @@ for i = 1:length(FileList)
     end
     % Looking for video file
     d = [dir(fullfile(FileName,'*.mpg'));dir(fullfile(FileName,'*.mp4'));dir(fullfile(FileName,'*.avi'))];
+    % Remove hidden files
+    d = d(arrayfun(@(x) ~strcmp(x.name(1),'.'),d));
     if ~isempty(d)
         str = char(d(1).name);
         F(ind_file).video = str;
@@ -222,8 +229,7 @@ for i = 1:length(FileList)
             str = char(dd(1).name);
             F(ind_file).rcf = str;
         end
-    end
-    
+    end   
     
     % File type
     if isempty(F(ind_file).acq)
@@ -258,7 +264,6 @@ for i = 1:length(FileList)
         F(ind_file).nlab = strcat(recording,'_nlab');
         % ask confirmation before importation
         
-        
         % Comment for batch
         str_quest = strcat(fieldnames(F(ind_file)),sprintf(' : '),struct2cell(F(ind_file)));
         button = questdlg(str_quest,'New Importation','OK','Cancel','OK');
@@ -269,7 +274,7 @@ for i = 1:length(FileList)
         if isempty(button) || strcmp(button,'Cancel')
             return;
         else
-            %try
+            try
                 mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
                 fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
                 
@@ -310,13 +315,18 @@ for i = 1:length(FileList)
                     TimeTags_cell(3,:) = {'',TimeTags(2).Tag,TimeTags(2).Onset,TimeTags(2).Duration,TimeTags(2).Reference,''};
                 end
                 save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
-%             catch
-%                 rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');
-%                 fprintf('Nlab directory deleted : %s.\n',F(ind_file).nlab);
-%                 F(ind_file).nlab = '';
-%             end
+            catch
+                % Removing nlab folder
+                rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');
+                warning('Failed Importation: Nlab directory deleted [%s].',F(ind_file).nlab);
+                F(ind_file).nlab = '';
+                ind_failed = [ind_failed;ind_file];
+            end
         end
     end
 end
+
+% Removing failed recordings
+F(ind_failed) = [];
 
 end

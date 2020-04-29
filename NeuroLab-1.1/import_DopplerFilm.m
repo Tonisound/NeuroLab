@@ -25,7 +25,7 @@ if ~isempty(F.acq)
     
 else
     % case file_acq ends .mat (Aixplorer)
-    warning('File .acq not found %s.\n',F.acq)
+    warning('File .acq not found %s.',F.acq)
     Doppler_film = NaN(0,0,2);
 end
 
