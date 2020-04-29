@@ -513,6 +513,9 @@ for i = 1:length(ind_files)
                 case 'Import Anatomical Regions'
                     success = import_regions(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
+                case 'Generate Region Groups'
+                    success = generate_region_groups(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
+                    
                 case 'Import Reference Time'
                     success = import_reference_time(FILES(ii),myhandles);
                 

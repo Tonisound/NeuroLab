@@ -19,6 +19,9 @@ switch strtrim(str(val,:))
         
     case 'Import Anatomical Regions'
         import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,handles);
+    
+    case 'Generate Region Groups'
+        generate_region_groups(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,handles);
         
     case 'Import LFP Traces'
         import_lfptraces(FILES(CUR_FILE),handles);

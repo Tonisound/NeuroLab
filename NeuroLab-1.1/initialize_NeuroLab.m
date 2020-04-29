@@ -334,7 +334,8 @@ pl = uicontrol(f,'Style','popup',...
     'FontSize',fontsize,...
     'Parent',botPanel);
 
-pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Convert Neuroshop Masks|Import Anatomical Regions|Import LFP Traces|Import External Files';
+pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Convert Neuroshop Masks|';
+pl_str = strcat(pl_str,'Import Anatomical Regions|Generate Region Groups|Import LFP Traces|Import External Files');
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Left-Right Runs');
 pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Export Image Patches|Export Anatomical Regions');
