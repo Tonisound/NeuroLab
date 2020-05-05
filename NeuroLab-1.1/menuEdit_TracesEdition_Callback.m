@@ -237,7 +237,11 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
                     
                     % Update LineStyle and LineWidth
                     lines(j).LineStyle = char(D(j,4));
-                    lines(j).LineWidth = str2num(cell2mat(D(j,5)));
+                    try
+                        lines(j).LineWidth = str2num(cell2mat(D(j,5)));
+                    catch
+                        str2num(cell2mat(D(j,5)));
+                    end
                     
                     % Update Visible
                     lines(j).Visible = char(D(j,6));
@@ -250,6 +254,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','LineWidth','Visib
 
         if ~isempty(handles)
            boxPatch_Callback(handles.PatchBox,[],handles);
+           boxMask_Callback(handles.MaskBox,[],handles);
         end
         
         % Putting Cursor on top

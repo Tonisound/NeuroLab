@@ -392,7 +392,7 @@ for i=1:length(ind_groups)
 end
 
 % Checkbox Update
-boxLabel_Callback(handles.LabelBox,[],handles);
+boxMask_Callback(handles.MaskBox,[],handles);
 boxPatch_Callback(handles.PatchBox,[],handles);        
 actualize_plot(handles);
 success = true;

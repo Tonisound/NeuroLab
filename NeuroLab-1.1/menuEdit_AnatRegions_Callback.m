@@ -1582,7 +1582,7 @@ for i =1:length(r_patches)
         set(hl,'Visible','on');
     end
     
-    % boxLabel_Callback(handles.LabelBox,[],handles);
+    boxMask_Callback(handles.MaskBox,[],handles);
     boxPatch_Callback(handles.PatchBox,[],handles);
     
     % Updating UserData
@@ -1632,7 +1632,7 @@ for i =1:length(g_patches)
 %     if strcmp(str_rpopup,'Trace Dynamics')
 %         set(hl,'Visible','on');
 %     end
-    % boxLabel_Callback(handles.LabelBox,[],handles);
+    boxMask_Callback(handles.MaskBox,[],handles);
     boxPatch_Callback(handles.PatchBox,[],handles);
     
     % Updating UserData

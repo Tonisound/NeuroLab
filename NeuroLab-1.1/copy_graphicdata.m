@@ -66,30 +66,23 @@ for i=length(h_line):-1:1
                     
             switch mode
                 case 'loading'
-                    try
-                        %old code 
-                        s.X = h_line(i).UserData.X;
-                        s.Y = h_line(i).UserData.Y;  
-                    catch
-                        %new code
-                        name = regexprep(s.Name,'/','_');
-                        data_l = load(fullfile(dir_save,strcat(name,'.mat')),'Y','f','x_start','x_end');
-                        %fprintf('[X,Y] data loaded at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
-                        s.X = data_l.x_start:data_l.f:data_l.x_end;
-                        s.Y = data_l.Y;
-                    end
+                    name = regexprep(s.Name,'/','_');
+                    data_l = load(fullfile(dir_save,strcat(name,'.mat')),'Y','f','x_start','x_end');
+                    %fprintf('[X,Y] data loaded at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
+                    s.X = data_l.x_start:data_l.f:data_l.x_end;
+                    s.Y = data_l.Y;
                     
                  case 'saving'
-                    if ~exist(dir_save,'dir')
-                        mkdir(dir_save);
-                    end
-                    X = h_line(i).UserData.X;
-                    Y = h_line(i).UserData.Y;
-                    f = X(2)-X(1);
-                    x_start = X(1);
-                    x_end = X(end);
-                    save(fullfile(dir_save,strcat(name,'.mat')),'Y','f','x_start','x_end','-v7.3');
-                    %fprintf('[X,Y] data saved at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
+%                     if ~exist(dir_save,'dir')
+%                         mkdir(dir_save);
+%                     end
+%                     X = h_line(i).UserData.X;
+%                     Y = h_line(i).UserData.Y;
+%                     f = X(2)-X(1);
+%                     x_start = X(1);
+%                     x_end = X(end);
+%                     save(fullfile(dir_save,strcat(name,'.mat')),'Y','f','x_start','x_end','-v7.3');
+%                     fprintf('[X,Y] data saved at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
             end
             h_line(i).UserData = s;
             
@@ -98,87 +91,44 @@ for i=length(h_line):-1:1
                     
             switch mode
                 case 'loading'
-                    try
-                        %old code
-                        hp = copyobj(h_line(i).UserData,ax1);
-                        s.Trace = h_line(i);
-                        s.Name = hp.UserData.Name;
-                        s.Mask = hp.UserData.Mask;
-                        hp.UserData = s;
-                        h_line(i).UserData = hp;
-
-                    catch
-                        %new code
-                        hp = copyobj(h_line(i).UserData.Graphic,ax1);
-                        hp.UserData = h_line(i);
-                        h_line(i).UserData.Graphic = hp;
-                        % loading mask
-                        name = regexprep(h_line(i).UserData.Name,'/','_');
-                        data_l = load(fullfile(dir_save,strcat(name,'.mat')),'mask');
-                        %fprintf('[X,Y] data loaded at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
-                        h_line(i).UserData.Mask = data_l.mask;
-                    end
+                    hp = copyobj(h_line(i).UserData.Graphic,ax1);
+                    hp.UserData = h_line(i);
+                    h_line(i).UserData.Graphic = hp;
+                    % loading mask
+                    name = regexprep(h_line(i).UserData.Name,'/','_');
+                    data_l = load(fullfile(dir_save,strcat(name,'.mat')),'mask');
+                    %fprintf('[X,Y] data loaded at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
+                    h_line(i).UserData.Mask = data_l.mask;
                     
                 case 'saving'
-                    try
-                        %old code 
-                        hp = copyobj(h_line(i).UserData,ax1);
-                        s.Name = hp.UserData.Name;
-                        s.Graphic = hp;
-                        mask = hp.UserData.Mask;
-                        hp.UserData = h_line(i);
-                        h_line(i).UserData = s;
-                        %saving dir
-                        name = regexprep(s.Name,'/','_');
-                        if ~exist(dir_save,'dir')
-                            mkdir(dir_save);
-                        end
-                        % Reshaping Y and saving 
-                        ydat = reshape(h_line(i).YData(:),[length_burst+1,n_burst]);
-                        Y = reshape(ydat(1:end-1,:),[length_burst*n_burst,1]);
-                        X = time_ref.Y;
-                        save(fullfile(dir_save,strcat(name,'.mat')),'X','Y','mask','-v7.3');
-                        %fprintf('[X,Y] data saved at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
+                    hp = copyobj(h_line(i).UserData.Graphic,ax1);
+                    s.Name = h_line(i).UserData.Name;
+                    s.Graphic = hp;
+                    %s.Mask = hp.UserData.Mask;
+                    mask = h_line(i).UserData.Mask;
+                    h_line(i).UserData = s;
+                    hp.UserData = h_line(i);
                     
-                    catch
-                        %new code
-                        hp = copyobj(h_line(i).UserData.Graphic,ax1);
-                        s.Name = h_line(i).UserData.Name;
-                        s.Graphic = hp;
-                        %s.Mask = hp.UserData.Mask;
-                        mask = h_line(i).UserData.Mask;
-                        h_line(i).UserData = s;
-                        hp.UserData = h_line(i);
-                        
-                        %saving dir
-                        name = regexprep(s.Name,'/','_');
-                        if ~exist(dir_save,'dir')
-                            mkdir(dir_save);
-                        end
-                        % Reshaping Y and saving
-                        ydat = reshape(h_line(i).YData(:),[length_burst+1,n_burst]);
-                        Y = reshape(ydat(1:end-1,:),[length_burst*n_burst,1]);
-                        X = time_ref.Y;
-                        save(fullfile(dir_save,strcat(name,'.mat')),'X','Y','mask','-v7.3');
-                        %fprintf('[X,Y] data saved at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
+                    %saving dir
+                    name = regexprep(s.Name,'/','_');
+                    if ~exist(dir_save,'dir')
+                        mkdir(dir_save);
                     end
+                    % Reshaping Y and saving
+                    ydat = reshape(h_line(i).YData(:),[length_burst+1,n_burst]);
+                    Y = reshape(ydat(1:end-1,:),[length_burst*n_burst,1]);
+                    X = time_ref.Y;
+                    save(fullfile(dir_save,strcat(name,'.mat')),'X','Y','mask','-v7.3');
+                    %fprintf('[X,Y] data saved at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
+
             end
         case {'Trace_Pixel','Trace_Box'}
             switch mode
                 case 'loading'
-                    try
-                        %old code
-                        hp = copyobj(h_line(i).UserData,ax1);
-                        s.Trace = h_line(i);
-                        s.Name = hp.UserData.Trace;
-                        hp.UserData = s;
-                        h_line(i).UserData = hp;         
-                    catch
-                        %new code
-                        hp = copyobj(h_line(i).UserData.Graphic,ax1);
-                        hp.UserData = h_line(i);
-                        h_line(i).UserData.Graphic = hp;
-                    end
+                    hp = copyobj(h_line(i).UserData.Graphic,ax1);
+                    hp.UserData = h_line(i);
+                    h_line(i).UserData.Graphic = hp;
+                    
                 case 'saving'
                     hp = copyobj(h_line(i).UserData.Graphic,ax1);
                     s.Name = h_line(i).UserData.Name;

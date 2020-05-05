@@ -52,6 +52,8 @@ uistack(cursor,'top');
 
 %Update Box Patches
 boxPatch_Callback(handles.PatchBox,[],handles);
+%Update Box Mask
+boxMask_Callback(handles.MaskBox,[],handles);
 %Update Box Atlas
 boxAtlas_Callback(handles.AtlasBox,[],handles.CenterAxes);
 %Update Box TimePatch

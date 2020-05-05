@@ -26,16 +26,15 @@ set(handles.TimeDisplay,'String',handles.TimeDisplay.UserData(CUR_IM,:));
 
 % Stopping Movie
 set(handles.PlayToggle,'Value',0);
-set(handles.LabelBox,'Value',0);
+%set(handles.LabelBox,'Value',0);
 set(findobj(handles.RightAxes,'Tag','Trace_Mean'),'Visible','on');
-set(findobj(handles.RightAxes,'Tag','Trace_Mean_label'),'Visible','off');
 
 % Resetting axes
 delete(findobj(handles.CenterAxes,'Type','line','-or','Type','patch'));
 delete(findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor'));
 delete(findobj(handles.RightAxes,'Type','text'));
 
-% Recreating Trace_Mean & Trace_Mean_label
+% Recreating Trace_Mean
 xdata = [reshape(1:LAST_IM,[length_burst,n_burst]);NaN(1,n_burst)];
 ydata = [reshape(mean(mean(IM,2,'omitnan'),1,'omitnan'),[length_burst,n_burst]);NaN(1,n_burst)];
 hl = line('XData',xdata(:),...

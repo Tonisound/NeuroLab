@@ -23,13 +23,16 @@ if strcmp(seltype,'normal')
         hObj.LineWidth = 2*GColors.patch_width;
         hObj.FaceAlpha = GColors.patch_transparency;
         hObj.Selected ='on';
+        hObj.LineWidth = 2*GColors.patch_width;
         hObj.UserData.LineWidth=coeff_increase*hObj.UserData.LineWidth;
     else
         %hObj.EdgeColor = char2rgb('k');
         hObj.EdgeColor = GColors.patch_color;
-        hObj.LineWidth = GColors.patch_width;
         hObj.FaceAlpha = GColors.patch_transparency;
         hObj.Selected ='off';
+        hObj.LineWidth = 1;
+        hObj.UserData.LineWidth=1;
+        hObj.LineWidth = GColors.patch_width;
         hObj.UserData.LineWidth=hObj.UserData.LineWidth/coeff_increase;
     end
 else
