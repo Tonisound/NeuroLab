@@ -46,4 +46,8 @@ if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<
     
 end
 
+if length(edits)>2
+    edits(3).String = datestr(pt_rp(1,1)/(24*3600),'HH:MM:SS.FFF');
+end
+
 end

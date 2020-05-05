@@ -468,7 +468,7 @@ set(handles.TagButton,'Callback',{@template_button_TagSelection_Callback,handles
 
 % All Axes
 for i=1:length(all_axes)
-    set(all_axes(i),'ButtonDownFcn',{@template_axes_clickFcn,0,edits});
+    set(all_axes(i),'ButtonDownFcn',{@template_axes_clickFcn,0,[],edits});
 end
 
 % Clear secondary panels

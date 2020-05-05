@@ -810,29 +810,42 @@ else
     leg_labs = label_channels;
 end
 
+% Plot Parameters
+n_groups = size(bdata,1);
+n_bars = size(bdata,2);
+bar_colors = NaN(n_bars,3);
+for i = 1:n_bars
+    %bar color
+    ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
+    bar_colors(i,:) = cmap(ind_color,:);
+end
+gpwidth = min(.5,n_bars/(n_bars+1.5));
+
+
 %Drawing bar
-b= bar(bdata,'Parent',ax);
+b = bar(bdata,'Parent',ax);
 % Removing bar edges
 for i =1:length(b)
     b(i).EdgeColor='k';
     b(i).LineWidth= .1;
 end
-n_groups = size(bdata,1);
-n_bars = size(bdata,2);
+
 
 % Error bars
 hold(ax,'on');
-gpwidth = min(.8,n_bars/(n_bars+1.5));
+% gpwidth = min(.8,n_bars/(n_bars+1.5));
 for i = 1:n_bars
     %bar color
-    ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
-    b(i).FaceColor = cmap(ind_color,:);
+%     ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
+%     b(i).FaceColor = cmap(ind_color,:);
+    b(i).FaceColor = bar_colors(i,:);
     % Calculate center of each bar
-    factor = gpwidth/2 - (2*(i)-1) *(gpwidth/(2*n_bars));
+    factor = 1.6*(gpwidth/2 - (2*i-1)*(gpwidth/(2*n_bars)));
     x = (1:n_groups) - factor;
     e = errorbar(x,bdata(:,i),edata(:,i),'k',...
         'linewidth',1,'linestyle','none',...
         'Parent',ax,'Visible',status_e,'Tag','ErrorBar');
+    
 end
 leg = legend(ax,leg_labs,'Visible',status_l);
 
@@ -865,7 +878,8 @@ ax_e.YLim = [.5 size(im.CData,1)+.5];
 ax_e.XLim = [.5 size(im.CData,2)+.5];
 ax_e.YDir = 'reverse';
 for i=1:length(selected_lines)
-    if strcmp(selected_lines(i).Tag,'Trace_Region') || strcmp(selected_lines(i).Tag,'Trace_Pixel') || strcmp(selected_lines(i).Tag,'Trace_Box')
+    if strcmp(selected_lines(i).Tag,'Trace_Region') || strcmp(selected_lines(i).Tag,'Trace_RegionGroup')...
+            || strcmp(selected_lines(i).Tag,'Trace_Pixel') || strcmp(selected_lines(i).Tag,'Trace_Box')
         p = selected_lines(i).UserData.Graphic;
         p = copyobj(p,ax_e);
         p.Visible ='on';
@@ -933,13 +947,14 @@ n_bars = size(bdata,2);
 
 % Error bars
 hold(ax,'on');
-gpwidth = min(.8,n_bars/(n_bars+1.5));
+% gpwidth = min(.8,n_bars/(n_bars+1.5));
 for i = 1:n_bars
     %bar color
     ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
     b(i).FaceColor = cmap(ind_color,:);
+    b(i).FaceColor = bar_colors(i,:);
     % Calculate center of each bar
-    factor = gpwidth/2 - (2*(i)-1) *(gpwidth/(2*n_bars));
+    factor = 1.6*(gpwidth/2 - (2*(i)-1) *(gpwidth/(2*n_bars)));
     x = (1:n_groups) - factor;
     e = errorbar(x,bdata(:,i),edata(:,i),'k',...
         'linewidth',1,'linestyle','none',...
@@ -1015,16 +1030,16 @@ end
 n_groups = size(tt_data,3);
 n_bars = size(tt_data,2);
 hold(ax,'on');
-%gpwidth = min(.8,n_groups/(n_groups+1.5));
-gpwidth = .85;
+% gpwidth = min(.8,n_groups/(n_groups+1.5));
+% gpwidth = .85;
 for i=1:n_groups
     positions = i-gpwidth/2:gpwidth/(n_bars-1):i+gpwidth/2;
-    ind_colors = 1:63/(n_bars-1):64;
-    colors = cmap(round(ind_colors),:);
+%     ind_colors = 1:63/(n_bars-1):64;
+%     colors = cmap(round(ind_colors),:);
     boxplot(tt_data(:,:,i),...
         'MedianStyle','target',...
         'positions',positions,...
-        'colors',colors,...
+        'colors',bar_colors,...colors,...
         'OutlierSize',1,...
         'Widths',gpwidth/(n_bars+1),...
         'Parent',ax);
@@ -1037,8 +1052,9 @@ ax.Position = [.05 .05 .8 .9];
 b= bar(dummy_data,'Parent',ax_dummy);
 for i=1:length(b)
     %bar color
-    ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
-    b(i).FaceColor = cmap(ind_color,:);
+%     ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
+%     b(i).FaceColor = cmap(ind_color,:);
+    b(i).FaceColor = bar_colors(i,:);
     b(i).EdgeColor = 'k';
     b(i).LineWidth = .1;
 end
@@ -1113,8 +1129,8 @@ end
 n_groups = size(tt_data,3);
 n_bars = size(tt_data,2);
 hold(ax,'on');
-%gpwidth = min(.8,n_groups/(n_groups+1.5));
-gpwidth = .85;
+% gpwidth = min(.8,n_groups/(n_groups+1.5));
+% gpwidth = .85;
 val_min = min(tt_data(:),[],'omitnan');
 val_max = max(tt_data(:),[],'omitnan');
 edges = val_min:(val_max-val_min)/100:val_max;
@@ -1122,8 +1138,8 @@ centers = edges(1:end-1)+.5*(edges(2)-edges(1));
 
 for i=1:n_groups
     positions = i-gpwidth/2:gpwidth/(n_bars-1):i+gpwidth/2;
-    ind_colors = 1:63/(n_bars-1):64;
-    colors = cmap(round(ind_colors),:);
+%     ind_colors = 1:63/(n_bars-1):64;
+%     colors = cmap(round(ind_colors),:);
     delta_p = gpwidth/n_bars;
         
     for j=1:n_bars
@@ -1138,9 +1154,9 @@ for i=1:n_groups
 %         line('XData',xdata,'YData',centers,...
 %             'Color',colors(j,:),'LineWidth',0.5,...
 %             'Tag','HistLine','Parent',ax);
-        patch(xdata,centers,colors(j,:),'FaceAlpha',1,...
+        patch(xdata,centers,bar_colors(j,:),'FaceAlpha',1,...
             'EdgeColor','none','LineWidth',1,...
-            'Tag','Region','Parent',ax);
+            'Tag','HistRegion','Parent',ax);
 %         patch(xdata,centers,colors(j,:),'FaceAlpha',0,...
 %             'EdgeColor',colors(j,:),'LineWidth',1,...
 %             'Tag','Region','Parent',ax);
@@ -1154,8 +1170,9 @@ ax.Position = [.05 .05 .8 .9];
 b= bar(dummy_data,'Parent',ax_dummy);
 for i=1:length(b)
     %bar color
-    ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
-    b(i).FaceColor = cmap(ind_color,:);
+%     ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
+%     b(i).FaceColor = cmap(ind_color,:);
+    b(i).FaceColor = bar_colors(i,:);
     b(i).EdgeColor = 'k';
     b(i).LineWidth = .1;
 end
@@ -1232,6 +1249,7 @@ ind_colors = 1:63/(n_bars-1):64;
 colors = cmap(round(ind_colors),:);
 for i =1:length(b)
     b(i).FaceColor = colors(i,:);
+    % b(i).FaceColor = bar_colors(i,:);
     b(i).EdgeColor = 'k';
     b(i).LineWidth = .5;
 end
@@ -1398,7 +1416,11 @@ n_channels = length(ind_channels);
 episodes = size(TimeTag_Data,2);
 val = handles.Popup1.Value;
 channels = str2double(handles.Edit2.String);
-g_colors = get(groot,'DefaultAxesColorOrder');
+
+cmap = handles.MainFigure.Colormap;
+% g_colors = get(groot,'DefaultAxesColorOrder');
+ind_colors = 1:63/(episodes-1):64;
+h_colors = cmap(round(ind_colors),:);
 
 % Clear Axes
 h_all = findobj(handles.MainPanel,'Type','Axes');
@@ -1519,8 +1541,9 @@ for i=1:channels
         hold(ax1,'on');
         b = bar(1:episodes,diag(m),'stacked','Parent',ax1);
         for k=1:episodes
-            %b(k).FaceColor = char(GDisp.colors(k));
-            b(k).FaceColor = g_colors(mod(k-1,7)+1,:);
+            % b(k).FaceColor = char(GDisp.colors(k));
+            % b(k).FaceColor = g_colors(mod(k-1,7)+1,:);
+            b(k).FaceColor = h_colors(k,:);
         end
         e = errorbar(diag(m),diag(s_sem),'Color','k',...
             'Parent',ax1,'LineStyle','none',...
@@ -1551,8 +1574,11 @@ for i=1:channels
         hold(ax2,'on');
         for k=1:episodes
             x = TimeTag_Data(~isnan(TimeTag_Data(:,k,ind)),k,ind);
+%             h = histogram(x,'BinEdges',floor(val_min):(val_max-val_min)/50:ceil(val_max),...
+%                 'FaceAlpha',.5,'FaceColor',g_colors(mod(k-1,7)+1,:),...
+%                 'Normalization','pdf','Parent',ax2);
             h = histogram(x,'BinEdges',floor(val_min):(val_max-val_min)/50:ceil(val_max),...
-                'FaceAlpha',.5,'FaceColor',g_colors(mod(k-1,7)+1,:),...
+                'FaceAlpha',.5,'FaceColor',h_colors(k,:),...
                 'Normalization','pdf','Parent',ax2);
             box = findobj(handles.MainPanel,'Tag',sprintf('Box%d',k));
             if ~box.Value
@@ -1569,7 +1595,8 @@ for i=1:channels
             mu = m(k);
             sigma = s(k);
             y = exp(-(x-mu).^2./(2*sigma^2))./(sigma*sqrt(2*pi));
-            l = line(x,y,'Parent',ax2,'Color',g_colors(mod(k-1,7)+1,:),'LineWidth',1.5);
+            % l = line(x,y,'Parent',ax2,'Color',g_colors(mod(k-1,7)+1,:),'LineWidth',1.5);
+            l = line(x,y,'Parent',ax2,'Color',h_colors(k,:),'LineWidth',1.5);
             box = findobj(handles.MainPanel,'Tag',sprintf('Box%d',k));
             if ~box.Value
                 l.Visible = 'off';

@@ -244,7 +244,6 @@ l_mean = findobj(handles.RightAxes,'Tag','Trace_Mean');
 l_cursor = findobj(handles.RightAxes,'Tag','Cursor');
 ax_mean = axes('Parent',f,'YTick',[],'Tag','AxMean','FontSize',7,...
     'YTickLabel','','YLim',[min(l_mean.YData,[],'omitnan') max(l_mean.YData,[],'omitnan')]);
-%set(ax_mean,'ButtonDownFcn',{@template_axes_clickFcn,ax_mean});
 f.UserData.l_mean = copyobj(l_mean,ax_mean);
 ax_mean.XLim = [min(l_mean.XData) max(l_mean.XData)];
 % ax_mean.XTick = l_mean.XData(1):100:l_mean.XData(end);

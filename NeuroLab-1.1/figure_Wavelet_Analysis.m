@@ -267,6 +267,13 @@ e2 = uicontrol('Units','normalized',...
     'String',myhandles.TimeDisplay.UserData(END_IM,:),...
     'Parent',iP,...
     'Tag','Edit2');
+e2b = uicontrol('Units','normalized',...
+    'Style','text',...
+    'HorizontalAlignment','center',...
+    'Tooltipstring','Current Time',...
+    'String',myhandles.TimeDisplay.UserData(START_IM,:),...
+    'Parent',iP,...
+    'Tag','Edit2b');
 e3 = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
@@ -381,8 +388,10 @@ efa.Position = [7*ipos(3)/20     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
 efr.Position = [8*ipos(3)/20     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
 exc.Position = [9*ipos(3)/20     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
 
-e1.Position = [5.2*ipos(3)/10     2.75*ipos(4)/5   ipos(3)/12   3.5*ipos(4)/10];
-e2.Position = [5.2*ipos(3)/10     ipos(4)/10           ipos(3)/12   3.5*ipos(4)/10];
+e1.Position = [5.2*ipos(3)/10     6.5*ipos(4)/10   ipos(3)/12   3*ipos(4)/10];
+e2.Position = [5.2*ipos(3)/10     0           ipos(3)/12   3*ipos(4)/10];
+e2b.Position = [5.2*ipos(3)/10     3.25*ipos(4)/10           ipos(3)/12   3*ipos(4)/10];
+
 e3.Position = [6.5*ipos(3)/10     2.75*ipos(4)/5   ipos(3)/20   3.5*ipos(4)/10];
 e4.Position = [6.5*ipos(3)/10     ipos(4)/10   ipos(3)/20   3.5*ipos(4)/10];
 e5.Position = [6*ipos(3)/10      2.75*ipos(4)/5           ipos(3)/20   3.5*ipos(4)/10];
@@ -1018,7 +1027,8 @@ set(handles.TagButton,'Callback',{@template_button_TagSelection_Callback,handles
 
 % All Axes
 for i=1:length(all_axes)
-    set(all_axes(i),'ButtonDownFcn',{@template_axes_clickFcn,0,edits});
+    value_template_axes = 1;
+    set(all_axes(i),'ButtonDownFcn',{@template_axes_clickFcn,value_template_axes,[],[edits;handles.Edit2b]});
 end
 % Top Axes
 set(handles.ScaleButton,'Callback',{@template_buttonScale_Callback,all_topaxes});
@@ -1935,6 +1945,7 @@ end
 function buttonAutoScale_Callback(~,~,handles)
 
 bands = str2double(handles.Edit4.String);
+channels = str2double(handles.Edit3.String);
 panels = [handles.TopPanel;handles.BotPanel;handles.FirstBotPanel;handles.SecondBotPanel];
 coeff1 = str2double(handles.EditAutoscale.String);
 coeff2 = 2*coeff1/3;
@@ -1942,7 +1953,7 @@ coeff2 = 2*coeff1/3;
 %coeff2 = 1.5;
 
 for i =1:length(panels)
-    for j=1:bands
+    for j=1:max(bands,channels)
         ax = findobj(panels(i),'Tag',sprintf('Ax%d',j));
         ax_r = findobj(panels(i),'Tag',sprintf('Ax%d_r',j));
         ax_s = findobj(panels(i),'Tag',sprintf('Ax%d_s',j));
