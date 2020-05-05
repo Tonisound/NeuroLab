@@ -52,7 +52,7 @@ f2 = figure('Units','characters',...
     'NumberTitle','off',...
     'Tag','MainFigure',...
     'PaperPositionMode','auto',...
-    'Name','Pixel Correlation');
+    'Name','Correlation Analysis');
 clrmenu(f2);
 colormap('jet');
 ax_dummy = axes('Parent',f2,'Tag','Dummy','Visible','off');
@@ -60,6 +60,12 @@ ax_dummy = axes('Parent',f2,'Tag','Dummy','Visible','off');
 f2.UserData.data_config = data_config;
 f2.UserData.data_tg = data_tg;
 f2.UserData.data_tt = data_tt;
+
+% Parameters
+% Lag Intervals for batch mode
+f2.UserData.slider_values.lag1 = [-2;2];
+f2.UserData.slider_values.lag2 = [-1;3];
+
 
 % Information Panel
 iP = uipanel('Units','normalized',...
@@ -138,13 +144,13 @@ c1 = uicontrol('Units','normalized',...
     'Value',1,...
     'TooltipString','Include reference in matrix',...
     'Tag','Checkbox1');
-c2 = uicontrol('Units','normalized',...
+c3 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'HorizontalAlignment','left',...
     'Parent',iP,...
-    'Value',1,...
-    'TooltipString','Automatic Slider Update',...
-    'Tag','Checkbox2');
+    'Value',0,...
+    'TooltipString','Full Map Saving',...
+    'Tag','Checkbox3');
 
 e1 = uicontrol('Units','normalized',...
     'Style','edit',...
@@ -196,12 +202,12 @@ t1.Position = [0     3/4 4/10   1/4];
 t2.Position = [0     1/2   4/10   1/4];
 t3.Position = [0     1/4   4/10   1/4];
 t4.Position = [0     0            4/10   1/4];
-p1.Position = [4/10     6.5/10   4/10   1/4];
-p2.Position = [4/10     3.5/10   2/10   1/4];
-p3.Position = [6/10     3.5/10   2/10   1/4];
+p1.Position = [4/10     7/10   4/10   1/4];
+p2.Position = [4/10     4.5/10   2/10   1/4];
+p3.Position = [6/10     4.5/10   2/10   1/4];
 t9.Position = [4/10     .5/10  1/10   1/5];
-c1.Position = [5.2/10     2/10  1/20   1/6];
-c2.Position = [5.2/10     0  1/20  1/6];
+c1.Position = [5.2/10     2.5/10  1/20   1/6];
+c3.Position = [5.2/10     0.5/10  1/20  1/6];
 s1.Position = [6/10    .5/10  1.5/10   1/5];
 e1.Position = [5.5/10    .5/10  .5/10   1/4];
 e2.Position = [7.5/10    .5/10  .5/10   1/4];
@@ -541,7 +547,7 @@ t = uitable('Units','normalized',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
     'Parent',taPanel);
-%Default Time tags Selection
+% Default Time tags Selection
 % t.UserData.Selection = (myhandles.TagButton.UserData.Selected)';
 t.UserData.Selection = [];
 t.UserData.TimeTags_images = data_tt.TimeTags_images;
@@ -573,16 +579,17 @@ gt.UserData.TimeGroups_name = data_tg.TimeGroups_name;
 gt.UserData.TimeGroups_frames = data_tg.TimeGroups_frames;
 gt.UserData.TimeGroups_name = data_tg.TimeGroups_duration;
 gt.UserData.TimeGroups_frames = data_tg.TimeGroups_S;
-
-if ~isempty(str_group)
-    ind_keep = zeros(size(gt.Data,1),1);
-    for i =1:size(gt.Data,1)
-        if sum(strcmp(str_group,char(gt.Data(i,1))))>0
-            ind_keep(i) = 1;
-        end
-    end
-    gt.UserData.Selection = find(ind_keep==1);
-end
+% Default Time Groups Selection
+% if ~isempty(str_group)
+%     ind_keep = zeros(size(gt.Data,1),1);
+%     for i =1:size(gt.Data,1)
+%         if sum(strcmp(str_group,char(gt.Data(i,1))))>0
+%             ind_keep(i) = 1;
+%         end
+%     end
+%     gt.UserData.Selection = find(ind_keep==1);
+% end
+gt.UserData.Selection = [];
 
 handles2 = guihandles(f2);
 delete(handles2.CenterAxes.Title);
@@ -607,12 +614,12 @@ set(handles2.PatchBox,'Callback',{@boxPatch_Callback,handles2});
 set(handles2.MaskBox,'Callback',{@boxMask_Callback,handles2});
 
 set(handles2.Slider,'Callback',{@slider_Callback,handles2});  
-set(handles2.ButtonCompute,'Callback',{@compute_Callback,handles2});
+set(handles2.ButtonCompute,'Callback',{@compute_Callback,handles2,val});
 set(handles2.ButtonClear,'Callback',{@clear_Callback,handles2});
 set(handles2.ButtonSaveImage,'Callback',{@saveimage_Callback,handles2});
 set(handles2.ButtonSaveStats,'Callback',{@savestats_Callback,handles2});
 set(handles2.ButtonReset,'Callback',{@reset_Callback,handles2});
-set(handles2.ButtonBatch,'Callback',{@batch_Correlation_Callback,handles2,[str_regions;str_traces]});
+set(handles2.ButtonBatch,'Callback',{@batch_Correlation_Callback,handles2,val,str_group,[str_regions;str_traces]});
 set(handles2.TextBox,'Callback',{@textbox_Callback,handles2});
 set(handles2.Edit1,'Callback',{@edit_Callback,handles2});
 set(handles2.Edit2,'Callback',{@edit_Callback,handles2});
@@ -629,7 +636,7 @@ tabgp.SelectedTab = tab6;
 % str_group contains group names
 % str_traces contains traces names 
 if val==0
-    batch_Correlation_Callback(handles2.ButtonBatch,[],handles2,[str_regions;str_traces]);
+    batch_Correlation_Callback(handles2.ButtonBatch,[],handles2,val,str_group,[str_regions;str_traces]);
 end
 
 end
@@ -749,7 +756,7 @@ end
 
 end
 
-function compute_Callback(hObj,~,handles)
+function compute_Callback(hObj,~,handles,val_batch)
 % Compute Correlation Map
 % Compute Correlogram
 
@@ -793,7 +800,7 @@ fwrite(fid_info,sprintf('Stats type : %s \n',handles.Popup3.String(handles.Popup
 
 % Adapting slider
 % Getting Lags
-if handles.Checkbox2.Value
+if val_batch == 0
     adapt_slider_batch(h_ref.Tag,handles);
 end
 lags = handles.Slider.Min:handles.Slider.Max;
@@ -1280,6 +1287,12 @@ for i = 1:length(all_axes)
 %         im.AlphaData = mask*abs(A0(ind_keep,i));
         im.AlphaData = mask*abs(A0(ind_keep,index_lags(i)));
     end
+    ax.YLim = [.5 size(mask,1)+.5];
+    ax.XLim = [.5 size(mask,2)+.5];
+    ax.XTick = [];
+    ax.XTickLabel = [];
+    ax.YTick = [];
+    ax.YTickLabel = [];
 %     if i==length(all_axes)
 %         c = colorbar(ax,'eastoutside');
 %     end
@@ -1389,9 +1402,16 @@ save(fullfile(save_dir,'UF.mat'),'UF','-v7.3');
 P_cor = handles.Slider.UserData.P_cor;
 Cor = handles.Slider.UserData.Cor;
 save(fullfile(save_dir,'fCorrelation.mat'),'Cor','P_cor','-v7.3');
-% C_map = handles.Slider.UserData.C_map;
-% P_map = handles.Slider.UserData.P_map;
-% save(fullfile(save_dir,'Full_map.mat'),'C_map','P_map','-v7.3');
+fprintf('File fCorrelation Saved [%s].\n',fullfile(save_dir,'fCorrelation.mat'));
+
+flag_fullmap = handles.Checkbox3.Value;
+if flag_fullmap
+    C_map = handles.Slider.UserData.C_map;
+    P_map = handles.Slider.UserData.P_map;
+    save(fullfile(save_dir,'Full_map.mat'),'C_map','P_map','-v7.3');
+    fprintf('File Full_map Saved [%s].\n',fullfile(save_dir,'Full_map.mat'));
+end
+
 im1 = findobj(handles.Ax1,'type','Image');
 Rmax_map = im1.CData;
 im2 = findobj(handles.Ax2,'type','Image');
@@ -1399,6 +1419,7 @@ Tmax_map = im2.CData;
 RT_pattern = A;
 save(fullfile(save_dir,'Correlation_pattern.mat'),'Rmax_map','Tmax_map','RT_pattern',...
     'x_','labels','r_max','t_max','x_max','r_min','t_min','x_min','-v7.3');
+fprintf('File Correlation_pattern Saved [%s].\n',fullfile(save_dir,'Correlation_pattern.mat'));
 
 %work_dir = fullfile(save_dir,'Regions');
 %mkdir(work_dir);
@@ -1472,6 +1493,11 @@ pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
+handles.TabGroup.SelectedTab = handles.ThirdTab;
+pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
+saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+
 handles.TabGroup.SelectedTab = handles.FourthTab;
 pic_name = strcat(video_name,'_',handles.TabGroup.SelectedTab.Title);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
@@ -1500,15 +1526,14 @@ end
 function adapt_slider_batch(tag,handles)
 
 % Slider step Update
+sv = handles.MainFigure.UserData.slider_values;
 switch tag
     case {'Trace_Mean';'Trace_Region';'Trace_RegionGroup';'Trace_Box';'Trace_Pixel'}
-        handles.Edit1.String = -10;
-        handles.Edit2.String = 10;
+        handles.Edit1.String = sv.lag1(1);
+        handles.Edit2.String = sv.lag1(2);
     case {'Trace_Cerep'}
-%         handles.Edit1.String = -5;
-%         handles.Edit2.String = 15;
-        handles.Edit1.String = -100;
-        handles.Edit2.String = 500;
+        handles.Edit1.String = sv.lag2(1);
+        handles.Edit2.String = sv.lag2(2);
 end
 
 handles.Edit1.UserData.Previous = handles.Edit1.String;
@@ -1521,14 +1546,31 @@ drawnow;
 
 end
 
-function batch_Correlation_Callback(hObj,~,handles,str_ref)
+function batch_Correlation_Callback(hObj,~,handles,val,str_group,str_ref)
 
 data_config = handles.MainFigure.UserData.data_config;
 data_tg = handles.MainFigure.UserData.data_tg;
 
-ind_group = handles.Group_table.UserData.Selection;
-if isempty(ind_group)
-    warning('No Time Groups Selected. Unable to perform batch computation');
+% ind_group = handles.Group_table.UserData.Selection;
+% if isempty(ind_group)
+%     warning('No Time Groups Selected. Unable to perform batch computation');
+% end
+
+if val == 1
+    [ind_group,v] = listdlg('Name','Time Group Selection','PromptString','Select Time groups',...
+        'SelectionMode','multiple','ListString',handles.Group_table.Data(:,1),'InitialValue',handles.Group_table.UserData.Selection,'ListSize',[300 500]);
+    if v==0 || isempty(ind_group)
+        warning('No Group selected .\n');
+        return;
+    end
+else
+    ind_group = [];
+    for i =1:length(str_group)
+        ind_keep = find(strcmp(handles.Group_table.Data(:,1),str_group(i))==1);
+        if ~isempty(ind_keep)
+            ind_group = [ind_group;ind_keep];
+        end
+    end
 end
 
 for i=1:length(ind_group)
@@ -1560,7 +1602,7 @@ for i=1:length(ind_group)
 	ind_pu = find(contains(p1.String,str_ref)==1);
     for k =1:length(ind_pu)
         p1.Value = ind_pu(k);
-        compute_Callback(bc,[],handles);
+        compute_Callback(bc,[],handles,val);
         savestats_Callback([],[],handles);
         saveimage_Callback([],[],handles);
         if exist('_info.txt','file')
