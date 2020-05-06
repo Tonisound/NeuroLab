@@ -361,6 +361,7 @@ hl = line('XData',1:last_im,...
     'HitTest','off',...
     'Parent', handles.RightAxes);
 s.Name = sprintf('Index-Surge/(%.1f-%.1f)',thresh_surge,n_aw);
+s.Selected = 0;
 s.X = time_ref.Y;
 s.Y = ind_surge;
 % Adding NaN to have zero-start
@@ -378,6 +379,7 @@ hr = line('XData',1:last_im,...
     'HitTest','off',...
     'Parent', handles.RightAxes);
 s.Name = sprintf('Ratio-Surge/(%.1f)',n_aw);
+s.Selected = 0;
 s.X = time_ref.Y;
 s.Y = ratio_surge;
 % Adding NaN to have zero-start

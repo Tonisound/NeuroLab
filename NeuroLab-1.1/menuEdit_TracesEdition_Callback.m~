@@ -292,18 +292,6 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWid
         temp  = ui_T.Data;
         
         reset_visible = {'off','off','off','off','off'};
-        switch strtrim(handles.RightPanelPopup.String(handles.RightPanelPopup.Value,:))
-            case 'Pixel Dynamics'
-                reset_visible{1}='on';
-            case 'Box Dynamics'
-                reset_visible{2}='on';
-            case 'Region Dynamics'
-                reset_visible{3}='on';
-            case 'Region Group Dynamics'
-                reset_visible{4}='on';
-            case 'Trace Dynamics'
-                reset_visible{5}='on';
-        end
         
         ind = find(strcmp(D(:,2),'Trace_Mean'));
         for k=ind
@@ -320,7 +308,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWid
         for k =1:length(ind)
             temp(ind(k),3)= {GDisp.colors_info{k}};
             temp(ind(k),4)= {'-'};
-            temp(ind(k),5)= reset_visible(1);%{'off'};
+            temp(ind(k),5)= reset_visible(1);{'off'};
             temp(ind(k),6)= {1};
             temp(ind(k),9)= {0};
             %temp(ind(k),1:6) = {sprintf('Pixel_%d',k),'Trace_Pixel',GDisp.colors_info{k},'-','off',.5};
@@ -330,7 +318,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWid
         for k =1:length(ind)
             temp(ind(k),3)= {GDisp.colors_info{k}};
             temp(ind(k),4)= {'-'};
-            temp(ind(k),5)= reset_visible(2);%{'off'};
+            temp(ind(k),5)= {'off'};
             temp(ind(k),6)= {1};
             temp(ind(k),9)= {0};
             % temp(ind(k),1:6) = {sprintf('Box_%d',k),'Trace_Box',GDisp.colors_info{k},'-','off',.5};
@@ -339,7 +327,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWid
         ind = find(strcmp(D(:,2),'Trace_Region'));
         for k =1:length(ind)
             temp(ind(k),4)= {'-'};
-            temp(ind(k),5)= reset_visible(3);%{'on'};
+            temp(ind(k),5)= {'on'};
             temp(ind(k),6)= {1};
             temp(ind(k),9)= {0};
             %temp(ind(k),1:6) = {sprintf('Region_%d',k),'Trace_Region',rgb2char(rand(1,3)),'-','off',.5};
@@ -348,7 +336,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWid
         ind = find(strcmp(D(:,2),'Trace_RegionGroup'));
         for k =1:length(ind)
             temp(ind(k),4)= {'-'};
-            temp(ind(k),5)= reset_visible(4);%{'on'};
+            temp(ind(k),5)= {'on'};
             temp(ind(k),6)= {1};
             temp(ind(k),9)= {0};
             % temp(ind(k),1:6) = {sprintf('RegionGroup_%d',k),'Trace_RegionGroup',rgb2char(rand(1,3)),'-','off',.5};
@@ -357,7 +345,7 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWid
         ind = find(strcmp(D(:,2),'Trace_Cerep'));
         for k =1:length(ind)
             temp(ind(k),4)= {'-'};
-            temp(ind(k),5)= reset_visible(5);%{'off'};
+            temp(ind(k),5)= {'off'};
             temp(ind(k),6)= {1};
             temp(ind(k),9)= {0};
             % temp(ind(k),1:6) = {sprintf('Trace_%d',k),'Trace_Cerep',rgb2char(rand(1,3)),'-','off',.5};

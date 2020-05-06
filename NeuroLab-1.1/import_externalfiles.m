@@ -185,6 +185,7 @@ for i=1:length(ind_traces)
         
         % Line creation
         s.Name = t;
+        s.Selected = 0;
         s.X = traces(ind_traces(i)).X;
         s.Y = traces(ind_traces(i)).Y;
         hl.UserData = s;

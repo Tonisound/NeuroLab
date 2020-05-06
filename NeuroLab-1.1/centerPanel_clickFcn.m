@@ -57,6 +57,7 @@ if pt_cp(1,1)>Xlim(1) && pt_cp(1,1)<Xlim(2) && pt_cp(1,2)>Ylim(1) && pt_cp(1,2)<
                 %UserData
                 s.Graphic = hp;
                 s.Name = sprintf('Pixel-%d',n_pixels+1);
+                s.Selected = 0;
                 hp.UserData = hl;
                 hl.UserData = s;
                 % Gaussian smoothing
@@ -103,6 +104,7 @@ if pt_cp(1,1)>Xlim(1) && pt_cp(1,1)<Xlim(2) && pt_cp(1,2)>Ylim(1) && pt_cp(1,2)<
                 %UserData
                 s.Graphic = hq;
                 s.Name = sprintf('Box-%d',n_boxes+1);
+                s.Selected = 0;
                 hq.UserData = hr;
                 hr.UserData = s;
                 % Gaussian smoothing

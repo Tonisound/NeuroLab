@@ -263,6 +263,7 @@ hl = line('XData',xdata(:),...
     'HitTest','off',...
     'Parent', b);
 s.Name = 'Whole';
+s.Selected = 0;
 hl.UserData = s;
 
 t_gauss = GTraces.GaussianSmoothing;

@@ -159,11 +159,13 @@ ind_nrem = [];
 ind_sleep = [];
 for k = 1:length(l)
     if ~isempty(strfind(l(k).UserData.Name,'Index-REM'))
-        ind_rem = [ind_rem;k];
+        ind_nrem = k ;
     elseif ~isempty(strfind(l(k).UserData.Name,'Index-NREM'))
-        ind_nrem = [ind_nrem;k];
+        flag_nrem = true;
+        ind_nrem = k ;
     elseif ~isempty(strfind(l(k).UserData.Name,'Index-SLEEP'))
-        ind_sleep = [ind_sleep;k];
+        ind_sleep = k ;
+        flag_sleep = true;
     end
 end
 

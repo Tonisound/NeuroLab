@@ -51,8 +51,14 @@ end
 
 % Copying lines
 h_line = copyobj(lines,ax2);
+
 for i=length(h_line):-1:1
     s = struct('Name',[]);
+    % Adding field Selected to s
+    if isfield(h_line(i).UserData,'Selected')
+        s.Selected = h_line(i).UserData.Selected;
+    end
+    
     switch h_line(i).Tag
         % Copying items one-by-one
         case {'Trace_Mean'}
@@ -139,7 +145,14 @@ for i=length(h_line):-1:1
         otherwise
             warning('Unidentified Trace Format.\n')
     end
+    % Adding Selected Field if not existent in loading mode
+    if ~isfield(h_line(i).UserData,'Selected') && strcmp(mode,'loading')
+        h_line(i).UserData.Selected = 0;
+    end
+
 end
+
+
 
 % Copying Time Patches
 delete(findobj(ax2,'Tag','TimePatch'));

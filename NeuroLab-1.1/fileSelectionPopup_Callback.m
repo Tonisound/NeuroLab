@@ -57,7 +57,7 @@ if ~strcmp(old,new)
             delete(findobj(handles.CenterAxes,'Type','Line','-not','Tag','Cursor','-or','Type','Patch'));
             delete(findobj(handles.RightAxes,'Type','Line','-not','Tag','Cursor','-or','Type','Text'));
             
-            % Recreate Mean and Mean Label
+            % Recreate Mean
             try
                 data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
                     'time_ref','length_burst','n_burst','rec_mode');
@@ -77,6 +77,7 @@ if ~strcmp(old,new)
                 'Tag','Trace_Mean','Color','black',...
                 'HitTest','off','Parent',handles.RightAxes);
             s.Name = 'Whole';
+            s.Selected = 0;
             hl.UserData = s;
             
             % Gaussian window

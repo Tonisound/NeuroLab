@@ -128,6 +128,7 @@ for idx =1:length(graphics)
     else
         graphics(idx).UserData.YData(1:end-1)= y;
     end
+    
     fprintf('done.\n');
     
 end

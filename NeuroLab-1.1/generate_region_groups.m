@@ -358,6 +358,7 @@ for i=1:length(ind_groups)
         s.Name = region_groups(ind_groups(i)).name;
         s.Mask = region_groups(ind_groups(i)).mask;
         s.Graphic = hq;
+        s.Selected = 0;
         hq.UserData = hl;
         hl.UserData = s;
         

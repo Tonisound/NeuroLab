@@ -1,8 +1,7 @@
-function click_PixelFcn(hObj,~,handles)
+function click_PixelFcn(hObj,evnt,handles)
 % Called when user clicks on Pixel
 
-%disp(hObj);
-disp(hObj.UserData.UserData.Name);
+%disp(hObj.UserData.UserData.Name);
 seltype = get(handles.MainFigure,'SelectionType');
 load('Preferences.mat','GDisp');
 coeff_increase = GDisp.coeff_increase;
@@ -11,22 +10,13 @@ if strcmp(seltype,'normal')
     handles.MainFigure.Pointer = 'hand';
     hObj.Tag = 'Movable_Pixel';
     hObj.UserData.Tag = 'Movable_Trace_Pixel';
-    if hObj.MarkerEdgeColor == char2rgb('k')
-        others = findobj(handles.CenterAxes,'Visible','on','-and','MarkerEdgeColor',char2rgb('w'));
-        set(others,'MarkerEdgeColor',char2rgb('k'),'LineWidth',1);
-        for i =1:length(others)
-            others(i).UserData.LineWidth = others(i).UserData.LineWidth/coeff_increase;
-        end
-        
-        hObj.MarkerEdgeColor = char2rgb('w');
-        hObj.LineWidth = 2;
-        uistack(hObj.UserData,'top');
-        hObj.UserData.LineWidth=coeff_increase*hObj.UserData.LineWidth;
-    else
-        hObj.MarkerEdgeColor = char2rgb('k');
-        hObj.LineWidth = 1;
-        hObj.UserData.LineWidth=hObj.UserData.LineWidth/coeff_increase;
+    
+    % Direct click
+    if ~isempty(evnt) 
+        hObj.UserData.UserData.Selected = 1-hObj.UserData.UserData.Selected;
+        actualize_line_aspect(hObj.UserData);
     end
+
 else
     delete(hObj.UserData);
     delete(hObj);

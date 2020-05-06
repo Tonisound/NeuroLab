@@ -315,6 +315,7 @@ for i=1:length(ind_regions)
         
         % Updating UserData
         s.Name = regions(ind_regions(i)).name;
+        s.Selected = 0;
         s.Mask = regions(ind_regions(i)).mask;
         s.Graphic = hq;
         hq.UserData = hl;

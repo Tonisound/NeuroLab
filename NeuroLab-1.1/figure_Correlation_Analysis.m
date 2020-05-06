@@ -1571,6 +1571,7 @@ else
             ind_group = [ind_group;ind_keep];
         end
     end
+    ind_group = sort(ind_group,'ascend');
 end
 
 for i=1:length(ind_group)

@@ -44,6 +44,7 @@ hl = line('XData',xdata(:),...
     'HitTest','off',...
     'Parent', handles.RightAxes);
 s.Name = 'Whole';
+s.Selected = 0;
 hl.UserData = s;
 
 % Updating Plot Figure

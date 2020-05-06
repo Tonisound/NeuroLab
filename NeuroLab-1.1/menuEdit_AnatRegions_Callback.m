@@ -1589,6 +1589,7 @@ for i =1:length(r_patches)
     s.Name = p.UserData.Name;
     s.Mask = p.UserData.Mask;
     s.Graphic = hq;
+    s.Selected = 0;
     hq.UserData = hl;
     hl.UserData = s;
 end
@@ -1639,6 +1640,7 @@ for i =1:length(g_patches)
     s.Name = p.UserData.Name;
     s.Mask = double(p.UserData.Mask);
     s.Graphic = hq;
+    s.Selected = 0;
     hq.UserData = hl;
     hl.UserData = s;
 end
