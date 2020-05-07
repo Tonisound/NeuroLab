@@ -851,9 +851,13 @@ if ~isempty(path_spectro)
         data_spectro = load(fullfile(path_spectro,d_spectro(ind_channel).name));
     else
         data_spectro = [];
+        handles.Checkbox1.Enable = 'off';
+        warning('Empty Spectrogramm folder.');
     end
 else
+    data_spectro = [];
     handles.Checkbox1.Enable = 'off';
+    warning('Missing Spectrogramm folder.');
 end
 
 % if ~exist(fullfile(path,strcat('Power-broadband',strrep(channel,'LFP',''),'.mat')),'file')

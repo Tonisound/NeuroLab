@@ -18,7 +18,7 @@ for i = 1:length(lines)
             else
                 l.UserData.Graphic.EdgeColor = char2rgb('k');
                 %l.LineWidth = 1;
-                l.LineWidth=coeff_increase*l.LineWidth;
+                l.LineWidth=l.LineWidth/coeff_increase;
             end
             
         case {'Trace_Pixel','Movable_Trace_Pixel'}
@@ -27,7 +27,8 @@ for i = 1:length(lines)
                 l.UserData.Graphic.MarkerEdgeColor = char2rgb('w');
                 %l.LineWidth = 2;
                 l.LineWidth=coeff_increase*l.LineWidth;
-                uistack(hObj.UserData,'top');
+                uistack(l,'top');
+                
             else
                 l.UserData.Graphic.MarkerEdgeColor = char2rgb('k');
                 %l.LineWidth = 1;
@@ -42,7 +43,7 @@ for i = 1:length(lines)
                 l.UserData.Graphic.FaceAlpha = 2*GColors.patch_transparency;
                 l.LineWidth=l.LineWidth*coeff_increase;
             else
-                l.UserData.Graphic.EdgeColor = char2rgb('k');
+                l.UserData.Graphic.EdgeColor = GColors.patch_color;
                 l.UserData.Graphic.LineWidth = GColors.patch_width;
                 l.UserData.Graphic.FaceAlpha = GColors.patch_transparency;
                 l.LineWidth=l.LineWidth/coeff_increase;

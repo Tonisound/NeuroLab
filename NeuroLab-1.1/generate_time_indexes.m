@@ -157,15 +157,74 @@ l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
 ind_rem = [];
 ind_nrem = [];
 ind_sleep = [];
+ind_qw = [];
+ind_aw = [];
+ind_wake = [];
 for k = 1:length(l)
-    if ~isempty(strfind(l(k).UserData.Name,'Index-REM'))
+    if strcmp(l(k).UserData.Name,'Index-REM')
         ind_rem = [ind_rem;k];
-    elseif ~isempty(strfind(l(k).UserData.Name,'Index-NREM'))
+    elseif strcmp(l(k).UserData.Name,'Index-NREM')
         ind_nrem = [ind_nrem;k];
-    elseif ~isempty(strfind(l(k).UserData.Name,'Index-SLEEP'))
+    elseif strcmp(l(k).UserData.Name,'Index-SLEEP')
         ind_sleep = [ind_sleep;k];
+    elseif strcmp(l(k).UserData.Name,'Index-AW')
+        ind_aw = [ind_aw;k];
+    elseif strcmp(l(k).UserData.Name,'Index-QW')
+        ind_qw = [ind_qw;k];
+    elseif strcmp(l(k).UserData.Name,'Index-WAKE')
+        ind_wake = [ind_wake;k];
     end
 end
+
+if ~isempty(ind_rem) && ~isempty(ind_nrem)  
+    % Creating line
+    hl = line('XData',(1:n_images)',...
+        'YData',double((l(ind_rem(1)).YData+l(ind_nrem(1)).YData)>0),...
+        'Color',(l(ind_rem(1)).Color+l(ind_nrem(1)).Color)/2,...
+        'LineWidth',1,...
+        'Tag','Trace_Cerep',...
+        'Visible','on',...
+        'HitTest','off',...
+        'Parent', handles.RightAxes);
+    s.Name = sprintf('Index-SLEEP');
+    s.Selected = 0;
+    s.X = t_ref;
+    s.Y = hl.YData;
+    hl.UserData = s;
+    % Message user
+    if ~isempty(ind_sleep)
+        fprintf('Time Index successfully updated (Index-SLEEP).\n');
+    else
+        fprintf('Time Index successfully created (Index-SLEEP).\n');
+    end
+end
+
+if ~isempty(ind_aw) && ~isempty(ind_qw)
+    % Creating line
+    hl = line('XData',(1:n_images)',...
+        'YData',double((l(ind_qw(1)).YData+l(ind_aw(1)).YData)>0),...
+        'Color',(l(ind_qw(1)).Color+l(ind_aw(1)).Color)/2,...
+        'LineWidth',1,...
+        'Tag','Trace_Cerep',...
+        'Visible','on',...
+        'HitTest','off',...
+        'Parent', handles.RightAxes);
+    s.Name = sprintf('Index-WAKE');
+    s.Selected = 0;
+    s.X = t_ref;
+    s.Y = hl.YData;
+    hl.UserData = s;
+    % Message user
+    if ~isempty(ind_wake)
+        fprintf('Time Index successfully updated (Index-WAKE).\n');
+    else
+        fprintf('Time Index successfully created (Index-WAKE).\n');
+    end
+end
+
+% removing Index-SLEEP
+% removing Index-WAKE
+delete(l([ind_sleep;ind_wake]));
 
 success = true;
 

@@ -149,7 +149,7 @@ for i =1:length(lines)
     D=[D;{lines(i).UserData.Name,lines(i).Tag,rgb2char(lines(i).Color),lines(i).LineStyle,lines(i).Visible,...
         lines(i).LineWidth,stack_pos(i),f_samp(i),lines(i).UserData.Selected}];
 end
-
+okButton.UserData.InitialData = D;
 
 % UiTable 
 ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWidth','Position','Sampling','Selected'},...
@@ -284,6 +284,11 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWid
         cursor = findobj(ax,'Tag','Cursor');
         uistack(cursor,'top');
         
+        % Actualize Trace Aspect
+        ind_keep = ~strcmp(D(:,9),'');
+        ind_diff = find(abs(cell2mat(okButton.UserData.InitialData(ind_keep,9))-cell2mat(D(ind_keep,9)))==1);
+        actualize_line_aspect(lines(ind_diff));
+        
         close(f2);
     end
 
@@ -364,11 +369,9 @@ ui_T = uitable('ColumnName',{'Name','Tag','Color','Linestyle','Visible','LineWid
         end
             
         % updating changes
-        if ~isempty(ui_T.UserData)
-            indices = ui_T.UserData.Selection;
-            for ii=1:length(indices)
-                ui_T.Data(indices(ii,1),indices(ii,2)) = temp(indices(ii,1),indices(ii,2));
-            end
+        if ~isempty(ui_T.UserData) || ~isempty(ui_T.UserData.Selection)
+            indices = ui_T.UserData.Selection(:,1);
+            ui_T.Data(indices,:) = temp(indices,:);
         else
             ui_T.Data = temp;
         end

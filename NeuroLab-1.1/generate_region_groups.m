@@ -259,7 +259,6 @@ load('Preferences.mat','GTraces','GColors');
 patch_alpha = GColors.patch_transparency;
 patch_width = GColors.patch_width;
 patch_color = GColors.patch_color;
-l_width = 1;
 t_gauss = GTraces.GaussianSmoothing;
 delta =  time_ref.Y(2)-time_ref.Y(1);
 w = gausswin(round(2*t_gauss/delta));
@@ -350,7 +349,7 @@ for i=1:length(ind_groups)
             'Tag','Trace_RegionGroup',...
             'HitTest','on',...
             'Visible','off',...
-            'LineWidth',l_width,...
+            'LineWidth',1,...
             'Parent',handles.RightAxes);
         set(hl,'ButtonDownFcn',{@click_lineFcn,handles});
         
