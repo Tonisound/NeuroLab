@@ -47,7 +47,8 @@ if ~strcmp(old,new)
         END_IM = data_config.END_IM;
         LAST_IM = data_config.LAST_IM;
         FILES(CUR_FILE) = data_config.File;      
-        load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),data_config.UiValues.CenterPanelPopup);
+        % load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),data_config.UiValues.CenterPanelPopup);
+        load_global_image(FILES(CUR_FILE),handles.CenterPanelPopup.String(data_config.UiValues.CenterPanelPopup,:));
         
         if exist(fullfile(DIR_SAVE,new_fus,'Trace_light.mat'),'file')
             load_graphicdata(fullfile(DIR_SAVE,new_fus),handles);

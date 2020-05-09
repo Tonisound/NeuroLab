@@ -246,7 +246,8 @@ set(resetAllparamButton,'Callback',@resetAllparamButton_callback);
             load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         end
         if flag_dload
-            load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles.CenterPanelPopup.Value);
+            % load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles.CenterPanelPopup.Value);
+            load_global_image(FILES(CUR_FILE),handles.CenterPanelPopup.String(handles.CenterPanelPopup.Value,:));
             actualize_plot(handles);
         end
     end

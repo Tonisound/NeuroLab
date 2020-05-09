@@ -265,8 +265,10 @@ t1 = uicontrol('Style','text',...
 pu1 = uicontrol('Style','popupmenu',...
     'Units','normalized',...
     'String','current|source|normalized|dB',...
+    'Value',1,...
     'Tag','popup1',...
     'Parent',f);
+pu1.UserData = pu1.String(pu1.Value,:);
 set(pu1,'Callback',{@pu1_Callback,folder_name});
 
 % OK/Cancel buttons
@@ -1989,8 +1991,12 @@ end
 
 function pu1_Callback(hObj,~,folder_name)
 
-global IM;
+global SEED IM FILES CUR_FILE;
 temp = strtrim(hObj.String(hObj.Value,:));
+if strcmp(temp,hObj.UserData)
+    return
+end
+
 f = hObj.Parent;
 im = findobj(f,'Tag','MainImage');
 l_cursor = findobj(f,'Tag','T2');
@@ -2000,27 +2006,75 @@ switch temp
     case 'current'
         f.UserData.IM = IM;
         
-    case 'source'
-        fprintf('Loading Doppler_film ...\n');
-        Dn = load(fullfile(folder_name,'Doppler.mat'),'Doppler_film');
-        fprintf('===> Doppler_film loaded from %s.\n',fullfile(folder_name,'Doppler.mat'));
-        f.UserData.IM = Dn.Doppler_film;
+    case {'source','normalized','dB'}
+        % Loading Doppler.mat from acq file
+        F = FILES(CUR_FILE);
+        if ~isempty(F.acq)
+            file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
+            fprintf('Loading Doppler_film [%s] ...',F.acq);
+            if contains(F.acq,'.acq')
+                % case file_acq ends .acq (Verasonics)
+                data = load(file_acq,'-mat');
+                Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
+            elseif contains(F.acq,'.mat')
+                % case file_acq ends .mat (Aixplorer)
+                data = load(file_acq,'Doppler_film');
+                Doppler_film = data.Doppler_film;
+            end
+            fprintf(' done.\n');
+        else
+            errordlg('Cannot load Doppler: File .acq not found [%s].',F.acq);
+            return;
+        end
         
-    case 'normalized'
-        fprintf('Loading Doppler_normalized ...\n');
-        Dn = load(fullfile(folder_name,'Doppler_normalized.mat'),'Doppler_normalized');
-        fprintf('Doppler_normalized loaded : %s\n',fullfile(folder_name,'Doppler_normalized.mat'));
-        f.UserData.IM = Dn.Doppler_normalized;
-    
-    case 'dB'
-        fprintf('Loading Doppler_film ...\n');
-        Dn = load(fullfile(folder_name,'Doppler.mat'),'Doppler_film');
-        fprintf('===> dB Movie computed from %s [ref image: %d].\n',fullfile(folder_name,'Doppler.mat'),cur_im);
-        f.UserData.IM = 20*log10(abs(Dn.Doppler_film)/max(max(abs(Dn.Doppler_film(:,:,cur_im)))));
-        %f.UserData.IM = 20*log10(abs(IM)/max(max(abs(IM(:,:,cur_im)))));
+        switch temp
+            case 'source'
+                f.UserData.IM = Doppler_film;
+                
+            case 'normalized'
+%                 normalization = GImport.Doppler_normalization;
+%                 index_baseline = zeros(size(Doppler_film,3),1);
+%                 
+%                 switch normalization
+%                     case 'std'
+%                         im_mean = mean(Doppler_film,3,'omitnan');
+%                         im_std = std(Doppler_film,0,3,'omitnan');
+%                         M = repmat(im_mean,1,1,size(Doppler_film,3));
+%                         S = repmat(im_std,1,1,size(Doppler_film,3));
+%                         Doppler_normalized = (Doppler_film-M)./S;
+%                     case 'mean'
+%                         im_mean = mean(Doppler_film,3,'omitnan');
+%                         M = repmat(im_mean,1,1,size(Doppler_film,3));
+%                         Doppler_normalized = 100*(Doppler_film-M)./M;
+%                     case 'baseline'
+%                         dt = load(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_images');
+%                         ind_base = contains({dt.TimeTags(:).Tag}','BASELINE');
+%                         if isempty(dt.TimeTags_images(ind_base))
+%                             warning('No Tag baseline defined.\n')
+%                             return;
+%                         else
+%                             temp = dt.TimeTags_images(ind_base,:);
+%                             for i=1:size(temp,1)
+%                                 index_baseline(temp(i,1):temp(i,2))=1;
+%                             end
+%                         end
+%                         
+%                         Doppler_baseline = Doppler_film(:,:,index_baseline==1);
+%                         im_baseline = mean(Doppler_baseline,3,'omitnan');
+%                         M = repmat(im_baseline,1,1,size(Doppler_film,3));
+%                         Doppler_normalized = 100*(Doppler_film-M)./M;
+%                 end
+                im_mean = mean(Doppler_film,3,'omitnan');
+                M = repmat(im_mean,1,1,size(Doppler_film,3));
+                f.UserData.IM = 100*(Doppler_film-M)./M;
+                
+            case 'dB'
+                f.UserData.IM = 20*log10(abs(Doppler_film)/max(max(abs(Doppler_film(:,:,cur_im)))));
+        end
 end
 
 im.CData = f.UserData.IM(:,:,cur_im);
+hObj.UserData = temp;
 
 end
 

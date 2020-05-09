@@ -9,7 +9,7 @@ str = get(handles.ProcessListPopup,'String');
 switch strtrim(str(val,:))
     
     case 'Compute Normalized Movie'
-        compute_normalizedmovie(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        compute_normalizedmovie(FILES(CUR_FILE),handles);
         
     case 'Edit Anatomical Regions - Register Atlas'
         menuEdit_AnatRegions_Callback(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,handles);

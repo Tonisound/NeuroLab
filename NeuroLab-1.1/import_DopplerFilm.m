@@ -31,11 +31,17 @@ end
 
 
 % Checking Doppler
-if flag == 1
+if flag == 0
+    % first import
+    [ind_remove,thresh,tag] = check_Doppler(Doppler_film);
+    Doppler_type = 'Doppler_source';
+else
+    % re-import
+    % d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh','Doppler_type');
     d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh');
     [ind_remove,thresh,tag] = check_Doppler(Doppler_film,d.ind_remove,d.thresh);
-else
-    [ind_remove,thresh,tag] = check_Doppler(Doppler_film);
+    %Doppler_type = d.Doppler_type;
+    Doppler_type = 'Doppler_source';
 end
 if isempty(ind_remove)
     return;
@@ -43,14 +49,14 @@ end
 Doppler_film(:,:,ind_remove) = NaN(size(Doppler_film,1),size(Doppler_film,2),sum(ind_remove));
 
 % Saving Doppler_film
+% Overwrite previous file Doppler.mat
 fprintf('Saving Doppler_film ...');
-save(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'Doppler_film','ind_remove','thresh','-v7.3');
+save(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'Doppler_film','Doppler_type','ind_remove','thresh','-v7.3');
 handles.RightAxes.UserData.ind_remove = ind_remove;
 fprintf(' done.\n');
 
-
 % create and save Config.mat
-if flag ==0
+if flag == 0
     START_IM = 1;
     CUR_IM = 1;
     END_IM = size(Doppler_film,3);
@@ -67,12 +73,19 @@ if flag ==0
     fprintf('Config.mat saved.\n');
 else
     % Updating global variables
-    if handles.CenterPanelPopup.Value == 1
-        IM = Doppler_film;
-        LAST_IM = size(IM,3);
-        actualize_traces(handles);
-        actualize_plot(handles);
-    end
+    %     if handles.CenterPanelPopup.Value == 1
+    %         IM = Doppler_film;
+    %         LAST_IM = size(IM,3);
+    %         actualize_traces(handles);
+    %         actualize_plot(handles);
+    %     end
+    
+    % Forcing Doppler_source
+    handles.CenterPanelPopup.Value = 1;
+    IM = Doppler_film;
+    LAST_IM = size(IM,3);
+    actualize_traces(handles);
+    actualize_plot(handles);
     
 end
 

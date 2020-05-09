@@ -11,7 +11,7 @@ tag = [];
 t = (1:size(Doppler_film,3))';
 test = permute(mean(mean(Doppler_film,2,'omitnan'),1,'omitnan'),[3,1,2]);
 test(test<0)=0.0001;
-
+%test = rescale(test,1,max(test));
 
 % Checking arguments depending on importation type
 if nargin == 1
@@ -33,58 +33,59 @@ im  = imagesc(Doppler_film(:,:,1),'Parent',ax1);
 ax1.Visible = 'off';
 %colormap(ax1,'gray');
 
-text1 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
+text1 = uicontrol('Style','text','Units','normalized',...
+    'BackgroundColor','w','String','','Parent',f);
 text1.String = sprintf('%d/%d',CUR_IM,size(Doppler_film,3));
-text2 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
-text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
+text2 = uicontrol('Style','text','Units','normalized',...
+    'BackgroundColor','w','String','','Parent',f);
+text2.String = sprintf('Discarded: %d/%d (%.1f %%)',...
     sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
-text3 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
-text3.String = 'Drag/drop cursor and threshold.Arrows to move cursor. Press enter to discard/include cursor frame';
-text4 = uicontrol('Style','text','Units','normalized','String','','Parent',f);
+text3 = uicontrol('Style','text','Units','normalized','String','','Parent',f,...
+	'String','Drag/drop cursor and threshold.Arrows to move cursor. Press enter to discard/include cursor frame');
+text4 = uicontrol('Style','text','Units','normalized',...
+    'BackgroundColor','w','String','','Parent',f);
 
 ax2 = axes('Parent',f);
 ax2.XLim = [.5,size(Doppler_film,3)+5];
 delta = max(test)-min(test);
 ax2.YLim = [min(test)-.1*delta,max(test)+.1*delta];
 ax2.UserData = [];
-ax2.YScale = 'log';
+%ax2.YScale = 'log';
 
 line('XData',t,'YData',test,'Color','k','LineWidth',1,'Parent',ax2);
 l_thresh = line('XData',[.5,size(Doppler_film,3)+5],'YData',[thresh,thresh],...
     'Color',[.5 .5 .5],'LineWidth',3,'Parent',ax2,'HitTest','on');
-l_cursor = line('XData',[CUR_IM CUR_IM],'YData',ax2.YLim,...
+l_cursor = line('XData',[CUR_IM CUR_IM],'YData',[1 1e6],...
     'Color',[.5 .5 .5],'LineWidth',1,'Parent',ax2,'HitTest','on');
 l_keep = line('XData',t(ind_keep==1),'YData',test(ind_keep==1),...
     'Color','b','LineStyle','none','Marker','o','Parent',ax2,'HitTest','on');
 l_rm = line('XData',t(ind_remove==1),'YData',test(ind_remove==1),...
     'Color','r','LineStyle','none','Marker','o','Parent',ax2,'HitTest','on');
 
+cb1 = uicontrol('Style','checkbox','Units','normalized',...
+    'String','linear','TooltipString','Log/linear scale','Tag','Checkbox1','Parent',f);
 tagButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.875 .025 .4 .1],'String','Tag',...
-    'Tag','InvertButton','Parent',f);
+    'String','Tag','TooltipString','Set baseline','Tag','InvertButton','Parent',f);
 invertButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.875 .025 .4 .1],'String','Invert',...
-    'Tag','InvertButton','Parent',f);
+    'String','Invert','Tag','InvertButton','Parent',f);
 okButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.875 .025 .8 .1],'String','OK',...
-    'Tag','okButton','Parent',f);
+    'String','OK','Tag','okButton','Parent',f);
 skipButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.875 .025 .7 .1],'String','Skip',...
-    'Tag','cancelButton','Parent',f);
+    'String','Skip','Tag','cancelButton','Parent',f);
 cancelButton = uicontrol('Style','pushbutton','Units','normalized',...
-    'Position',[.875 .025 .6 .1],'String','Cancel',...
-    'Tag','cancelButton','Parent',f);
+    'String','Cancel','Tag','cancelButton','Parent',f);
 cancelButton.Enable = status;
 
 
 %Positions
 ax1.Position = [.025 .1 .2 .8];
 ax2.Position = [.25 .1 .65 .8];
-text1.Position = [.92 .8 .06 .1];
-text2.Position = [.92 .7 .06 .1];
+text1.Position = [.92 .8 .06 .05];
+text2.Position = [.92 .71 .06 .08];
 text3.Position = [.1 .925 .8 .04];
-text4.Position = [.92 .6 .06 .1];
+text4.Position = [.92 .61 .06 .08];
 
+cb1.Position = [.92 .86 .06 .04];
 tagButton.Position = [.92 .5 .06 .1];
 invertButton.Position = [.92 .4 .06 .1];
 okButton.Position = [.92 .3 .06 .1];
@@ -98,12 +99,26 @@ set(skipButton,'Callback',{@skipButton_callback});
 set(cancelButton,'Callback',{@cancelButton_callback});
 
 % Interactive control
+set(cb1,'Callback',{@cb1_Callback});
 set(ax2,'ButtonDownFcn',{@axes_clickFcn});
 set(l_cursor,'ButtonDownFcn',{@click_l_cursor});
 set(l_thresh,'ButtonDownFcn',{@click_l_thresh});
 set(l_rm,'ButtonDownFcn',{@click_l_keeprm});
 set(l_keep,'ButtonDownFcn',{@click_l_keeprm});
 set(f,'KeyPressFcn',{@key_pressFcn});
+
+    function cb1_Callback(hObj,~)
+        switch hObj.String
+            case 'linear'
+                hObj.String = 'log';
+                ax2.YScale = 'log';
+                %l_cursor.YData = ax2.YLim
+            case 'log'
+                hObj.String = 'linear';
+                ax2.YScale = 'linear';
+                %l_cursor.YData = ax2.YLim
+        end 
+    end
 
     function invertButton_callback(~,~)
         i1 = max(1,round(ax2.XLim(1)));
@@ -115,7 +130,7 @@ set(f,'KeyPressFcn',{@key_pressFcn});
         l_keep.YData = test(ind_keep==1);
         l_rm.XData = t(ind_remove==1);
         l_rm.YData = test(ind_remove==1);
-        text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
+        text2.String = sprintf('Discarded: %d/%d (%.1f %%)',...
             sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
     end
 
@@ -174,7 +189,7 @@ set(f,'KeyPressFcn',{@key_pressFcn});
         l_keep.YData = test(ind_keep==1);
         l_rm.XData = t(ind_remove==1);
         l_rm.YData = test(ind_remove==1);
-        text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
+        text2.String = sprintf('Discarded: %d/%d (%.1f %%)',...
             sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
     end
 
@@ -208,7 +223,7 @@ set(f,'KeyPressFcn',{@key_pressFcn});
                     l_keep.YData = test(ind_keep==1);
                     l_rm.XData = t(ind_remove==1);
                     l_rm.YData = test(ind_remove==1);
-                    text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
+                    text2.String = sprintf('Discarded: %d/%d (%.1f %%)',...
                         sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
                 end
         end
@@ -271,7 +286,7 @@ set(f,'KeyPressFcn',{@key_pressFcn});
                 l_keep.YData = test(ind_keep==1);
                 l_rm.XData = t(ind_remove==1);
                 l_rm.YData = test(ind_remove==1);
-                text2.String = sprintf('Discarded frames %d/%d (%.1f %%)',...
+                text2.String = sprintf('Discarded: %d/%d (%.1f %%)',...
                     sum(ind_remove),length(ind_remove),100*sum(ind_remove)/length(ind_remove));
         end
     end

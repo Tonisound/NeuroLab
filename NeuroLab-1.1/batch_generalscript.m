@@ -429,7 +429,8 @@ if flag_gload
     load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);
 end
 if flag_dload
-    load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);
+    % load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);
+    load_global_image(FILES(CUR_FILE),myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:));
     actualize_plot(myhandles);
 end
 save('Preferences.mat','GTraces','GImport','-append');
@@ -505,7 +506,7 @@ for i = 1:length(ind_files)
                     success=true;
                     
                 case 'Compute Normalized Movie'
-                    success = compute_normalizedmovie(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
+                    success = compute_normalizedmovie(FILES(ii),myhandles);
                         
                 case 'Edit Time Groups'
                     success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);

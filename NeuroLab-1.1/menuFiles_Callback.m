@@ -370,9 +370,10 @@ if ~isempty(FILES)
         'String',FILES(CUR_FILE).dir_ext,...
         'TooltipString', '.dir_ext',...
         'Parent',tab1);
-    d1.normalization = '';
-    if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_normalized.mat'),'file')
-        d1 = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler_normalized.mat'),'normalization');
+    % Loading normalization
+    d1 = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'));
+    if ~isfield(d1,'normalization')
+        d1.normalization = '';
     end
     uicontrol('Style','text',...
         'Units','characters',...
@@ -654,9 +655,10 @@ end
         if ~isempty(evnt.Indices)
             cur_file = evnt.Indices(1,1);
             data = load(fullfile(DIR_SAVE,files_temp(cur_file).nlab,'Config.mat'));
-            data_norm.normalization = '';
-            if exist(fullfile(DIR_SAVE,files_temp(cur_file).nlab,'Doppler_normalized.mat'),'file')
-                data_norm = load(fullfile(DIR_SAVE,files_temp(cur_file).nlab,'Doppler_normalized.mat'),'normalization');
+            % Loading normalization
+            data_norm = load(fullfile(DIR_SAVE,files_temp(cur_file).nlab,'Doppler.mat'));
+            if ~isfield(data_norm,'normalization')
+                data_norm.normalization = '';
             end
             data_ref.reference = '';
             data_ref.padding = '';

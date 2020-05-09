@@ -46,12 +46,18 @@ else
 
 end
 
+% % Loading Doppler_film
+% fprintf('Loading Doppler_normalized ...\n');
+% Dn = load(fullfile(folder_name,'Doppler_normalized.mat'),'Doppler_normalized');
+% fprintf('Doppler_normalized loaded : %s\n',fullfile(folder_name,'Doppler_normalized.mat'));
+% Doppler_film = Dn.Doppler_normalized;
+% last_im = size(Doppler_film,3);
 
 % Loading Doppler_film
-fprintf('Loading Doppler_normalized ...\n');
-Dn = load(fullfile(folder_name,'Doppler_normalized.mat'),'Doppler_normalized');
-fprintf('Doppler_normalized loaded : %s\n',fullfile(folder_name,'Doppler_normalized.mat'));
-Doppler_film = Dn.Doppler_normalized;
+fprintf('Loading Doppler film ... ');
+Dn = load(fullfile(folder_name,'Doppler.mat'),'Doppler_film');
+fprintf('done [%s].\n',fullfile(folder_name,'Doppler.mat'));
+Doppler_film = Dn.Doppler_film;
 last_im = size(Doppler_film,3);
 
 %Loading Time Ref

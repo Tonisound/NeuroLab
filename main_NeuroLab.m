@@ -79,9 +79,13 @@ else
         END_IM = data_config.END_IM;
         UiValues = data_config.UiValues;
         FILES(CUR_FILE) = data_config.File;
-        if ~exist('IM','var')||isempty(IM)
-            load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),UiValues.CenterPanelPopup);
-        end
+%         if ~exist('IM','var')||isempty(IM)
+%             load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),UiValues.CenterPanelPopup);
+%         end
+        fprintf('Loading Doppler_film [%s] ...',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'));
+        dd = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'Doppler_film');
+        IM = dd.Doppler_film;
+        fprintf(' done.\n');
     else
         errordlg('Missing File Config.mat.\nTry reloading files.\n');
         return ;

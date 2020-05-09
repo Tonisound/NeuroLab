@@ -34,15 +34,11 @@ switch strtrim(str(val,:))
         end
     case '(Movie) Data Reconstruction'
         try
-            %load(fullfile(savedir,'Doppler.mat'),'Doppler_film');
-            load(fullfile(savedir,'Doppler_normalized.mat'),'Doppler_normalized');
+            load(fullfile(savedir,'Doppler.mat'),'Doppler_film');
             load(fullfile(savedir,'Doppler_reconstructed.mat'),'Doppler_reconstructed_ICA','Doppler_reconstructed_PCA');
             
-            if ~isempty(X)&&~isempty(Y)
-                movie_reconstruction(Doppler_normalized,Doppler_reconstructed_ICA,Doppler_reconstructed_PCA,'Normalized Movie','ICA Reconstruction','PCA Reconstruction',X,Y);
-            else
-                movie_reconstruction(Doppler_normalized,Doppler_reconstructed_ICA,Doppler_reconstructed_PCA,'Normalized Movie','ICA Reconstruction','PCA Reconstruction');
-            end
+%             movie_reconstruction(Doppler_film,Doppler_reconstructed_ICA,Doppler_reconstructed_PCA,'Normalized Movie','ICA Reconstruction','PCA Reconstruction',X,Y);
+            movie_reconstruction(Doppler_film,Doppler_reconstructed_ICA,Doppler_reconstructed_PCA,'Normalized Movie','ICA Reconstruction','PCA Reconstruction');
         catch
             errordlg(sprintf('Missing File Doppler_reconstructed : %s\n',fullfile(savedir,'Doppler_reconstructed.mat')));
             return;
