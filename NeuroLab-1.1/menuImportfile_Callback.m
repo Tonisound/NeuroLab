@@ -284,6 +284,9 @@ for i = 1:length(FileList)
                 % Detect trigger
                 import_reference_time(F(ind_file),handles);
                 
+                % Import/Crop Video
+                import_crop_video(F(ind_file),handles,0);
+                
                 % Save UF Params
                 saving_UFParams(fullfile(F(ind_file).fullpath,F(ind_file).dir_fus),fullfile(DIR_SAVE,F(ind_file).nlab));
                 

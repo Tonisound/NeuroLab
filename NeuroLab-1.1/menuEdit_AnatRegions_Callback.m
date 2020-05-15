@@ -1,7 +1,7 @@
 function success = menuEdit_AnatRegions_Callback(folder_name,file_recording,handles,val)
 
 global IM CUR_IM;
-success = true;
+success = false;
 
 % If nargin > 3 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
@@ -540,7 +540,7 @@ else
     table_group.UserData.patches = [];
 end
 
-%waitfor(f);
+waitfor(f);
 success = true;
 
 end

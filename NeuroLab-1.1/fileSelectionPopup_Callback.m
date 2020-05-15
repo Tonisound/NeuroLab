@@ -40,7 +40,8 @@ if ~strcmp(old,new)
     % Saving Previous File if FILES not empty
     if ~(strcmp(new,'')||strcmp(new,'<0>'))
         
-        data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'File','CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
+        data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),...
+            'File','CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
         UiValues = data_config.UiValues;
         START_IM = data_config.START_IM;
         CUR_IM = data_config.CUR_IM;
@@ -102,17 +103,11 @@ if ~strcmp(old,new)
                 else
                     hl.YData(1:end-1) = nanconv(y,w,'same');
                 end
-            end
-            
+            end        
         end
         
     % Loading Video file
-%    import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
-    try
-        import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
-    catch
-        warning('Unable to import video file [%s].',fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video));
-    end
+    load_video(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     else
         IM = zeros(88,169,2);
@@ -123,7 +118,8 @@ if ~strcmp(old,new)
         menuEdit_DeleteAll_Callback([],[],handles);
         if ~isempty(handles.VideoAxes.UserData)
             delete(handles.VideoAxes.UserData.Image);
-            delete(handles.VideoAxes.UserData.VideoReader);
+            delete(handles.VideoAxes.UserData.Text);
+            % delete(handles.VideoAxes.UserData.VideoReader);
             handles.VideoAxes.UserData = [];
         end
     end

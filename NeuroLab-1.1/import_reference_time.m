@@ -66,12 +66,16 @@ if ~exist(fullfile(F.fullpath,F.dir_fus,'trigger.txt'),'file')
     % Trigger Offset (Default: 0)
     offset = 0;
     
+    % LFP-VIDEO Delay (Default: 0)
+    delay_lfp_video = 0;
+    
     % Trigger Exportation
     file_txt = fullfile(F.fullpath,F.dir_fus,'trigger.txt');
     fid_txt = fopen(file_txt,'wt');
     fprintf(fid_txt,'%s',sprintf('<REF>%s</REF>\n',reference));
     fprintf(fid_txt,'%s',sprintf('<PAD>%s</PAD>\n',padding));
     fprintf(fid_txt,'%s',sprintf('<OFFSET>%.3f</OFFSET>\n',offset));
+    fprintf(fid_txt,'%s',sprintf('<DELAY>%.3f</DELAY>\n',delay_lfp_video));
     fprintf(fid_txt,'%s',sprintf('<TRIG>\n'));
     %fprintf(fid_txt,'%s',sprintf('n=%d \n',length(trigger)));
     for k = 1:length(trigger)
@@ -86,6 +90,7 @@ else
     reference = 'default';
     padding = 'none';
     offset = 0; % default
+    delay_lfp_video = 0; % default
     trigger = [];
     
     file_txt = fullfile(F.fullpath,F.dir_fus,'trigger.txt');
@@ -120,6 +125,15 @@ else
         C = char(B(2));
         D = textscan(C,'%f');
         offset = D{1,1};
+    end
+    % DELAY
+    delim1 = '<DELAY>';
+    delim2 = '</DELAY>';
+    if strfind(A,delim1)
+        B = regexp(A,'<DELAY>|</DELAY>','split');
+        C = char(B(2));
+        D = textscan(C,'%f');
+        delay_lfp_video = D{1,1};
     end
     % TRIG
     B = regexp(A,'<TRIG>|</TRIG>','split');
@@ -178,6 +192,7 @@ end
 %datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
 save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst',...
     'rec_mode','jump_value','ind_jumps','ind_bursts',...
+    'offset','delay_lfp_video',...
     'length_burst','n_images','reference','padding','-v7.3');
 fprintf('Succesful Reference Time Importation [%s,%d,%d]\n',rec_mode,n_burst,length_burst);
 fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));

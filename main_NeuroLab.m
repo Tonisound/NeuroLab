@@ -102,20 +102,14 @@ if ~isempty(FILES)
     if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Trace_light.mat'),'file')
         load_graphicdata(fullfile(DIR_SAVE,[FILES(CUR_FILE).nlab]),myhandles);
     elseif exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.fig'),'file')
-        load_graphicfigure(fullfile(DIR_SAVE,[FILES(CUR_FILE).nlab]),myhandles);
+        load_graphicfigure(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);
     else
         warning('Missing Graphic Objects. File %s.',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     end
     
     % Loading Video file
-    % import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);
-    try
-        import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);
-        myhandles.DisplayMenu_Video.Enable = 'on';
-    catch
-        warning('Unable to import video file [%s].',fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video));
-        myhandles.DisplayMenu_Video.Enable = 'off';
-    end
+    load_video(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);
+
 end
 
 actualize_plot(myhandles);

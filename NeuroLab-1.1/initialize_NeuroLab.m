@@ -134,13 +134,14 @@ uimenu(m1b,'Label','Import File','Tag','FileMenu_Import');
 uimenu(m1b,'Label','Import Doppler film','Tag','ImportMenu_Doppler','Separator','on');
 uimenu(m1b,'Label','Import Reference Time','Tag','ImportMenu_ReferenceTime');
 uimenu(m1b,'Label','Import Time Tags','Tag','ImportMenu_TimeTags');
-uimenu(m1b,'Label','Import Video','Tag','ImportMenu_Video');
+uimenu(m1b,'Label','Import - Crop Video','Tag','ImportMenu_Video');
 uimenu(m1b,'Label','Import LFP Configuration','Tag','ImportMenu_ImportConfig');
 % uimenu(m1b,'Label','Import LFP Traces','Tag','ImportMenu_LFPTraces');
 % uimenu(m1b,'Label','Import Regions','Tag','ImportMenu_Regions');
 % uimenu(m1b,'Label','Import External Files','Tag','ImportMenu_ExternalFiles');
 
 uimenu(m1b,'Label','Reload Doppler film','Tag','ImportMenu_ReloadDoppler','Separator','on');
+uimenu(m1b,'Label','Reload Video','Tag','ImportMenu_ReloadVideo');
 uimenu(m1b,'Label','Reload Graphics','Tag','ImportMenu_ReloadGraphic');
 % uimenu(m1b,'Label','Load Cereplex Traces','Tag','ImportMenu_LoadTraces','Enable','on');
 % uimenu(m1b,'Label','Load Regions','Tag','ImportMenu_LoadRegions','Enable','on');
@@ -600,16 +601,25 @@ f2 = figure('Units','normalized',...
     'Visible',UiValues.video_status,...
     'WindowStyle','normal',...
     'Name','Behavior');
+cb_timing = uicontrol(f,'Style','checkbox',...
+    'Units','normalized',...
+    'TooltipString','Show timing',...
+    'Tag','TimingBox',...
+    'Position',[0 0 .2 .05],...
+    'Value',1,...
+    'Parent',f2);
 
 myhandles.VideoFigure=f2;
 %myhandles.VideoAxes=axes('Parent',f2);
 %myhandles.VideoImage = image(zeros(10,10,3),'Parent',myhandles.VideoAxes);
 myhandles.VideoAxes = axes('Parent',f2,'Tag','VideoAxes',...
     'XTick',[],'YTick',[],'XTickLabel',[],'YTickLabel',[],...
-        'Position',[.05 .05 .9 .9],'Box','on');
+    'Position',[.05 .05 .9 .9],'Box','on');
+colormap(myhandles.VideoAxes,'gray');
 
 
 % Interactive Control
+set(cb_timing,'Callback',{@cb_timing_Callback,myhandles.VideoFigure});
 set(myhandles.MainFigure,'KeyPressFcn',{@mainFigure_keypressFcn,myhandles});
 set(myhandles.MainFigure,'WindowScrollWheelFcn',{@mainFigure_windowscrollwheelFcn,myhandles});
 set(myhandles.RightAxes,'ButtonDownFcn',{@rightPanel_clickFcn,myhandles});
@@ -633,7 +643,7 @@ set(myhandles.FileMenu_Import,'Callback',{@menuFiles_Callback,myhandles,1});
 set(myhandles.ImportMenu_Doppler,'Callback','import_DopplerFilm(FILES(CUR_FILE),myhandles,1);');
 set(myhandles.ImportMenu_ReferenceTime,'Callback','import_reference_time(FILES(CUR_FILE),myhandles);');
 set(myhandles.ImportMenu_TimeTags,'Callback','import_time_tags(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
-set(myhandles.ImportMenu_Video,'Callback','import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),myhandles);');
+set(myhandles.ImportMenu_Video,'Callback','import_crop_video(FILES(CUR_FILE),myhandles,1);');
 set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 % set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),myhandles);');
 % set(myhandles.ImportMenu_Regions,'Callback','import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,myhandles);');
@@ -641,6 +651,7 @@ set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_
 
 % set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
 set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(FILES(CUR_FILE),myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:),1);actualize_plot(myhandles);');
+set(myhandles.ImportMenu_ReloadVideo,'Callback','load_video(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
 
