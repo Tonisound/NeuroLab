@@ -158,7 +158,8 @@ uimenu(m2,'Label','Delete All Traces','Tag','EditMenu_Delete_All','Separator','o
 uimenu(m2,'Label','Delete Pixels and Boxes','Tag','EditMenu_Delete_Pixels');
 uimenu(m2,'Label','Delete Region Traces','Tag','EditMenu_Delete_Regions');
 uimenu(m2,'Label','Delete Region Groups','Tag','EditMenu_Delete_RegionGroups');
-uimenu(m2,'Label','Delete Cereplex Traces','Tag','EditMenu_Delete_Spiko');
+uimenu(m2,'Label','Delete Cereplex Traces','Tag','EditMenu_Delete_Cerep');
+uimenu(m2,'Label','Delete Sources LFP','Tag','EditMenu_Delete_SourcesLFP');
 uimenu(m2,'Label','Actualize Traces','Tag','ImportMenu_ActualizeTraces','Separator','on');
 
 % handles.DisplayMenu
@@ -338,10 +339,10 @@ pl = uicontrol(f,'Style','popup',...
     'Parent',botPanel);
 
 pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Convert Neuroshop Masks|';
-pl_str = strcat(pl_str,'Import Anatomical Regions|Generate Region Groups|Import LFP Traces|Import External Files');
+pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import External Files');
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Left-Right Runs');
-pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Export Image Patches|Export Anatomical Regions');
+pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Generate Region Groups|Export Image Patches|Export Anatomical Regions');
 pl.String = pl_str;
 
 % Process Button
@@ -666,7 +667,9 @@ set(myhandles.EditMenu_Delete_All,'Callback',{@menuEdit_DeleteAll_Callback,myhan
 set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,1});
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
 set(myhandles.EditMenu_Delete_RegionGroups,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
-set(myhandles.EditMenu_Delete_Spiko,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,4});
+set(myhandles.EditMenu_Delete_Cerep,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,4});
+set(myhandles.EditMenu_Delete_SourcesLFP,'Callback',{@menuEdit_Delete_SourcesLFP,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles});
+
 
 % handles.DisplayMenu
 set(myhandles.DisplayMenu_Video,'Callback',{@menuDisplay_Video_Callback,myhandles});

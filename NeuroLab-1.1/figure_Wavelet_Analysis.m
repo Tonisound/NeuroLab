@@ -120,18 +120,21 @@ ind_1_diff = contains(traces_name,'$');
 ind_1_source = ~ind_1_diff;
 ind_2_diff = contains(phases_name,'$');
 ind_2_source = ~ind_2_diff;
-% updating bands depending on 
-switch GImport.Channel_loading
-    case 'source'
-        ind_1 = ind_1_source;
-        ind_2 = ind_2_source;
-    case 'differential'
-        ind_1 = ind_1_diff;
-        ind_2 = ind_2_diff;
-    otherwise%case 'both'
-        ind_1 = logical(ind_1_source+ind_1_diff);
-        ind_2 = logical(ind_2_source+ind_2_diff);
-end
+% % updating bands depending on 
+% switch GImport.Channel_loading
+%     case 'source'
+%         ind_1 = ind_1_source;
+%         ind_2 = ind_2_source;
+%     case 'differential'
+%         ind_1 = ind_1_diff;
+%         ind_2 = ind_2_diff;
+%     otherwise%case 'both'
+%         ind_1 = logical(ind_1_source+ind_1_diff);
+%         ind_2 = logical(ind_2_source+ind_2_diff);
+% end
+ind_1 = logical(ind_1_source+ind_1_diff);
+ind_2 = logical(ind_2_source+ind_2_diff);
+
 traces_name = traces_name(ind_1);
 phases_name = phases_name(ind_2);
 traces = traces(ind_1);
@@ -656,7 +659,8 @@ end
 function initialize_botPanel(handles)
 
 fmin = 1;
-fmax = 150;
+% fmax = 150;
+fmax = 20;
 bands = str2double(handles.Edit4.String);
 bot_axes = findobj(handles.BotPanel,'Type','axes');
 l = length(bot_axes);
@@ -1448,18 +1452,30 @@ Time_indices = [xlim1,xlim2];
 str = datestr((Time_indices(2)-Time_indices(1))/(24*3600),'HH:MM:SS.FFF');
 Tag_Selection = {'CURRENT',handles.Edit1.String,str};
 
-% Test if axis limits matches Whole
-if round(Time_indices(1)-time_ref.Y(1))==0 && round(Time_indices(2)-time_ref.Y(end))==0
-    tag = 'WHOLE';
-    Tag_Selection ={tag,handles.Edit1.String,str};
-% Test if axis limits matches tag
-elseif ~isempty(handles.TagButton.UserData) 
-    tts1 = char(handles.TagButton.UserData.TimeTags_strings(1));
-    tts2 = char(handles.TagButton.UserData.TimeTags_strings(2));
-    if strcmp(handles.Edit1.String(1:9),tts1(1:9)) && strcmp(handles.Edit2.String(1:9),tts2(1:9))
-        tag = char(handles.TagButton.UserData.Name);
+% % Test if axis limits matches Whole
+% if round(Time_indices(1)-time_ref.Y(1))==0 && round(Time_indices(2)-time_ref.Y(end))==0
+%     tag = 'WHOLE';
+%     Tag_Selection ={tag,handles.Edit1.String,str};
+% % Test if axis limits matches tag
+% elseif ~isempty(handles.TagButton.UserData) 
+%     tts1 = char(handles.TagButton.UserData.TimeTags_strings(1));
+%     tts2 = char(handles.TagButton.UserData.TimeTags_strings(2));
+%     if strcmp(handles.Edit1.String(1:9),tts1(1:9)) && strcmp(handles.Edit2.String(1:9),tts2(1:9))
+%         tag = char(handles.TagButton.UserData.Name);
+%         Tag_Selection ={tag,handles.Edit1.String,str};
+%     end
+% end
+
+% Loading Time Tags
+if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file'))
+    data_tt = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'));
+    tts1 = data_tt.TimeTags_strings(:,1);
+    tts2 = data_tt.TimeTags_strings(:,2);    
+    ind_tts =  find(strcmp(handles.Edit1.String,tts1).*strcmp(handles.Edit2.String,tts2)==1);
+    if ~isempty(ind_tts)
+        tag = char(data_tt.TimeTags(ind_tts(1)).Tag);
         Tag_Selection ={tag,handles.Edit1.String,str};
-    end
+    end   
 end
 
 % Saving structures

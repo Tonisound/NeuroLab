@@ -131,7 +131,7 @@ sP = uipanel('Units','normalized',...
     'Parent',f2);
 
 
-% Files Table  
+% Files Table
 D = cellstr(myhandles.FileSelectPopup.String);
 ft = uitable('Units','normalized',...
     'ColumnName','',...
@@ -144,7 +144,7 @@ ft = uitable('Units','normalized',...
     'Tag','File_table',...
     'RowStriping','on',...
     'Parent',fP);
-%ft.CellSelectionCallback = {@filetable_uitable_select};    
+%ft.CellSelectionCallback = {@filetable_uitable_select};
 % Adjust Columns
 ft.Units = 'pixels';
 %ft.ColumnWidth ={.4*(ft.Position(3)-w_margin) .6*(ft.Position(3)-w_margin)};
@@ -154,8 +154,12 @@ ft.UserData.Selection = [];
 
 % Process Table
 ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
-D = [{'Clear Sources_LFP'};{'Delete Region Traces'};cellstr(myhandles.ProcessListPopup.String);cellstr(myhandles.FigureListPopup.String(ind_1,:));...
-    {'Import Reference Time'};{'Import Time Tags'};{'Import - Crop Video'};{'Trace Edition'};{'Time Tag Edition'};{'Time Group Edition'};{'Edit LFP Configuration'}];
+% ind_1 = ~(contains(strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
+D = [{'Delete Sources_LFP'};{'Delete Region Traces'};...
+    {'Import Doppler film'};{'Import Reference Time'};{'Import Time Tags'};{'Import - Crop Video'};{'Import LFP Configuration'};...
+    cellstr(myhandles.ProcessListPopup.String);...
+    cellstr(myhandles.FigureListPopup.String(ind_1,:));...
+    {'Edit Traces'};{'Edit Time Tags'};{'Edit Time Groups'};{'Edit LFP Configuration'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
     'ColumnFormat',{'char'},...
@@ -330,7 +334,7 @@ str_spiko = [];
 for i =1:length(ft.UserData.Selection)%size(FILES,2)
     ii = ft.UserData.Selection(i);
     switch str
-            
+        
         case 'Graphic_objects.mat'
             if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_light.mat'),'file')
                 data = load(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_light.mat'),'traces');
@@ -353,8 +357,8 @@ for i =1:length(ft.UserData.Selection)%size(FILES,2)
                 ind_spiko = strcmp(data.traces(:,2),'Trace_Cerep');
                 str_regions = [str_regions;data.traces(ind_regions,1)];
                 str_spiko = [str_spiko;data.traces(ind_spiko,1)];
-            end           
-    end  
+            end
+    end
 end
 
 str_regions_unique = unique(str_regions);
@@ -400,14 +404,14 @@ drawnow;
 
 % Update Preferences.mat
 load('Preferences.mat','GTraces','GImport');
-        
+
 % Flag if gload changed
 if ~strcmp(strtrim(handles.Popup1.String(handles.Popup1.Value,:)),GTraces.GraphicLoadFormat)
     flag_gload = true;
 else
     flag_gload = false;
 end
-% Update gload and gsave 
+% Update gload and gsave
 GTraces.GraphicLoadFormat = strtrim(handles.Popup1.String(handles.Popup1.Value,:));
 GTraces.GraphicLoadFormat_index = handles.Popup1.Value;
 GTraces.GraphicSaveFormat = strtrim(handles.Popup2.String(handles.Popup2.Value,:));
@@ -478,7 +482,7 @@ for i = 1:length(ind_files)
     myhandles.FileSelectPopup.Value=ii;
     fileSelectionPopup_Callback(myhandles.FileSelectPopup,[],myhandles);
     load(fullfile(DIR_SAVE,FILES(ii).nlab,'Time_Reference.mat'),'n_burst');
-
+    
     % Looping on processes
     for j=1:length(ind_processes)
         jj = ind_processes(j);
@@ -486,169 +490,180 @@ for i = 1:length(ind_files)
         c1 = now;
         
         %try
-            switch process_name
-                case 'Clear Sources_LFP'
-                    % Housecleaning: emptying Sources_LFP/ before saving
-                    load('Preferences.mat','GTraces');
-                    save_fmt = GTraces.GraphicSaveFormat;
-                    success=false;
-                    if strcmp(save_fmt,'Graphic_objects_full.mat')
-                        disp('============== Housecleaning ==================');
-                        if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'dir')
-                            delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
-                            rmdir(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'s');
-                            success=true;
-                        end
-                    end
-                    
-                case 'Delete Region Traces'
-                    delete(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+        switch process_name
+            case 'Delete Sources_LFP'
+                % Housecleaning: emptying Sources_LFP/ before saving
+                %                 load('Preferences.mat','GTraces');
+                %                 save_fmt = GTraces.GraphicSaveFormat;
+                %                 success=false;
+                %                 if strcmp(save_fmt,'Graphic_objects_full.mat')
+                %                     disp('============== Housecleaning ==================');
+                %                     if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'dir')
+                %                         delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
+                %                         rmdir(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'s');
+                %                         success=true;
+                %                     end
+                %                 end
+                disp('============== Housecleaning ==================');
+                if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'dir')
+                    delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
+                    rmdir(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'s');
                     success=true;
-                    
-                case 'Compute Normalized Movie'
-                    success = compute_normalizedmovie(FILES(ii),myhandles);
-                        
-                case 'Edit Time Groups'
-                    success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
-                        
-                case 'Import Anatomical Regions'
-                    success = import_regions(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
-                    
-                case 'Generate Region Groups'
-                    success = generate_region_groups(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
-                    
-                case 'Import Reference Time'
-                    success = import_reference_time(FILES(ii),myhandles);
+                end
                 
-                case 'Import Time Tags'
-                    success = import_time_tags(FILES(ii).fullpath,fullfile(DIR_SAVE,FILES(ii).nlab));
-                    
-                case 'Import - Crop Video'
-                    success = import_crop_video(FILES(ii),myhandles,1);
-                    
-                case 'Import LFP Traces'
-                    success = import_lfptraces(FILES(CUR_FILE),myhandles,0);
-                    
-                case'Import External Files'
-                    success = import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
-                    
-                case 'Detect Vascular Surges'
-                    success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-                    
-                case 'Detect Left-Right Runs'
-                    success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-                       
-                case 'Divide LFP Frequency Bands'
-                    success = divide_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-
-                case 'Convert Neuroshop Masks'
-                    success = convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
-                    
-                case 'Generate Time Indexes'
-                    success = generate_time_indexes(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-                    
-                case 'Generate Time Groups'
-                    success = generate_time_groups(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-                    
-                case 'Filter LFP channels - Extract Power Envelope'
-                    % in this case 1 select band manually, 
-                    % else 0 for main channel if specified else all
-                    success = filter_lfp_extractenvelope(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-                    
-                case 'Filter ACC/GYR/EMG channels - Extract Power Envelope'
-                    success = filter_accgyremg_extractenvelope(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-                                    
-                case 'Export Anatomical Regions'
-                    success = export_regions(myhandles,FILES(ii).recording,0);
-                    
-                case 'Export Image Patches'
-                    success = export_image_patches(myhandles,fullfile(DIR_SAVE,FILES(ii).nlab),0);
+            case 'Delete Region Traces'
+                delete(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+                success=true;
+                
+            case 'Import Doppler film'
+                Doppler_film = import_DopplerFilm(FILES(ii),myhandles,1);
+                if isempty(Doppler_film)
+                    success = false;
+                else
+                    success = true;
+                end
+                
+            case 'Import Reference Time'
+                success = import_reference_time(FILES(ii),myhandles);
+                
+            case 'Import Time Tags'
+                success = import_time_tags(FILES(ii).fullpath,fullfile(DIR_SAVE,FILES(ii).nlab));
+                
+            case 'Import - Crop Video'
+                success = import_crop_video(FILES(ii),myhandles,1);
+                
+            case 'Import LFP Configuration'
+                success = import_lfpconfig(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
+                
+            case 'Compute Normalized Movie'
+                success = compute_normalizedmovie(FILES(ii),myhandles);
+                
+            case 'Edit Anatomical Regions - Register Atlas'
+                success = menuEdit_AnatRegions_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
+                
+            case 'Convert Neuroshop Masks'
+                success = convert_neuroshop_masks(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
+                
+            case 'Import Anatomical Regions'
+                success = import_regions(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
+                
+            case 'Import LFP Traces'
+                success = import_lfptraces(FILES(CUR_FILE),myhandles,0);
+                
+            case'Import External Files'
+                success = import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
+                
+            case 'Filter LFP channels - Extract Power Envelope'
+                % in this case 1 select band manually,
+                % else 0 for main channel if specified else all
+                success = filter_lfp_extractenvelope(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+            case 'Filter ACC/GYR/EMG channels - Extract Power Envelope'
+                success = filter_accgyremg_extractenvelope(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+            case 'Divide LFP Frequency Bands'
+                success = divide_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+            case 'Detect Vascular Surges'
+                success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+            case 'Detect Left-Right Runs'
+                success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+            case 'Generate Time Indexes'
+                success = generate_time_indexes(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+            case 'Generate Time Groups'
+                success = generate_time_groups(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+            case 'Generate Region Groups'
+                success = generate_region_groups(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
+                
+            case 'Export Anatomical Regions'
+                success = export_regions(myhandles,FILES(ii).recording,0);
+                
+            case 'Export Image Patches'
+                success = export_image_patches(myhandles,fullfile(DIR_SAVE,FILES(ii).nlab),0);
+                
+            case '(Figure) Global Episode Display'
+                f2 = figure_GlobalDisplay(myhandles,0,str_tag);
+                
+            case '(Figure) Correlation Analysis'
+                f2 = figure_Correlation_Analysis(myhandles,0,str_group,str_regions,str_traces);
+                
+            case '(Figure) LFP Wavelet Analysis'
+                f2 = figure_Wavelet_Analysis(myhandles,0,str_tag);
+                
+            case '(Figure) Sleep Scoring'
+                f2 = figure_SleepScoring(myhandles,fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,0);
+                
+            case '(Figure) fUS Episode Statistics'
+                f2 = figure_fUS_EpisodeStatistics(myhandles,0,str_group);
+                
+            case '(Figure) Vascular Potentiation'
+                f2 = figure_VascularPotentiation(myhandles,0,str_group);
+                
+            case '(Figure) Peak Detection'
+                f2 = figure_PeakDetection(myhandles,0,str_tag);
+                
+            case '(Figure) Peri-Event Time Histogram'
+                f2 = figure_PeriEventHistogramm(myhandles,0,str_group,str_regions,str_traces);
+                
+            case '(Figure) Cross-Correlation LFP-fUS'
+                f2 = figure_CrossCorrelation(myhandles,0,str_tag);
+                
+            case 'Edit Traces'
+                success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);
+                
+            case 'Actualize Traces'
+                success = actualize_traces(myhandles);
+                
+            case 'Edit Time Tags'
+                success = menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
+                
+            case 'Edit Time Groups'
+                success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
+                
+            case 'Edit LFP Configuration'
+                success = menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
+            case 'Save UF Params'
+                success = saving_UFParams(fullfile(FILES(ii).fullpath,FILES(ii).dir_fus),fullfile(DIR_SAVE,FILES(ii).nlab));
+                
+            otherwise
+                c2 = now;
+                dur = datestr(c2-c1,'HH:MM:SS.FFF');
+                ot.Data = [ot.Data;{file_name process_name 'Unimplemented' 'Unimplemented' dur}];
+                continue;
+        end
         
-                case 'Edit Anatomical Regions - Register Atlas'
-                    success = menuEdit_AnatRegions_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
-                    
-                case 'Edit LFP Configuration'
-                    success = menuEdit_LFPConfig_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-                
-                case '(Figure) Global Episode Display'
-                    f2 = figure_GlobalDisplay(myhandles,0,str_tag);
-                     
-                case '(Figure) Correlation Analysis'
-                    f2 = figure_Correlation_Analysis(myhandles,0,str_group,str_regions,str_traces);
-                    
-                case '(Figure) LFP Wavelet Analysis'
-                    f2 = figure_Wavelet_Analysis(myhandles,0,str_tag);
-                    
-                case '(Figure) Sleep Scoring'
-                    f2 = figure_SleepScoring(myhandles,fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,0);                
-                
-                case '(Figure) fUS Episode Statistics'
-                    f2 = figure_fUS_EpisodeStatistics(myhandles,0,str_group);
-                
-                case '(Figure) Vascular Potentiation'
-                    f2 = figure_VascularPotentiation(myhandles,0,str_group);
-                    
-                case '(Figure) Peak Detection'
-                    f2 = figure_PeakDetection(myhandles,0,str_tag);
-                    
-                case '(Figure) Peri-Event Time Histogram'
-                    f2 = figure_PeriEventHistogramm(myhandles,0,str_group,str_regions,str_traces);
-                    
-                case '(Figure) Cross-Correlation LFP-fUS'
-                    f2 = figure_CrossCorrelation(myhandles,0,str_tag);
-                   
-                case 'Trace Edition'
-                    success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);
-                    
-                case 'Import LFP Configuration'
-                    success = import_lfpconfig(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
-                    
-                case 'Actualize Traces'
-                    success = actualize_traces(myhandles);
-                    
-                case 'Time Tag Edition'
-                    success = menuEdit_TimeTagEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
-                    
-                case 'Time Group Edition'
-                    success = menuEdit_TimeGroupEdition_Callback(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
-                    
-                case 'Save UF Params'
-                    success = saving_UFParams(fullfile(FILES(ii).fullpath,FILES(ii).dir_fus),fullfile(DIR_SAVE,FILES(ii).nlab));
-                                    
-                otherwise
-                    c2 = now;
-                    dur = datestr(c2-c1,'HH:MM:SS.FFF');
-                    ot.Data = [ot.Data;{file_name process_name 'Unimplemented' 'Unimplemented' dur}];
-                    continue;
-            end
-            
-            % Closing figure if exists
-            if exist('f2','var')
-                success = f2.UserData.success;
-                close(f2);
-                waitfor(f2);
-            end
-            % Update output table
-            if success
-                c2 = now;
-                dur = datestr(c2-c1,'HH:MM:SS.FFF');
-                ot.Data = [ot.Data;{file_name process_name 'Success' '' dur}];
-            else
-                c2 = now;
-                dur = datestr(c2-c1,'HH:MM:SS.FFF');
-                ot.Data = [ot.Data;{file_name process_name '' 'Failure' dur}];
-            end
-%         catch
-%             if exist('f2','var')
-%                 close(f2);
-%             end
-%             c2 = now;
-%             dur = datestr(c2-c1,'HH:MM:SS.FFF');
-%             ot.Data = [ot.Data;{file_name process_name '' 'Catch' dur}];
-%         end
+        % Closing figure if exists
+        if exist('f2','var')
+            success = f2.UserData.success;
+            close(f2);
+            waitfor(f2);
+        end
+        % Update output table
+        if success
+            c2 = now;
+            dur = datestr(c2-c1,'HH:MM:SS.FFF');
+            ot.Data = [ot.Data;{file_name process_name 'Success' '' dur}];
+        else
+            c2 = now;
+            dur = datestr(c2-c1,'HH:MM:SS.FFF');
+            ot.Data = [ot.Data;{file_name process_name '' 'Failure' dur}];
+        end
+        %         catch
+        %             if exist('f2','var')
+        %                 close(f2);
+        %             end
+        %             c2 = now;
+        %             dur = datestr(c2-c1,'HH:MM:SS.FFF');
+        %             ot.Data = [ot.Data;{file_name process_name '' 'Catch' dur}];
+        %         end
     end
     
-    time_e = datestr(now,'mmmm dd, yyyy HH:MM:SS.FFF'); 
+    time_e = datestr(now,'mmmm dd, yyyy HH:MM:SS.FFF');
     fprintf('File %s ended at %s \n',file_name,time_e);
     ot.Data = [ot.Data;{sprintf('=== Start : %s - End : %s ===',time_s,time_e) '' '' '' ''}];
 end

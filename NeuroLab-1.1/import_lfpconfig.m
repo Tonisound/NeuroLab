@@ -29,6 +29,9 @@ channel_type = [];
 channel_list = [];
 channel_id = [];
 ind_channel = [];
+mainlfp = [];
+mainacc = [];
+mainemg = [];
 % takes first line as header
 fgetl(fileID);
 while ~feof(fileID)
@@ -38,6 +41,19 @@ while ~feof(fileID)
     c2 = strtrim(cline(2));
     c2 = strrep(c2,'_','-');
     c3 = strtrim(cline(3));
+    
+    % finding main channel
+    if contains(char(c1),'*')
+        c1 = strrep(char(c1),'*','');
+        switch char(c3)
+            case 'LFP'
+                mainlfp = sprintf('%03d',str2double(c1));
+            case 'ACC'
+                mainacc =  sprintf('%03d',str2double(c1));
+            case 'EMG'
+                mainemg = sprintf('%03d',str2double(c1));
+        end
+    end
     ind_channel = [ind_channel;eval(char(c1))];
     channel_id = [channel_id;c2];
     channel_type = [channel_type;c3];
@@ -60,6 +76,16 @@ fprintf('File Config.mat appended [%s].\n',folder_name);
 save(fullfile(folder_name,'Nconfig.mat'),...
     'ind_channel','channel_id','channel_list','channel_type');
 fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
+
+% Saving LFP EMG main channel
+data_config = load(fullfile(folder_name,'Config.mat'));
+File = data_config.File;
+File.mainlfp = mainlfp;
+File.mainemg = mainemg;
+File.mainacc = mainacc;
+FILES(CUR_FILE)=File;
+save(fullfile(folder_name,'Config.mat'),'File','-append');
+fprintf('Config.mat file updated [%s].\n',fullfile(folder_name,'Config.mat'));
 
 success = true;
 

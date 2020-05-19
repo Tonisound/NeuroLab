@@ -15,6 +15,7 @@ success = false;
 global SEED DIR_SAVE ;
 video_file = fullfile(SEED,F.parent,F.session,F.recording,F.video);
 output_file = fullfile(DIR_SAVE,F.nlab,'Video.mat');
+crop_file = fullfile(DIR_SAVE,F.nlab,'CroppingInfo.mat');
 
 % Loading Time_Reference.mat
 if exist(fullfile(DIR_SAVE,F.nlab,'Time_Reference.mat'),'file')
@@ -40,7 +41,7 @@ else
     data_video = [];
 end
 
-
+% Loading Video file
 if ~exist(video_file,'file')
     warning('Video File not found [%s].',video_file);
 else
@@ -65,8 +66,46 @@ else
             all_frames = cat(3,all_frames,vidFrame);
         end
     end
-    fprintf(' done.\n');
+    fprintf(' done.\n');   
+end
+
+
+% Direct Processing if CroppingInfo.mat is found
+if exist(crop_file,'file')
+    fprintf('Cropping Information Loaded [%s].\n',crop_file);
+    data_crop  = load(crop_file);
+    t_corrected = data_crop.t_video;
+    %t_ref = data_crop.t_interp;
+    %index_frames = data_crop.index_frames;
+    %delay_lfp_video = data_crop.delay_lfp_video;
+    x_crop = data_crop.x_crop;
+    y_crop = data_crop.y_crop;
     
+    % reading frames
+    all_frames = [];
+    % fprintf('Extracting cropped video frames [%s] ...',v.Name);
+    h = waitbar(0,'Extracting cropped frames: 0.0 % completed [].');
+    for i = 1:length(t_corrected)
+        v.CurrentTime = t_corrected(i);
+        vidFrame = readFrame(v);
+        if strcmp(v.VideoFormat,'RGB24')
+            vidFrame = rgb2gray(vidFrame);
+            vidFrame = vidFrame(x_crop(1):x_crop(2),y_crop(1):y_crop(2));
+            all_frames = cat(3,all_frames,vidFrame);
+        end
+        waitbar(i/length(t_corrected),h,sprintf('Extracting cropped frames: %.1f %% completed [Frame %d/%d].',100*i/length(t_corrected),i,length(t_corrected)));
+    end
+    close(h);
+    % fprintf(' done.\n');
+    
+    % Saving file
+    % save(output_file,'all_frames','index_frames','t_ref','t_video','delay_lfp_video','x_crop','y_crop','-v7.3');
+    fprintf('Cropping Information Saved and Renamed [%s].\n==> [%s]...',crop_file,output_file);
+    save(crop_file,'all_frames','-append');
+    movefile(crop_file,output_file)
+    fprintf(' done.\n');
+    success = true;
+    return;
 end
 
 v_ratio = v.Height/v.Width;
