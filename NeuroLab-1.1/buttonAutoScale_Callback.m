@@ -10,9 +10,16 @@ global IM;
 all_lines = findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-and','Visible','on');
 all_M = [];
 for i =1:length(all_lines)
-    all_M = [all_M;[min(all_lines(i).YData,[],'omitnan') max(all_lines(i).YData,[],'omitnan')]];
+    index_x = find((all_lines(i).XData>handles.RightAxes.XLim(1)).*(all_lines(i).XData<handles.RightAxes.XLim(2))==1);
+    all_M = [all_M;[min(all_lines(i).YData(index_x),[],'omitnan') max(all_lines(i).YData(index_x),[],'omitnan')]];
 end
-handles.RightAxes.YLim = [min(all_M(1,:),[],'omitnan') max(all_M(2,:),[],'omitnan')];
+
+% update
+if size(all_M,1)==1
+    handles.RightAxes.YLim = all_M;
+else
+    handles.RightAxes.YLim = [min(all_M(:,1),[],'omitnan') max(all_M(:,2),[],'omitnan')];
+end
 
 handles.CenterAxes.YLim  = [.5 size(IM,1)+.5];
 handles.CenterAxes.XLim  = [.5 size(IM,2)+.5];

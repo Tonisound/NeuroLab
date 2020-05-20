@@ -120,20 +120,19 @@ ind_1_diff = contains(traces_name,'$');
 ind_1_source = ~ind_1_diff;
 ind_2_diff = contains(phases_name,'$');
 ind_2_source = ~ind_2_diff;
-% % updating bands depending on 
-% switch GImport.Channel_loading
-%     case 'source'
-%         ind_1 = ind_1_source;
-%         ind_2 = ind_2_source;
-%     case 'differential'
-%         ind_1 = ind_1_diff;
-%         ind_2 = ind_2_diff;
-%     otherwise%case 'both'
-%         ind_1 = logical(ind_1_source+ind_1_diff);
-%         ind_2 = logical(ind_2_source+ind_2_diff);
-% end
-ind_1 = logical(ind_1_source+ind_1_diff);
-ind_2 = logical(ind_2_source+ind_2_diff);
+% updating bands depending on 
+switch GImport.Channel_loading
+    case 'source'
+        ind_1 = ind_1_source;
+        ind_2 = ind_2_source;
+    case 'differential'
+        ind_1 = ind_1_diff;
+        ind_2 = ind_2_diff;
+    otherwise%case 'both'
+        ind_1 = logical(ind_1_source+ind_1_diff);
+        ind_2 = logical(ind_2_source+ind_2_diff);
+end
+
 
 traces_name = traces_name(ind_1);
 phases_name = phases_name(ind_2);

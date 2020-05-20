@@ -47,14 +47,16 @@ while ~feof(fileID)
         c1 = strrep(char(c1),'*','');
         switch char(c3)
             case 'LFP'
-                mainlfp = sprintf('%03d',str2double(c1));
+                %mainlfp = sprintf('%03d',str2double(c1));
+                mainlfp = char(c2);
             case 'ACC'
-                mainacc =  sprintf('%03d',str2double(c1));
+                mainacc =  char(c2);
             case 'EMG'
-                mainemg = sprintf('%03d',str2double(c1));
+                mainemg = char(c2);
         end
     end
-    ind_channel = [ind_channel;eval(char(c1))];
+    % ind_channel = [ind_channel;eval(char(c1))];
+    ind_channel = [ind_channel;str2double(char(c1))];
     channel_id = [channel_id;c2];
     channel_type = [channel_type;c3];
     channel_list = [channel_list;{sprintf('%s/%s',char(c3),char(c2))}];

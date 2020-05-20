@@ -1,4 +1,4 @@
-function menuEdit_Delete_SourcesLFP(~,~,foldername,handles)
+function menuEdit_Delete_SourcesLFP(foldername,handles)
 
 if exist(fullfile(foldername,'Sources_LFP'),'dir')
     delete(findobj(handles.RightAxes,'Tag','Trace_Cerep'));          

@@ -49,11 +49,7 @@ f2 = dialog('Units','characters',...
 % LFP Main channel
 d_lfp = dir(fullfile(folder_name,'Sources_LFP','LFP_*.mat'));
 lfp_str = regexprep({d_lfp(:).name}','.mat','');
-% if isempty(d_lfp)
-%     lfp_str = channel_list;
-% else
-%     lfp_str = regexprep({d_lfp(:).name}','.mat','');
-% end
+lfp_str = regexprep(lfp_str,'LFP_','');
 lfp_str = [{''};lfp_str];
 uicontrol('Style','text',...
     'Units','normalized',...
@@ -66,7 +62,7 @@ pu_lfp = uicontrol('Style','popupmenu',...
     'String',lfp_str,...
     'Parent',f2);
 %picking channel
-ind_mainlfp = find(strcmp(lfp_str,strcat('LFP_',data_config.File.mainlfp))==1);
+ind_mainlfp = find(strcmp(lfp_str,data_config.File.mainlfp)==1);
 if ~isempty(ind_mainlfp)
     pu_lfp.Value = ind_mainlfp;
 end
@@ -74,11 +70,7 @@ end
 % EMG Main channel
 d_emg = dir(fullfile(folder_name,'Sources_LFP','EMG_*.mat'));
 emg_str = regexprep({d_emg(:).name}','.mat','');
-% if isempty(d_emg)
-%     emg_str = channel_list;
-% else
-%     emg_str = regexprep({d_emg(:).name}','.mat','');
-% end
+emg_str = regexprep(emg_str,'EMG_','');
 emg_str = [{''};emg_str];
 uicontrol('Style','text',...
     'Units','normalized',...
@@ -91,7 +83,7 @@ pu_emg = uicontrol('Style','popupmenu',...
     'String',emg_str,...
     'Parent',f2);
 %picking channel
-ind_mainemg = find(strcmp(emg_str,strcat('EMG_',data_config.File.mainemg))==1);
+ind_mainemg = find(strcmp(emg_str,data_config.File.mainemg)==1);
 if ~isempty(ind_mainemg)
     pu_emg.Value = ind_mainemg;
 end
@@ -99,11 +91,7 @@ end
 % ACC Main channel
 d_acc = dir(fullfile(folder_name,'Sources_LFP','ACC_*.mat'));
 acc_str = regexprep({d_acc(:).name}','.mat','');
-% if isempty(d_acc)
-%     acc_str = channel_list;
-% else
-%     acc_str = regexprep({d_acc(:).name}','.mat','');
-% end
+acc_str = regexprep(acc_str,'ACC_','');
 acc_str = [{''};acc_str];
 uicontrol('Style','text',...
     'Units','normalized',...
@@ -116,7 +104,7 @@ pu_acc = uicontrol('Style','popupmenu',...
     'String',acc_str,...
     'Parent',f2);
 %picking channel
-ind_mainacc = find(strcmp(acc_str,strcat('ACC_',data_config.File.mainacc))==1);
+ind_mainacc = find(strcmp(acc_str,data_config.File.mainacc)==1);
 if ~isempty(ind_mainacc)
     pu_acc.Value = ind_mainacc;
 end
@@ -215,9 +203,9 @@ t1.Data = D;
         end
         
         % Saving LFP EMG main channel
-        data_config.File.mainlfp = strrep(char(pu_lfp.String(pu_lfp.Value,:)),'LFP_','');
-        data_config.File.mainemg = strrep(char(pu_emg.String(pu_emg.Value,:)),'EMG_','');
-        data_config.File.mainacc = strrep(char(pu_acc.String(pu_acc.Value,:)),'ACC_','');
+        data_config.File.mainlfp = char(pu_lfp.String(pu_lfp.Value,:));
+        data_config.File.mainemg = char(pu_emg.String(pu_emg.Value,:));
+        data_config.File.mainacc = char(pu_acc.String(pu_acc.Value,:));
         File = data_config.File;
         FILES(CUR_FILE)=File;
         save(fullfile(folder_name,'Config.mat'),'File','-append');

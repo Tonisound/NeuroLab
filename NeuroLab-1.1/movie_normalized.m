@@ -6,9 +6,9 @@ function movie_normalized(handles)
 global SEED IM DIR_SAVE DIR_FIG DIR_STATS FILES CUR_FILE START_IM END_IM;
 
 % Input dialog Initialization
-prompt={'Delay to start (s)';'Window size (s)';'Video loading';'Save/Display mode (disp/frames/video)'};
+prompt={'Delay to start (s)';'Window size (s)';'Show video';'Save/Display mode (disp/frames/video)'};
 name = 'Select Movie Initialization Parameters';
-defaultans = {'0.0';'20.0';'false';'disp'};
+defaultans = {'0.0';'20.0';'true';'disp'};
 answer = inputdlg(prompt,name,[1 100],defaultans);
 if isempty(answer)
     return;
@@ -159,50 +159,55 @@ t = (b-floor(b))*24*3600;
 % Loading video
 if strcmp(flag_video,'true')
 
-    % Check if Video_Axes contains video reader
+%     % Check if Video_Axes contains video reader
+%     if isempty(handles.VideoAxes.UserData)
+%         % Check video loading option
+%         load('Preferences.mat','GImport');
+%         if strcmp(GImport.Video_loading,'skip')
+%             GImport.Video_loading = 'full';
+%         end
+%         save('Preferences.mat','GImport','-append');
+%         warning('Preferences.mat Video loading Option updated');
+%         
+%         % Import Video
+%         import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+%     end
+%     
+%     % Conversion to rgb movie
+%     if ~isempty(handles.VideoAxes.UserData.rgb_video) && handles.VideoAxes.UserData.start_im==START_IM && handles.VideoAxes.UserData.end_im==END_IM
+%         rgb_video = handles.VideoAxes.UserData.rgb_video;
+%     else
+%         fprintf('Converting video to rgb movie frames...');
+%         v = handles.VideoAxes.UserData.VideoReader;
+%         im = handles.VideoAxes.UserData.Image.CData;
+%         %rgb_video = [];
+%         rgb_video = zeros(size(im,1),size(im,2),size(im,3),END_IM-START_IM+1,'uint8');
+%         
+%         h = waitbar(0,'Loading video file. Please wait.');
+%         for i = 1:END_IM-START_IM+1
+%             v.CurrentTime = t(i+START_IM-1);
+%             vidFrame = readFrame(v);
+%             %rgb_video = cat(4,rgb_video,vidFrame);
+%             rgb_video(:,:,:,i) = vidFrame;
+%             x = i/(END_IM-START_IM+1);
+%             waitbar(x,h,sprintf('%.1f %% converted to RGB movie.',100*x))
+%         end
+%         close(h);
+%         fprintf(' done.\n');
+%         
+%         % Storing video
+%         handles.VideoAxes.UserData.rgb_video=rgb_video;
+%         handles.VideoAxes.UserData.start_im=START_IM;
+%         handles.VideoAxes.UserData.end_im=END_IM;
+%     end
     if isempty(handles.VideoAxes.UserData)
-        % Check video loading option
-        load('Preferences.mat','GImport');
-        if strcmp(GImport.Video_loading,'skip')
-            GImport.Video_loading = 'full';
-        end
-        save('Preferences.mat','GImport','-append');
-        warning('Preferences.mat Video loading Option updated');
-        
-        % Import Video
-        import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
-    end
-    
-    % Conversion to rgb movie
-    if ~isempty(handles.VideoAxes.UserData.rgb_video) && handles.VideoAxes.UserData.start_im==START_IM && handles.VideoAxes.UserData.end_im==END_IM
-        rgb_video = handles.VideoAxes.UserData.rgb_video;
+        bw_video = ones(1,1,END_IM-START_IM+1);
     else
-        fprintf('Converting video to rgb movie frames...');
-        v = handles.VideoAxes.UserData.VideoReader;
-        im = handles.VideoAxes.UserData.Image.CData;
-        %rgb_video = [];
-        rgb_video = zeros(size(im,1),size(im,2),size(im,3),END_IM-START_IM+1,'uint8');
-        
-        h = waitbar(0,'Loading video file. Please wait.');
-        for i = 1:END_IM-START_IM+1
-            v.CurrentTime = t(i+START_IM-1);
-            vidFrame = readFrame(v);
-            %rgb_video = cat(4,rgb_video,vidFrame);
-            rgb_video(:,:,:,i) = vidFrame;
-            x = i/(END_IM-START_IM+1);
-            waitbar(x,h,sprintf('%.1f %% converted to RGB movie.',100*x))
-        end
-        close(h);
-        fprintf(' done.\n');
-        
-        % Storing video
-        handles.VideoAxes.UserData.rgb_video=rgb_video;
-        handles.VideoAxes.UserData.start_im=START_IM;
-        handles.VideoAxes.UserData.end_im=END_IM;
+        bw_video = handles.VideoAxes.UserData.all_frames;
     end
     
 else
-    rgb_video = ones(1,1,3,END_IM-START_IM+1);
+    bw_video = ones(1,1,END_IM-START_IM+1);
 end
 
 % Saving Video frame
@@ -418,6 +423,7 @@ ax_im2 = axes('Parent',f,...
     'CLimMode','manual',...
     'CLim',handles.CenterAxes.CLim,...
     'TickLength',[0 0]);
+colormap(ax_im2,'gray');
 % First Image
 im = imagesc(IM(:,:,START_IM),'Parent',ax_im);
 set(ax_im,'XTickLabel','','XTick','','YTick','','YTickLabel','');
@@ -428,7 +434,9 @@ cbar = colorbar(ax_im,'Parent',f);
 % set(ax_im2,'XTickLabel','','XTick','','YTick','','YTickLabel','');
 % ax_im2.CLim = [-1,1];
 % colormap(ax_im2,'parula');
-image(rgb_video(:,:,:,1),'Parent',ax_im2);
+
+% image(rgb_video(:,:,:,1),'Parent',ax_im2);
+image(bw_video(:,:,1),'Parent',ax_im2);
 ax_im2.Visible = 'off';
 
 % adding Atlas
@@ -668,7 +676,8 @@ while i>=START_IM && i<=END_IM
         t2.String = sprintf('%d/%d',i,END_IM);
         %Update movie
         im.CData = IM(:,:,i);
-        image(rgb_video(:,:,:,i+1-START_IM),'Parent',ax_im2);
+        % image(rgb_video(:,:,:,i+1-START_IM),'Parent',ax_im2);
+        imagesc(bw_video(:,:,i+1-START_IM),'Parent',ax_im2);
         ax_im2.Visible = 'off';
         
         % Plotting traces

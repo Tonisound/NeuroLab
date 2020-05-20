@@ -165,7 +165,7 @@ GFilt.acc_smooth = .5;
 GFilt.gyr_inf = 1;
 GFilt.gyr_sup = 10;
 GFilt.gyr_smooth = .5;
-GFilt.emg_inf = 1;
+GFilt.emg_inf = 150;
 GFilt.emg_sup = 250;
 GFilt.emg_smooth = .5;
 

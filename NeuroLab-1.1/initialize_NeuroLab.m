@@ -668,7 +668,7 @@ set(myhandles.EditMenu_Delete_Pixels,'Callback',{@menuEdit_DeleteLines_Callback,
 set(myhandles.EditMenu_Delete_Regions,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,2});
 set(myhandles.EditMenu_Delete_RegionGroups,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,3});
 set(myhandles.EditMenu_Delete_Cerep,'Callback',{@menuEdit_DeleteLines_Callback,myhandles,4});
-set(myhandles.EditMenu_Delete_SourcesLFP,'Callback',{@menuEdit_Delete_SourcesLFP,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles});
+set(myhandles.EditMenu_Delete_SourcesLFP,'Callback','menuEdit_Delete_SourcesLFP(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 
 
 % handles.DisplayMenu
