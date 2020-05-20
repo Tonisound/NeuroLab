@@ -35,7 +35,7 @@ end
 % Checking Doppler
 if flag == 1 && exist(output_file,'file')
     % re-import
-    data_video = load(output_file,'delay_lfp_video','x_crop','y_crop'); 
+    data_video = load(output_file,'delay_lfp_video','x_crop','y_crop','video_quality'); 
     delay_lfp_video = data_video.delay_lfp_video;
 else
     data_video = [];
@@ -77,9 +77,25 @@ if exist(crop_file,'file')
     t_corrected = data_crop.t_video;
     %t_ref = data_crop.t_interp;
     %index_frames = data_crop.index_frames;
-    %delay_lfp_video = data_crop.delay_lfp_video;
+    
+    if isfield(data_crop,'video_quality')
+        video_quality = data_crop.video_quality;
+    else
+        video_quality = 'Medium';
+    end
+    
     x_crop = data_crop.x_crop;
     y_crop = data_crop.y_crop;
+    
+    % Getting video quality
+    switch video_quality
+        case 'High'
+            step_quality = 1;
+        case 'Medium'
+            step_quality = 2;
+        case 'Low'
+            step_quality = 3;
+    end
     
     % reading frames
     all_frames = [];
@@ -90,10 +106,10 @@ if exist(crop_file,'file')
         vidFrame = readFrame(v);
         if strcmp(v.VideoFormat,'RGB24')
             vidFrame = rgb2gray(vidFrame);
-            vidFrame = vidFrame(x_crop(1):x_crop(2),y_crop(1):y_crop(2));
+            vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
             all_frames = cat(3,all_frames,vidFrame);
         end
-        waitbar(i/length(t_corrected),h,sprintf('Extracting cropped frames: %.1f %% completed [Frame %d/%d].',100*i/length(t_corrected),i,length(t_corrected)));
+        waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]: %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)))
     end
     close(h);
     % fprintf(' done.\n');
@@ -141,6 +157,7 @@ ax2.YTickLabel=[];
 ax2.Tag = 'AxCrop';
 
 % RE-drawing patch
+video_quality = 'Medium';
 if ~isempty(data_video)
     x1 = data_video.x_crop(1);
     x2 = data_video.x_crop(2);
@@ -152,6 +169,10 @@ if ~isempty(data_video)
         'FaceAlpha',.1,...
         'LineWidth',1,...
         'Parent',ax);
+    
+    if isfield(data_video,'video_quality')
+        video_quality = data_video.video_quality;
+    end   
 end
 
 %buttons
@@ -196,7 +217,10 @@ text1 = uicontrol('Style','text',...
 s1 = sprintf('Output File: %s','video.mat');
 s2 = sprintf('Time Interval: %s - %s',datestr(datenum(t_interp(1)/(24*3600)),'HH:MM:SS.FFF'),datestr(datenum(t_interp(end)/(24*3600)),'HH:MM:SS.FFF'));
 s3 = sprintf('Total Frames: %d',length(t_interp));
-s7 = sprintf('Expected Size: %.1f Mb',(v.Width*v.Height*length(t_interp))/1e6);
+esize = (v.Width*v.Height*length(t_interp)/1e6);
+s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/9);
+
+
 t2 = cellstr([{s1};{s2};{s3};{s7}]);
 text2 = uicontrol('Style','text',... 
     'Units','normalized',...
@@ -216,6 +240,41 @@ e1 = uicontrol('Style','edit',...
     'Parent',f);
 e1.UserData.delay_lfp_video = delay_lfp_video;
 
+% Button Group
+bg = uibuttongroup('Visible','on',...
+    'Units','normalized',...
+    'Tag','ButtonGroup');
+% Create three radio buttons in the button group.
+bg1 = uicontrol(bg,'Style','radiobutton',...
+    'Units','normalized',...
+    'String','x1',...
+    'Position',[0 0 .33 1],...
+    'Tag','High',...
+    'TooltipString','High quality video',...
+    'HandleVisibility','off');
+bg2 = uicontrol(bg,'Style','radiobutton',...
+    'Units','normalized',...
+    'String','/4',...
+    'Position',[.335 0 .33 1],...
+    'TooltipString','Medium quality video',...
+    'Tag','Medium',...
+    'HandleVisibility','off');
+bg3 = uicontrol(bg,'Style','radiobutton',...
+    'Units','normalized',...
+    'String','/9',...
+    'TooltipString','Low quality video',...
+    'Tag','Low',...
+    'Position',[.67 0 .33 1],...
+    'HandleVisibility','off');
+switch video_quality
+    case 'High'
+        bg.SelectedObject = bg1;
+    case 'Medium'
+        bg.SelectedObject = bg2;
+    case 'Low'
+        bg.SelectedObject = bg3;
+end
+
 
 % removeButton.Position = [.05 .2 .2 .05];
 % updateButton.Position = [.05 .15 .2 .05];
@@ -224,10 +283,10 @@ e1.UserData.delay_lfp_video = delay_lfp_video;
 
 % t3.Position = [.05 .2 .2 .05];
 e1.Position = [.05 .21 .2 .04];
-
-cropButton.Position = [.05 .15 .2 .05];
-okButton.Position = [.05 .1 .2 .05];
-cancelButton.Position = [.05 .05 .2 .05];
+bg.Position = [.05 .17 .2 .04];
+cropButton.Position = [.05 .13 .2 .04];
+okButton.Position = [.05 .09 .2 .04];
+cancelButton.Position = [.05 .05 .2 .04];
 ax2.Position = [.75 .05 .2 .2];
 text1.Position = [.275 .15 .45 .095];
 text2.Position = [.275 .05 .45 .095];
@@ -241,6 +300,7 @@ else
 end
 set(e1,'Callback',{@e1_callback,handles});
 
+%set(bg,'SelectionChangedFcn',{@bg_Callback,handles})
 set(cropButton,'Callback',{@cropButton_callback,handles});
 set(okButton,'Callback',{@okButton_callback,handles});
 set(cancelButton,'Callback',{@cancelButton_callback,handles});
@@ -374,9 +434,11 @@ ax2.XLim = [.5 y2-y1+.5];
 v = f.UserData.v;
 t_interp = f.UserData.t_interp;
 if ~isempty(hObj)
-    s7 = sprintf('Expected Size: %.1f Mb',((x2-x1+1)*(y2-y1+1)*length(t_interp))/1e6);
+    esize = ((x2-x1+1)*(y2-y1+1)*length(t_interp))/1e6;
+    s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/9);
 else
-    s7 = sprintf('Expected Size: %.1f Mb',(v.Width*v.Height*length(t_interp))/1e6);
+    esize = (v.Width*v.Height*length(t_interp)/1e6);
+    s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/9);
 end
 t2.String{4}  =s7;
 
@@ -436,6 +498,17 @@ t_interp = f.UserData.t_interp;
 x_crop = f.UserData.x_crop;
 y_crop = f.UserData.y_crop;
 
+% Getting Video Quality
+video_quality = handles.ButtonGroup.SelectedObject.Tag;
+switch video_quality
+    case 'High'
+        step_quality = 1;
+    case 'Medium'
+        step_quality = 2;
+    case 'Low'
+        step_quality = 3;
+end
+
 % reading frames
 all_frames = [];
 % fprintf('Extracting cropped video frames [%s] ...',v.Name);
@@ -445,10 +518,10 @@ for i = 1:length(t_corrected)
     vidFrame = readFrame(v);
     if strcmp(v.VideoFormat,'RGB24')
         vidFrame = rgb2gray(vidFrame);
-        vidFrame = vidFrame(x_crop(1):x_crop(2),y_crop(1):y_crop(2));
+        vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
         all_frames = cat(3,all_frames,vidFrame);
     end
-    waitbar(i/length(t_corrected),h,sprintf('Extracting cropped frames: %.1f %% completed [Frame %d/%d].',100*i/length(t_corrected),i,length(t_corrected)));
+    waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]: %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)));
 end
 close(h);
 % fprintf(' done.\n');
@@ -459,7 +532,7 @@ fprintf('Saving Cropped video [%s] ...',output_file);
 t_video = t_corrected;
 t_ref = t_interp;
 index_frames = 1:length(t_interp);
-save(output_file,'all_frames','index_frames','t_ref','t_video','delay_lfp_video','x_crop','y_crop','-v7.3')
+save(output_file,'all_frames','index_frames','video_quality','t_ref','t_video','delay_lfp_video','x_crop','y_crop','-v7.3')
 fprintf(' done.\n');
 
 % Closing figure

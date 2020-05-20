@@ -12,14 +12,18 @@ defname = SEED_CONFIG;
 [file,path]  = uigetfile(filter,title,defname);
 
 if isempty(file) || sum(path==0)
-    choice = questdlg('Do you wish to discard current LFP configuration ?',...
-        'User Confirmation','OK','Cancel','Cancel');
-    if ~isempty(choice) && strcmp(choice,'OK')
-        FILES(CUR_FILE).ncf = [];
-        save('Files.mat','FILES','-append');
-        fprintf('Files.mat updated.\n');
+    if isempty(FILES(CUR_FILE).ncf)
+        return;
+    else
+        choice = questdlg('Do you wish to discard current LFP configuration ?',...
+            'User Confirmation','OK','Cancel','Cancel');
+        if ~isempty(choice) && strcmp(choice,'OK')
+            FILES(CUR_FILE).ncf = [];
+            save('Files.mat','FILES','-append');
+            fprintf('Files.mat updated.\n');
+        end
+        return;
     end
-    return;
 end
 
 % Open file
