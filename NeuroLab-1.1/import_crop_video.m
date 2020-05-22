@@ -52,13 +52,14 @@ else
     v = VideoReader(video_file);
     % Parameters
     t1 = max(t_ref(1),0);
-    t2 = min(t_ref(end),v.Duration);
+    t2 = min(t_ref(end),v.Duration-1);
     n_frames = 10;
     t_samp = rescale(1:n_frames,t1,t2);
     t_interp = t_ref;
     
     all_frames = [];
     for i = 1:length(t_samp)
+        %fprintf('tsamp = %.2f, i=%d, duration = %.2f \n',t_samp(i),i,v.Duration);
         v.CurrentTime = t_samp(i);
         vidFrame = readFrame(v);
         if strcmp(v.VideoFormat,'RGB24')
@@ -66,7 +67,7 @@ else
             all_frames = cat(3,all_frames,vidFrame);
         end
     end
-    fprintf(' done.\n');   
+    fprintf(' done.\n');
 end
 
 
@@ -103,13 +104,20 @@ if exist(crop_file,'file')
     h = waitbar(0,'Extracting cropped frames: 0.0 % completed [].');
     for i = 1:length(t_corrected)
         v.CurrentTime = t_corrected(i);
-        vidFrame = readFrame(v);
-        if strcmp(v.VideoFormat,'RGB24')
-            vidFrame = rgb2gray(vidFrame);
-            vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
-            all_frames = cat(3,all_frames,vidFrame);
+        try
+            % Pulling Video Frame
+            vidFrame = readFrame(v);
+            if strcmp(v.VideoFormat,'RGB24')
+                vidFrame = rgb2gray(vidFrame);
+                vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
+                all_frames = cat(3,all_frames,vidFrame);
+            end
+        catch
+            % Empty Image Padding
+            all_frames = cat(3,all_frames,NaN(size(vidFrame)));
+            warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration,F.video);
         end
-        waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]: %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)))
+        waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]\n %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)))
     end
     close(h);
     % fprintf(' done.\n');
@@ -515,13 +523,20 @@ all_frames = [];
 h = waitbar(0,'Extracting cropped frames: 0.0 % completed [].');
 for i = 1:length(t_corrected)
     v.CurrentTime = t_corrected(i);
-    vidFrame = readFrame(v);
-    if strcmp(v.VideoFormat,'RGB24')
-        vidFrame = rgb2gray(vidFrame);
-        vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
-        all_frames = cat(3,all_frames,vidFrame);
+    try
+        % Pulling Video Frame
+        vidFrame = readFrame(v);
+        if strcmp(v.VideoFormat,'RGB24')
+            vidFrame = rgb2gray(vidFrame);
+            vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
+            all_frames = cat(3,all_frames,vidFrame);
+        end
+    catch
+        % Empty Image Padding
+        all_frames = cat(3,all_frames,NaN(size(vidFrame)));
+        warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration,F.video);
     end
-    waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]: %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)));
+    waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]\n %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)));
 end
 close(h);
 % fprintf(' done.\n');
@@ -554,23 +569,6 @@ t_interp = f.UserData.t_interp;
 % Getting indexes
 x_crop = f.UserData.x_crop;
 y_crop = f.UserData.y_crop;
-
-% % reading frames
-% all_frames = [];
-% % fprintf('Extracting cropped video frames [%s] ...',v.Name);
-% h = waitbar(0,'Extracting cropped frames: 0.0 % completed [].');
-% for i = 1:length(t_corrected)
-%     v.CurrentTime = t_corrected(i);
-%     vidFrame = readFrame(v);
-%     if strcmp(v.VideoFormat,'RGB24')
-%         vidFrame = rgb2gray(vidFrame);
-%         vidFrame = vidFrame(x_crop(1):x_crop(2),y_crop(1):y_crop(2));
-%         all_frames = cat(3,all_frames,vidFrame);
-%     end
-%     waitbar(i/length(t_corrected),h,sprintf('Extracting cropped frames: %.1f %% completed [Frame %d/%d].',100*i/length(t_corrected),i,length(t_corrected)));
-% end
-% close(h);
-% % fprintf(' done.\n');
 
 % Saving file
 output_file = strrep(f.UserData.output_file,'Video.mat','CroppingInfo.mat');

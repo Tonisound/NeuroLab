@@ -72,12 +72,19 @@ else
     [trigger,reference,padding] = extract_trigger_nottl(data_acq,f_def);
 end
 
+% Trigger Offset (Default: 0)
+offset = 0;
+
+% LFP-VIDEO Delay (Default: 0)
+delay_lfp_video = 0;
 
 % Write trigger file
 file_txt = fullfile(folder_name,dir_fus,'trigger.txt');
-fid_txt = fopen(file_txt,'w');
+fid_txt = fopen(file_txt,'w');    
 fprintf(fid_txt,'%s',sprintf('<REF>\n%s</REF>\n',reference));
 fprintf(fid_txt,'%s',sprintf('<PAD>\n%s</PAD>\n',padding));
+fprintf(fid_txt,'%s',sprintf('<OFFSET>%.3f</OFFSET>\n',offset));
+fprintf(fid_txt,'%s',sprintf('<DELAY>%.3f</DELAY>\n',delay_lfp_video));
 fprintf(fid_txt,'%s',sprintf('<TRIG>\n'));
 %fprintf(fid_txt,'%s',sprintf('n=%d \n',length(trigger)));
 for k = 1:length(trigger)
@@ -161,7 +168,6 @@ if isfield(Info,'VideosFiles') && ~isempty(Info.VideosFiles)
 else
     fprintf('No video to export.\n');
 end
- 
 
 end
 
