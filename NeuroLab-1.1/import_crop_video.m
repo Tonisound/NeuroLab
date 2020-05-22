@@ -43,12 +43,12 @@ end
 
 % Loading Video file
 if ~exist(video_file,'file')
-    warning('Video File not found [%s].',video_file);
+    errordlg('Video File not found [%s].',video_file);
+    return;
 else
     % Getting video parameters
     d = dir(video_file);
     
-    fprintf('Opening Video - Extracting frames [%s] ...',F.video);
     v = VideoReader(video_file);
     % Parameters
     t1 = max(t_ref(1),0);
@@ -56,15 +56,20 @@ else
     n_frames = 10;
     t_samp = rescale(1:n_frames,t1,t2);
     t_interp = t_ref;
+    fprintf('Opening Video - Extracting %d frames [%s] ...',n_frames,F.video);
     
     all_frames = [];
     for i = 1:length(t_samp)
         %fprintf('tsamp = %.2f, i=%d, duration = %.2f \n',t_samp(i),i,v.Duration);
         v.CurrentTime = t_samp(i);
-        vidFrame = readFrame(v);
-        if strcmp(v.VideoFormat,'RGB24')
-            vidFrame = rgb2gray(vidFrame);
-            all_frames = cat(3,all_frames,vidFrame);
+        try
+            vidFrame = readFrame(v);
+            if strcmp(v.VideoFormat,'RGB24')
+                vidFrame = rgb2gray(vidFrame);
+                all_frames = cat(3,all_frames,vidFrame);
+            end
+        catch
+            warning('Frame Skipped: Time %.2f. File [%s]',t_samp(i),video_file);
         end
     end
     fprintf(' done.\n');
