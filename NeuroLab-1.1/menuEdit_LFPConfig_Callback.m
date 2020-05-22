@@ -15,12 +15,20 @@ data_config = load(fullfile(folder_name,'Config.mat'));
 % Loading Channel Config
 if exist(fullfile(folder_name,'Nconfig.mat'),'file')
     d_ncf = load(fullfile(folder_name,'Nconfig.mat'),...
-        'ind_channel','channel_id','channel_list','channel_type');
+        'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type');
     ind_channel = d_ncf.ind_channel(:);
+    ind_channel_diff = d_ncf.ind_channel_diff(:);
+    temp = [];
+    for k =1:length(ind_channel)
+        temp = [temp;{sprintf('%d-%d',ind_channel(k),ind_channel_diff(k))}];    
+    end
+    temp = strrep(temp,'-NaN','');
+    temp = strrep(temp,'NaN','');
     channel_id = d_ncf.channel_id(:);
     channel_type = d_ncf.channel_type(:);
     channel_list = d_ncf.channel_list(:);
-    D = [num2cell(ind_channel),channel_id,channel_type,channel_list];
+    % D = [num2cell(ind_channel),channel_id,channel_type,channel_list];
+    D = [temp,channel_id,channel_type,channel_list];
 else
     D=cell(39,3);
     for j=1:32
@@ -181,7 +189,21 @@ t1.Data = D;
 
     function okButton_callback(~,~)
         
-        ind_channel = cell2mat(t1.Data(:,1));
+        %ind_channel = cell2mat(t1.Data(:,1));
+        ind_channel_ = NaN(size(t1.Data(:,1)));
+        ind_channel_diff_ = NaN(size(t1.Data(:,1)));
+        for l=1:size(t1.Data(:,1),1)
+            if contains(t1.Data(l,1),'-')
+                temp2 = regexp(char(t1.Data(l,1)),'-','split');
+                ind_channel_(l) = str2double(char(temp2(1)));
+                ind_channel_diff_(l) = str2double(char(temp2(2)));
+            else
+                ind_channel_(l) = str2double(char(t1.Data(l,1)));
+            end
+        end
+        ind_channel = ind_channel_;
+        ind_channel_diff = ind_channel_diff_;
+        
         channel_id = t1.Data(:,2);
         channel_type = t1.Data(:,3);
         channel_list = cell(size(channel_id));
@@ -198,7 +220,7 @@ t1.Data = D;
             fprintf('Files.mat updated.\n');
         else
             save(fullfile(folder_name,'Nconfig.mat'),...
-                'ind_channel','channel_id','channel_list','channel_type','-append');
+                'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type','-append');
             fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
         end
         

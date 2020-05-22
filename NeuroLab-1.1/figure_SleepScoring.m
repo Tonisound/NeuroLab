@@ -911,7 +911,8 @@ handles.MainFigure.UserData.t_source = t_source;
 
 % Updating pu_ratio1
 d_envelope = dir(fullfile(path,strcat('Power-*.mat')));
-ind_keep = contains({d_envelope(:).name}',strrep(channel,'LFP',''));
+% ind_keep = contains({d_envelope(:).name}',strrep(channel,'LFP',''));
+ind_keep = contains({d_envelope(:).name}',strcat(strrep(channel,'LFP',''),'.mat'));
 d_envelope = d_envelope(ind_keep);
 pu_ratio1.UserData.d_envelope = d_envelope;
 pu_ratio2.UserData.d_envelope = d_envelope;
@@ -919,7 +920,8 @@ pu_ratio2.UserData.d_envelope = d_envelope;
 temp = {d_envelope.name}';
 temp = regexprep(temp,'Power-','');
 temp = regexprep(temp,'.mat','');
-temp = regexprep(temp,strrep(channel,'LFP',''),'');
+%temp = regexprep(temp,strrep(channel,'LFP',''),'');
+temp = strrep(temp,strrep(channel,'LFP',''),'');
 
 temp2 = [];
 for i =1:length(temp)

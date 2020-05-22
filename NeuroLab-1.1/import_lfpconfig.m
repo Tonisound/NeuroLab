@@ -33,6 +33,7 @@ channel_type = [];
 channel_list = [];
 channel_id = [];
 ind_channel = [];
+ind_channel_diff = [];
 mainlfp = [];
 mainacc = [];
 mainemg = [];
@@ -59,8 +60,20 @@ while ~feof(fileID)
                 mainemg = char(c2);
         end
     end
-    % ind_channel = [ind_channel;eval(char(c1))];
-    ind_channel = [ind_channel;str2double(char(c1))];
+    
+    % finding differential channel
+    if contains(char(c1),'-')
+        temp = regexp(char(c1),'-','split');
+        c1a = temp(1);
+        c1b = temp(2);
+    else
+        c1a = char(c1);
+        c1b = '';
+    end
+    
+    % ind_channel = [ind_channel;str2double(char(c1))];
+    ind_channel = [ind_channel;str2double(char(c1a))];
+    ind_channel_diff = [ind_channel_diff;str2double(char(c1b))];
     channel_id = [channel_id;c2];
     channel_type = [channel_type;c3];
     channel_list = [channel_list;{sprintf('%s/%s',char(c3),char(c2))}];
@@ -80,7 +93,7 @@ fprintf('File Config.mat appended [%s].\n',folder_name);
 
 % Save Nconfig.mat
 save(fullfile(folder_name,'Nconfig.mat'),...
-    'ind_channel','channel_id','channel_list','channel_type');
+    'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type');
 fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
 
 % Saving LFP EMG main channel

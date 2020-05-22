@@ -105,8 +105,9 @@ end
 if exist(fullfile(DIR_SAVE,F.nlab,'Nconfig.mat'),'file')
     % load from ncf file
     d_ncf = load(fullfile(DIR_SAVE,F.nlab,'Nconfig.mat'),...
-        'ind_channel','channel_id','channel_list','channel_type');
+        'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type');
     ind_channel = d_ncf.ind_channel;
+    ind_channel_diff = d_ncf.ind_channel_diff;
     channel_id = d_ncf.channel_id;
     channel_type = d_ncf.channel_type;
     channel_list = d_ncf.channel_list;
@@ -131,11 +132,34 @@ else
     channel_id = channel_id(ind_channel);
     channel_list = channel_list(ind_channel);
     channel_type = channel_type(ind_channel);
+    ind_channel_diff = NaN(size(ind_channel));
     save(fullfile(DIR_SAVE,F.nlab,'Nconfig.mat'),...
-        'ind_channel','channel_id','channel_list','channel_type','-v7.3');
+        'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type','-v7.3');
     %F.ncf = strcat(F.recording,'.mat');
 end
-Data = data_ns.Data(ind_channel,:);
+
+% Loading Data
+% Data = data_ns.Data(ind_channel,:);
+RawData = data_ns.Data;
+Data = NaN(length(ind_channel),size(RawData,2));
+for i =1:length(ind_channel)
+    if isnan(ind_channel_diff(i))
+        if isnan(ind_channel(i))
+            warning('Invalid index channels importing trace [%s].',char(channel_list(i)));
+            Data(i,:) = NaN(1,size(RawData,2));
+        else
+            Data(i,:) = RawData(ind_channel(i),:);
+        end
+        
+    else
+        if isnan(ind_channel(i))
+            Data(i,:) = -RawData(ind_channel_diff(i),:);
+        else
+            Data(i,:) = RawData(ind_channel(i),:)-RawData(ind_channel_diff(i),:);
+        end
+    end
+end
+
 
 % Storing data in traces
 parent = strcat(MetaData.Filename,MetaData.FileExt);
