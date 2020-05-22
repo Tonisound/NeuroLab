@@ -225,18 +225,26 @@ traces_lfp = traces(ind_lfp==1);
 traces_remainder = traces(ind_lfp==0);
 traces_diff_lfp = struct('ID',{},'shortname',{},'fullname',{},'parent',{},...
     'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{},'nb_samples',{});
-for i = 1:length(traces_lfp)-1
+
+% removing diff channels
+ind_keep = ~contains({traces_lfp(:).ID}','$');
+channel_id = channel_id(ind_keep);
+channel_type = channel_type(ind_keep);
+traces_lfp_cleared = traces_lfp(ind_keep);
+
+for i = 1:length(traces_lfp_cleared)-1
     % traces_diff_lfp(i).ID = strcat(char(channel_id(i)),'---',char(channel_id(i+1)));
+    
     traces_diff_lfp(i).ID = strcat(char(channel_id(i)),'$',char(channel_id(i+1)));
     traces_diff_lfp(i).shortname = char(channel_type(i));
     traces_diff_lfp(i).parent = parent;
     traces_diff_lfp(i).fullname = sprintf('%s/%s',traces_diff_lfp(i).shortname,traces_diff_lfp(i).ID);
-    traces_diff_lfp(i).X = traces_lfp(i).X;
-    traces_diff_lfp(i).Y = traces_lfp(i).Y-traces_lfp(i+1).Y;
+    traces_diff_lfp(i).X = traces_lfp_cleared(i).X;
+    traces_diff_lfp(i).Y = traces_lfp_cleared(i).Y-traces_lfp_cleared(i+1).Y;
     traces_diff_lfp(i).X_ind = data_t.time_ref.X;
     traces_diff_lfp(i).X_im = data_t.time_ref.Y;
     traces_diff_lfp(i).Y_im = interp1(traces_diff_lfp(i).X,traces_diff_lfp(i).Y,traces_diff_lfp(i).X_im);
-    traces_diff_lfp(i).nb_samples = traces_lfp(:).nb_samples;
+    traces_diff_lfp(i).nb_samples = traces_lfp_cleared(:).nb_samples;
     
 end
 % Modyfing traces according to GImport.Channel_loading
