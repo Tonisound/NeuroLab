@@ -11,6 +11,18 @@ StartTimeStr=datestr(Info.BinFiles(1).TStart,'yyyymmdd');
 % save(Newmatfile,'Data','Time','Info','-v7.3');
 % disp('done');
 
+% Getting LFP-Video delay
+% LFP-VIDEO Delay (Default: 0)
+delay_lfp_video = 0;
+if ~isempty(Info.VideosFiles) && ~isempty(Info.BinFiles)
+    all_delays = [];
+    for i =1:length(Info.VideosFiles.Files)
+        all_delays = [all_delays;(Info.VideosFiles.Files(i).TStart-Info.BinFiles.TStart)*24*3600];
+    end
+    [~,ind_min] = min(abs(all_delays));
+    delay_lfp_video = all_delays(ind_min);
+end
+
 % Getting dir names
 global SEED;
 if exist(SEED,'dir')
@@ -25,7 +37,6 @@ dir_lfp = strrep(recording,'_E','_lfp');
 if ~exist(fullfile(folder_name,dir_lfp),'dir')
     mkdir(fullfile(folder_name,dir_lfp));
 end
-
 
 % Finding trigger channel
 ind_ttl = find(contains(lower(Info.ChLabel),'ttl'));
@@ -74,9 +85,6 @@ end
 
 % Trigger Offset (Default: 0)
 offset = 0;
-
-% LFP-VIDEO Delay (Default: 0)
-delay_lfp_video = 0;
 
 % Write trigger file
 file_txt = fullfile(folder_name,dir_fus,'trigger.txt');
@@ -135,10 +143,11 @@ MetaTags.DataPointsSec = MetaTags.DataDurationSec;
 
 % Export SK2 file
 fprintf('Exporting SK2 file ...');
-save(fullfile(folder_name,dir_lfp,strcat(recording,'.sk2')),'Data','MetaTags','-v7.3');
+% save(fullfile(folder_name,dir_lfp,strcat(recording,'.sk2')),'Data','MetaTags','-v7.3');
+recording = strrep(Info.BinFiles.FileName,'.bin','.sk2');
+save(fullfile(folder_name,dir_lfp,strcat(recording,'.sk2')),'Data','MetaTags','Info','-v7.3');
 fprintf(' done.\n');
 fprintf('=> [%s].\n',fullfile(folder_name,dir_lfp,strcat(recording,'.sk2')));
-
 %save(strcat(recording,'.sk2'),'Data','MetaTags','-v7.3');
 
 % Copying video to new location
@@ -170,7 +179,6 @@ else
 end
 
 end
-
 
 function [trigger,padding] = extract_trigger_oneiros(Data,f_trig,n_frames)
 
