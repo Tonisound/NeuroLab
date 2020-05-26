@@ -120,7 +120,7 @@ if exist(crop_file,'file')
         catch
             % Empty Image Padding
             all_frames = cat(3,all_frames,NaN(size(vidFrame)));
-            warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration,F.video);
+            warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration, v.Name);
         end
         waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]\n %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)))
     end
@@ -539,7 +539,7 @@ for i = 1:length(t_corrected)
     catch
         % Empty Image Padding
         all_frames = cat(3,all_frames,NaN(size(vidFrame)));
-        warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration,F.video);
+        warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration,v.Name);
     end
     waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]\n %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)));
 end
