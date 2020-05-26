@@ -592,6 +592,18 @@ end
             end
         end
         
+        % Update fullpath in Config.mat & files_temp
+        for i =1:length(files_temp)
+            % Loading Configuration
+            data_c = load(fullfile(DIR_SAVE,files_temp(i).nlab,'Config.mat'),'File','UiValues');
+            File = data_c.File;
+            File.fullpath = fullfile(SEED,File.parent,File.session,File.recording);
+            files_temp(i).fullpath = fullfile(SEED,File.parent,File.session,File.recording);
+            % Saving Config.mat
+            save(fullfile(DIR_SAVE,files_temp(i).nlab,'Config.mat'),'File','-append');
+            % fprintf('File [%s] updated.\n',fullfile(DIR_SAVE,files_temp(i).nlab,'Config.mat'));
+        end
+        
         %Update files
         FILES = files_temp;
         CUR_FILE = cur_file;
@@ -605,6 +617,8 @@ end
         handles.FileSelectPopup.Value = cur_file;
         close(f2);
         fileSelectionPopup_Callback(handles.FileSelectPopup,[],handles);
+        
+
         
         % Saving Files.mat
         save('Files.mat','FILES','CUR_FILE','str','-append');

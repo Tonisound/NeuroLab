@@ -64,6 +64,18 @@ DIR_FIG =       GParams.DIR_FIG;
 DIR_STATS =     GParams.DIR_STATS;
 DIR_SYNT =      GParams.DIR_SYNT;
 
+% Update fullpath in Config.mat & FILES
+for i =1:length(FILES)
+    % Loading Configuration
+    data_c = load(fullfile(DIR_SAVE,FILES(i).nlab,'Config.mat'),'File','UiValues');
+    File = data_c.File;
+    File.fullpath = fullfile(SEED,File.parent,File.session,File.recording);
+    FILES(i).fullpath = fullfile(SEED,File.parent,File.session,File.recording);
+    % Saving Config.mat
+    save(fullfile(DIR_SAVE,FILES(i).nlab,'Config.mat'),'File','-append');
+    % fprintf('File [%s] updated.\n',fullfile(DIR_SAVE,files_temp(i).nlab,'Config.mat'));
+end
+
 if isempty(FILES)
     IM = zeros(88,169,2);
     LAST_IM = 2;
@@ -72,7 +84,8 @@ if isempty(FILES)
     CUR_IM = 1;
 else
     if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')
-        data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'File','CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
+        data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),...
+            'File','CUR_IM','LAST_IM','START_IM','END_IM','UiValues');
         CUR_IM = data_config.CUR_IM;
         LAST_IM = data_config.LAST_IM;
         START_IM = data_config.START_IM;

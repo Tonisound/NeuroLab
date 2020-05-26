@@ -19,8 +19,10 @@ if ~isempty(Info.VideosFiles) && ~isempty(Info.BinFiles)
     for i =1:length(Info.VideosFiles.Files)
         all_delays = [all_delays;(Info.VideosFiles.Files(i).TStart-Info.BinFiles.TStart)*24*3600];
     end
-    [~,ind_min] = min(abs(all_delays));
-    delay_lfp_video = all_delays(ind_min);
+    [~,ind_min_delay] = min(abs(all_delays));
+    delay_lfp_video = all_delays(ind_min_delay);
+else
+    ind_min_delay = [];
 end
 
 % Getting dir names
@@ -158,16 +160,23 @@ if isfield(Info,'VideosFiles') && ~isempty(Info.VideosFiles)
         video_dir = Info.VideosFiles.Files(1).Dir;
     else
         % several video files found
-        temp = regexp(strrep(Info.BinFiles.FileName,'.bin',''),'_','split');
-        pattern = char(temp(end));
-        ind_video = find(contains({Info.VideosFiles.Files(:).FileName}',pattern(1:8))==1);
-        if ~isempty(ind_video)
-            video_file = Info.VideosFiles.Files(ind_video).FileName;
-            video_dir = Info.VideosFiles.Files(ind_video).Dir;
+%         temp = regexp(strrep(Info.BinFiles.FileName,'.bin',''),'_','split');
+%         pattern = char(temp(end));
+%         ind_video = find(contains({Info.VideosFiles.Files(:).FileName}',pattern(1:8))==1);
+%         if ~isempty(ind_video)
+%             video_file = Info.VideosFiles.Files(ind_video).FileName;
+%             video_dir = Info.VideosFiles.Files(ind_video).Dir;
+%         else
+%             video_file = Info.VideosFiles.Files(1).FileName;
+%             video_dir = Info.VideosFiles.Files(1).Dir;
+%         end
+        if ~isempty(ind_min_delay)
+            video_file = Info.VideosFiles.Files(ind_min_delay).FileName;
+            video_dir = Info.VideosFiles.Files(ind_min_delay).Dir;
         else
             video_file = Info.VideosFiles.Files(1).FileName;
             video_dir = Info.VideosFiles.Files(1).Dir;
-        end
+        end        
     end
     
     fprintf('Copying video file ...');

@@ -108,9 +108,9 @@ if exist(crop_file,'file')
     % fprintf('Extracting cropped video frames [%s] ...',v.Name);
     h = waitbar(0,'Extracting cropped frames: 0.0 % completed [].');
     for i = 1:length(t_corrected)
-        v.CurrentTime = t_corrected(i);
         try
             % Pulling Video Frame
+            v.CurrentTime = t_corrected(i);
             vidFrame = readFrame(v);
             if strcmp(v.VideoFormat,'RGB24')
                 vidFrame = rgb2gray(vidFrame);
@@ -527,9 +527,9 @@ all_frames = [];
 % fprintf('Extracting cropped video frames [%s] ...',v.Name);
 h = waitbar(0,'Extracting cropped frames: 0.0 % completed [].');
 for i = 1:length(t_corrected)
-    v.CurrentTime = t_corrected(i);
     try
         % Pulling Video Frame
+        v.CurrentTime = t_corrected(i);
         vidFrame = readFrame(v);
         if strcmp(v.VideoFormat,'RGB24')
             vidFrame = rgb2gray(vidFrame);
