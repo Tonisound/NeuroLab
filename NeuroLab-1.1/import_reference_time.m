@@ -1,28 +1,56 @@
-function success = import_reference_time(F,handles)
+function [success,Doppler_film] = import_reference_time(F,handles)
 % Import reference time - Detects NEV channel and extracts trigger from it
 % Adds one trigger if discrepancy between fus data and trigger number
 
 success = false;
 
 %global LAST_IM IM CUR_IM  FILES CUR_FILE;
-global CUR_IM DIR_SAVE;
+global SEED CUR_IM DIR_SAVE;
 load('Preferences.mat','GImport');
 dir_save = fullfile(DIR_SAVE,F.nlab);
+file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
+Doppler_film = [];
 
-% Loading n_frames
-if exist(fullfile(dir_save,'Config.mat'),'file')
-    data_c = load(fullfile(dir_save,'Config.mat'),'n_frames');
-    n_frames = data_c.n_frames;
-else
-    errordlg('Missing file [%s]',fullfile(dir_save,'Config.mat'));
-    return;
-end
+% % Loading n_frames
+% if exist(fullfile(dir_save,'Config.mat'),'file')
+%     data_c = load(fullfile(dir_save,'Config.mat'),'n_frames');
+%     n_frames = data_c.n_frames;
+% else
+%     errordlg(sprintf('Missing file [%s]',fullfile(dir_save,'Config.mat')));
+%     return;
+% end
 
 % test if trigger.txt does not exist and creates it
 if ~exist(fullfile(F.fullpath,F.dir_fus,'trigger.txt'),'file')
     
+    % Loading n_frames
+    if exist(fullfile(dir_save,'Config.mat'),'file')
+        fprintf('Loading n_frames [%s] ...',fullfile(dir_save,'Config.mat'));
+        data_c = load(fullfile(dir_save,'Config.mat'),'n_frames');
+        fprintf(' done.\n');
+        n_frames = data_c.n_frames;
+    elseif contains(F.acq,'.acq')
+        % case file_acq ends .acq (Verasonics)
+        fprintf('Loading Doppler_film and n_frames [%s] ...',F.acq);
+        data_acq = load(file_acq,'-mat');
+        fprintf(' done.\n');
+        Doppler_film = permute(data_acq.Acquisition.Data,[3,1,4,2]);
+        n_frames = size(Doppler_film,3);
+    elseif contains(F.acq,'.mat')
+        % case file_acq ends .mat (Aixplorer)
+        fprintf('Loading Doppler_film and n_frames [%s] ...',F.acq);
+        data_acq = load(file_acq,'Doppler_film');
+        fprintf(' done.\n');
+        Doppler_film = data_acq.Doppler_film;
+        n_frames = size(Doppler_film,3);
+    else
+        errordlg(sprintf('Unable to import reference time - Missing acq file [%s]',file_acq));
+        return;
+    end
+    
     % Trigger Importation
     switch GImport.Trigger_loading
+        
         % ns5 priority
         case 'ns5'
             if exist(fullfile(F.fullpath,F.dir_lfp,F.ns5),'file') && ~isempty(F.ns5)
@@ -150,17 +178,10 @@ time_ref.Y = trigger+offset;
 time_ref.nb_images = length(trigger);
 
 
-% Detecting trigger jumps
+% Detecting burst and jumps
 ind_bursts = find([0;diff(trigger(:))]>GImport.burst_thresh);
-ind_jumps = find([0;diff(trigger(:))]>GImport.jump_thresh);
+ind_jumps = find([0;0;abs(diff(diff(trigger(:))))]>GImport.jump_thresh);
 
-
-% if ~isempty(ind_bursts)
-%     rec_mode = 'BURST';
-% else
-%     rec_mode = 'CONTINUOUS';
-% end
-jump_value = length(ind_jumps);
 if length(unique(diff(ind_bursts)))==1
     rec_mode = 'BURST';
     n_burst = 1+length(ind_bursts);
@@ -171,8 +192,8 @@ elseif ~isempty(ind_bursts)
     rec_mode = 'BURST-IRREGULAR';
     n_burst = 1;
     length_burst = length(trigger); 
-elseif ~isempty(ind_jumps)
-    rec_mode = 'JUMP-IRREGULAR';
+elseif ~isempty(ind_jumps) && (length(ind_jumps)/length(trigger))>GImport.jump_proportion
+    rec_mode = 'CONTINUOUS-IRREGULAR';
     n_burst = 1;
     length_burst = length(trigger); 
 else
@@ -180,6 +201,20 @@ else
     n_burst = 1;
     length_burst = length(trigger); 
 end
+
+% Interpolate if trigger is not regular
+if strcmp(rec_mode,'BURST-IRREGULAR') || strcmp(rec_mode,'CONTINUOUS-IRREGULAR')
+    fprintf('Irregular Timing Detected [%s]: Launching Interpolation.\nFile [%s]\n',rec_mode,file_txt)
+    S.Doppler_film = Doppler_film;
+    S.trigger = trigger;
+    S.reference = reference;
+    S.padding = padding;
+    S.rec_mode = rec_mode;
+    S.file_txt = file_txt;
+    % Interpolate Doppler
+    [F,S] = interpolate_Doppler(F,handles,S);
+end
+
 
 % Save dans ReferenceTime.mat
 time_str = cellstr(datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF'));
@@ -190,10 +225,9 @@ catch
     handles.TimeDisplay.String = char(time_str(1));
 end
 %datestr(time_ref.Y(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
-save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref','n_burst',...
-    'rec_mode','jump_value','ind_jumps','ind_bursts',...
-    'offset','delay_lfp_video',...
-    'length_burst','n_images','reference','padding','-v7.3');
+save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref',...
+    'reference','padding','offset','delay_lfp_video',...
+    'rec_mode','ind_jumps','ind_bursts','length_burst','n_burst','-v7.3');
 fprintf('Succesful Reference Time Importation [%s,%d,%d]\n',rec_mode,n_burst,length_burst);
 fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));
 

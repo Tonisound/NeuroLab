@@ -618,8 +618,6 @@ end
         close(f2);
         fileSelectionPopup_Callback(handles.FileSelectPopup,[],handles);
         
-
-        
         % Saving Files.mat
         save('Files.mat','FILES','CUR_FILE','str','-append');
         fprintf('Files.mat Saved %s.\n',fullfile(pwd,'Files.mat'));

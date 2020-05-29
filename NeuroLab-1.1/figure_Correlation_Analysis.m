@@ -762,10 +762,10 @@ function compute_Callback(hObj,~,handles,val_batch)
 
 global START_IM END_IM IM DIR_SAVE FILES CUR_FILE;
 data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
-    'time_ref','length_burst','n_burst','rec_mode','n_images');
+    'time_ref','length_burst','n_burst','rec_mode');
 time_ref = data_tr.time_ref;
 rec_mode = data_tr.rec_mode;
-n_images = data_tr.n_images;
+n_images = data_tr.time_ref.nb_images;
 length_burst = length(time_ref.Y);
 n_burst = 1;
 

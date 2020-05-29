@@ -278,11 +278,11 @@ for i = 1:length(FileList)
                 mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
                 fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
                 
-                % Import fUS Movie and Save Config.mat
-                [Doppler_film,tag] = import_DopplerFilm(F(ind_file),handles,0);
-                
                 % Detect trigger
-                import_reference_time(F(ind_file),handles);
+                [~,Doppler_film] = import_reference_time(F(ind_file),handles);
+                
+                % Import fUS Movie and Save Config.mat
+                [Doppler_film,tag] = import_DopplerFilm(F(ind_file),handles,0,Doppler_film);
                 
                 % Import/Crop Video
                 import_crop_video(F(ind_file),handles,0);

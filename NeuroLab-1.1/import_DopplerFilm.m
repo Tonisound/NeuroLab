@@ -1,32 +1,37 @@
-function [Doppler_film,tag] =  import_DopplerFilm(F,handles,flag)
+function [Doppler_film,tag] =  import_DopplerFilm(F,handles,flag,Doppler_film)
 % Import Doppler movie from .acq file
 % Generates Configuration file Config.mat
 % flag 0 - first import
 % flag 1 - reimport
 
+if nargin == 3
+    Doppler_film = [];
+end
+
 global IM LAST_IM SEED DIR_SAVE;
 tag = [];
 
 % create Doppler.mat
-if ~isempty(F.acq)
-    file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
-    
-    fprintf('Loading Doppler_film [%s] ...',F.acq);
-    if contains(F.acq,'.acq')
-        % case file_acq ends .acq (Verasonics)
-        data = load(file_acq,'-mat');
-        Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
-    elseif contains(F.acq,'.mat')
+if isempty(Doppler_film)
+    if ~isempty(F.acq)
+        file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
+        fprintf('Loading Doppler_film [%s] ...',F.acq);
+        if contains(F.acq,'.acq')
+            % case file_acq ends .acq (Verasonics)
+            data = load(file_acq,'-mat');
+            Doppler_film = permute(data.Acquisition.Data,[3,1,4,2]);
+        elseif contains(F.acq,'.mat')
+            % case file_acq ends .mat (Aixplorer)
+            data = load(file_acq,'Doppler_film');
+            Doppler_film = data.Doppler_film;
+        end
+        fprintf(' done.\n');
+        
+    else
         % case file_acq ends .mat (Aixplorer)
-        data = load(file_acq,'Doppler_film');
-        Doppler_film = data.Doppler_film;
+        warning('File .acq not found %s.',F.acq)
+        Doppler_film = NaN(0,0,2);
     end
-    fprintf(' done.\n');
-    
-else
-    % case file_acq ends .mat (Aixplorer)
-    warning('File .acq not found %s.',F.acq)
-    Doppler_film = NaN(0,0,2);
 end
 
 
