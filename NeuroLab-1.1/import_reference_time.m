@@ -1,11 +1,12 @@
-function [success,Doppler_film] = import_reference_time(F,handles)
+function [success,Doppler_film,F] = import_reference_time(F,handles)
 % Import reference time - Detects NEV channel and extracts trigger from it
 % Adds one trigger if discrepancy between fus data and trigger number
 
 success = false;
 
 %global LAST_IM IM CUR_IM  FILES CUR_FILE;
-global SEED CUR_IM DIR_SAVE;
+global SEED CUR_IM DIR_SAVE FILES CUR_FILE;
+    
 load('Preferences.mat','GImport');
 dir_save = fullfile(DIR_SAVE,F.nlab);
 file_acq = fullfile(SEED,F.parent,F.session,F.recording,F.dir_fus,F.acq);
@@ -210,13 +211,47 @@ if strcmp(rec_mode,'BURST-IRREGULAR') || strcmp(rec_mode,'CONTINUOUS-IRREGULAR')
     S.reference = reference;
     S.padding = padding;
     S.rec_mode = rec_mode;
+    S.offset = offset;
+    S.delay_lfp_video = delay_lfp_video;
     S.file_txt = file_txt;
+    
     % Interpolate Doppler
     [F,S] = interpolate_Doppler(F,handles,S);
+    
+    % unpacking
+    Doppler_film = S.Doppler_film;
+    trigger = S.trigger;
+    reference = S.reference;
+    padding = S.padding;
+    rec_mode = S.rec_mode;
+    offset = S.offset;
+    delay_lfp_video = S.delay_lfp_video;       
+    
+    % Trigger Importation
+    n_images = length(trigger);
+    time_ref.X = (1:n_images)';
+    time_ref.Y = trigger+offset;
+    time_ref.nb_images = length(trigger);
+    % Burst/Jump Information
+    ind_bursts = find([0;diff(trigger(:))]>GImport.burst_thresh);
+    ind_jumps = find([0;0;abs(diff(diff(trigger(:))))]>GImport.jump_thresh);
+    if strcmp(rec_mode,'BURST')
+        n_burst = 1+length(ind_bursts);
+        length_burst = unique(diff(ind_bursts));
+    else
+        n_burst = 1;
+        length_burst = length(trigger);
+    end
+    
+    % Save Config.mat if exist
+    FILES(CUR_FILE) = F;
+    if exist(fullfile(dir_save,'Config.mat'),'file')
+        File = F;
+        save(fullfile(dir_save,'Config.mat'),'File','-append');
+    end
 end
 
-
-% Save dans ReferenceTime.mat
+% Save ReferenceTime.mat
 time_str = cellstr(datestr((time_ref.Y)/(24*3600),'HH:MM:SS.FFF'));
 handles.TimeDisplay.UserData = char(time_str);
 try

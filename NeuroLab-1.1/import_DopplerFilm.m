@@ -1,4 +1,4 @@
-function [Doppler_film,tag] =  import_DopplerFilm(F,handles,flag,Doppler_film)
+function tag =  import_DopplerFilm(F,handles,flag,Doppler_film)
 % Import Doppler movie from .acq file
 % Generates Configuration file Config.mat
 % flag 0 - first import

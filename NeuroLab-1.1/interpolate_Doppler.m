@@ -38,6 +38,8 @@ if ~isfield(S,'trigger') || isempty(S.trigger)
         reference = data_tr.reference;
         padding = data_tr.padding;
         rec_mode = data_tr.rec_mode;
+        offset = data_tr.offset;
+        delay_lfp_video = data_tr.delay_lfp_video;
         file_txt = fullfile(DIR_SAVE,F.nlab,'Time_Reference.mat');
     else
         errordlg(sprintf('Missing Time Reference file [%s].',F.nlab));
@@ -49,6 +51,8 @@ else
     reference = S.reference;
     padding = S.padding;
     rec_mode = S.rec_mode;
+    offset = S.offset;
+    delay_lfp_video = S.delay_lfp_video;
     file_txt = 'trigger.txt';
 end
 
@@ -205,32 +209,53 @@ uiwait(f);
         
         % interpolate Doppler
         fprintf('Interpolating Doppler_film %d frames -> %d frames ...',length(trigger),length(t_interp));
-        % Doppler_int = interp3(1:size(Doppler_film,1),1:size(Doppler_film,2),trigger,Doppler_film,1:size(Doppler_film,1),1:size(Doppler_film,2),t_interp);
-        x = 1:size(Doppler_film,1);
-        y = 1:size(Doppler_film,2);
-        z = trigger';
-        zq = t_interp;
-        Doppler_int = interp3(x,y,z,Doppler_film,x,y,zq);
+        [x,y,z] = meshgrid(1:size(Doppler_film,2),1:size(Doppler_film,1),trigger);
+        [xq,yq,zq] = meshgrid(1:size(Doppler_film,2),1:size(Doppler_film,1),t_interp);
+        Doppler_int = interp3(x,y,z,Doppler_film,xq,yq,zq);
         fprintf(' done.\n');
         
         % Save New Doppler
         F_out = F;
         F_out.dir_fus = strrep(F.dir_fus,'_fus','_fusint');
-        F_out.acq = 'Doppler_interpolated.mat';
-        file_out = fullfile(SEED,F_out.parent,F_out.session,F_out.recording,F_out.dir_fus,F_out.acq);
+        F_out.acq = 'Doppler.mat';
         Doppler_film = Doppler_int;
+        folder_out = fullfile(F_out.fullpath,F_out.dir_fus);
+        file_out = fullfile(folder_out,F_out.acq);
+        if exist(folder_out,'dir')
+            rmdir(folder_out,'s');
+        end
+        mkdir(folder_out);
+        fprintf('Saving Doppler Interpolated [%s] ...',file_out);
         save(file_out,'Doppler_film','-v7.3');
+        fprintf(' done.\n');
         
-        % Save trigger 
+        % Save trigger
+        reference = strcat(reference,sprintf('[Interp %.2f sec]',step_interp));
+        trigger = t_interp;
+        
+        % Trigger Exportation
+        file_txt_out = fullfile(folder_out,'trigger.txt');
+        fid_txt = fopen(file_txt_out,'wt');
+        fprintf(fid_txt,'%s',sprintf('<REF>%s</REF>\n',reference));
+        fprintf(fid_txt,'%s',sprintf('<PAD>%s</PAD>\n',padding));
+        fprintf(fid_txt,'%s',sprintf('<OFFSET>%.3f</OFFSET>\n',offset));
+        fprintf(fid_txt,'%s',sprintf('<DELAY>%.3f</DELAY>\n',delay_lfp_video));
+        fprintf(fid_txt,'%s',sprintf('<TRIG>\n'));
+        %fprintf(fid_txt,'%s',sprintf('n=%d \n',length(trigger)));
+        for k = 1:length(trigger)
+            fprintf(fid_txt,'%s',sprintf('%.3f\n',trigger(k)));
+        end
+        fprintf(fid_txt,'%s',sprintf('</TRIG>'));
+        fclose(fid_txt);
+        fprintf('File trigger.txt saved at %s.\n',file_txt_out);
         
         % Return F and S
+        S_out = S;
         S_out.Doppler_film = Doppler_film;
         S_out.trigger = trigger;
         S_out.reference = reference;
-        S_out.padding = padding;
-        S_out.rec_mode = rec_mode;
-        S_out.file_txt = file_txt;
-        
+        S_out.rec_mode = strrep(rec_mode,'-IRREGULAR','');
+        S_out.file_txt = file_txt_out;
         close(f);
     end
 
