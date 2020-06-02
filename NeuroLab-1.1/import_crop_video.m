@@ -42,8 +42,8 @@ else
 end
 
 % Loading Video file
-if ~exist(video_file,'file')
-    errordlg('Video File not found [%s].',video_file);
+if ~exist(video_file,'file') || isempty(F.video)
+    warning('Video File not found [%s].',video_file);
     return;
 else
     % Getting video parameters

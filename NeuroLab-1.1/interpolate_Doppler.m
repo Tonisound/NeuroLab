@@ -225,7 +225,7 @@ uiwait(f);
             rmdir(folder_out,'s');
         end
         mkdir(folder_out);
-        fprintf('Saving Doppler Interpolated [%s] ...',file_out);
+        fprintf('Saving Doppler Interpolated [%s]...',file_out);
         save(file_out,'Doppler_film','-v7.3');
         fprintf(' done.\n');
         

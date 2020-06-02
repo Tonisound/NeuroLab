@@ -146,7 +146,9 @@ for i = 1:length(FileList)
     end
     
     % Looking for fUS
-    d = dir(fullfile(FileName,'*_fus'));
+    d1 = dir(fullfile(FileName,'*_fusint'));
+    d2 = dir(fullfile(FileName,'*_fus'));
+    d = [d1;d2];
     if ~isempty(d)
         dir_fus = char(d(1).name);
         F(ind_file).dir_fus = dir_fus;
@@ -274,12 +276,13 @@ for i = 1:length(FileList)
         if isempty(button) || strcmp(button,'Cancel')
             return;
         else
-            try
+            %try
                 mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
                 fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
                 
                 % Detect trigger
-                [~,Doppler_film,F] = import_reference_time(F(ind_file),handles);
+                [~,Doppler_film,F_out] = import_reference_time(F(ind_file),handles);
+                F(ind_file) = F_out;
                 
                 % Import fUS Movie and Save Config.mat
                 tag = import_DopplerFilm(F(ind_file),handles,0,Doppler_film);
@@ -318,13 +321,13 @@ for i = 1:length(FileList)
                     TimeTags_cell(3,:) = {'',TimeTags(2).Tag,TimeTags(2).Onset,TimeTags(2).Duration,TimeTags(2).Reference,''};
                 end
                 save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
-            catch
-                % Removing nlab folder
-                rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');
-                warning('Failed Importation: Nlab directory deleted [%s].',F(ind_file).nlab);
-                F(ind_file).nlab = '';
-                ind_failed = [ind_failed;ind_file];
-            end
+%             catch
+%                 % Removing nlab folder
+%                 rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');
+%                 warning('Failed Importation: Nlab directory deleted [%s].',F(ind_file).nlab);
+%                 F(ind_file).nlab = '';
+%                 ind_failed = [ind_failed;ind_file];
+%             end
         end
     end
 end
