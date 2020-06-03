@@ -17,7 +17,7 @@ delay_lfp_video = 0;
 if ~isempty(Info.VideosFiles) && ~isempty(Info.BinFiles)
     all_delays = [];
     for i =1:length(Info.VideosFiles.Files)
-        all_delays = [all_delays;(Info.VideosFiles.Files(i).TStart-Info.BinFiles.TStart)*24*3600];
+        all_delays = [all_delays;(Info.VideosFiles.Files(i).TStart-Info.BinFiles(1).TStart)*24*3600];
     end
     [~,ind_min_delay] = min(abs(all_delays));
     delay_lfp_video = all_delays(ind_min_delay);
@@ -38,6 +38,10 @@ dir_fus = strrep(recording,'_E','_fus');
 dir_lfp = strrep(recording,'_E','_lfp');
 if ~exist(fullfile(folder_name,dir_lfp),'dir')
     mkdir(fullfile(folder_name,dir_lfp));
+end
+dir_ext = strrep(recording,'_E','_ext');
+if ~exist(fullfile(folder_name,dir_ext),'dir')
+    mkdir(fullfile(folder_name,dir_ext));
 end
 
 % Finding trigger channel
@@ -130,8 +134,8 @@ MetaTags.ChannelCount = n_channels;
 MetaTags.SamplingFreq = f_resamp;
 MetaTags.TimeRes = Info.Fs;
 MetaTags.ChannelID = (1:n_channels)';
-MetaTags.DateTime = datestr(Info.BinFiles.TStart);
-MetaTags.DateTimeRaw = datevec(Info.BinFiles.TStart);
+MetaTags.DateTime = datestr(Info.BinFiles(1).TStart);
+MetaTags.DateTimeRaw = datevec(Info.BinFiles(1).TStart);
 MetaTags.Comment = '';
 MetaTags.FileSpec = '';
 MetaTags.Timestamp = 0;
@@ -146,10 +150,10 @@ MetaTags.DataPointsSec = MetaTags.DataDurationSec;
 % Export SK2 file
 fprintf('Exporting SK2 file ...');
 % save(fullfile(folder_name,dir_lfp,strcat(recording,'.sk2')),'Data','MetaTags','-v7.3');
-recording = strrep(Info.BinFiles.FileName,'.bin','.sk2');
-save(fullfile(folder_name,dir_lfp,strcat(recording,'.sk2')),'Data','MetaTags','Info','-v7.3');
+recording = strrep(Info.BinFiles(1).FileName,'.bin','.sk2');
+save(fullfile(folder_name,dir_lfp,recording),'Data','MetaTags','Info','-v7.3');
 fprintf(' done.\n');
-fprintf('=> [%s].\n',fullfile(folder_name,dir_lfp,strcat(recording,'.sk2')));
+fprintf('=> [%s].\n',fullfile(folder_name,dir_lfp,recording));
 %save(strcat(recording,'.sk2'),'Data','MetaTags','-v7.3');
 
 % Copying video to new location
