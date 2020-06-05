@@ -96,8 +96,8 @@ end
 %     sprintf('Gamma High [%.1f-%.1fHz]',GFilt.gammahigh_inf,GFilt.gammahigh_sup);...
 %     sprintf('Gamma High Up [%.1f-%.1fHz]',GFilt.gammahighup_inf,GFilt.gammahighup_sup);...
 %     sprintf('Ripple [%.1f-%.1fHz]',GFilt.ripple_inf,GFilt.ripple_sup,GFilt.ripple_smooth)};
-str_band = {'Broadband';'Delta';'Theta';'Gamma Low';'Gamma Mid';'Gamma Mid Up';'Gamma High';'Gamma High Up';'Ripple'};
-band_list = {'broadband';'delta';'theta';'gammalow';'gammamid';'gammamidup';'gammahigh';'gammahighup';'ripple'};
+str_band = {'Broadband';'Delta';'Theta';'Beta';'Gamma Low';'Gamma Mid';'Gamma Mid Up';'Gamma High';'Gamma High Up';'Ripple'};
+band_list = {'broadband';'delta';'theta';'beta';'gammalow';'gammamid';'gammamidup';'gammahigh';'gammahighup';'ripple'};
 
 str_ratio = [];
 band_ratio = [];
@@ -277,6 +277,8 @@ for i=1:length(ind_traces)
             color = g_colors(5,:);
         elseif strfind(str,'theta')
             color = g_colors(7,:);
+        elseif strfind(str,'beta')
+            color = g_colors(6,:);
         elseif strfind(str,'gammalow')
             color = g_colors(1,:);
         elseif strfind(str,'gammamid')
