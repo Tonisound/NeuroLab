@@ -24,8 +24,8 @@ if ~isempty(handles.VideoAxes.UserData) && strcmp(handles.VideoFigure.Visible,'o
     %handles.VideoAxes.UserData.Text.String = sprintf('Absolute Time: %s',t_str);
     t_str1 = datestr(handles.VideoAxes.UserData.t_ref(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
     t_str2 = datestr(handles.VideoAxes.UserData.t_video(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
-    handles.VideoAxes.UserData.Text.String(1) = {sprintf('Absolute Time: %s',t_str1)};
-    handles.VideoAxes.UserData.Text.String(2) = {sprintf('Relative Time: %s',t_str2)};
+    handles.VideoAxes.UserData.Text.String(1) = {sprintf('LFP Time: %s',t_str1)};
+    handles.VideoAxes.UserData.Text.String(2) = {sprintf('Video Time: %s',t_str2)};
 end
 
 % Actualize Cursor

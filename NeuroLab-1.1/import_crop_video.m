@@ -105,6 +105,7 @@ if exist(crop_file,'file')
     
     % reading frames
     all_frames = [];
+    % all_frames = NaN(v.Height,v.Width,length(t_corrected));
     % fprintf('Extracting cropped video frames [%s] ...',v.Name);
     h = waitbar(0,'Extracting cropped frames: 0.0 % completed [].');
     for i = 1:length(t_corrected)
@@ -116,10 +117,12 @@ if exist(crop_file,'file')
                 vidFrame = rgb2gray(vidFrame);
                 vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
                 all_frames = cat(3,all_frames,vidFrame);
+                % all_frames(:,:,i) = vidFrame;
             end
         catch
             % Empty Image Padding
             all_frames = cat(3,all_frames,NaN(size(vidFrame)));
+            % all_frames(:,:,i) = NaN(size(vidFrame));
             warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration, v.Name);
         end
         waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]\n %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)))
@@ -524,6 +527,8 @@ end
 
 % reading frames
 all_frames = [];
+% all_frames = NaN(v.Height,v.Width,length(t_corrected));
+    
 % fprintf('Extracting cropped video frames [%s] ...',v.Name);
 h = waitbar(0,'Extracting cropped frames: 0.0 % completed [].');
 for i = 1:length(t_corrected)
@@ -535,10 +540,12 @@ for i = 1:length(t_corrected)
             vidFrame = rgb2gray(vidFrame);
             vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
             all_frames = cat(3,all_frames,vidFrame);
+            % all_frames(:,:,i) = vidFrame;
         end
     catch
         % Empty Image Padding
         all_frames = cat(3,all_frames,NaN(size(vidFrame)));
+        % all_frames(:,:,i) = NaN(size(vidFrame));
         warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration,v.Name);
     end
     waitbar(i/length(t_corrected),h,sprintf('Extracting Video [%s Quality]\n %.1f %% completed [Frame %d/%d].',video_quality,100*i/length(t_corrected),i,length(t_corrected)));

@@ -564,6 +564,9 @@ for i = 1:length(ind_files)
             case 'Divide LFP Frequency Bands'
                 success = divide_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
+            % case 'Detect Animal Position'
+            %     success = detect_animal_position(FILES(ii),myhandles,0);
+                
             case 'Detect Vascular Surges'
                 success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 

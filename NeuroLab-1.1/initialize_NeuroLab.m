@@ -342,6 +342,7 @@ pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Conv
 pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import External Files');
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Left-Right Runs');
+% pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Animal Position|Detect Vascular Surges|Detect Left-Right Runs');
 pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Generate Region Groups|Export Image Patches|Export Anatomical Regions');
 pl.String = pl_str;
 
@@ -650,8 +651,7 @@ set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_
 % set(myhandles.ImportMenu_Regions,'Callback','import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,myhandles);');
 % set(myhandles.ImportMenu_ExternalFiles,'Callback','import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 
-% set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles.CenterPanelPopup.Value);actualize_plot(myhandles);');
-set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(FILES(CUR_FILE),myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:),1);actualize_plot(myhandles);');
+set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(FILES(CUR_FILE),myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:));actualize_plot(myhandles);');
 set(myhandles.ImportMenu_ReloadVideo,'Callback','load_video(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');

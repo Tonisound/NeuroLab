@@ -31,6 +31,9 @@ switch strtrim(str(val,:))
         
     case 'Divide LFP Frequency Bands'
         divide_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        
+    % case 'Detect Animal Position'
+    %     detect_animal_position(FILES(CUR_FILE),handles);
 
     case 'Detect Vascular Surges'
         detect_vascular_surges(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

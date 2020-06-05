@@ -34,8 +34,8 @@ if exist(video_file,'file')
         'Parent',handles.VideoAxes);
     t_str1 = datestr(data_video.t_ref(1)/(24*3600),'HH:MM:SS.FFF');
     t_str2 = datestr(data_video.t_video(1)/(24*3600),'HH:MM:SS.FFF');
-    t.String(1) = {sprintf('Absolute Time: %s',t_str1)};
-    t.String(2) = {sprintf('Relative Time: %s',t_str2)};
+    t.String(1) = {sprintf('LFP Time: %s',t_str1)};
+    t.String(2) = {sprintf('Video Time: %s',t_str2)};
     
     %Postion
     %         f=handles.VideoAxes.Parent;
