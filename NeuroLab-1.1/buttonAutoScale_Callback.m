@@ -15,9 +15,9 @@ for i =1:length(all_lines)
 end
 
 % update
-if size(all_M,1)==1
+if size(all_M,1)==1 && ~isempty(all_M)
     handles.RightAxes.YLim = all_M;
-else
+elseif size(all_M,1)>1
     handles.RightAxes.YLim = [min(all_M(:,1),[],'omitnan') max(all_M(:,2),[],'omitnan')];
 end
 

@@ -29,12 +29,12 @@ switch strtrim(str(val,:))
     case'Import External Files'
         import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Import Animal Position'
+        import_animal_position(FILES(CUR_FILE),handles);
+
     case 'Divide LFP Frequency Bands'
         divide_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-    % case 'Detect Animal Position'
-    %     detect_animal_position(FILES(CUR_FILE),handles);
-
     case 'Detect Vascular Surges'
         detect_vascular_surges(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         

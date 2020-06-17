@@ -553,6 +553,9 @@ for i = 1:length(ind_files)
             case'Import External Files'
                 success = import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
                 
+            case 'Import Animal Position'
+                success = import_animal_position(FILES(ii),myhandles,0);
+                
             case 'Filter LFP channels - Extract Power Envelope'
                 % in this case 1 select band manually,
                 % else 0 for main channel if specified else all
@@ -563,9 +566,6 @@ for i = 1:length(ind_files)
                 
             case 'Divide LFP Frequency Bands'
                 success = divide_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
-                
-            % case 'Detect Animal Position'
-            %     success = detect_animal_position(FILES(ii),myhandles,0);
                 
             case 'Detect Vascular Surges'
                 success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);

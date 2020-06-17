@@ -245,6 +245,10 @@ l_cursor = findobj(handles.RightAxes,'Tag','Cursor');
 ax_mean = axes('Parent',f,'YTick',[],'Tag','AxMean','FontSize',7,...
     'YTickLabel','','YLim',[min(l_mean.YData,[],'omitnan') max(l_mean.YData,[],'omitnan')]);
 f.UserData.l_mean = copyobj(l_mean,ax_mean);
+% Force mean line visibility
+if strcmp(l_mean.Visible,'off')
+    f.UserData.l_mean.Visible = 'on';
+end
 ax_mean.XLim = [min(l_mean.XData) max(l_mean.XData)];
 % ax_mean.XTick = l_mean.XData(1):100:l_mean.XData(end);
 % ax_mean.XTickLabel = cell2(l_mean.XData(1):100:l_mean.XData(end));
@@ -1583,9 +1587,6 @@ for i =1:length(r_patches)
         set(hl,'Visible','on');
     end
     
-    boxMask_Callback(handles.MaskBox,[],handles);
-    boxPatch_Callback(handles.PatchBox,[],handles);
-    
     % Updating UserData
     s.Name = p.UserData.Name;
     s.Mask = p.UserData.Mask;
@@ -1594,6 +1595,10 @@ for i =1:length(r_patches)
     hq.UserData = hl;
     hl.UserData = s;
 end
+
+% Update Mask and Patch aspect
+boxMask_Callback(handles.MaskBox,[],handles);
+boxPatch_Callback(handles.PatchBox,[],handles);
 
 g_patches = handles2.Group_table.UserData.patches;
 for i =1:length(g_patches)

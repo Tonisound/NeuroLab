@@ -100,7 +100,7 @@ if exist(crop_file,'file')
         case 'Medium'
             step_quality = 2;
         case 'Low'
-            step_quality = 3;
+            step_quality = 4;
     end
     
     % reading frames
@@ -234,7 +234,7 @@ s1 = sprintf('Output File: %s','video.mat');
 s2 = sprintf('Time Interval: %s - %s',datestr(datenum(t_interp(1)/(24*3600)),'HH:MM:SS.FFF'),datestr(datenum(t_interp(end)/(24*3600)),'HH:MM:SS.FFF'));
 s3 = sprintf('Total Frames: %d',length(t_interp));
 esize = (v.Width*v.Height*length(t_interp)/1e6);
-s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/9);
+s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/16);
 
 
 t2 = cellstr([{s1};{s2};{s3};{s7}]);
@@ -277,7 +277,7 @@ bg2 = uicontrol(bg,'Style','radiobutton',...
     'HandleVisibility','off');
 bg3 = uicontrol(bg,'Style','radiobutton',...
     'Units','normalized',...
-    'String','/9',...
+    'String','/16',...
     'TooltipString','Low quality video',...
     'Tag','Low',...
     'Position',[.67 0 .33 1],...
@@ -451,10 +451,10 @@ v = f.UserData.v;
 t_interp = f.UserData.t_interp;
 if ~isempty(hObj)
     esize = ((x2-x1+1)*(y2-y1+1)*length(t_interp))/1e6;
-    s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/9);
+    s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/16);
 else
     esize = (v.Width*v.Height*length(t_interp)/1e6);
-    s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/9);
+    s7 = sprintf('Expected Size: %.1f / %.1f / %.1f Mb',esize,esize/4,esize/16);
 end
 t2.String{4}  =s7;
 
@@ -522,7 +522,7 @@ switch video_quality
     case 'Medium'
         step_quality = 2;
     case 'Low'
-        step_quality = 3;
+        step_quality = 4;
 end
 
 % reading frames
