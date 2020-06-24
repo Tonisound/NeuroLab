@@ -553,8 +553,8 @@ for i = 1:length(ind_files)
             case'Import External Files'
                 success = import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
                 
-            case 'Import Animal Position'
-                success = import_animal_position(FILES(ii),myhandles,0);
+            case 'Import NEV Tracking'
+                success = import_tracking_info(FILES(ii),myhandles,0);
                 
             case 'Filter LFP channels - Extract Power Envelope'
                 % in this case 1 select band manually,

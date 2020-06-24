@@ -314,8 +314,8 @@ if n_images~= length(trigger_raw)
         discrepant = n_images-length(trigger_raw);
         padding = 'excess'; 
         % keep only first triggers
-        trigger = trigger_raw(end-n_images+1:end);
-        %trigger = trigger_raw(1:n_images);
+        %trigger = trigger_raw(end-n_images+1:end);
+        trigger = trigger_raw(1:n_images);
             
     end
 else
@@ -399,8 +399,8 @@ if n_images~= length(trigger_raw)
         discrepant = n_images-length(trigger_raw);
         padding = 'excess'; 
         % keep only first triggers
-        trigger = trigger_raw(end-n_images+1:end);
-        %trigger = trigger_raw(1:n_images);
+        %trigger = trigger_raw(end-n_images+1:end);
+        trigger = trigger_raw(1:n_images);
         %time_stamp = time_stamp_raw(1:n_images);
             
     end

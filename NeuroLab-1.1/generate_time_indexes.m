@@ -79,7 +79,7 @@ all_names = {tg_modified(:).Name}';
 all_strings = {tg_modified(:).String}';
 all_tags = {tt_data.TimeTags(:).Tag}';
 
-% Storinf results
+% Storing results
 S = struct('Name',[],'index1',[],'index2',[]);
 counter = 0;
 

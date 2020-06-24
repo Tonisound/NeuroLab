@@ -29,8 +29,8 @@ switch strtrim(str(val,:))
     case'Import External Files'
         import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
-    case 'Import Animal Position'
-        import_animal_position(FILES(CUR_FILE),handles);
+    case 'Import NEV Tracking'
+        import_tracking_info(FILES(CUR_FILE),handles);
 
     case 'Divide LFP Frequency Bands'
         divide_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

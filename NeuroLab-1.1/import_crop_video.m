@@ -32,7 +32,7 @@ else
     return;
 end
 
-% Checking Doppler
+% Checking Video.mat
 if flag == 1 && exist(output_file,'file')
     % re-import
     data_video = load(output_file,'delay_lfp_video','x_crop','y_crop','video_quality'); 
