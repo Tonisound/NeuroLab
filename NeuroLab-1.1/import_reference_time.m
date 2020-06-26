@@ -312,10 +312,29 @@ if n_images~= length(trigger_raw)
         
         warning('Trigger (%d) and IM size (%d) do not match [Excess trigs]. -> Discarding end trigs',length(trigger_raw),n_images);
         discrepant = n_images-length(trigger_raw);
-        padding = 'excess'; 
-        % keep only first triggers
-        %trigger = trigger_raw(end-n_images+1:end);
-        trigger = trigger_raw(1:n_images);
+%         % padding = sprintf('excess[%d][%s]',-discrepant,'first'); 
+%         padding = sprintf('excess[%d][%s]',-discrepant,'last'); 
+%         % keep only first triggers
+%         trigger = trigger_raw(end-n_images+1:end);
+%         % trigger = trigger_raw(1:n_images);
+        
+        % asking user which trigs to keep
+        answer = questdlg(sprintf('Discrepant Trigger [%d] and Doppler Size [%d].\n What triggers to you want to keep ?',length(trigger_raw),n_images), ...
+            'Trigger Importation',...
+            'Keep first trigs','Keep last trigs','Cancel');
+        % Handle response
+        switch answer
+            case 'Keep first trigs'
+                padding = sprintf('excess[%d][%s]',-discrepant,'first');
+                trigger = trigger_raw(1:n_images);      
+            case 'Keep last trigs'
+                padding = sprintf('excess[%d][%s]',-discrepant,'last');
+                trigger = trigger_raw(end-n_images+1:end);
+            otherwise
+                %default
+                padding = sprintf('excess[%d][%s]',-discrepant,'first');
+                trigger = trigger_raw(1:n_images);  
+        end
             
     end
 else
@@ -397,11 +416,29 @@ if n_images~= length(trigger_raw)
         
         warning('Trigger (%d) and IM size (%d) do not match [Excess trigs]. -> Discarding end trigs',length(trigger_raw),n_images);
         discrepant = n_images-length(trigger_raw);
-        padding = 'excess'; 
-        % keep only first triggers
-        %trigger = trigger_raw(end-n_images+1:end);
-        trigger = trigger_raw(1:n_images);
-        %time_stamp = time_stamp_raw(1:n_images);
+%         % padding = sprintf('excess[%d][%s]',-discrepant,'first'); 
+%         padding = sprintf('excess[%d][%s]',-discrepant,'last'); 
+%         % keep only first triggers
+%         trigger = trigger_raw(end-n_images+1:end);
+%         %trigger = trigger_raw(1:n_images);
+%         %time_stamp = time_stamp_raw(1:n_images);
+                
+        % asking user which trigs to keep
+        answer = questdlg(sprintf('Discrepant Trigger [%d] and Doppler Size [%d].\n What triggers to you want to keep ?',length(trigger_raw),n_images), ...
+            'Trigger Importation','Keep first trigs','Keep last trigs','Cancel');
+        % Handle response
+        switch answer
+            case 'Keep first trigs'
+                padding = sprintf('excess[%d][%s]',-discrepant,'first');
+                trigger = trigger_raw(1:n_images);      
+            case 'Keep last trigs'
+                padding = sprintf('excess[%d][%s]',-discrepant,'last');
+                trigger = trigger_raw(end-n_images+1:end);
+            otherwise
+                %default
+                padding = sprintf('excess[%d][%s]',-discrepant,'first');
+                trigger = trigger_raw(1:n_images);
+        end
             
     end
 else

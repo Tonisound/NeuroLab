@@ -22,7 +22,7 @@ else
 end
 
 switch hObj.Value
-    case 0,
+    case 0
         for i=1:length(lines)
             scale = lines(i).UserData.scale;
             %offset = lines(i).UserData.offset;
@@ -30,7 +30,7 @@ switch hObj.Value
             lines(i).UserData.scale = 1;
             %lines(i).UserData.offset = 1;
         end
-    case 1,
+    case 1
         for i=1:length(lines)
             %min_l = min(lines(i).YData(START_IM:END_IM));
             max_l = max(lines(i).YData(START_IM:END_IM));
