@@ -281,7 +281,7 @@ for i = 1:length(FileList)
                 fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
                 
                 % Detect trigger
-                [~,Doppler_film,F_out] = import_reference_time(F(ind_file),handles);
+                [~,Doppler_film,F_out] = import_reference_time(F(ind_file),handles,0);
                 F(ind_file) = F_out;
                 
                 % Import fUS Movie and Save Config.mat

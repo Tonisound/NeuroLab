@@ -1,6 +1,12 @@
-function [success,Doppler_film,F] = import_reference_time(F,handles)
+function [success,Doppler_film,F] = import_reference_time(F,handles,flag)
 % Import reference time - Detects NEV channel and extracts trigger from it
 % Adds one trigger if discrepancy between fus data and trigger number
+% flag 0 - first import
+% flag 1 - reimport
+
+if nargin == 2
+    flag = 1;
+end
 
 success = false;
 
@@ -204,7 +210,7 @@ else
 end
 
 % Interpolate if trigger is not regular
-if strcmp(rec_mode,'BURST-IRREGULAR') || strcmp(rec_mode,'CONTINUOUS-IRREGULAR')
+if strcmp(rec_mode,'BURST-IRREGULAR') || strcmp(rec_mode,'CONTINUOUS-IRREGULAR') || flag==1
     fprintf('Irregular Timing Detected [%s]: Launching Interpolation.\nFile [%s]\n',rec_mode,file_txt)
     S.Doppler_film = Doppler_film;
     S.trigger = trigger;
@@ -301,7 +307,7 @@ if n_images~= length(trigger_raw)
         
         warning('Trigger (%d) and IM size (%d) do not match [Missing end trig]. -> Adding end trig',length(trigger_raw),n_images);
         discrepant = n_images-length(trigger_raw);
-        padding = 'missing';
+        padding = sprintf('missing[%d][%s]',discrepant,'extend');
         % extend trigger using delta_trig
         delta_trig = trigger_raw(2)-trigger_raw(1);
         additional_trigs = (1:discrepant)'*delta_trig;
@@ -405,7 +411,7 @@ if n_images~= length(trigger_raw)
         
         warning('Trigger (%d) and IM size (%d) do not match [Missing end trig]. -> Adding end trig',length(trigger_raw),n_images);
         discrepant = n_images-length(trigger_raw);
-        padding = 'missing';
+        padding = sprintf('missing[%d][%s]',discrepant,'extend');
         % extend trigger using delta_trig
         delta_trig = trigger_raw(2)-trigger_raw(1);
         additional_trigs = (1:discrepant)'*delta_trig;
