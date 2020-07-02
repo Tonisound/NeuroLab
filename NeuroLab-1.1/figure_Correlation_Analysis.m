@@ -34,8 +34,12 @@ end
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'file')
     data_tg = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');
 else
-    errordlg(sprintf('Please edit Time_Groups.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)));
-    return;
+    warning('Missing file Time_Groups.mat %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
+    %return;
+    data_tg.TimeGroups_name = [];
+    data_tg.TimeGroups_frames = [];
+    data_tg.TimeGroups_duration = [];
+    data_tg.TimeGroups_S = struct('Name',[],'Selected',[],'TimeTags_strings',[],'TimeTags_images',[]); 
 end
 
 % loading Config.mat
