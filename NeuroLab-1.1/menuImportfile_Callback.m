@@ -242,6 +242,22 @@ for i = 1:length(FileList)
             F(ind_file).type = 'VIDEO';
         elseif ~isempty(F(ind_file).video)
             F(ind_file).type = 'EEG-VIDEO';
+            F(ind_file).dop = 'Dummy';
+            
+            % Creating Dummy dir_fus
+            dir_fus = strrep(F(ind_file).dir_lfp,'_lfp','_fus');
+            if ~exist(fullfile(FileName,dir_fus),'dir')
+                mkdir(fullfile(FileName,dir_fus));
+            end
+            F(ind_file).dir_fus = dir_fus;
+            
+            % Creating Dummy Doppler
+            load('Preferences.mat','GImport');
+            def_frames = round(1800/GImport.f_def);
+            Doppler_film = rand(10,10,def_frames);
+            save(fullfile(FileName,dir_fus,'Doppler.mat'),'Doppler_film','-v7.3');
+            F(ind_file).acq = 'Doppler.mat';   
+            
         end
     else
         if isempty(F(ind_file).ns1)&&isempty(F(ind_file).ns2)...

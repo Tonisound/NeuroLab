@@ -21,7 +21,7 @@ end
 
 % Checking TrackingInfo.mat
 if exist(output_file,'file')
-    data_tracking = load(output_file,'arena','vertices','edges'); 
+    data_tracking = load(output_file,'arena','origin','vertex_x','vertex_y','length_x','length_y'); 
 else
     data_tracking = [];
 end
@@ -34,11 +34,6 @@ else
     data_tr = load(fullfile(folder_name,'Time_Reference.mat'));
     t_ref = data_tr.time_ref.Y;
     % t_ref = t_ref(1:60:end);
-    if isfield(data_tr,'delay_lfp_video')
-        delay_lfp_video = data_tr.delay_lfp_video;
-    else
-        delay_lfp_video = 0;
-    end
 end
 
 % Loading NEV File
@@ -159,7 +154,7 @@ line('XData',x_pixel,'YData',y_pixel,'Parent',ax,'Tag','RawTracking',...
     'Marker','o','MarkerSize',1,'MarkerFaceColor','r');
 
 % Adding Arena if exist
-if ~isempty(data_tracking)
+if ~isempty(data_tracking) && ~isempty(data_tracking.arena)
     patch(data_tracking.arena.XData,data_tracking.arena.YData,'y',...
         'EdgeColor','y',...
         'Tag','Arena',...
@@ -228,12 +223,18 @@ e1 = uicontrol('Style','edit',...
     'TooltipString','Short axis length (m)',...
     'Tag','Edit1',...
     'Parent',f);
+if ~isempty(data_tracking) && isfield(data_tracking,'length_x')
+    e1.String = sprintf('%.2f',data_tracking.length_x);
+end
 e2 = uicontrol('Style','edit',... 
     'Units','normalized',...
     'String','2.35',...
     'TooltipString','Long axis length (m)',...
     'Tag','Edit1',...
     'Parent',f);
+if ~isempty(data_tracking) && isfield(data_tracking,'length_y')
+    e2.String = sprintf('%.2f',data_tracking.length_y);
+end
 
 % Postion
 e1.Position = [.05 .21 .1 .04];
@@ -278,17 +279,40 @@ function okButton_callback(~,~,handles)
 
 ax = handles.AxVideo;
 f = ax.Parent;
+% Arena
 hq = findobj(ax,'Tag','Arena');
-arena.XData = hq.XData;
-arena.YData = hq.YData;
-%v = findobj(ax,'Tag','Vertex');
-%e = findobj(ax,'Tag','Edge');
-vertices = [];
-edges = [];
+if ~isempty(Vx)
+    arena.XData = hq.XData;
+    arena.YData = hq.YData;
+else
+    arena = [];
+end
+% Vertices
+V0 = findobj(ax,'Tag','Origin');
+if ~isempty(V0)
+    origin = [V0.XData,V0.YData];
+else
+    origin = [];
+end
+Vx = findobj(ax,'Tag','VertexX');
+if ~isempty(Vx)
+    vertex_x = [Vx.XData,Vx.YData];
+else
+    vertex_x = [];
+end
+Vy = findobj(ax,'Tag','VertexX');
+if ~isempty(Vy)
+    vertex_y = [Vy.XData,Vy.YData];
+else
+    vertex_y = [];
+end
+% Axes
+length_x = str2double(handles.Edit1.String);
+length_y = str2double(handles.Edit2.String);
 
 % Checking TrackingInfo.mat
 output_file = f.UserData.output_file;
-save(output_file,'arena','vertices','edges'); 
+save(output_file,'arena','origin','vertex_x','vertex_y','length_x','length_y'); 
 fprintf('Tracking Information Saved [%s].\n',output_file)
 
 % Closing
@@ -334,7 +358,8 @@ function axesButton_callback(hObj,~,handles)
 
 f = handles.TrackingFigure;
 ax = findobj(f,'Tag','AxVideo');
-hq = findobj(ax,'Tag','Arena');
+V = findobj(ax,'Tag','Vertices');
+E = findobj(ax,'Tag','Edges');
     
 if hObj.Value == 1
     if ~isempty(hq)
@@ -362,6 +387,37 @@ else
     % update tracking
     update_tracking(handles);   
 end
+
+% if hObj.Value == 1
+%     % Draw axes
+%     xdata = [];
+%     ydata = [];
+%     [x,y,button] = ginput(1);
+%     x = round(x);
+%     y = round(y);
+%     counter = 1;
+%     
+%     while counter<3      
+%         if button == 1
+%             % marker
+%             line(x,y,'Tag','Marker','Marker',marker_type,'MarkerSize',marker_size,...
+%                 'MarkerFaceColor',marker_color,'MarkerEdgeColor',marker_color,'Parent',ax)
+%             % line
+%             if ~isempty(xdata)
+%                 line([x,xdata(end)],[y,ydata(end)],'Tag','Line',...
+%                     'LineWidth',line_width,'Color',marker_color,'Parent',ax);
+%             end
+%             xdata = [xdata;x];
+%             ydata = [ydata;y];
+%             counter = counter+1;
+%             
+%             [x,y,button] = ginput(1);
+%         else
+%             %delete
+%         end
+%     end 
+% else
+% end
 
 end
 
