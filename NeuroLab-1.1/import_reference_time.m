@@ -210,7 +210,7 @@ else
 end
 
 % Interpolate if trigger is not regular
-if strcmp(rec_mode,'BURST-IRREGULAR') || strcmp(rec_mode,'CONTINUOUS-IRREGULAR') || flag==1
+if strcmp(rec_mode,'BURST-IRREGULAR') || strcmp(rec_mode,'CONTINUOUS-IRREGULAR') %|| flag==1
     fprintf('Irregular Timing Detected [%s]: Launching Interpolation.\nFile [%s]\n',rec_mode,file_txt)
     S.Doppler_film = Doppler_film;
     S.trigger = trigger;
@@ -307,11 +307,37 @@ if n_images~= length(trigger_raw)
         
         warning('Trigger (%d) and IM size (%d) do not match [Missing end trig]. -> Adding end trig',length(trigger_raw),n_images);
         discrepant = n_images-length(trigger_raw);
-        padding = sprintf('missing[%d][%s]',discrepant,'extend');
-        % extend trigger using delta_trig
-        delta_trig = trigger_raw(2)-trigger_raw(1);
-        additional_trigs = (1:discrepant)'*delta_trig;
-        trigger = [trigger_raw; trigger_raw(end)+additional_trigs];
+%         padding = sprintf('missing[%d][%s]',discrepant,'extend');
+%         % extend trigger using delta_trig
+%         delta_trig = trigger_raw(2)-trigger_raw(1);
+%         additional_trigs = (1:discrepant)'*delta_trig;
+%         trigger = [trigger_raw; trigger_raw(end)+additional_trigs];
+        
+        % asking user which trigs to keep
+        answer = questdlg(sprintf('Discrepant Trigger [%d] and Doppler Size [%d].\n Where do you want to add trigs ?',length(trigger_raw),n_images), ...
+            'Trigger Importation',...
+            'Add trigs at start','Add trigs to end','Cancel');
+        % Handle response
+        switch answer
+            case 'Add trigs at start'
+                % insert trigger using delta_trig
+                padding = sprintf('missing[%d][%s]',discrepant,'insert');
+                delta_trig = trigger_raw(2)-trigger_raw(1);
+                additional_trigs = (1:discrepant)'*delta_trig;
+                trigger = [trigger_raw(1)-flipud(additional_trigs);trigger_raw];     
+            case 'Add trigs to end'
+                % extend trigger using delta_trig
+                padding = sprintf('missing[%d][%s]',discrepant,'extend');
+                delta_trig = trigger_raw(2)-trigger_raw(1);
+                additional_trigs = (1:discrepant)'*delta_trig;
+                trigger = [trigger_raw; trigger_raw(end)+additional_trigs];
+            otherwise
+                % insert trigger using delta_trig
+                padding = sprintf('missing[%d][%s]',discrepant,'insert');
+                delta_trig = trigger_raw(2)-trigger_raw(1);
+                additional_trigs = (1:discrepant)'*delta_trig;
+                trigger = [trigger_raw(1)-flipud(additional_trigs);trigger_raw];     
+        end
         
         
     elseif length(trigger_raw) > n_images
@@ -411,12 +437,38 @@ if n_images~= length(trigger_raw)
         
         warning('Trigger (%d) and IM size (%d) do not match [Missing end trig]. -> Adding end trig',length(trigger_raw),n_images);
         discrepant = n_images-length(trigger_raw);
-        padding = sprintf('missing[%d][%s]',discrepant,'extend');
-        % extend trigger using delta_trig
-        delta_trig = trigger_raw(2)-trigger_raw(1);
-        additional_trigs = (1:discrepant)'*delta_trig;
-        trigger = [trigger_raw; trigger_raw(end)+additional_trigs];
-        %time_stamp = [time_stamp_raw; time_stamp_raw(end)+time_stamp_raw(2)-time_stamp_raw(1)];
+%         padding = sprintf('missing[%d][%s]',discrepant,'extend');
+%         % extend trigger using delta_trig
+%         delta_trig = trigger_raw(2)-trigger_raw(1);
+%         additional_trigs = (1:discrepant)'*delta_trig;
+%         trigger = [trigger_raw; trigger_raw(end)+additional_trigs];
+%         %time_stamp = [time_stamp_raw; time_stamp_raw(end)+time_stamp_raw(2)-time_stamp_raw(1)];
+        
+                % asking user which trigs to keep
+        answer = questdlg(sprintf('Discrepant Trigger [%d] and Doppler Size [%d].\n Where do you want to add trigs ?',length(trigger_raw),n_images), ...
+            'Trigger Importation',...
+            'Add trigs at start','Add trigs to end','Cancel');
+        % Handle response
+        switch answer
+            case 'Add trigs at start'
+                % insert trigger using delta_trig
+                padding = sprintf('missing[%d][%s]',discrepant,'insert');
+                delta_trig = trigger_raw(2)-trigger_raw(1);
+                additional_trigs = (1:discrepant)'*delta_trig;
+                trigger = [trigger_raw(1)-flipud(additional_trigs);trigger_raw];     
+            case 'Add trigs to end'
+                % extend trigger using delta_trig
+                padding = sprintf('missing[%d][%s]',discrepant,'extend');
+                delta_trig = trigger_raw(2)-trigger_raw(1);
+                additional_trigs = (1:discrepant)'*delta_trig;
+                trigger = [trigger_raw; trigger_raw(end)+additional_trigs];
+            otherwise
+                % insert trigger using delta_trig
+                padding = sprintf('missing[%d][%s]',discrepant,'insert');
+                delta_trig = trigger_raw(2)-trigger_raw(1);
+                additional_trigs = (1:discrepant)'*delta_trig;
+                trigger = [trigger_raw(1)-flipud(additional_trigs);trigger_raw];  
+        end
         
     elseif length(trigger_raw) > n_images
         
