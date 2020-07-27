@@ -509,6 +509,8 @@ for i = 1:length(ind_files)
                     delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
                     rmdir(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'s');
                     success=true;
+                else
+                    success=false;
                 end
                 
             case 'Delete Region Traces'

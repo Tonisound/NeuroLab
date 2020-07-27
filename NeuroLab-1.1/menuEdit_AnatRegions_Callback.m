@@ -1596,10 +1596,6 @@ for i =1:length(r_patches)
     hl.UserData = s;
 end
 
-% Update Mask and Patch aspect
-boxMask_Callback(handles.MaskBox,[],handles);
-boxPatch_Callback(handles.PatchBox,[],handles);
-
 g_patches = handles2.Group_table.UserData.patches;
 for i =1:length(g_patches)
     p = g_patches(i);
@@ -1639,8 +1635,6 @@ for i =1:length(g_patches)
 %     if strcmp(str_rpopup,'Trace Dynamics')
 %         set(hl,'Visible','on');
 %     end
-    boxMask_Callback(handles.MaskBox,[],handles);
-    boxPatch_Callback(handles.PatchBox,[],handles);
     
     % Updating UserData
     s.Name = p.UserData.Name;
@@ -1650,6 +1644,10 @@ for i =1:length(g_patches)
     hq.UserData = hl;
     hl.UserData = s;
 end
+
+% Update Mask and Patch aspect
+boxMask_Callback(handles.MaskBox,[],handles);
+boxPatch_Callback(handles.PatchBox,[],handles);
 
 % Close figure and actualize traces
 handles2.EditFigure.UserData.success = true;

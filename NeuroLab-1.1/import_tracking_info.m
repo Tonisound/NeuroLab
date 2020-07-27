@@ -57,7 +57,7 @@ end
 % Getting coordinates
 x_pixel = [];
 y_pixel = [];
-t_pixel = S.Data.VideoSync.ElapsedTime/1000;
+t_pixel = double(S.Data.VideoSync.ElapsedTime)/1000;
 % fprintf('Getting tracking coordinates [%s]...','Object1'); 
 for i=1:length(S.Data.Tracking.Object1.MarkerCoordinates)
     x_pixel = [x_pixel;S.Data.Tracking.Object1.MarkerCoordinates(i).X];
@@ -104,9 +104,15 @@ else
 end
 
 % Correct y_pixel and calculate speed
-t_pixel = double(t_pixel(2:end));
-x_pixel = double(x_pixel(2:end));
-y_pixel = double(y_pixel(2:end));
+% t_pixel = double(t_pixel(2:end));
+
+% Removing duplicates
+[t_pixel,ia] = unique(t_pixel,'sorted');
+x_pixel = double(x_pixel(ia));
+y_pixel = double(y_pixel(ia));
+%t_pixel = t_pixel(2:end);
+%x_pixel = double(x_pixel(2:end));
+%y_pixel = double(y_pixel(2:end));
 y_pixel = v.Height-y_pixel;
 sx_pixel = [0;diff(x_pixel)/mean(diff(t_pixel))];
 sy_pixel = [0;diff(y_pixel)/mean(diff(t_pixel))];
@@ -128,6 +134,7 @@ f.UserData.v = v;
 f.UserData.video_file = video_file;
 f.UserData.nev_file = nev_file;
 f.UserData.output_file = output_file;
+f.UserData.data_tr = data_tr;
 
 f.UserData.t_pixel = t_pixel;
 f.UserData.x_pixelraw = x_pixel;
@@ -230,15 +237,23 @@ e2 = uicontrol('Style','edit',...
     'Units','normalized',...
     'String','2.35',...
     'TooltipString','Long axis length (m)',...
-    'Tag','Edit1',...
+    'Tag','Edit2',...
     'Parent',f);
 if ~isempty(data_tracking) && isfield(data_tracking,'length_y')
     e2.String = sprintf('%.2f',data_tracking.length_y);
 end
+load('Preferences.mat','GTraces')
+e3 = uicontrol('Style','edit',...
+    'Units','normalized',...
+    'String',GTraces.GaussianSmoothing,...
+    'TooltipString','Smoothing constant (s)',...
+    'Tag','Edit3',...
+    'Parent',f);
 
 % Postion
-e1.Position = [.05 .21 .1 .04];
-e2.Position = [.15 .21 .1 .04];
+e1.Position = [.05 .21 .06 .04];
+e2.Position = [.12 .21 .06 .04];
+e3.Position = [.19 .21 .06 .04];
 axesButton.Position = [.05 .17 .2 .04];
 arenaButton.Position = [.05 .13 .2 .04];
 okButton.Position = [.05 .09 .2 .04];
@@ -248,18 +263,18 @@ ax3.Position = [.525 .06 .2 .15];
 ax4.Position = [.75 .06 .2 .15];
 
 % Interactive Control
-handles = guihandles(f);
+handles2 = guihandles(f);
 
 % callbacks
-%set(e1,'Callback',{@e1_callback,handles});
-set(arenaButton,'Callback',{@arenaButton_callback,handles});
-set(axesButton,'Callback',{@axesButton_callback,handles});
-set(okButton,'Callback',{@okButton_callback,handles});
-set(cancelButton,'Callback',{@cancelButton_callback,handles});
+%set(e1,'Callback',{@e1_callback,handles2});
+set(arenaButton,'Callback',{@arenaButton_callback,handles2});
+set(axesButton,'Callback',{@axesButton_callback,handles2});
+set(okButton,'Callback',{@okButton_callback,handles2,handles});
+set(cancelButton,'Callback',{@cancelButton_callback,handles2});
 
 % Updating UserData and aspect
-% update_imagecrop(handles);
-% e1_callback(e1,[],handles)
+% update_imagecrop(handles2);
+% e1_callback(e1,[],handles2)
 
 waitfor(f);
 success = true;
@@ -275,13 +290,13 @@ close(f);
 
 end
 
-function okButton_callback(~,~,handles)
+function okButton_callback(~,~,handles,old_handles)
 
 ax = handles.AxVideo;
 f = ax.Parent;
 % Arena
 hq = findobj(ax,'Tag','Arena');
-if ~isempty(Vx)
+if ~isempty(hq)
     arena.XData = hq.XData;
     arena.YData = hq.YData;
 else
@@ -314,6 +329,90 @@ length_y = str2double(handles.Edit2.String);
 output_file = f.UserData.output_file;
 save(output_file,'arena','origin','vertex_x','vertex_y','length_x','length_y'); 
 fprintf('Tracking Information Saved [%s].\n',output_file)
+
+% Getting coordinates
+data_tr = f.UserData.data_tr;
+x_pixel = f.UserData.x_pixel;
+y_pixel = f.UserData.y_pixel;
+s_pixel = f.UserData.s_pixel;
+t_pixel = f.UserData.t_pixel;
+
+% Converting to traces
+traces = struct('fullname',{},'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{});
+traces(1).fullname = 'X(pixel)';
+traces(1).X = t_pixel;
+traces(1).Y = x_pixel;
+traces(1).X_ind = data_tr.time_ref.X;
+traces(1).X_im = data_tr.time_ref.Y;
+traces(1).Y_im = interp1(traces(1).X,traces(1).Y,traces(1).X_im);
+traces(2).fullname = 'Y(pixel)';
+traces(2).X = t_pixel;
+traces(2).Y = y_pixel;
+traces(2).X_ind = data_tr.time_ref.X;
+traces(2).X_im = data_tr.time_ref.Y;
+traces(2).Y_im = interp1(traces(2).X,traces(2).Y,traces(2).X_im);
+traces(3).fullname = 'SPEED(pixel)';
+traces(3).X = t_pixel;
+traces(3).Y = s_pixel;
+traces(3).X_ind = data_tr.time_ref.X;
+traces(3).X_im = data_tr.time_ref.Y;
+traces(3).Y_im = interp1(traces(3).X,traces(3).Y,traces(3).X_im);
+
+% Direct Trace Loading
+ind_traces = 1:length(traces);
+% getting lines name
+lines = findobj(old_handles.RightAxes,'Tag','Trace_Cerep');
+lines_name = cell(length(lines),1);
+for i =1:length(lines)
+    lines_name{i} = lines(i).UserData.Name;
+end
+
+for i=1:length(ind_traces)
+    
+    t = traces(ind_traces(i)).fullname;
+    %Adding burst
+    Xtemp = traces(ind_traces(i)).X_ind;
+    Ytemp = traces(ind_traces(i)).Y_im;
+    
+    if sum(strcmp(t,lines_name))>0
+        %line already exists overwrite
+        ind_overwrite = find(strcmp(t,lines_name)==1);
+        lines(ind_overwrite).UserData.Y = traces(ind_traces(i)).Y;
+        lines(ind_overwrite).XData = Xtemp;
+        lines(ind_overwrite).YData = Ytemp;
+        % fprintf('External Trace successfully updated (%s)\n',traces(ind_traces(i)).fullname);
+        fprintf('External Trace successfully updated (%s)\n',t);
+    else
+        %line creation
+        %str = lower(char(traces(ind_traces(i)).fullname));
+        color = rand(1,3);
+        
+        hl = line('XData',Xtemp,...
+            'YData',Ytemp,...
+            'Color',color,...
+            'LineWidth',1,...
+            'Tag','Trace_Cerep',...
+            'Visible','off',...
+            'HitTest','off',...
+            'Parent', old_handles.RightAxes);
+        %         if handles.RightPanelPopup.Value==4
+        %             set(hl,'Visible','on');
+        %         end
+        str_rpopup = strtrim(old_handles.RightPanelPopup.String(old_handles.RightPanelPopup.Value,:));
+        if strcmp(str_rpopup,'Trace Dynamics')
+            set(hl,'Visible','on');
+        end
+        
+        % Line creation
+        s.Name = t;
+        s.Selected = 0;
+        s.X = traces(ind_traces(i)).X;
+        s.Y = traces(ind_traces(i)).Y;
+        hl.UserData = s;
+        fprintf('External Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);
+    end
+    
+end
 
 % Closing
 close(f);
@@ -362,9 +461,9 @@ V = findobj(ax,'Tag','Vertices');
 E = findobj(ax,'Tag','Edges');
     
 if hObj.Value == 1
-    if ~isempty(hq)
-        hq.FaceAlpha = 0.1;
-    end
+    % make previous objects invisible
+    V.Visible ='off';
+    E.Visible ='off';
     % interactive control
     set(f,'WindowButtonDownFcn',{@ax_clickFcn2,handles});
     % disable all other buttons
@@ -374,9 +473,9 @@ if hObj.Value == 1
     end
     hObj.Enable = 'on';
 else   
-    if ~isempty(hq)
-        hq.FaceAlpha = 0;
-    end
+    % make previous objects invisible
+    V.Visible ='off';
+    E.Visible ='off';
     % interactive control
     set(f,'WindowButtonDownFcn','');
     % enable all other buttons
@@ -549,16 +648,40 @@ else
     x_pixel(ind_rm) = NaN;
     y_pixel = y_pixelraw;
     y_pixel(ind_rm) = NaN;
-    s_pixel = s_pixelraw;
-    y_pixel(ind_rm) = NaN;
+%     s_pixel = s_pixelraw;
+%     s_pixel(ind_rm) = NaN;
     % Raw Tracking
     l1.XData = x_pixel;
     l1.YData = y_pixel;
-    % Position Axes
+%     % Position Axes
+%     l2.YData = x_pixel;
+%     l3.YData = y_pixel;
+%     l4.YData = s_pixel; 
+
+%     %Interpolation
+%     x_pixel = interp1(t_pixel(ind_rm==0),x_pixelraw(ind_rm==0),t_pixel);
+%     y_pixel = interp1(t_pixel(ind_rm==0),y_pixelraw(ind_rm==0),t_pixel);
+    
+    % Smoothing
+    n = str2double(handles.Edit3.String)*(round(length(t_pixel)/(t_pixel(end)-t_pixel(1))));
+    x_pixel = nanconv(x_pixel,gausswin(n)/n,'same');
+    y_pixel = nanconv(y_pixel,gausswin(n)/n,'same');
+    
+    % Computing speed
+    sx_pixel = [0;diff(x_pixel)/mean(diff(t_pixel))];
+    sy_pixel = [0;diff(y_pixel)/mean(diff(t_pixel))];
+    s_pixel = sqrt(sx_pixel.^2+sy_pixel.^2);
+    %l1.XData = x_pixel;
+    %l1.YData = y_pixel;
     l2.YData = x_pixel;
     l3.YData = y_pixel;
     l4.YData = s_pixel; 
     
 end
+
+% storing
+f.UserData.x_pixel = l2.YData;
+f.UserData.y_pixel = l3.YData;
+f.UserData.s_pixel = l4.YData;
 
 end
