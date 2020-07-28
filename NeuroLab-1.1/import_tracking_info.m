@@ -21,7 +21,7 @@ end
 
 % Checking TrackingInfo.mat
 if exist(output_file,'file')
-    data_tracking = load(output_file,'arena','origin','vertex_x','vertex_y','length_x','length_y'); 
+    data_tracking = load(output_file,'arena','origin','vertex_x','vertex_y','length_x','length_y','smooth_s'); 
 else
     data_tracking = [];
 end
@@ -33,7 +33,6 @@ if ~exist(fullfile(folder_name,'Time_Reference.mat'),'file')
 else
     data_tr = load(fullfile(folder_name,'Time_Reference.mat'));
     t_ref = data_tr.time_ref.Y;
-    % t_ref = t_ref(1:60:end);
 end
 
 % Loading NEV File
@@ -83,7 +82,6 @@ else
     t2 = min(t_ref(end),v.Duration-1);
     n_frames = 10;
     t_samp = rescale(1:n_frames,t1,t2);
-    t_interp = t_ref;
     fprintf('Opening Video - Extracting %d frames [%s] ...',n_frames,F.video);
     
     all_frames = [];
@@ -110,9 +108,6 @@ end
 [t_pixel,ia] = unique(t_pixel,'sorted');
 x_pixel = double(x_pixel(ia));
 y_pixel = double(y_pixel(ia));
-%t_pixel = t_pixel(2:end);
-%x_pixel = double(x_pixel(2:end));
-%y_pixel = double(y_pixel(2:end));
 y_pixel = v.Height-y_pixel;
 sx_pixel = [0;diff(x_pixel)/mean(diff(t_pixel))];
 sy_pixel = [0;diff(y_pixel)/mean(diff(t_pixel))];
@@ -155,7 +150,11 @@ imagesc(mean(all_frames,3,'omitnan'),'Parent',ax,'Tag','ImageVideo');
 %ax.YTickLabel=[];
 ax.Tag = 'AxVideo';
 
-% Adding tracking coordinates
+% All tracking
+line('XData',f.UserData.x_pixelraw,'YData',f.UserData.y_pixelraw,'Parent',ax,'Tag','AllTracking',...
+        'LineWidth',.01,'LineStyle','-','Color',[.5 .5 .5],...
+        'Marker','o','MarkerSize',1,'MarkerFaceColor',[.5 .5 .5],'Visible','off');
+% Adding tracking coordinates    
 line('XData',x_pixel,'YData',y_pixel,'Parent',ax,'Tag','RawTracking',...
     'LineWidth',.01,'LineStyle','-','Color','r',...
     'Marker','o','MarkerSize',1,'MarkerFaceColor','r');
@@ -168,36 +167,30 @@ if ~isempty(data_tracking) && ~isempty(data_tracking.arena)
         'FaceAlpha',0,...
         'LineWidth',1,...
         'Parent',ax);
-    % Adding sticker
-    text(data_tracking.arena.XData(1),data_tracking.arena.YData(1),'arena',...
-        'FontSize',8,...
-        'BackgroundColor','y',...
-        'EdgeColor','y',...
-        'Color','k',...
-        'Parent',ax,...
-        'Tag','StickerArena',...
-        'Visible','on');
 end
 
+
 % Position Axes
-ax2 = axes('Parent',f,'Tag','AxPositionX','Title','X vs time',...
-    'TickLength',[0 0],'XTick',[],'XTickLabel','','YTick',[],'YTickLabel','');
+% ax2 = axes('Parent',f,'Tag','AxPositionX','Title','X vs time',...
+%     'TickLength',[0 0],'XTick',[],'XTickLabel','','YTick',[],'YTickLabel','');
+ax2 = axes('Parent',f,'Tag','AxPositionX','Title','X vs time');
 line('XData',t_pixel,'YData',x_pixel,'Color','b','Parent',ax2,'Tag','RawX');
 ax2.XLim = [t_pixel(1) t_pixel(end)];
 ax2.Title.String = 'X(t)';
 
-ax3 = axes('Parent',f,'Tag','AxPositionY','Title','Y vs time',...
-    'TickLength',[0 0],'XTick',[],'XTickLabel','','YTick',[],'YTickLabel','');
+% ax3 = axes('Parent',f,'Tag','AxPositionY','Title','Y vs time',...
+%     'TickLength',[0 0],'XTick',[],'XTickLabel','','YTick',[],'YTickLabel','');
+ax3 = axes('Parent',f,'Tag','AxPositionY','Title','Y vs time');
 line('XData',t_pixel,'YData',y_pixel,'Color','b','Parent',ax3,'Tag','RawY');
 ax3.XLim = [t_pixel(1) t_pixel(end)];
 ax3.Title.String = 'Y(t)';
 
-ax4 = axes('Parent',f,'Tag','AxSpeed','Title','Speed vs time',...
-    'TickLength',[0 0],'XTick',[],'XTickLabel','','YTick',[],'YTickLabel','');
+% ax4 = axes('Parent',f,'Tag','AxSpeed','Title','Speed vs time',...
+%    'TickLength',[0 0],'XTick',[],'XTickLabel','','YTick',[],'YTickLabel','');
+ax4 = axes('Parent',f,'Tag','AxSpeed','Title','Speed vs time');
 line('XData',t_pixel,'YData',s_pixel,'Color','b','Parent',ax4,'Tag','RawS');
 ax4.XLim = [t_pixel(1) t_pixel(end)];
 ax4.Title.String = 'V(t)';
-
 
 % Buttons
 arenaButton = uicontrol('Style','togglebutton',... 
@@ -205,12 +198,6 @@ arenaButton = uicontrol('Style','togglebutton',...
     'Value',0,...
     'String','Update Arena',...
     'Tag','arenaButton',...
-    'Parent',f);
-axesButton = uicontrol('Style','togglebutton',... 
-    'Units','normalized',...
-    'Value',0,...
-    'String','Update Axes',...
-    'Tag','axesButton',...
     'Parent',f);
 okButton = uicontrol('Style','pushbutton',... 
     'Units','normalized',...
@@ -226,21 +213,25 @@ cancelButton = uicontrol('Style','pushbutton',...
 % Edits
 e1 = uicontrol('Style','edit',... 
     'Units','normalized',...
-    'String','0.20',...
-    'TooltipString','Short axis length (m)',...
+    'String','2.35',...
+    'TooltipString','Long Axis (X,m)',...
     'Tag','Edit1',...
     'Parent',f);
-if ~isempty(data_tracking) && isfield(data_tracking,'length_x')
+f.UserData.length_x = str2double(e1.String);
+if ~isempty(data_tracking) && isfield(data_tracking,'length_x') && ~isempty(data_tracking.length_x)
     e1.String = sprintf('%.2f',data_tracking.length_x);
+    f.UserData.length_x = data_tracking.length_x;
 end
 e2 = uicontrol('Style','edit',... 
     'Units','normalized',...
-    'String','2.35',...
-    'TooltipString','Long axis length (m)',...
+    'String','0.20',...
+    'TooltipString','Short Axis length (Y,m)',...
     'Tag','Edit2',...
     'Parent',f);
-if ~isempty(data_tracking) && isfield(data_tracking,'length_y')
+f.UserData.length_y = str2double(e2.String);
+if ~isempty(data_tracking) && isfield(data_tracking,'length_y') && ~isempty(data_tracking.length_y)
     e2.String = sprintf('%.2f',data_tracking.length_y);
+    f.UserData.length_y = data_tracking.length_y;
 end
 load('Preferences.mat','GTraces')
 e3 = uicontrol('Style','edit',...
@@ -249,15 +240,19 @@ e3 = uicontrol('Style','edit',...
     'TooltipString','Smoothing constant (s)',...
     'Tag','Edit3',...
     'Parent',f);
+f.UserData.smooth_s = str2double(e3.String);
+if ~isempty(data_tracking) && isfield(data_tracking,'smooth_s') && ~isempty(data_tracking.smooth_s)
+    e3.String = sprintf('%.2f',data_tracking.smooth_s);
+    f.UserData.smooth_s = data_tracking.smooth_s;
+end
 
 % Postion
-e1.Position = [.05 .21 .06 .04];
-e2.Position = [.12 .21 .06 .04];
-e3.Position = [.19 .21 .06 .04];
-axesButton.Position = [.05 .17 .2 .04];
-arenaButton.Position = [.05 .13 .2 .04];
-okButton.Position = [.05 .09 .2 .04];
-cancelButton.Position = [.05 .05 .2 .04];
+e1.Position = [.05 .2 .06 .05];
+e2.Position = [.12 .2 .06 .05];
+e3.Position = [.19 .2 .06 .05];
+arenaButton.Position = [.05 .15 .2 .05];
+okButton.Position = [.05 .1 .2 .05];
+cancelButton.Position = [.05 .05 .2 .05];
 ax2.Position = [.3 .06 .2 .15];
 ax3.Position = [.525 .06 .2 .15];
 ax4.Position = [.75 .06 .2 .15];
@@ -266,15 +261,18 @@ ax4.Position = [.75 .06 .2 .15];
 handles2 = guihandles(f);
 
 % callbacks
-%set(e1,'Callback',{@e1_callback,handles2});
+set(e1,'Callback',{@e1_callback,handles2});
+set(e2,'Callback',{@e2_callback,handles2});
+set(e3,'Callback',{@e3_callback,handles2});
 set(arenaButton,'Callback',{@arenaButton_callback,handles2});
-set(axesButton,'Callback',{@axesButton_callback,handles2});
 set(okButton,'Callback',{@okButton_callback,handles2,handles});
 set(cancelButton,'Callback',{@cancelButton_callback,handles2});
 
-% Updating UserData and aspect
-% update_imagecrop(handles2);
-% e1_callback(e1,[],handles2)
+% Update tracking
+update_tracking(handles2);
+
+% Smoothing
+e3_callback(e3,[],handles2);
 
 waitfor(f);
 success = true;
@@ -299,8 +297,14 @@ hq = findobj(ax,'Tag','Arena');
 if ~isempty(hq)
     arena.XData = hq.XData;
     arena.YData = hq.YData;
+    t1 = 'X(m)';
+    t2 = 'Y(m)';
+    t3 = 'SPEED';
 else
     arena = [];
+    t1 = 'X(pixel)';
+    t2 = 'Y(pixel)';
+    t3 = 'SPEED(pixel)';
 end
 % Vertices
 V0 = findobj(ax,'Tag','Origin');
@@ -315,19 +319,21 @@ if ~isempty(Vx)
 else
     vertex_x = [];
 end
-Vy = findobj(ax,'Tag','VertexX');
+Vy = findobj(ax,'Tag','VertexY');
 if ~isempty(Vy)
     vertex_y = [Vy.XData,Vy.YData];
 else
     vertex_y = [];
 end
+
 % Axes
-length_x = str2double(handles.Edit1.String);
-length_y = str2double(handles.Edit2.String);
+length_x = f.UserData.length_x;
+length_y = f.UserData.length_y;
+smooth_s = f.UserData.smooth_s;
 
 % Checking TrackingInfo.mat
 output_file = f.UserData.output_file;
-save(output_file,'arena','origin','vertex_x','vertex_y','length_x','length_y'); 
+save(output_file,'arena','origin','vertex_x','vertex_y','length_x','length_y','smooth_s'); 
 fprintf('Tracking Information Saved [%s].\n',output_file)
 
 % Getting coordinates
@@ -339,19 +345,19 @@ t_pixel = f.UserData.t_pixel;
 
 % Converting to traces
 traces = struct('fullname',{},'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{});
-traces(1).fullname = 'X(pixel)';
+traces(1).fullname = t1;
 traces(1).X = t_pixel;
 traces(1).Y = x_pixel;
 traces(1).X_ind = data_tr.time_ref.X;
 traces(1).X_im = data_tr.time_ref.Y;
 traces(1).Y_im = interp1(traces(1).X,traces(1).Y,traces(1).X_im);
-traces(2).fullname = 'Y(pixel)';
+traces(2).fullname = t2;
 traces(2).X = t_pixel;
 traces(2).Y = y_pixel;
 traces(2).X_ind = data_tr.time_ref.X;
 traces(2).X_im = data_tr.time_ref.Y;
 traces(2).Y_im = interp1(traces(2).X,traces(2).Y,traces(2).X_im);
-traces(3).fullname = 'SPEED(pixel)';
+traces(3).fullname = t3;
 traces(3).X = t_pixel;
 traces(3).Y = s_pixel;
 traces(3).X_ind = data_tr.time_ref.X;
@@ -424,6 +430,7 @@ function arenaButton_callback(hObj,~,handles)
 f = handles.TrackingFigure;
 ax = findobj(f,'Tag','AxVideo');
 hq = findobj(ax,'Tag','Arena');
+l5 = findobj(ax,'Tag','AllTracking');
     
 if hObj.Value == 1
     if ~isempty(hq)
@@ -437,6 +444,17 @@ if hObj.Value == 1
         all_buttons(i).Enable = 'off';
     end
     hObj.Enable = 'on';
+    
+    % Turn all tracking on
+    l5.Visible = 'on';
+    
+    % Delete objects
+    delete(findobj(ax,'Tag','StickerArena'));
+    delete(findobj(ax,'Tag','StickerX'));
+    delete(findobj(ax,'Tag','StickerY'));
+    delete(findobj(ax,'Tag','Origin'));
+    delete(findobj(ax,'Tag','VertexX')); 
+    delete(findobj(ax,'Tag','VertexY'));
 else   
     if ~isempty(hq)
         hq.FaceAlpha = 0;
@@ -447,76 +465,13 @@ else
     for i=1:length(all_buttons)
         all_buttons(i).Enable = 'on';
     end
-    % update tracking
-    update_tracking(handles);   
-end
-
-end
-
-function axesButton_callback(hObj,~,handles)
-
-f = handles.TrackingFigure;
-ax = findobj(f,'Tag','AxVideo');
-V = findobj(ax,'Tag','Vertices');
-E = findobj(ax,'Tag','Edges');
     
-if hObj.Value == 1
-    % make previous objects invisible
-    V.Visible ='off';
-    E.Visible ='off';
-    % interactive control
-    set(f,'WindowButtonDownFcn',{@ax_clickFcn2,handles});
-    % disable all other buttons
-    all_buttons = findobj(handles.TrackingFigure,'Style','togglebutton','-or','Style','pushbutton');
-    for i=1:length(all_buttons)
-        all_buttons(i).Enable = 'off';
-    end
-    hObj.Enable = 'on';
-else   
-    % make previous objects invisible
-    V.Visible ='off';
-    E.Visible ='off';
-    % interactive control
-    set(f,'WindowButtonDownFcn','');
-    % enable all other buttons
-    all_buttons = findobj(handles.TrackingFigure,'Style','togglebutton','-or','Style','pushbutton');
-    for i=1:length(all_buttons)
-        all_buttons(i).Enable = 'on';
-    end
+    % Turn all tracking off
+    l5.Visible = 'off';
+    
     % update tracking
     update_tracking(handles);   
 end
-
-% if hObj.Value == 1
-%     % Draw axes
-%     xdata = [];
-%     ydata = [];
-%     [x,y,button] = ginput(1);
-%     x = round(x);
-%     y = round(y);
-%     counter = 1;
-%     
-%     while counter<3      
-%         if button == 1
-%             % marker
-%             line(x,y,'Tag','Marker','Marker',marker_type,'MarkerSize',marker_size,...
-%                 'MarkerFaceColor',marker_color,'MarkerEdgeColor',marker_color,'Parent',ax)
-%             % line
-%             if ~isempty(xdata)
-%                 line([x,xdata(end)],[y,ydata(end)],'Tag','Line',...
-%                     'LineWidth',line_width,'Color',marker_color,'Parent',ax);
-%             end
-%             xdata = [xdata;x];
-%             ydata = [ydata;y];
-%             counter = counter+1;
-%             
-%             [x,y,button] = ginput(1);
-%         else
-%             %delete
-%         end
-%     end 
-% else
-% end
 
 end
 
@@ -530,6 +485,10 @@ pt_cp = round(ax.CurrentPoint);
 delete(findobj(ax,'Tag','Movable_Arena'));
 delete(findobj(ax,'Tag','Arena'));
 delete(findobj(ax,'Tag','StickerArena'));
+% delete origin, vertex_x, vertex_y
+delete(findobj(ax,'Tag','Origin'));
+delete(findobj(ax,'Tag','VertexX'));
+delete(findobj(ax,'Tag','VertexY'));
 
 x = [pt_cp(1,1),pt_cp(1,1),pt_cp(1,1),pt_cp(1,1)];
 y = [pt_cp(1,2),pt_cp(1,2),pt_cp(1,2),pt_cp(1,2)];
@@ -577,29 +536,106 @@ f = hObj;
 ax = findobj(f,'Tag','AxVideo');
 
 % Converting Movable to Fixed
-% hq = findobj(ax,'Tag','Movable_Arena');
-% set(hq,'Tag','Arena','HitTest','on','ButtonDownFcn',{@click_Arena,handles});
 hq = findobj(ax,'Tag','Movable_Arena');
 set(hq,'Tag','Arena');
 set(hObj,'Pointer','arrow');
 set(hObj,'WindowButtonMotionFcn','');
 set(hObj,'WindowButtonUp','');
 
-% Adding sticker
-if ~isempty(hq)
-    text(hq.XData(1),hq.YData(1),'arena',...
-        'FontSize',8,...
-        'BackgroundColor','y',...
-        'EdgeColor','y',...
-        'Color','k',...
-        'Parent',ax,...
-        'Tag','StickerArena',...
-        'Visible','on');
+% Compute smoothed trajectory
+[x,y,s,x_,y_] = compute_trajectory(f);
+
+% Finding lines and update
+l1 = findobj(ax,'Tag','RawTracking');
+l1.XData = x_;
+l1.YData = y_;
+
+ax2 = handles.AxPositionX;
+l2 = findobj(ax2,'Tag','RawX');
+l2.YData = x;
+
+ax3 = handles.AxPositionY;
+l3 = findobj(ax3,'Tag','RawY');
+l3.YData = y;
+
+ax4 = handles.AxSpeed;
+l4 = findobj(ax4,'Tag','RawS');
+l4.YData = s;
+
+% Storing
+f.UserData.x_pixel = l2.YData;
+f.UserData.y_pixel = l3.YData;
+f.UserData.s_pixel = l4.YData;
+
 end
 
-%handles.arenaButton.Value = 0;
-%set(f,'WindowButtonDownFcn','');
-%update_tracking(handles);
+function [x_smooth,y_smooth,s_smooth,x_,y_] = compute_trajectory(f)
+
+ax = findobj(f,'Tag','AxVideo');
+hq = findobj(ax,'Tag','Arena');
+
+% Raw coordinates
+x_pixelraw = f.UserData.x_pixelraw;
+y_pixelraw = f.UserData.y_pixelraw;
+s_pixelraw = f.UserData.s_pixelraw;
+t_pixel = f.UserData.t_pixel;
+smooth_s = f.UserData.smooth_s;
+length_x = f.UserData.length_x;
+length_y = f.UserData.length_y;
+
+if isempty(hq)
+    % Raw Tracking
+    x_smooth = x_pixelraw;
+    y_smooth = y_pixelraw;
+    %s_smooth = s_pixelraw;
+    % Smoothing
+    n = smooth_s*(round(length(t_pixel)/(t_pixel(end)-t_pixel(1))));
+    s_smooth = nanconv(s_pixelraw,gausswin(n)/n,'same');
+    x_ = x_smooth;
+    y_ = y_smooth;
+else
+    x1 = min(hq.XData);
+    x2 = max(hq.XData);
+    y1 = min(hq.YData);
+    y2 = max(hq.YData);
+    
+    % Finding dots to remove
+    ind_rmx = ((x_pixelraw-x1).*(x_pixelraw-x2))>0;
+    ind_rmy = ((y_pixelraw-y1).*(y_pixelraw-y2))>0;
+    ind_rm = (ind_rmx+ind_rmy)>0;
+    % Remove dots
+    x_pixel = x_pixelraw;
+    x_pixel(ind_rm) = NaN;
+    x_ = x_pixel;
+    y_pixel = y_pixelraw;
+    y_pixel(ind_rm) = NaN;
+    y_ = y_pixel;
+    
+%     % Smoothing
+%     n = smooth_s*(round(length(t_pixel)/(t_pixel(end)-t_pixel(1))));
+%     x_pixel = nanconv(x_pixel,gausswin(n)/n,'same');
+%     y_pixel = nanconv(y_pixel,gausswin(n)/n,'same');
+    
+    % Updating Units
+    ratio_pixel_x = length_x/(x2-x1);
+    ratio_pixel_y = length_y/(y2-y1);
+    x_pixel = (x_pixel-x1)*ratio_pixel_x;
+    y_pixel = (y_pixel-y1)*ratio_pixel_y;
+    
+    % Computing speed
+    sx_pixel = [0;diff(x_pixel)/mean(diff(t_pixel))];
+    sy_pixel = [0;diff(y_pixel)/mean(diff(t_pixel))];
+    s_pixel = sqrt(sx_pixel.^2+sy_pixel.^2);
+    
+    % Smoothing
+    n = smooth_s*(round(length(t_pixel)/(t_pixel(end)-t_pixel(1))));
+    s_pixel = nanconv(s_pixel,gausswin(n)/n,'same');
+    
+    % Return output
+    x_smooth = x_pixel;
+    y_smooth = y_pixel;
+    s_smooth = s_pixel;
+end
 
 end
 
@@ -607,79 +643,126 @@ function update_tracking(handles)
 % Update Tracking Information
 
 ax = handles.AxVideo;
-f = ax.Parent;
-
-l1 = findobj(ax,'Tag','RawTracking');
-ax2 = handles.AxPositionX;
-l2 = findobj(ax2,'Tag','RawX');
-ax3 = handles.AxPositionY;
-l3 = findobj(ax3,'Tag','RawY');
-ax4 = handles.AxSpeed;
-l4 = findobj(ax4,'Tag','RawS');
-
-% Raw coordinates
-x_pixelraw = f.UserData.x_pixelraw;
-y_pixelraw = f.UserData.y_pixelraw;
-s_pixelraw = f.UserData.s_pixelraw;
-t_pixel = f.UserData.t_pixel;
-
-% Getting arena coordinates
 hq = findobj(ax,'Tag','Arena');
-if isempty(hq)
-    % Raw Tracking
-    l1.XData = x_pixelraw;
-    l1.YData = y_pixelraw;
-    % Position Axes
-    l2.YData = x_pixelraw;
-    l3.YData = y_pixelraw;
-    l4.YData = s_pixelraw;
- 
-else
+
+if ~isempty(hq)
+    
     x1 = min(hq.XData);
     x2 = max(hq.XData);
     y1 = min(hq.YData);
     y2 = max(hq.YData);
-    % Finding dots to remove
-    ind_rmx = ((l1.XData-x1).*(l1.XData-x2))>0;
-    ind_rmy = ((l1.YData-y1).*(l1.YData-y2))>0;
-    ind_rm = (ind_rmx+ind_rmy)>0;
-    % Update
-    x_pixel = x_pixelraw;
-    x_pixel(ind_rm) = NaN;
-    y_pixel = y_pixelraw;
-    y_pixel(ind_rm) = NaN;
-%     s_pixel = s_pixelraw;
-%     s_pixel(ind_rm) = NaN;
-    % Raw Tracking
-    l1.XData = x_pixel;
-    l1.YData = y_pixel;
-%     % Position Axes
-%     l2.YData = x_pixel;
-%     l3.YData = y_pixel;
-%     l4.YData = s_pixel; 
-
-%     %Interpolation
-%     x_pixel = interp1(t_pixel(ind_rm==0),x_pixelraw(ind_rm==0),t_pixel);
-%     y_pixel = interp1(t_pixel(ind_rm==0),y_pixelraw(ind_rm==0),t_pixel);
     
-    % Smoothing
-    n = str2double(handles.Edit3.String)*(round(length(t_pixel)/(t_pixel(end)-t_pixel(1))));
-    x_pixel = nanconv(x_pixel,gausswin(n)/n,'same');
-    y_pixel = nanconv(y_pixel,gausswin(n)/n,'same');
+    % Drawing origin, vertex_x, vertex_y
+    line('XData',x1,'YData',y1,'Tag','Origin','Parent',ax,...
+        'Marker','o','MarkerSize',5,'MarkerFaceColor','y','MarkerEdgeColor',[.5 .5 .5]);
+    line('XData',x2,'YData',y1,'Tag','VertexX','Parent',ax,...
+        'Marker','o','MarkerSize',5,'MarkerFaceColor','y','MarkerEdgeColor',[.5 .5 .5]);
+    line('XData',x1,'YData',y2,'Tag','VertexY','Parent',ax,...
+        'Marker','o','MarkerSize',5,'MarkerFaceColor','y','MarkerEdgeColor',[.5 .5 .5]);
     
-    % Computing speed
-    sx_pixel = [0;diff(x_pixel)/mean(diff(t_pixel))];
-    sy_pixel = [0;diff(y_pixel)/mean(diff(t_pixel))];
-    s_pixel = sqrt(sx_pixel.^2+sy_pixel.^2);
-    %l1.XData = x_pixel;
-    %l1.YData = y_pixel;
-    l2.YData = x_pixel;
-    l3.YData = y_pixel;
-    l4.YData = s_pixel; 
-    
+    % Adding stickers
+    text(mean(hq.XData),mean(hq.YData),'arena',...
+        'FontSize',8,...
+        'BackgroundColor','y',...
+        'EdgeColor','y',...
+        'Color','k',...
+        'Parent',ax,...
+        'Tag','StickerArena',...
+        'Visible','on');
+     % Adding sticker
+    text((x1+x2)/2,y1,sprintf('%.2f',str2double(handles.Edit1.String)),...
+        'FontSize',8,'BackgroundColor',[.5 .5 .5],'EdgeColor','y','Color','k','Parent',ax,'Tag','StickerX','Visible','on');
+    text(x1,(y1+y2)/2,sprintf('%.2f',str2double(handles.Edit2.String)),...
+        'FontSize',8,'BackgroundColor',[.5 .5 .5],'EdgeColor','y','Color','k','Parent',ax,'Tag','StickerY','Visible','on');
 end
 
-% storing
+end
+
+function e1_callback(hObj,~,handles)
+
+ax = handles.AxVideo;
+f = ax.Parent;
+f.UserData.length_x = str2double(hObj.String);
+
+hq = findobj(ax,'Tag','StickerX');
+if ~isempty(hq)
+    hq.String = sprintf('%.2f',f.UserData.length_x);
+end
+
+% Update units
+[x,y,s] = compute_trajectory(f);
+ax2 = handles.AxPositionX;
+l2 = findobj(ax2,'Tag','RawX');
+l2.YData = x;
+
+ax3 = handles.AxPositionY;
+l3 = findobj(ax3,'Tag','RawY');
+l3.YData = y;
+
+ax4 = handles.AxSpeed;
+l4 = findobj(ax4,'Tag','RawS');
+l4.YData = s;
+
+% Storing
+f.UserData.x_pixel = l2.YData;
+f.UserData.y_pixel = l3.YData;
+f.UserData.s_pixel = l4.YData;
+
+end
+
+function e2_callback(hObj,~,handles)
+
+ax = handles.AxVideo;
+f = ax.Parent;
+f.UserData.length_y = str2double(hObj.String);
+
+hq = findobj(ax,'Tag','StickerY');
+if ~isempty(hq)
+    hq.String = sprintf('%.2f',f.UserData.length_y);
+end
+
+% Update units
+[x,y,s] = compute_trajectory(f);
+ax2 = handles.AxPositionX;
+l2 = findobj(ax2,'Tag','RawX');
+l2.YData = x;
+
+ax3 = handles.AxPositionY;
+l3 = findobj(ax3,'Tag','RawY');
+l3.YData = y;
+
+ax4 = handles.AxSpeed;
+l4 = findobj(ax4,'Tag','RawS');
+l4.YData = s;
+
+% Storing
+f.UserData.x_pixel = l2.YData;
+f.UserData.y_pixel = l3.YData;
+f.UserData.s_pixel = l4.YData;
+
+end
+
+function e3_callback(hObj,~,handles)
+
+ax = handles.AxVideo;
+f = ax.Parent;
+f.UserData.smooth_s = str2double(hObj.String);
+
+% Update units
+[x,y,s] = compute_trajectory(f);
+ax2 = handles.AxPositionX;
+l2 = findobj(ax2,'Tag','RawX');
+l2.YData = x;
+
+ax3 = handles.AxPositionY;
+l3 = findobj(ax3,'Tag','RawY');
+l3.YData = y;
+
+ax4 = handles.AxSpeed;
+l4 = findobj(ax4,'Tag','RawS');
+l4.YData = s;
+
+% Storing
 f.UserData.x_pixel = l2.YData;
 f.UserData.y_pixel = l3.YData;
 f.UserData.s_pixel = l4.YData;
