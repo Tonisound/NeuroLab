@@ -38,6 +38,9 @@ switch strtrim(str(val,:))
     case 'Detect Vascular Surges'
         detect_vascular_surges(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Detect Locomotion Events'
+        detect_locomotion_events(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        
     case 'Detect Left-Right Runs'
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
