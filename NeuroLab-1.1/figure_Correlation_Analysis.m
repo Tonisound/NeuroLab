@@ -67,8 +67,9 @@ f2.UserData.data_tt = data_tt;
 
 % Parameters
 % Lag Intervals for batch mode
-f2.UserData.slider_values.lag1 = [-2;2];
-f2.UserData.slider_values.lag2 = [-1;3];
+f2.UserData.slider_values.lag1 = [-10;10];
+f2.UserData.slider_values.lag2 = [-5;15];
+%f2.UserData.slider_values.lag2 = [-100;500];
 
 
 % Information Panel
@@ -138,6 +139,7 @@ t9 = uicontrol('Units','normalized',...
     'HorizontalAlignment','left',...
     'Parent',iP,...
     'String',sprintf('Lag (s) : 0'),...
+    'BackgroundColor','w',...
     'Tag','Text9');
 t9.UserData.time_ref = time_ref;
 
@@ -145,16 +147,16 @@ c1 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'HorizontalAlignment','left',...
     'Parent',iP,...
-    'Value',1,...
-    'TooltipString','Include reference in matrix',...
+    'Value',0,...
+    'TooltipString','Skip Full Map computation (Traces only)',...
     'Tag','Checkbox1');
-c3 = uicontrol('Units','normalized',...
+c2 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'HorizontalAlignment','left',...
     'Parent',iP,...
     'Value',0,...
     'TooltipString','Full Map Saving',...
-    'Tag','Checkbox3');
+    'Tag','Checkbox2');
 
 e1 = uicontrol('Units','normalized',...
     'Style','edit',...
@@ -167,6 +169,13 @@ e2 = uicontrol('Units','normalized',...
     'Parent',iP,...
     'Tag','Edit2',...
     'Tooltipstring','Maximum Lag');
+e3 = uicontrol('Units','normalized',...
+    'Style','edit',...
+    'HorizontalAlignment','center',...
+    'Parent',iP,...
+    'String',1,...
+    'Tag','Edit3',...
+    'Tooltipstring','Lag Step');
 
 bc = uicontrol('Units','normalized',...
     'Style','pushbutton',...
@@ -211,10 +220,12 @@ p2.Position = [4/10     4.5/10   2/10   1/4];
 p3.Position = [6/10     4.5/10   2/10   1/4];
 t9.Position = [4/10     .5/10  1/10   1/5];
 c1.Position = [5.2/10     2.5/10  1/20   1/6];
-c3.Position = [5.2/10     0.5/10  1/20  1/6];
+c2.Position = [5.2/10     0.5/10  1/20  1/6];
 s1.Position = [6/10    .5/10  1.5/10   1/5];
 e1.Position = [5.5/10    .5/10  .5/10   1/4];
 e2.Position = [7.5/10    .5/10  .5/10   1/4];
+e3.Position = [4/10     2.5/10  1/10   1/5];
+
 bc.Position = [8/10     2/3      1/10   1/3];
 bcl.Position = [9/10     2/3      1/10   1/3];
 br.Position = [8/10     1/3      1/10   1/3];
@@ -304,7 +315,7 @@ e1 = uicontrol('Units','normalized',...
     'Tag','Cmin_1',...
     'Callback', {@update_caxis,ax1,c1,1},...
     'Tooltipstring','CMin 2');
-e2 =uicontrol('Units','normalized',...
+e2 = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',aP1,...
@@ -817,12 +828,15 @@ handles.Slider.UserData.ref_color = ref_color;
 fprintf('Reference Object : %s\n',ref_name);
 handles.ButtonReset.UserData.ref_name = ref_name;
 
-test_hother = ~handles.Checkbox1.Value;
+test_hother = false;
 if test_hother
+    % Include reference in matrix
     h_other = h_all(~ismember(h_all,h_ref));
 else
+    % Exclude reference in matrix
     h_other = h_all;
 end
+
 
 % Selecting Time indices
 if ~isempty(handles.Group_table.UserData.Selection)
@@ -863,7 +877,7 @@ end
 % Compute Correlation Map
 str1 = strtrim(handles.Popup2.String(handles.Popup2.Value,:));
 str2 = strtrim(handles.Popup3.String(handles.Popup3.Value,:));
-[C_map,P_map] = compute_correlationmap(IM,xdata.^2,lags,Time_indices,str1,str2);
+[C_map,P_map] = compute_correlationmap(IM,xdata.^2,lags,Time_indices,str1,str2,handles);
 handles.Slider.UserData.C_map = C_map;
 handles.Slider.UserData.P_map = P_map;
 title(handles.CenterAxes,sprintf('Pixel Correlation map (Ref: %s)',ref_name));
@@ -1324,6 +1338,109 @@ handles.MainFigure.UserData.success = true;
 
 end
 
+function [C_map,P_val] = compute_correlationmap(im,xdat,lags,Time_indices,str1,str2,handles)
+% Compute Correlation Map between all pixel in image im 
+% and ref_series with different time lags specified in lags
+
+global DIR_SAVE FILES CUR_FILE;
+
+try
+    data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
+        'time_ref','length_burst','n_burst','rec_mode');
+%     length_burst = data_tr.length_burst;
+%     n_burst = data_tr.n_burst;
+    length_burst = length(data_tr.time_ref.Y);
+    n_burst = 1;
+catch
+    warning('Missing File %s',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
+    length_burst = size(IM,3);
+    n_burst =1;
+end
+
+if nargin<5
+    str1 = 'Pearson';
+    str2 = 'both';
+end
+
+% Reshaping xdat 
+xdat = reshape(xdat,[length_burst+1,n_burst]);
+xdat = reshape(xdat(1:end-1,:),[length_burst*n_burst,1]);
+xdat(Time_indices==0) = NaN;
+
+% Reshape im as time_series
+ydat = reshape(permute(im,[3,1,2]),[size(im,3) size(im,1)*size(im,2)]);
+ydat(Time_indices==0,:) = NaN;
+
+% Adding NaN Values between each burst
+Xdat = [reshape(xdat,[length_burst,n_burst]);NaN(length(lags),n_burst)];
+Xdat = Xdat(:);
+Ydat = [reshape(ydat,[length_burst,n_burst*size(ydat,2)]);NaN(length(lags),n_burst*size(ydat,2))];
+Ydat = reshape(Ydat,[(length_burst+length(lags))*n_burst, size(ydat,2)]);
+
+% Test if Computation is skipped
+if handles.Checkbox1.Value
+    % Skip computation
+    C_map = rand(size(im,1),size(im,2),length(lags));
+    P_val = rand(size(im,1),size(im,2),length(lags));
+else
+    % Computing Correlation Map
+    fprintf('Computing Correlation map (%s,%s) \nLags: %s...',str1,str2,mat2str(lags));
+    count=0;
+    C_map = NaN(size(im,1),size(im,2),length(lags));
+    P_val = NaN(size(im,1),size(im,2),length(lags));
+    h = waitbar(0,'Computing correlation map: 0.0 % completed.');
+    for k=1:length(lags)
+        tic
+        t = lags(k);
+        count=count+1;
+        i = max(1,1+t);
+        j = min(length(Xdat),length(Xdat)+t);
+        i_ref = max(1,1-t);
+        j_ref = min(length(Xdat),length(Xdat)-t);
+        Y_sub = double(Ydat(i:j,:));
+        X_sub = Xdat(i_ref:j_ref);
+        [c,p] = corr(Y_sub,X_sub,'rows','pairwise','type',str1,'tail',str2);
+        c = reshape(c,[size(im,1),size(im,2)]);
+        p = reshape(p,[size(im,1),size(im,2)]);
+        C_map(:,:,count)=c;
+        P_val(:,:,count)=p;
+        fprintf('> Lag %d/%d completed.\n',k,length(lags));
+        waitbar(k/length(lags),h,sprintf('Computing correlation map: %.1f %% completed.',100*k/length(lags)));
+        toc
+    end
+    close(h);
+    fprintf('... Done.\n');
+end
+end
+
+function [C_map,P_val] = compute_correlogramm(series,lags)
+% Compute Correlogramm between all vectors in series 
+% with different time lags specified in lags
+
+fprintf('Computing Correlogram with delays %s...',mat2str(lags));
+
+C_map = NaN(size(series,2),size(series,2),length(lags));
+P_val = NaN(size(series,2),size(series,2),length(lags));
+
+for k=1:size(series,2)
+    count=0;
+    ref_series = series(:,k);
+    for t=lags
+        count=count+1;
+        i = max(1,1+t);
+        j = min(length(ref_series),length(ref_series)+t);
+        i_ref = max(1,1-t);
+        j_ref = min(length(ref_series),length(ref_series)-t);
+        series_sub = series(i:j,:);
+        ref_series_sub = ref_series(i_ref:j_ref);
+        [c,p] = corr(series_sub,ref_series_sub,'rows','complete');
+        C_map(k,:,count)=c';
+        P_val(k,:,count)=p';
+    end
+end
+fprintf('... Done.\n');
+end
+
 function reset_Callback(~,~,handles)
 
 global START_IM END_IM;
@@ -1408,7 +1525,7 @@ Cor = handles.Slider.UserData.Cor;
 save(fullfile(save_dir,'fCorrelation.mat'),'Cor','P_cor','-v7.3');
 fprintf('File fCorrelation Saved [%s].\n',fullfile(save_dir,'fCorrelation.mat'));
 
-flag_fullmap = handles.Checkbox3.Value;
+flag_fullmap = handles.Checkbox2.Value;
 if flag_fullmap
     C_map = handles.Slider.UserData.C_map;
     P_map = handles.Slider.UserData.P_map;
@@ -1421,6 +1538,14 @@ Rmax_map = im1.CData;
 im2 = findobj(handles.Ax2,'type','Image');
 Tmax_map = im2.CData;
 RT_pattern = A;
+
+if handles.Checkbox1.Value && exist(fullfile(save_dir,'Correlation_pattern.mat'),file)
+    % Reload Correlation_pattern.mat if exists
+    d1 = load(fullfile(save_dir,'Correlation_pattern.mat'),'Rmax_map','Tmax_map');
+    Tmax_map = d1.Tmax_map;
+    Rmax_map = d1.Rmax_map;
+end
+
 save(fullfile(save_dir,'Correlation_pattern.mat'),'Rmax_map','Tmax_map','RT_pattern',...
     'x_','labels','r_max','t_max','x_max','r_min','t_min','x_min','-v7.3');
 fprintf('File Correlation_pattern Saved [%s].\n',fullfile(save_dir,'Correlation_pattern.mat'));
@@ -1594,11 +1719,8 @@ for i=1:length(ind_group)
     % If str_ref ([str_regions;str_traces] from batch menu) is not empty use it as str_ref
     % Else use str_ref defined here
     if isempty(str_ref)
-%         str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
-%             {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'};{'X(m)'};{'Y(m)'}];
-        str_ref = [{'Power-theta/'};{'Power-gammalow/'};...
-            {'Power-gammamid/'};{'Power-gammahigh/'};...
-            {'Whole'}];
+        str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
+            {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'}];
     end
     
     % Compute
@@ -1609,7 +1731,10 @@ for i=1:length(ind_group)
         p1.Value = ind_pu(k);
         compute_Callback(bc,[],handles,val);
         savestats_Callback([],[],handles);
-        saveimage_Callback([],[],handles);
+        if handles.Checkbox1.Value
+            % Skip if needed
+            saveimage_Callback([],[],handles);
+        end
         if exist('_info.txt','file')
             delete('_info.txt');
         end
