@@ -41,6 +41,9 @@ if ~isempty(F.nev) && exist(nev_file,'file')
     fprintf('Loading NEV file [%s]...',nev_file);
     S = openNEV(nev_file,'nosave');
     fprintf(' done.\n');
+else
+    errordlg(sprintf('Cannot load file [%s]',nev_file));
+    return;
 end
 % Testing if Tracking is empty
 if isempty(S.Data.Tracking) 
@@ -130,6 +133,7 @@ f.UserData.video_file = video_file;
 f.UserData.nev_file = nev_file;
 f.UserData.output_file = output_file;
 f.UserData.data_tr = data_tr;
+f.UserData.folder_name = folder_name;
 
 f.UserData.t_pixel = t_pixel;
 f.UserData.x_pixelraw = x_pixel;
@@ -292,6 +296,8 @@ function okButton_callback(~,~,handles,old_handles)
 
 ax = handles.AxVideo;
 f = ax.Parent;
+folder_name = f.UserData.folder_name;
+
 % Arena
 hq = findobj(ax,'Tag','Arena');
 if ~isempty(hq)
@@ -343,6 +349,13 @@ y_pixel = f.UserData.y_pixel;
 s_pixel = f.UserData.s_pixel;
 t_pixel = f.UserData.t_pixel;
 
+% regular interpolation
+xq = t_pixel(1):mean(diff(t_pixel)):t_pixel(end);
+x_pixel = interp1(t_pixel,x_pixel,xq);
+y_pixel = interp1(t_pixel,y_pixel,xq);
+s_pixel = interp1(t_pixel,s_pixel,xq);
+t_pixel = xq;
+
 % Converting to traces
 traces = struct('fullname',{},'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{});
 traces(1).fullname = t1;
@@ -362,7 +375,7 @@ traces(3).X = t_pixel;
 traces(3).Y = s_pixel;
 traces(3).X_ind = data_tr.time_ref.X;
 traces(3).X_im = data_tr.time_ref.Y;
-traces(3).Y_im = interp1(traces(3).X,traces(3).Y,traces(3).X_im);
+traces(3).Y_im = interp1(traces(3).X,traces(3).Y,traces(3).X_im);    
 
 % Direct Trace Loading
 ind_traces = 1:length(traces);
@@ -417,11 +430,25 @@ for i=1:length(ind_traces)
         hl.UserData = s;
         fprintf('External Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);
     end
-    
 end
 
 % Closing
 close(f);
+
+% Save Cereplex_Traces.mat
+dir_source = fullfile(folder_name,'Sources_LFP');
+if ~exist(dir_source,'dir')
+    mkdir(dir_source);
+end
+for i =1:3
+    X = traces(i).X;
+    Y = traces(i).Y;
+    f = X(2)-X(1);
+    x_start = X(1);
+    x_end = X(end);
+    save(fullfile(dir_source,strcat(traces(i).fullname,'.mat')),'Y','f','x_start','x_end','-v7.3');
+    fprintf('Trace Saved [%s]\n',fullfile(dir_source,strcat(traces(i).fullname,'.mat')));
+end
 
 end
 

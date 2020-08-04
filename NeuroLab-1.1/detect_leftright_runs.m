@@ -109,7 +109,9 @@ burst_left = [];
 burst_right = [];
 
 % Loading Episodes
-if exist(fullfile(folder_name,'Spikoscope_Episodes.mat'),'file')
+if exist(fullfile(folder_name,'NeuroLab_Episodes.mat'),'file')
+    data_e = load(fullfile(folder_name,'NeuroLab_Episodes.mat'));
+elseif exist(fullfile(folder_name,'Spikoscope_Episodes.mat'),'file')
     data_e = load(fullfile(folder_name,'Spikoscope_Episodes.mat'));
 else
     return;
@@ -176,7 +178,9 @@ episode1 = data_e.episodes(ind_episode);
 
 % Time Tags
 % restricting data_t to fUS-Burst
-ind_keep = contains({data_t.TimeTags(:).Tag}','Burst');
+% ind_keep = contains({data_t.TimeTags(:).Tag}','Burst');
+ind_keep = contains({data_t.TimeTags(:).Tag}',[{'RUN-'};{'Burst'}]);
+
 data_t.TimeTags_strings = data_t.TimeTags_strings(ind_keep,:);
 data_t.TimeTags = data_t.TimeTags(ind_keep);
 %burst_name = cell(size(data_t.TimeTags));
@@ -192,12 +196,14 @@ for i =1:length(episode1.Y)
     
     % Checking l_x.UserData slope
     t_e1 = episode1.Y(i);
-    [~,ind_e1] = min((l_x.UserData.X-(t_e1-2)).^2);
-    [~,ind_e2] = min((l_x.UserData.X-(t_e1+2)).^2);
+    [~,ind_e1] = min((l_x.UserData.X-(t_e1-1)).^2);
+    [~,ind_e2] = min((l_x.UserData.X-(t_e1+1)).^2);
     if sum(diff(l_x.UserData.Y(ind_e1:ind_e2)))>0
         turn = {'left'};
+        turn = 'left';
     else
         turn = {'right'};
+        turn = 'right';
     end
     all_turns(i) = {turn};
     
