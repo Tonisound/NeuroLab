@@ -4,8 +4,9 @@ function f2 = figure_PeriEventHistogramm(handles,val,str_group,str_regions,str_t
 global DIR_SAVE FILES CUR_FILE;
 
 % loading Config.mat
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'file')
-     data_config = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'));
+folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
+if exist(fullfile(folder_name,'Config.mat'),'file')
+     data_config = load(fullfile(folder_name,'Config.mat'));
 end
 
 f2 = figure('Units','characters',...
@@ -93,6 +94,7 @@ bb = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
 bb.UserData.fUSData = [];
 bb.UserData.LFPData = [];
 bb.UserData.CFCData = [];
+bc.UserData.folder_name = folder_name;
 
 bs = uicontrol('Units','characters','Style','pushbutton','Parent',iP,...
     'String','Sort','Tag','Button_Sort','TooltipString','Sorting Episodes','Enable','off');
@@ -681,8 +683,10 @@ if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file')
      errordlg('Missing File [%s]',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'));
      return;
 end
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
 handles.ButtonCompute.UserData.time_ref = time_ref;
+handles.ButtonCompute.UserData.length_burst = length_burst;
+handles.ButtonCompute.UserData.n_burst = n_burst;
 
 channels = str2double(handles.Edit1.String);
 electrodes = str2double(handles.Edit2.String);
@@ -1358,7 +1362,10 @@ end
 function [Xdata,Ydata,ind_start,ind_end,ref_time,f_samp]= compute_channels(handles,Time_indices,ind_events,f_int)
 
 % Getting Data from uiconntrols
-time_ref = handles.ButtonCompute.UserData.time_ref;
+% time_ref = handles.ButtonCompute.UserData.time_ref;
+% n_burst = handles.ButtonCompute.UserData.n_burst;
+% length_burst = handles.ButtonCompute.UserData.length_burst;
+folder_name = handles.ButtonCompute.UserData.folder_name;
 lines_channels = handles.ButtonCompute.UserData.lines_channels;
 
 % Parameters
@@ -1381,21 +1388,42 @@ end
 Ydata = NaN(length(ind_events),length(ref_time),length(ind_channels));
 f_samp = NaN(length(ind_channels),1);
 for k = 1:length(ind_channels)
+%     switch char(fUS_Selection(k,2))
+%         % Trace_Cerep
+%         case {'Trace_Cerep'}
+%             X = lines_channels(k).UserData.X;
+%             Y = lines_channels(k).UserData.Y;
+%             %f_samp(k) = length(X)/X(end);
+%             f_samp(k) = 1./(X(2)-X(1));
+%             % Other Traces
+%         otherwise
+%             X = time_ref.Y;
+%             switch n_burst
+%                 case 1
+%                     Y = lines_channels(k).YData(1:end-1);
+%                 otherwise
+%                     warning('Trace Interpolation might be wrong. [%s]',lines_channels(k).UserData.Name);
+%                     Y = lines_channels(k).YData(1:end-1);
+%             end
+%             f_samp(k) = 1./(X(2)-X(1));
+%     end   
+
+    l_name = lines_channels(k).UserData.Name;
     switch char(fUS_Selection(k,2))
         % Trace_Cerep
         case {'Trace_Cerep'}
-            X = lines_channels(k).UserData.X;
-            Y = lines_channels(k).UserData.Y;
-            % f_samp(k) = length(X)/X(end);
-            f_samp(k) = 1./(X(2)-X(1));
-            % Other Traces
+            data_l = load(fullfile(folder_name,'Sources_LFP',strcat(l_name,'.mat')));
+            X = data_l.x_start:data_l.f:data_l.x_end;
+            Y = data_l.Y;
+            f_samp(k) = data_l.f;
+        % Other Traces
         otherwise
-            % X = time_ref.Y;
-            % Y = (lines_channels(k).YData(~isnan(lines_channels(k).YData)))';
-            X = lines_channels(k).XData;
-            Y = lines_channels(k).YData;
-            f_samp(k) = 1./(X(2)-X(1));
-    end   
+            data_l = load(fullfile(folder_name,'Sources_fUS',strcat(l_name,'.mat')));
+            X = data_l.X;
+            Y = data_l.Y;
+            f_samp(k) = 1/(X(2)-X(1));
+    end
+    
     % Extracting data
     for i=1:length(ind_events)
         ind_keep = ((X-Time_indices(i,1)).*(X-Time_indices(i,4)))<0;

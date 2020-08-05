@@ -82,7 +82,7 @@ o	Confusion LabelBox (no labels) / Horizontal Axis Box
 o	Bug Reset Button in Menu Edit Traces
 o	Filter temperature upon import (bug fix)
 
----------------------------------------------------------------------------?
+---------------------------------------------------------------------------
 NeuroLab Directions – Update January 2020
 
 Importation
@@ -106,7 +106,7 @@ o	Divide frequency bands
 
 Layout
 o	Overlay atlas checkbox in main interface
-?	Bug fix atlas coordinates
+        Bug fix atlas coordinates
 o	Aplats de couleur pour time-groups
 
 Figures
@@ -115,7 +115,7 @@ o	Wavelet: Update/show time upon cursor motion
 o	Add figure autocorrelation fUS
 o	Pb de légende Figure fus_statistics
 
----------------------------------------------------------------------------?
+---------------------------------------------------------------------------
 NeuroLab Directions – Update November 2019
 
 Figure Wavelet
@@ -135,7 +135,7 @@ o	Automatic grouping of time tags – Define time groups
 		(Grouper les tags qui contiennent une string puis écraser time groups)
 o	Définir des groupes de régions (Trace_group) automatiquement/manuellement
 
----------------------------------------------------------------------------?
+---------------------------------------------------------------------------
 NeuroLab Directions – Update October 2019
 
 To fix 
@@ -146,7 +146,7 @@ o	Bug fUS Episode stats if only 1 time group (legend bug + bug compute)
 o	Figure Peak Detection Wavelet: bug nanconv does not work
 o	Figure fUS Correlation Analysis (in Traces & Tags) Tab Time_group for selection
 
----------------------------------------------------------------------------?
+---------------------------------------------------------------------------
 NeuroLab Directions – Update April 2019
 
 To do 
@@ -162,7 +162,7 @@ o	Do not move files in Synthesis (useless)
 o	Movie add listeners
 o	Export Raw Dataset > Export videos
 
----------------------------------------------------------------------------?
+---------------------------------------------------------------------------
 NeuroLab Directions – Update January 2019
 
 To do 
@@ -174,7 +174,7 @@ o	Remove nlab folder upon failed importation
 o	Bug Trace creation -> smoothing
 o	Check recording list without parent
 
----------------------------------------------------------------------------?
+---------------------------------------------------------------------------
 NeuroLab Directions – Update December 2018
 
 Video
@@ -201,7 +201,7 @@ o	Check electrode position + show traces first
 Figure Peri Event
 o	Add gaussian smoothing
 
----------------------------------------------------------------------------?
+---------------------------------------------------------------------------
 NeuroLab Directions – Update June 2018
 
 To do
@@ -222,7 +222,7 @@ o	Bug Clim scale / bug Box Patch / bug Autoscale Box
 o	Bug Batch first file
 o	Changer resample to interp1
 
----------------------------------------------------------------------------?
+---------------------------------------------------------------------------
 NeuroLab Directions – Update August 2017
 
 Wavelet Fourier analysis
