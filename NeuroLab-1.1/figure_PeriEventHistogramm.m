@@ -1355,6 +1355,278 @@ handles.MainFigure.UserData.success = true;
 
 end
 
+function [Xdata,Ydata,ind_start,ind_end,ref_time,f_samp]= compute_channels(handles,Time_indices,ind_events,f_int)
+
+% Getting Data from uiconntrols
+time_ref = handles.ButtonCompute.UserData.time_ref;
+lines_channels = handles.ButtonCompute.UserData.lines_channels;
+
+% Parameters
+ind_channels = handles.fUSTable.UserData.Selection;
+fUS_Selection = handles.fUSTable.Data(ind_channels,:);
+lines_channels = lines_channels(ind_channels);
+
+% Building XData
+[longest,~] = max(Time_indices(:,4)-Time_indices(:,1));
+ref_time = 0:1/f_int:longest;
+Xdata = NaN(length(ind_events),length(ref_time));
+for i=1:length(ind_events)
+    temp = (Time_indices(i,1):1/f_int:Time_indices(i,4));
+    Xdata(i,1:length(temp))=temp;
+end
+[~,ind_start] = min((Xdata-repmat(Time_indices(:,2),1,length(ref_time))).^2,[],2);
+[~,ind_end] = min((Xdata-repmat(Time_indices(:,3),1,length(ref_time))).^2,[],2);
+
+% Building YData
+Ydata = NaN(length(ind_events),length(ref_time),length(ind_channels));
+f_samp = NaN(length(ind_channels),1);
+for k = 1:length(ind_channels)
+    switch char(fUS_Selection(k,2))
+        % Trace_Cerep
+        case {'Trace_Cerep'}
+            X = lines_channels(k).UserData.X;
+            Y = lines_channels(k).UserData.Y;
+            % f_samp(k) = length(X)/X(end);
+            f_samp(k) = 1./(X(2)-X(1));
+            % Other Traces
+        otherwise
+            % X = time_ref.Y;
+            % Y = (lines_channels(k).YData(~isnan(lines_channels(k).YData)))';
+            X = lines_channels(k).XData;
+            Y = lines_channels(k).YData;
+            f_samp(k) = 1./(X(2)-X(1));
+    end   
+    % Extracting data
+    for i=1:length(ind_events)
+        ind_keep = ((X-Time_indices(i,1)).*(X-Time_indices(i,4)))<0;
+        x = X(ind_keep);
+        y = Y(ind_keep);     
+        if ~isempty(y)
+            [~,ind_first] = min((Xdata(i,:)-x(1)).^2);
+            [~,ind_last] = min((Xdata(i,:)-x(end)).^2);
+            y_resamp = resample(y,round(100*f_int),round(100*f_samp(k)));
+            l = min(ind_last-ind_first+1,length(y_resamp));
+            Ydata(i,ind_first:ind_first+l-1,k) = y_resamp(1:l);
+        end
+    end
+end
+
+% %Gaussian Smoothing
+% t_gauss = str2double(handles.Edit5.String);
+% if t_gauss>0
+% 
+%     l = hObj.UserData.lines_channels_0;
+%     t = hObj.UserData.lines_electrodes_0;
+%     for i=1:length(l)
+%         x = l(i).XData;
+%         y = l(i).YData;
+%         delta = x(2)-x(1);
+%         l(i).YData = imgaussfilt(y,round(t_gauss/delta));
+%     end
+%     for i=1:length(t)
+%         x = t(i).UserData.X;
+%         y = t(i).UserData.Y;
+%         delta = x(2)-x(1);
+%         t(i).UserData.Y = imgaussfilt(y,round(t_gauss/delta));
+%     end
+%     delta = 1/f_int;
+%     Ydata_smooth = imgaussfilt3(Ydata,[1,round(t_gauss/delta),1],'FilterDomain','spatial');
+% 
+%     % Feeding Data to Button Compute
+%     hObj.UserData.lines_channels = l;
+%     hObj.UserData.lines_electrodes = t;
+%     % Passing Data to popup
+%     handles.Popup1.UserData.lines_channels = hObj.UserData.lines_channels;
+%     handles.Popup2.UserData.lines_electrodes = hObj.UserData.lines_electrodes;
+%     fprintf('Gaussian smoothing [Kernel = %.1f s].\n',t_gauss);
+% else
+%     fprintf('No smoothing.\n');
+%     Ydata_smooth = Ydata;
+%     hObj.UserData.lines_channels = hObj.UserData.lines_channels_0;
+%     hObj.UserData.lines_electrodes = hObj.UserData.lines_electrodes_0;
+%     % Passing Data to popup
+%     handles.Popup1.UserData.lines_channels = hObj.UserData.lines_channels;
+%     handles.Popup2.UserData.lines_electrodes = hObj.UserData.lines_electrodes;
+% end
+
+end
+
+function [Xdata,Ydata,ind_start,ind_end,ref_time,f_samp]= compute_electrodes(handles,Time_indices,ind_events,f_int)
+
+% Getting Data from uiconntrols
+time_ref = handles.ButtonCompute.UserData.time_ref;
+lines_electrodes = handles.ButtonCompute.UserData.lines_electrodes;
+
+% Parameters
+ind_electrodes = handles.LFPTable.UserData.Selection;
+LFP_Selection = handles.LFPTable.Data(ind_electrodes,:);
+lines_electrodes = lines_electrodes(ind_electrodes);
+
+% Building XData
+[longest,~] = max(Time_indices(:,4)-Time_indices(:,1));
+ref_time = 0:1/f_int:longest;
+Xdata = NaN(length(ind_events),length(ref_time));
+for i=1:length(ind_events)
+    temp = (Time_indices(i,1):1/f_int:Time_indices(i,4));
+    Xdata(i,1:length(temp))=temp;
+end
+[~,ind_start] = min((Xdata-repmat(Time_indices(:,2),1,length(ref_time))).^2,[],2);
+[~,ind_end] = min((Xdata-repmat(Time_indices(:,3),1,length(ref_time))).^2,[],2);
+
+% Building YData
+Ydata = NaN(length(ind_events),length(ref_time),length(ind_electrodes));
+f_samp = NaN(length(ind_electrodes),1);
+for k = 1:length(ind_electrodes)
+    switch char(LFP_Selection(k,2))
+        % Trace_Cerep
+        case {'Trace_Cerep'}
+            X = lines_electrodes(k).UserData.X;
+            Y = lines_electrodes(k).UserData.Y;
+            f_samp(k) = length(lines_electrodes(k).UserData.X)/(lines_electrodes(k).UserData.X(end));
+            % Other Traces
+        otherwise
+            X = time_ref.Y;
+            Y = (lines_electrodes(k).YData(~isnan(lines_electrodes(k).YData)))';
+            f_samp(k) = 1./(X(2)-X(1));
+    end   
+    % Extracting data
+    for i=1:length(ind_events)
+        ind_keep = ((X-Time_indices(i,1)).*(X-Time_indices(i,4)))<0;
+        x = X(ind_keep);
+        y = Y(ind_keep);
+        if ~isempty(y)
+            [~,ind_first] = min((Xdata(i,:)-x(1)).^2);
+            [~,ind_last] = min((Xdata(i,:)-x(end)).^2);
+            y_resamp = resample(y,round(100*f_int),round(100*f_samp(k)));
+            l = min(ind_last-ind_first+1,length(y_resamp));
+            Ydata(i,ind_first:ind_first+l-1,k) = y_resamp(1:l);
+        end
+    end
+end
+end
+
+function [Zdata,Zdata_norm] = compute_crossfreq(handles,Time_indices,bins,ind_events)
+
+% Building Zdata
+% Extracting CFC channels
+traces = handles.CFCPanel.UserData.traces;
+ind_crossfreq = handles.CFCTable.UserData.Selection;
+CFC_Selection = handles.CFCTable.Data(ind_crossfreq,:);
+Zdata = NaN(length(ind_events),length(bins),length(ind_crossfreq));
+
+for i=1:length(ind_crossfreq)
+    temp = {traces.fullname};
+    str = char(CFC_Selection(i,1));
+    str = regexprep(str,'(','');
+    str = regexprep(str,')','');
+    ind_1 = ~(cellfun('isempty',strfind(temp,str(1:end-1))));
+    ind_2 = ~(cellfun('isempty',strfind(temp,char(CFC_Selection(i,2)))));
+    ind_3 = ~(cellfun('isempty',strfind(temp,'Source_filtered_for_thet')));
+    if isempty(find(ind_3==1))
+        errordlg('Missing Phase Signal. Import Traces.');
+        return;
+    end
+    ind_power = find(ind_1&ind_2==1);
+    ind_phase = find(ind_3&ind_2==1);
+    switch length(ind_power)
+        case 0,
+            disp('Something wrong.');
+        case 1
+            phase_signal = traces(ind_phase).fullname;
+            power_signal = traces(ind_power).fullname;           
+        otherwise
+            l=[];
+            for k=1:length(ind_power)
+                l = [l;length(traces(ind_power(k)).shortname)];
+            end
+            [~,ind]=min(l);
+            ind_power = ind_power(ind);
+            ind_phase = ind_phase(ind);
+            phase_signal = traces(ind_phase).fullname;
+            power_signal = traces(ind_power).fullname;
+    end
+    
+    % Computing CFC for each episode
+    for k=1:size(Time_indices,1)
+        fprintf('Computing CFC %s %s - time [%d,%d]\n',phase_signal,power_signal,Time_indices(k,1),Time_indices(k,4));
+        bar_data = compute_cfc_episode(traces(ind_phase),traces(ind_power),Time_indices(k,1),Time_indices(k,4),bins);
+        Zdata(k,:,i) = bar_data;
+    end
+end
+% Normalized Zdata
+S  = sum(Zdata,2);
+A = repmat(S,[1,size(Zdata,2),1]);
+Zdata_norm = Zdata./A;
+end
+
+function [bar_data,ebar_data] = compute_cfc_episode(phase_signal,power_signal,t1,t2,bins)
+% Computes phase frequency coupling for episode starting at t1 ending at t2
+% (seconds)
+%bins = 0:10:720;
+
+f_samp = phase_signal.nb_samples/phase_signal.X(end);
+X = phase_signal.X(ceil(f_samp*t1):min(phase_signal.nb_samples,round(f_samp*t2)));
+Y = phase_signal.Y(ceil(f_samp*t1):min(phase_signal.nb_samples,round(f_samp*t2)));
+
+% Extracting ascending zeros
+temp = Y(1);
+zero_phase_ascend = [];
+zero_phase_descend = [];
+count = 1;
+while count<length(Y)
+    count=count+1;
+    while temp*Y(count)>0 && count<length(Y)
+        count=count+1;
+    end
+    if count~=length(Y)
+        temp = Y(count);
+        if temp>0
+            zero_phase_ascend = [zero_phase_ascend;X(count)];
+        else
+            zero_phase_descend = [zero_phase_descend;X(count)];
+        end
+    end
+end
+
+% Computing CFC
+f_samp = power_signal.nb_samples/power_signal.X(end);
+X = power_signal.X(ceil(f_samp*t1):min(power_signal.nb_samples,round(f_samp*t2)));
+Y = power_signal.Y(ceil(f_samp*t1):min(power_signal.nb_samples,round(f_samp*t2)));
+
+Y_phase = NaN(size(Y));
+a = repmat(X,1,length(zero_phase_ascend)) - repmat(zero_phase_ascend',size(X,1),1);
+[~,zero_phase_ascend_index] = min(a.^2);
+delta = diff(zero_phase_ascend_index);
+for i=1:length(delta)
+    switch mod(i,2)
+        case 0,
+            Y_phase(zero_phase_ascend_index(i):zero_phase_ascend_index(i)+delta(i)-1) = 0:1/delta(i):.9999;
+        case 1,
+            Y_phase(zero_phase_ascend_index(i):zero_phase_ascend_index(i)+delta(i)-1) = -1:1/delta(i):-.0001;
+    end
+end
+Y_phase = Y_phase*360;
+% Realigning phase to set 0 as theta-trough
+Y_phase = mod(Y_phase+360+90,720);
+
+% Extracting Histogram
+A = repmat(bins(1:end-1),length(Y_phase),1);
+B = repmat(bins(2:end),length(Y_phase),1);
+Y_phase_mat = repmat(Y_phase,1,length(bins)-1);
+index_bins_1 = Y_phase_mat-A>=0;
+index_bins_2 = Y_phase_mat-B<0;
+index_bins = (index_bins_1+index_bins_2)==2;
+Y_mat = repmat(Y,1,length(bins)-1);
+Y_mat = Y_mat.*index_bins;
+Y_mat(Y_mat==0)=NaN;
+
+bar_data = mean(Y_mat,1,'omitnan');
+ebar_data = std(Y_mat,1,'omitnan');
+bar_data = [bar_data,bar_data(1)];
+ebar_data = [ebar_data,ebar_data(1)];
+
+end
+
 function display_regression(~,~,handles)
 
 %Cor = handles.AxCorr.Children.CData;
@@ -2235,9 +2507,6 @@ handles.ButtonBatch.UserData.PeaktoPeakData.label_events = label_events;
 handles.MainFigure.Pointer = 'arrow';
 
 end
-
-% function gaussianfit_Callback(~,~,handles)
-% end
 
 function autocorr_Callback(~,~,handles)
 
