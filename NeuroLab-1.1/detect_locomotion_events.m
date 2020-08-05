@@ -624,6 +624,14 @@ TimeTags_strings = [handles.Table1.Data(:,1),handles.Table1.Data(:,5)];
 tts1 = datenum(TimeTags_strings(:,1));
 tts2 = datenum(TimeTags_strings(:,2));
 TimeTags_seconds = [(tts1-floor(tts1)),(tts2-floor(tts2))]*24*3600;
+
+% Adding seconds before and after
+t_before = 2;
+t_after = 5;
+TimeTags_seconds(:,1) = TimeTags_seconds(:,1)-t_before;
+TimeTags_seconds(:,2) = TimeTags_seconds(:,2)+t_after;
+TimeTags_strings = [cellstr(datestr(TimeTags_seconds(:,1)/(24*3600),'HH:MM:SS.FFF')),cellstr(datestr(TimeTags_seconds(:,2)/(24*3600),'HH:MM:SS.FFF'))];
+
 TimeTags_dur = datestr((TimeTags_seconds(:,2)-TimeTags_seconds(:,1))/(24*3600),'HH:MM:SS.FFF');
 % TimeTags_cell & TimeTags
 TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);

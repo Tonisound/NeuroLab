@@ -111,6 +111,9 @@ end
 [t_pixel,ia] = unique(t_pixel,'sorted');
 x_pixel = double(x_pixel(ia));
 y_pixel = double(y_pixel(ia));
+% bug fix
+% x_pixel = double(x_pixel(:));
+% y_pixel = double(y_pixel(:));
 y_pixel = v.Height-y_pixel;
 sx_pixel = [0;diff(x_pixel)/mean(diff(t_pixel))];
 sy_pixel = [0;diff(y_pixel)/mean(diff(t_pixel))];
