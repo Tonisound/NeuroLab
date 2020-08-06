@@ -49,7 +49,7 @@ uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Pa
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
     'String',5,'Tag','Edit_Start','Tooltipstring','Time Before Stimulus');
 uicontrol('Units','characters','Style','edit','HorizontalAlignment','center','Parent',iP,...
-    'String',5,'Tag','Edit_End','Tooltipstring','Time After Stimulus');
+    'String',10,'Tag','Edit_End','Tooltipstring','Time After Stimulus');
 
 % Popup Lists
 uicontrol('Units','characters','Style','popupmenu','Parent',iP,...
@@ -1362,7 +1362,7 @@ end
 function [Xdata,Ydata,ind_start,ind_end,ref_time,f_samp]= compute_channels(handles,Time_indices,ind_events,f_int)
 
 % Getting Data from uiconntrols
-% time_ref = handles.ButtonCompute.UserData.time_ref;
+time_ref = handles.ButtonCompute.UserData.time_ref;
 % n_burst = handles.ButtonCompute.UserData.n_burst;
 % length_burst = handles.ButtonCompute.UserData.length_burst;
 folder_name = handles.ButtonCompute.UserData.folder_name;
@@ -1410,17 +1410,22 @@ for k = 1:length(ind_channels)
 
     l_name = lines_channels(k).UserData.Name;
     switch char(fUS_Selection(k,2))
-        % Trace_Cerep
         case {'Trace_Cerep'}
+            % Trace_Cerep
             data_l = load(fullfile(folder_name,'Sources_LFP',strcat(l_name,'.mat')));
             X = data_l.x_start:data_l.f:data_l.x_end;
             Y = data_l.Y;
             f_samp(k) = data_l.f;
-        % Other Traces
-        otherwise
+        case {'Trace_Region';'Trace_Region_Group'}
+            % Other Traces
             data_l = load(fullfile(folder_name,'Sources_fUS',strcat(l_name,'.mat')));
             X = data_l.X;
             Y = data_l.Y;
+            f_samp(k) = 1/(X(2)-X(1));
+        otherwise
+            X = time_ref.Y;
+            %warning('Trace Interpolation might be wrong. [%s]',lines_channels(k).UserData.Name);
+            Y = lines_channels(k).YData(1:end-1);
             f_samp(k) = 1/(X(2)-X(1));
     end
     

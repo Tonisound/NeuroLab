@@ -707,7 +707,7 @@ length_burst = handles.MainFigure.UserData.length_burst;
 n_burst = handles.MainFigure.UserData.n_burst;
 
 % Loading lines
-lines = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+lines = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Region','-or','Tag','Trace_RegionGroup'));
 ind_hpc = [];
 ind_thal = [];
 ind_cortex = [];
@@ -1104,9 +1104,8 @@ for j =1:length(S_fus)
         y_fus = (y_fus-mean(y_fus,'omitnan'))/std(y_fus,[],'omitnan');
         y_lfp = (y_lfp-mean(y_lfp,'omitnan'))/std(y_lfp,[],'omitnan');
 
-        if strcmp(rec_mode,'BURST')
+        if sum(isnan(y_lfp))>0 || sum(isnan(y_fus))>0 % strcmp(rec_mode,'BURST')
             % compute xcorr with NaN
-            
             lags = thresh_inf:thresh_step:thresh_sup;
             r = zeros(length(lags),1);
             for k = 1:length(lags)

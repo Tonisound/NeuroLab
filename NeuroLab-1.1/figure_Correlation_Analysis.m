@@ -68,7 +68,7 @@ f2.UserData.data_tt = data_tt;
 % Parameters
 % Lag Intervals for batch mode
 f2.UserData.slider_values.lag1 = [-10;10];
-f2.UserData.slider_values.lag2 = [-5;15];
+f2.UserData.slider_values.lag2 = [-5;25];
 %f2.UserData.slider_values.lag2 = [-100;500];
 
 
@@ -1720,7 +1720,7 @@ for i=1:length(ind_group)
     % Else use str_ref defined here
     if isempty(str_ref)
         str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
-            {'Power-gammahigh/'};{'SPEED'};{'ACCEL-POWER'}];
+            {'Power-gammahigh/'};{'SPEED'};{'Power-ACC'}];
     end
     
     % Compute
@@ -1731,7 +1731,7 @@ for i=1:length(ind_group)
         p1.Value = ind_pu(k);
         compute_Callback(bc,[],handles,val);
         savestats_Callback([],[],handles);
-        if handles.Checkbox1.Value
+        if ~handles.Checkbox1.Value
             % Skip if needed
             saveimage_Callback([],[],handles);
         end

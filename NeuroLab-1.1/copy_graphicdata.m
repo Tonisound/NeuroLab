@@ -76,7 +76,10 @@ for i=length(h_line):-1:1
                     try
                         data_l = load(fullfile(dir_save,strcat(name,'.mat')),'Y','f','x_start','x_end');
                         %fprintf('[X,Y] data loaded at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
-                        s.X = data_l.x_start:data_l.f:data_l.x_end;
+                        %f = data_l.f;
+                        % bug fix irregular sampling rate
+                        f = (data_l.x_end-data_l.x_start)/(length(data_l.Y)-1);
+                        s.X = data_l.x_start:f:data_l.x_end;
                         s.Y = data_l.Y;
                     catch
                         warning('Unable to find trace [%s]. Loading dummy trace.',name);

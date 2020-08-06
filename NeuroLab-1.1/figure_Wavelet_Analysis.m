@@ -978,6 +978,8 @@ set(handles.ButtonReload,'Callback',{@reload_Callback,handles});
 set(handles.ButtonReset,'Callback',{@reset_Callback,handles,old_handles});
 set(handles.ButtonCompute,'Callback',{@compute_wavelet_Callback,handles});
 set(handles.ButtonAutoScale,'Callback',{@buttonAutoScale_Callback,handles});
+set(handles.EditAutoscale,'Callback',{@buttonAutoScale_Callback,handles});
+
 set(handles.ButtonExport,'Callback',{@export_wavelet_Callback,handles});
 set(handles.ButtonSaveImage,'Callback',{@saveimage_Callback,handles});
 set(handles.ButtonSaveStats,'Callback',{@savestats_Callback,handles});
