@@ -38,6 +38,15 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
     '20160630_114317_E';'20160701_130444_E'};
+list_frontal = {'20200616_135248_E_nlabSEP2';'20200618_132755_E';...
+    '20200619_130453_E';'20200624_163458_E';...
+    '20200701_092506_E';'20200701_113622_E';...
+    '20200701_134008_E';'20200702_111111_E';...
+    '20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
+    '20200710_093807_E'};
+list_sagittal = {'20200630_155022_E';'20200703_132316_E';...
+    '20200703_153247_E';'20200703_183145_E';...
+    '20200704_125924_E';'20200704_145737_E'};
 
 % list of references to search (in order)
 % list_ref = {'SPEED';'ACCEL'};
@@ -78,13 +87,19 @@ for i = 1:length(all_files)
         D(index).plane = 'CORONAL';
     elseif sum(contains(list_diagonal,cur_file))>0
         D(index).plane = 'DIAGONAL';
+    elseif sum(contains(list_frontal,cur_file))>0
+        D(index).plane = 'FRONTAL';
+    elseif sum(contains(list_sagittal,cur_file))>0
+        D(index).plane = 'SAGITTAL';
     else
         D(index).plane = 'UNDEFINED';
     end
 end
 
 % list_lfp
-list_lfp = {'SPEED';'ACCEL-POWER[61-extra]';'ACCEL-POWER[62-extra]';'ACCEL-POWER[63-extra]';...
+% list_lfp = {'SPEED';'ACCEL-POWER[61-extra]';'ACCEL-POWER[62-extra]';'ACCEL-POWER[63-extra]';...
+%     'Power-theta/';'Power-gammalow/';'Power-gammamid/';'Power-gammahigh/'};
+list_lfp = {'SPEED';'Power-ACC';...
     'Power-theta/';'Power-gammalow/';'Power-gammamid/';'Power-gammahigh/'};
 
 % list_regions
@@ -103,6 +118,22 @@ elseif  strcmp(cur_list,'DIAGONAL')
         'HypothalRg-L.mat';'HypothalRg-R.mat'};
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
+
+elseif  strcmp(cur_list,'FRONTAL')
+    list_regions = {'M1-L.mat';'M1-R.mat';'M2-L.mat';'M2-R.mat';...
+            'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
+            'PrL-L.mat';'PrL-R.mat';'CPu-L.mat';'CPu-R.mat';...
+            'fmi-L.mat';'fmi-R.mat'};
+    ind_keep = strcmp({D(:).plane}',cur_list);
+    D = D(ind_keep);
+    
+elseif  strcmp(cur_list,'SAGITTAL')
+    list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'MPtA.mat';...
+            'VM.mat';'Po.mat';'CA3Py.mat';'GrDG.mat';...
+            'Neocortex.mat';'dHpc.mat';'Thalamus.mat'};
+    ind_keep = strcmp({D(:).plane}',cur_list);
+    D = D(ind_keep);
+    
 else
     list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
         'dHpc-L.mat';'dHpc-R.mat';...
@@ -366,7 +397,7 @@ for index = 1:length(R)
 %             'LineWidth',.25,'Parent',ax);
         % ticks on graph
         if index<= length(list_regions)
-            ax.YLim = [-2;15];
+            ax.YLim = [-2;50];
         end
         line('XData',[ref_time(R(index).ind_start(j)),ref_time(R(index).ind_start(j))],...
             'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
@@ -399,7 +430,7 @@ for index = 1:length(R)
         'LineWidth',.25,'Parent',ax);
 %     % ticks on graph
 %     if index<= length(list_regions)
-%         ax.YLim = [-2;15];
+%         ax.YLim = [-2;50];
 %     end
 %     line('XData',[ref_time(R(index).ind_start(j)),ref_time(R(index).ind_start(j))],...
 %         'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
@@ -572,7 +603,7 @@ for index = 1:length(S)
     % axes limits
     ind_keep = find(sum(~isnan(S(index).Ydata),1)/size(S(index).Ydata,1)> thresh_average);
     ax.XLim = [ref_time(ind_keep(1))-.5, ref_time(ind_keep(end))];
-    ax.YLim = [-2;15];
+    ax.YLim = [-2;50];
     %ax.XTick = ref_time(ind_keep(1):500:ind_keep(end));
     %ax.XTickLabel = {'.5';'1.0';'1.5';'2.0'};
     

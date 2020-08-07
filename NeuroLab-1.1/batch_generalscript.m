@@ -577,6 +577,9 @@ for i = 1:length(ind_files)
                 
             case 'Detect Left-Right Runs'
                 success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                    
+            case 'Detect Early-Mid-Late Runs'
+                success = detect_earlymidlate_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
             case 'Generate Time Indexes'
                 success = generate_time_indexes(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);

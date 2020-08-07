@@ -68,7 +68,7 @@ f2.UserData.data_tt = data_tt;
 % Parameters
 % Lag Intervals for batch mode
 f2.UserData.slider_values.lag1 = [-10;10];
-f2.UserData.slider_values.lag2 = [-5;25];
+f2.UserData.slider_values.lag2 = [-5;15];
 %f2.UserData.slider_values.lag2 = [-100;500];
 
 
@@ -1709,19 +1709,19 @@ for i=1:length(ind_group)
     hObj.UserData.folder_name = char(data_tg.TimeGroups_name(ii));
     handles.Tag_table.UserData.Selection = data_tg.TimeGroups_S(ii).Selected';
     
-%     % Selecting main channel
-%     if ~isempty(data_config.File.mainlfp)
-%         str_ref = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
-%     else
-%         str_ref = [{'SPEED'};{'ACCEL-POWER'}];
-%     end
-    
-    % If str_ref ([str_regions;str_traces] from batch menu) is not empty use it as str_ref
-    % Else use str_ref defined here
-    if isempty(str_ref)
-        str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
-            {'Power-gammahigh/'};{'SPEED'};{'Power-ACC'}];
+    % Selecting main channel
+    if ~isempty(data_config.File.mainlfp)
+        str_ref = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER/033'}];
+    else
+        str_ref = [{'SPEED'};{'ACCEL-POWER'}];
     end
+    
+%     % If str_ref ([str_regions;str_traces] from batch menu) is not empty use it as str_ref
+%     % Else use str_ref defined here
+%     if isempty(str_ref)
+%         str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
+%             {'Power-gammahigh/'};{'SPEED'};{'Power-ACC'}];
+%     end
     
     % Compute
     p1 = handles.Popup1;

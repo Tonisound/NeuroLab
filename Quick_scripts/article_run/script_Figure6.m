@@ -40,6 +40,17 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
     '20160630_114317_E';'20160701_130444_E'};
 
+list_frontal = {'20200616_135248_E_nlabSEP2';'20200618_132755_E';...
+    '20200619_130453_E';'20200624_163458_E';...
+    '20200701_092506_E';'20200701_113622_E';...
+    '20200701_134008_E';'20200702_111111_E';...
+    '20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
+    '20200710_093807_E'};
+
+list_sagittal = {'20200630_155022_E';'20200703_132316_E';...
+    '20200703_153247_E';'20200703_183145_E';...
+    '20200704_125924_E';'20200704_145737_E'};
+
 % list of references to search (in order)
 % list_ref = {'SPEED';'ACCEL'};
 % list_ref = {'Power-Theta'};
@@ -79,6 +90,10 @@ for i = 1:length(all_files)
         D(index).plane = 'CORONAL';
     elseif sum(contains(list_diagonal,cur_file))>0
         D(index).plane = 'DIAGONAL';
+    elseif sum(contains(list_frontal,cur_file))>0
+        D(index).plane = 'FRONTAL';
+    elseif sum(contains(list_sagittal,cur_file))>0
+        D(index).plane = 'SAGITTAL';
     else
         D(index).plane = 'UNDEFINED';
     end
@@ -114,6 +129,26 @@ elseif  strcmp(cur_list,'DIAGONAL')
     end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
+elseif  strcmp(cur_list,'FRONTAL')
+    if ~flag_grouped
+        list_regions = {'M1-L.mat';'M1-R.mat';'M2-L.mat';'M2-R.mat';...
+            'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
+            'PrL-L.mat';'PrL-R.mat';'CPu-L.mat';'CPu-R.mat';...
+            'fmi-L.mat';'fmi-R.mat'};
+    else
+        list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'IL.mat';...
+            'PrL.mat';'CPu.mat';'fmi.mat'};
+    end
+    ind_keep = strcmp({D(:).plane}',cur_list);
+    D = D(ind_keep);
+    
+elseif  strcmp(cur_list,'SAGITTAL')
+    list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'MPtA.mat';...
+            'VM.mat';'Po.mat';'CA3Py.mat';'GrDG.mat';...
+            'Neocortex.mat';'dHpc.mat';'Thalamus.mat'};
+    ind_keep = strcmp({D(:).plane}',cur_list);
+    D = D(ind_keep);
+    
 else
     if ~flag_grouped
         list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
@@ -357,10 +392,10 @@ for index = 1:length(S)
     % axes limits
     ax.FontSize = 8;
     ax.XTick = 0:10:60;
-    ax.XTickLabel = {'0';'10';'20';'30';'40';'50';'60'};
+    ax.XTickLabel = {'0';'10';'20';'30';'40';'75';'60'};
     ax.XLim = [.5 30+.5];
-    ax.YLim = [-2 15];
-	 ax.TickLength = [0 0];
+    ax.YLim = [-2 75];
+	ax.TickLength = [0 0];
     
     % Linear Fit
     x = b.XData(~isnan(b.YData));
@@ -392,8 +427,10 @@ end
 if flag_save
     f.Units = 'pixels';
     f.Position = [195          59        1045         919];
-    saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
-    fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s',f.Name,'.pdf')));
+%    saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+%    fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s',f.Name,'.pdf')));
+    saveas(f,sprintf('%s%s%s',f.Name,str_fig,'.pdf'));
+    fprintf('Figure Saved [%s].\n',sprintf('%s%s',f.Name,'.pdf'));
 end
 
 % % 2nd figure

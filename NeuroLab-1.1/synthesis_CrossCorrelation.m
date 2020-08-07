@@ -39,10 +39,12 @@ episode_list = [];
 for i =1:length(rec_list)
     pattern = strrep(char(rec_list(i)),'.mat','');
     %temp = regexp(pattern,'_Cross_Correlation_|_REM','split');
-    temp = regexp(pattern,'_Cross_Correlation_|_R|_W','split');
+    temp = regexp(pattern,'_Cross_Correlation_|_REM|_WHOLE|_STABLE','split');
     file_list = [file_list;temp(1)];
     channel_list = [channel_list;temp(2)];
-    episode_list = [episode_list;{strcat('REM',char(temp(3)))}];
+    %episode_list = [episode_list;{strcat('REM',char(temp(3)))}];
+    temp2 = regexp(pattern,'_','split');
+    episode_list = [episode_list;{strtrim(char(temp2(end)))}];
 end
 
 %Clearing folder synthesis
@@ -330,7 +332,7 @@ for j =1:length(data.S_fus)
         h.FaceColor = g_colors(j,:);
         h.EdgeColor = g_colors(j,:);
         ax.Title.String = sprintf('Mu=%.2f/Med=%.2f',t_mean(j,i),t_median(j,i));
-        ax.YLim = [0 1.2*max(h.BinCounts)];
+        ax.YLim = [0 1.2*max(h.BinCounts)+.0001];
         ax.XLim = [new_lags(1) new_lags(end)];
         ax.XTick = new_lags(1):1:new_lags(end);
         ax.XLabel.String = data.S_lfp(i).name;

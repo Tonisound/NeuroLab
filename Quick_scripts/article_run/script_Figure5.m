@@ -35,6 +35,17 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20160622_191334_E';'20160623_123336_E';...%'20160624_120239_E';...
     '20160628_171324_E';'20160629_134749_E';'20160629_191304_E'};
 
+list_frontal = {'20200616_135248_E';'20200618_132755_E';...
+    '20200619_130453_E';'20200624_163458_E';...
+    '20200701_092506_E';'20200701_113622_E';...
+    '20200701_134008_E';'20200702_111111_E';...
+    '20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
+    '20200710_093807_E'};
+
+list_sagittal = {'20200630_155022_E';'20200703_132316_E';...
+    '20200703_153247_E';'20200703_183145_E';...
+    '20200704_125924_E';'20200704_145737_E'};
+
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
@@ -82,17 +93,23 @@ for i = 1:length(all_files)
         D(index).plane = 'CORONAL';
     elseif sum(contains(list_diagonal,cur_file))>0
         D(index).plane = 'DIAGONAL';
+    elseif sum(contains(list_frontal,cur_file))>0
+        D(index).plane = 'FRONTAL';
+    elseif sum(contains(list_sagittal,cur_file))>0
+        D(index).plane = 'SAGITTAL';
     else
         D(index).plane = 'UNDEFINED';
     end
 end
 
 % list_lfp
-list_lfp = {'SPEED';'ACCEL-POWER[61-extra]';'ACCEL-POWER[62-extra]';'ACCEL-POWER[63-extra]';...
-    'Power-theta/';'Power-gammalow/';'Power-gammamid/';'Power-gammahigh/'};
+% list_lfp = {'SPEED';'ACCEL-POWER[61-extra]';'ACCEL-POWER[62-extra]';'ACCEL-POWER[63-extra]';...
+%     'Power-theta/';'Power-gammalow/';'Power-gammamid/';'Power-gammahigh/'};
+list_lfp = {'SPEED';'Power-ACC'};
 
 % list_regions
 if strcmp(cur_list,'CORONAL')
+    rescale_factor = 10*ones(length(D),1);
     if ~flag_grouped
         list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
             'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
@@ -112,6 +129,7 @@ if strcmp(cur_list,'CORONAL')
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
+    rescale_factor = 10*ones(length(D),1);
     if ~flag_grouped
         list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
             'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
@@ -125,6 +143,29 @@ elseif  strcmp(cur_list,'DIAGONAL')
     end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
+    
+elseif  strcmp(cur_list,'FRONTAL')
+    rescale_factor = [20,6,6,20,20,20,3,10,10,5];
+    if ~flag_grouped
+        list_regions = {'M1-L.mat';'M1-R.mat';'M2-L.mat';'M2-R.mat';...
+            'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
+            'PrL-L.mat';'PrL-R.mat';'CPu-L.mat';'CPu-R.mat';...
+            'fmi-L.mat';'fmi-R.mat'};
+    else
+        list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'IL.mat';...
+            'PrL.mat';'CPu.mat';'fmi.mat'};
+    end
+    ind_keep = strcmp({D(:).plane}',cur_list);
+    D = D(ind_keep);
+    
+elseif  strcmp(cur_list,'SAGITTAL')
+    rescale_factor = 10*ones(length(D),1);
+    list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'MPtA.mat';...
+            'VM.mat';'Po.mat';'CA3Py.mat';'GrDG.mat';...
+            'Neocortex.mat';'dHpc.mat';'Thalamus.mat'};
+    ind_keep = strcmp({D(:).plane}',cur_list);
+    D = D(ind_keep);
+    
 else
     if ~flag_grouped
         list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
@@ -173,6 +214,11 @@ for index = 1:length(D)
         ind_keep = find(strcmp(data_fus.fUS_Selection(:,1),region_name)==1);
         
         if ~isempty(ind_keep)        
+            % rescale
+            m_ = mean(data_fus.Ydata(:),'omitnan');
+            s_ = std(data_fus.Ydata(:),[],'omitnan');
+            data_fus.Ydata = rescale_factor(index)*(data_fus.Ydata-m_)/s_;
+            
             Ydata_temp = cat(2,data_fus.Ydata(:,:,ind_keep),NaN(size(data_fus.Ydata,1),lmax-size(data_fus.Ydata,2)));
             S(i).Ydata = [S(i).Ydata;Ydata_temp];
             Xdata_temp = cat(2,data_fus.ref_time,NaN(1,lmax-length(data_fus.ref_time)));
@@ -206,10 +252,13 @@ for index = 1:length(D)
             ind_keep = ind_keep(1);
         end
         
-        if ~isempty(ind_keep)        
+        if ~isempty(ind_keep)
+%             % rescale
+%             m_ = mean(data_lfp.Ydata(:),'omitnan');
+%             s_ = std(data_lfp.Ydata(:),[],'omitnan');
+%             data_lfp.Ydata = (data_lfp.Ydata-m_)/s_;
+            
             Ydata_temp = cat(2,data_lfp.Ydata(:,:,ind_keep),NaN(size(data_lfp.Ydata,1),lmax-size(data_lfp.Ydata,2)));
-            % rescaling
-            Ydata_temp = rescale(Ydata_temp,0,100);
             Q(i).Ydata = [Q(i).Ydata;Ydata_temp];
             Xdata_temp = cat(2,data_lfp.ref_time,NaN(1,lmax-length(data_lfp.ref_time)));
             Xdata_temp = repmat(Xdata_temp,[size(Ydata_temp,1),1]);
@@ -347,13 +396,13 @@ for index = 1:length(S)
     
     % ticks on graph
     line('XData',ind_start,'YData',1:length(ind_start),...
-        'Color','w','LineWidth',.1,'Linestyle','none',...
-        'Marker','.','MarkerSize',1,'MarkerFaceColor','w',...
-        'MarkerEdgeColor','w','Parent',ax);
+        'Color','r','LineWidth',.1,'Linestyle','none',...
+        'Marker','.','MarkerSize',1,'MarkerFaceColor','r',...
+        'MarkerEdgeColor','r','Parent',ax);
     line('XData',ind_end,'YData',1:length(ind_end),...
-        'Color','w','LineWidth',.1,'Linestyle','none',...
-        'Marker','.','MarkerSize',1,'MarkerFaceColor','w',...
-        'MarkerEdgeColor','w','Parent',ax);
+        'Color','r','LineWidth',.1,'Linestyle','none',...
+        'Marker','.','MarkerSize',1,'MarkerFaceColor','r',...
+        'MarkerEdgeColor','r','Parent',ax);
     
     % recording line
     ind_new = find(~strcmp(S(index).rat_id,'')==1);
@@ -377,6 +426,7 @@ for index = 1:length(S)
         'Color','r','LineWidth',.1,'Linestyle','-',...
         'Marker','none','MarkerSize',1,'MarkerFaceColor','r',...
         'MarkerEdgeColor','w','Parent',ax);
+    l.Visible='off';
     %l.XData = S(index).t_start;
     
     % axes limits
@@ -393,7 +443,6 @@ for index = 1:length(S)
     end
     ax.XTickLabel = str_label;
     ax.XLim = [ind_keep(1),ind_keep(end)];
-    ax.CLim = [-5;20];
     
     % colorbar
     c = colorbar(ax,'northoutside');
@@ -401,6 +450,7 @@ for index = 1:length(S)
     c.Box = 'off';
     c.TickLength = [0 0];
     c.FontSize = 5;
+    ax.Position(4) = ax.Position(4)*.9;
     
     % display average
     m = mean(Ydata,'omitnan');
@@ -427,10 +477,12 @@ for index = 1:length(S)
     
     title(ax2,sprintf('%s [n=%d]',char(labels_gathered(index)),size(S(index).Xdata,1)));
     ax2.FontSize = 8;
-    ax2.YLim = [-2;10];
     ax2.XTickLabel = '';
     ax2.TickLength = [0 0];
     grid(ax2,'on');
+    
+    ax.CLim = [-5;15];
+    ax2.YLim = [-5;15];
 end
 
 f.Units = 'pixels';
@@ -514,13 +566,13 @@ for index = 1:length(Q)
     
     % ticks on graph
     line('XData',ind_start,'YData',1:length(ind_start),...
-        'Color','w','LineWidth',.1,'Linestyle','none',...
-        'Marker','.','MarkerSize',1,'MarkerFaceColor','w',...
-        'MarkerEdgeColor','w','Parent',ax);
+        'Color','r','LineWidth',.1,'Linestyle','none',...
+        'Marker','.','MarkerSize',1,'MarkerFaceColor','r',...
+        'MarkerEdgeColor','r','Parent',ax);
     line('XData',ind_end,'YData',1:length(ind_end),...
-        'Color','w','LineWidth',.1,'Linestyle','none',...
-        'Marker','.','MarkerSize',1,'MarkerFaceColor','w',...
-        'MarkerEdgeColor','w','Parent',ax);
+        'Color','r','LineWidth',.1,'Linestyle','none',...
+        'Marker','.','MarkerSize',1,'MarkerFaceColor','r',...
+        'MarkerEdgeColor','r','Parent',ax);
     
     % recording line
     ind_new = find(~strcmp(Q(index).rat_id,'')==1);
@@ -540,10 +592,11 @@ for index = 1:length(Q)
     for ii=1:size(Ydata,1)
         m_dat = [m_dat;mean(Ydata(ii,ind_ref(ii)-lag:ind_ref(ii)+lag),'omitnan')];
     end
-    line('XData',ind_start/2+30*m_dat,'YData',1:length(ind_start),...
+    l = line('XData',ind_start/2+30*m_dat,'YData',1:length(ind_start),...
         'Color','r','LineWidth',.1,'Linestyle','-',...
         'Marker','none','MarkerSize',1,'MarkerFaceColor','r',...
         'MarkerEdgeColor','w','Parent',ax);
+    l.Visible='off';
     
     % axes limits
     ax.FontSize = 8;
@@ -560,13 +613,13 @@ for index = 1:length(Q)
     ax.XTickLabel = str_label;
     ax.XLim = [ind_keep(1),ind_keep(end)];
     
-    %ax.CLim = [-5;20];
     % colorbar
     c = colorbar(ax,'northoutside');
     c.Position = [ax.Position(1) ax.Position(2)-1.5*margin_h ax.Position(3) margin_h/2];
     c.Box = 'off';
     c.TickLength = [0 0];
     c.FontSize = 5;
+    ax.Position(4) = .9*ax.Position(4);
     
     % display average
     m = mean(Ydata,'omitnan');
@@ -593,10 +646,23 @@ for index = 1:length(Q)
     
     title(ax2,sprintf('%s [n=%d]',char(labels_gathered(index)),size(Q(index).Xdata,1)));
     ax2.FontSize = 8;
-    %ax2.YLim = [-2;10];
     ax2.XTickLabel = '';
     ax2.TickLength = [0 0];
     grid(ax2,'on');
+    
+%     ax.CLim = [-.1;.5];
+%     ax2.YLim = [-.1;.5];
+    switch char(labels_gathered(index))
+        case 'SPEED'    
+            ax.CLim = [-.1;.5];
+            ax2.YLim = [-.1;.5];
+        case 'Power-ACC'    
+            ax.CLim = [-0;2000];
+            ax2.YLim = [0;2000];
+        otherwise    
+            ax.CLim = [-2;15];
+            ax2.YLim = [-2;15];
+    end
 end
 
 f.Units = 'pixels';

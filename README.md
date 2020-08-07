@@ -31,6 +31,7 @@ o	Add sliders for threshold in Figure Sleep Scoring
 o	Add click function for threshold in Detect Locomotion
 
 Bug Fixes: 
+o	Replace movefile by simple loading in Synthesis/Cross-Correlation LFP-fUS
 o	Save indexes as sources (detect surges/generate time indexes
 		See Detect Locomotion Events
 o	Fix Correlation Analysis when no regions selected

@@ -29,18 +29,26 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
-list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
-    '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
-    '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
-    '20150724_170457_E';'20150726_152241_E';'20150728_134238_E';'20151126_170516_E';...
-    '20160622_191334_E';'20160623_123336_E'};
-
+% list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
+%     '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
+%     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
+%     '20150724_170457_E';'20150726_152241_E';'20150728_134238_E';'20151126_170516_E';...
+%     '20160622_191334_E';'20160623_123336_E'};
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
     '20160630_114317_E';'20160701_130444_E'};
+list_frontal = {'20200616_135248_E_nlabSEP2';'20200618_132755_E';...
+    '20200619_130453_E';'20200624_163458_E';...
+    '20200701_092506_E';'20200701_113622_E';...
+    '20200701_134008_E';'20200702_111111_E';...
+    '20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
+    '20200710_093807_E'};
+list_sagittal = {'20200630_155022_E';'20200703_132316_E';...
+    '20200703_153247_E';'20200703_183145_E';...
+    '20200704_125924_E';'20200704_145737_E'};
 
 % list of references to search (in order)
 % list_ref = {'SPEED';'ACCEL'};
@@ -81,6 +89,10 @@ for i = 1:length(all_files)
         D(index).plane = 'CORONAL';
     elseif sum(contains(list_diagonal,cur_file))>0
         D(index).plane = 'DIAGONAL';
+    elseif sum(contains(list_frontal,cur_file))>0
+        D(index).plane = 'FRONTAL';
+    elseif sum(contains(list_sagittal,cur_file))>0
+        D(index).plane = 'SAGITTAL';
     else
         D(index).plane = 'UNDEFINED';
     end
@@ -116,6 +128,27 @@ elseif  strcmp(cur_list,'DIAGONAL')
     end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
+
+elseif  strcmp(cur_list,'FRONTAL')
+    if ~flag_grouped
+        list_regions = {'M1-L.mat';'M1-R.mat';'M2-L.mat';'M2-R.mat';...
+            'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
+            'PrL-L.mat';'PrL-R.mat';'CPu-L.mat';'CPu-R.mat';...
+            'fmi-L.mat';'fmi-R.mat'};
+    else
+        list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'IL.mat';...
+            'PrL.mat';'CPu.mat';'fmi.mat'};
+    end
+    ind_keep = strcmp({D(:).plane}',cur_list);
+    D = D(ind_keep);
+    
+elseif  strcmp(cur_list,'SAGITTAL')
+    list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'MPtA.mat';...
+            'VM.mat';'Po.mat';'CA3Py.mat';'GrDG.mat';...
+            'Neocortex.mat';'dHpc.mat';'Thalamus.mat'};
+    ind_keep = strcmp({D(:).plane}',cur_list);
+    D = D(ind_keep);
+    
 else
     if ~flag_grouped
         list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
@@ -139,6 +172,8 @@ list_lfp = [{'ACCEL-POWER[61-extra]'};...
     {'Power-gammahigh/'};...
     {'Power-gammahighup/'};...
     {'Power-ripple/'}];
+list_lfp = [{'Power-ACC'};
+    {'SPEED'}];
 
 % Buidling struct S
 % All_trials
@@ -182,7 +217,7 @@ for index = 1:length(D)
             continue;
         elseif length(ind_lfp)>1
             ind_lfp = ind_lfp(1);
-            warning('Multiple pattern matches [Pattern: %s /File: %s /Selected: %s]',lfp_name,cur_file,data_fus.label_lfp(ind_lfp));
+            warning('Multiple pattern matches [Pattern: %s /File: %s /Selected: %s]',char(lfp_name),char(cur_file),char(data_fus.label_lfp(ind_lfp)));
         end
             
         for j=1:length(list_regions)
@@ -324,8 +359,10 @@ end
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 if flag_save
-    saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
-    fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+%     saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+%     fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+    saveas(f,sprintf('%s%s%s',f.Name,str_fig,'.pdf'));
+    fprintf('Figure Saved [%s].\n',sprintf('%s%s%s',f.Name,str_fig,'.pdf'));
 end
 
 end
@@ -433,8 +470,10 @@ if flag_save
     for k = 1:length(all_tabs)
         tabgp.SelectedTab = all_tabs(k);
         str_fig = strrep(strcat('_',char(all_tabs(k).Title),'_',corr_type),filesep,'');
-        saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
-        fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+%         saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+%         fprintf('Figure Saved [%s].\n',fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+        saveas(f,sprintf('%s%s%s',f.Name,str_fig,'.pdf'));
+        fprintf('Figure Saved [%s].\n',sprintf('%s%s%s',f.Name,str_fig,'.pdf'));
     end
 end
 

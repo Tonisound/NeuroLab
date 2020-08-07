@@ -3915,9 +3915,10 @@ else
         
         % Selecting main channel
         if ~isempty(data_config.File.mainlfp)
-            pattern_lfp = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
+            %pattern_lfp = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER'}];
+            pattern_lfp = [{data_config.File.mainlfp};{'SPEED'};{'Power-ACC'}];
         else
-            pattern_lfp = [{'SPEED'};{'ACCEL-POWER'}];
+            pattern_lfp = [{'SPEED'};{'Power-ACC'}];
         end
         ind_keep = zeros(size(handles.LFPTable.Data,1),1);
         for k =1:length(pattern_lfp)

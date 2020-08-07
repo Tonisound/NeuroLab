@@ -44,6 +44,9 @@ switch strtrim(str(val,:))
     case 'Detect Left-Right Runs'
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Detect Early-Mid-Late Runs'
+        detect_earlymidlate_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        
     case 'Generate Time Indexes'
         generate_time_indexes(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
