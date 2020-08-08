@@ -1,9 +1,17 @@
-function modify_trigger(folder_txt)
+function modify_trigger(folder_txt,file_out)
 % last update 20/02/19 by Antoine
 % opens and import parameters from trigger file 
 % folder_txt: path to folder
 % Update Modification section if needed
 
+if nargin == 0
+    folder_txt = char(uigetdir('Select fUS directory'));
+    file_out = fullfile(folder_txt,'trigger_modified.txt');
+end
+
+if nargin == 1
+    file_out = fullfile(folder_txt,'trigger_modified.txt');
+end
 
 %% Trigger Importation
 % default values
@@ -53,15 +61,17 @@ trigger = D{1,1};
 
 
 %% Trigger Modification
-% reference = '';
-% padding = '';
+delta_t = trigger(2)-trigger(1);
+factor_interp = 40;
+trigger = trigger(1):delta_t/factor_interp:trigger(end);
+reference = folder_txt;
+padding = sprintf('Interpolation[%d][%d]',factor_interp,length(trigger));
 % offset = '';
-% trigger = '';
+
 
 
 %% Trigger Exportation
-file_txt = fullfile(folder_txt,'trigger.txt');
-fid_txt = fopen(file_txt,'wt');
+fid_txt = fopen(file_out,'wt');
 fprintf(fid_txt,'%s',sprintf('<REF>%s</REF>\n',reference));
 fprintf(fid_txt,'%s',sprintf('<PAD>%s</PAD>\n',padding));
 fprintf(fid_txt,'%s',sprintf('<OFFSET>%.3f</OFFSET>\n',offset));
@@ -72,6 +82,6 @@ for k = 1:length(trigger)
 end
 fprintf(fid_txt,'%s',sprintf('</TRIG>'));
 fclose(fid_txt);
-fprintf('File trigger.txt saved at %s.\n',file_txt);
+fprintf('File trigger.txt saved at %s.\n',file_out);
 
 end
