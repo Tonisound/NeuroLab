@@ -677,8 +677,8 @@ while i>=START_IM && i<=END_IM
         t2.String = sprintf('%d/%d',i,END_IM);
         %Update movie
         im.CData = IM(:,:,i);
-        % image(bw_video(:,:,:,i+1-START_IM),'Parent',ax_im2);
-        imagesc(bw_video(:,:,i),'Parent',ax_im2);
+        % image(rgb_video(:,:,:,i+1-START_IM),'Parent',ax_im2);
+        imagesc(bw_video(:,:,i+1-START_IM),'Parent',ax_im2);
         axis(ax_im2,'equal');
         ax_im2.Visible = 'off';
         

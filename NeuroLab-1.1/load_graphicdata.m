@@ -58,6 +58,8 @@ boxMask_Callback(handles.MaskBox,[],handles);
 boxAtlas_Callback(handles.AtlasBox,[],handles.CenterAxes);
 %Update Box TimePatch
 boxTimePatch_Callback(handles.TimePatchBox,[],handles.RightAxes);
+%Update Box Crop
+boxCrop_Callback(handles.CropBox,[],handles.CenterAxes,savedir);
 
 % Loading Atlas.mat
 if exist(fullfile(savedir,'Atlas.mat'),'file')

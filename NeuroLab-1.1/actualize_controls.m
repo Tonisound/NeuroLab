@@ -18,6 +18,11 @@ set(handles.PatchBox,'Value',uivalues.PatchBox);
 set(handles.MaskBox,'Value',uivalues.MaskBox);
 set(handles.AtlasBox,'Value',uivalues.AtlasBox);
 set(handles.CLimBox,'Value',uivalues.CLimBox);
+if isfield(uivalues,'CropBox')
+    handles.CropBox = uivalues.CropBox;
+else
+    handles.CropBox = 0;
+end
 handles.TagButton.UserData = uivalues.TagSelection;
 %Video Menu
 handles.DisplayMenu_Video.Checked = uivalues.video_status;

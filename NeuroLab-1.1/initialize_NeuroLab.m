@@ -425,17 +425,29 @@ cb = uicontrol(f,'Style','checkbox',...
     'Tag','CLimBox',...
     'Value',0,...
     'Parent',centerPanel);
+% handles.CropBox
+crb = uicontrol(f,'Style','checkbox',...
+    'Units','normalized',...
+    'TooltipString','Crop Image using Mask',...
+    'Tag','CropBox',...
+    'Value',0,...
+    'Parent',centerPanel);
+
 % Updating box values
 pb.Value = UiValues.PatchBox;
 mb.Value = UiValues.MaskBox;
 ab.Value = UiValues.AtlasBox;
 cb.Value = UiValues.CLimBox;
+if isfield(UiValues,'CropBox')
+    crb.Value = UiValues.CropBox;
+end
 
 % Resizing
 pb.Position = [0 28/30 2/30 1.5/30];
 mb.Position = [0 26.5/30 2/30 1.5/30];
 ab.Position = [0 25/30 2/30 1.5/30];
 cb.Position = [0 23.5/30 2/30 1.5/30];
+crb.Position = [0 22/30 2/30 1.5/30];
 td.Position = [.01 0 .25 2/30];
 a.Position = [.12 .12 .8 .8];
 
@@ -716,5 +728,6 @@ set(myhandles.PatchBox,'Callback',{@boxPatch_Callback,myhandles});
 set(myhandles.MaskBox,'Callback',{@boxMask_Callback,myhandles});
 set(myhandles.AtlasBox,'Callback',{@boxAtlas_Callback,myhandles.CenterAxes});
 set(myhandles.CLimBox,'Callback',{@boxCLim_Callback,myhandles});
+set(myhandles.CropBox,'Callback',{@boxCrop_Callback,myhandles.CenterAxes,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)});
 
 end
