@@ -452,8 +452,8 @@ end
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-global DIR_STATS;
-folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
+global DIR_SYNT;
+folder = fullfile(DIR_SYNT,'fUS_PeriEventHistogram');
 fullname = fullfile(folder,sprintf('%s%s',f.Name,'.pdf'));
 saveas(f,fullname);
 %saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s',f.Name,'.pdf')));
@@ -630,8 +630,8 @@ end
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-global DIR_STATS;
-folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
+global DIR_SYNT;
+folder = fullfile(DIR_SYNT,'fUS_PeriEventHistogram');
 fullname = fullfile(folder,sprintf('%s%s',f.Name,'.pdf'));
 saveas(f,fullname);
 %saveas(f,fullfile('C:\Users\Antoine\Desktop\PeriEvent',sprintf('%s%s',f.Name,'.pdf')));

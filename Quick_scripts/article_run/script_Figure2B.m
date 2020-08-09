@@ -401,8 +401,8 @@ end
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-global DIR_STATS;
-folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
+global DIR_SYNT;
+folder = fullfile(DIR_SYNT,'fUS_PeriEventHistogram');
 fullname = fullfile(folder,sprintf('%s%s',f.Name,'.pdf'));
 saveas(f,fullname);
 fprintf('Figure Saved [%s].\n',fullname);
@@ -588,8 +588,8 @@ end
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-global DIR_STATS;
-folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
+global DIR_SYNT;
+folder = fullfile(DIR_SYNT,'fUS_PeriEventHistogram');
 fullname = fullfile(folder,sprintf('%s%s',f.Name,'.pdf'));
 saveas(f,fullname);
 %plot2svg(strcat('D:\TRANSFER\Antoine\',f.Name,'.svg'),f);

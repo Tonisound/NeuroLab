@@ -39,7 +39,7 @@ list_frontal = {'20200616_135248_E';'20200618_132755_E';...
     '20200619_130453_E';'20200624_163458_E';...
     '20200701_092506_E';'20200701_113622_E';...
     '20200701_134008_E';'20200702_111111_E';...
-    '20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
+    '20200702_152447_E';'20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
     '20200710_093807_E'};
 
 list_sagittal = {'20200630_155022_E';'20200703_132316_E';...
@@ -145,7 +145,8 @@ elseif  strcmp(cur_list,'DIAGONAL')
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'FRONTAL')
-    rescale_factor = [20,6,6,20,20,20,3,10,10,5];
+    %rescale_factor = [20,6,6,20,20,20,3,10,10,5];
+    rescale_factor = 10*ones(length(D),1);
     if ~flag_grouped
         list_regions = {'M1-L.mat';'M1-R.mat';'M2-L.mat';'M2-R.mat';...
             'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
@@ -488,9 +489,9 @@ end
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-global DIR_STATS;
+global DIR_SYNT;
 if flag_save
-    folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
+    folder = fullfile(DIR_SYNT,'fUS_PeriEventHistogram');
     fullname = fullfile(folder,sprintf('%s%s',f.Name,'.pdf'));
     saveas(f,fullname);
     fprintf('Figure Saved [%s].\n',fullname);
@@ -668,9 +669,9 @@ end
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-global DIR_STATS;
+global DIR_SYNT;
 if flag_save
-    folder = fullfile(DIR_STATS,'fUS_PeriEventHistogram');
+    folder = fullfile(DIR_SYNT,'fUS_PeriEventHistogram');
     fullname = fullfile(folder,sprintf('%s%s',f.Name,'.pdf'));
     saveas(f,fullname);
     fprintf('Figure Saved [%s].\n',fullname);

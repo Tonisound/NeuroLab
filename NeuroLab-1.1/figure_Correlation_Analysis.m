@@ -1703,25 +1703,24 @@ else
     ind_group = sort(ind_group,'ascend');
 end
 
+% If str_ref ([str_regions;str_traces] from batch menu) is not empty use it as str_ref
+% Else use str_ref defined here
+if isempty(str_ref)
+    if ~isempty(data_config.File.mainlfp)
+        % Including main channel
+        str_ref = [{data_config.File.mainlfp};{'SPEED'};{'Power-ACC/033'}];
+    else
+        str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
+        {'Power-gammahigh/'};{'SPEED'};{'Power-ACC/033'}];
+    end
+end
+str_ref = [{data_config.File.mainlfp}];
+
 for i=1:length(ind_group)
     ii = ind_group(i);
     % Update Tag_table
     hObj.UserData.folder_name = char(data_tg.TimeGroups_name(ii));
     handles.Tag_table.UserData.Selection = data_tg.TimeGroups_S(ii).Selected';
-    
-    % Selecting main channel
-    if ~isempty(data_config.File.mainlfp)
-        str_ref = [{data_config.File.mainlfp};{'SPEED'};{'ACCEL-POWER/033'}];
-    else
-        str_ref = [{'SPEED'};{'ACCEL-POWER'}];
-    end
-    
-%     % If str_ref ([str_regions;str_traces] from batch menu) is not empty use it as str_ref
-%     % Else use str_ref defined here
-%     if isempty(str_ref)
-%         str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
-%             {'Power-gammahigh/'};{'SPEED'};{'Power-ACC'}];
-%     end
     
     % Compute
     p1 = handles.Popup1;

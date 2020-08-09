@@ -701,7 +701,8 @@ t_gauss = str2double(handles.Edit4.String);
 x_im = [handles.MainFigure.UserData.time_ref.Y;NaN];
 x_start = handles.MainFigure.UserData.time_ref.Y(1);
 x_end = handles.MainFigure.UserData.time_ref.Y(end);
-label_fus = {'cortex';'hpc';'thal';'whole'};
+% label_fus = {'cortex';'hpc';'thal';'whole'};
+label_fus = {'M1';'hpc';'thal';'whole'};
 rec_mode = handles.MainFigure.UserData.rec_mode;
 length_burst = handles.MainFigure.UserData.length_burst;
 n_burst = handles.MainFigure.UserData.n_burst;
@@ -718,7 +719,7 @@ for i =1:length(lines)
         ind_hpc = [ind_hpc;i];
     elseif contains(str,'thalamus')
         ind_thal = [ind_thal;i];
-    elseif contains(str,'cortex-')
+    elseif contains(str,'m1')%contains(str,'cortex-')
         ind_cortex = [ind_cortex;i];
     end
 end
@@ -1024,7 +1025,7 @@ end
 S_fus = struct('x',[],'y',[],'name',[]);
 S_fus(1).x = x_im(:);
 S_fus(1).y = y_cortex(:);
-S_fus(1).name = 'cortex';
+S_fus(1).name = 'M1';%'cortex';
 S_fus(2).x = x_im(:);
 S_fus(2).y = y_hpc(:);
 S_fus(2).name = 'hpc';
