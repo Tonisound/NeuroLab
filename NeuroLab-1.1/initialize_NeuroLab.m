@@ -728,6 +728,6 @@ set(myhandles.PatchBox,'Callback',{@boxPatch_Callback,myhandles});
 set(myhandles.MaskBox,'Callback',{@boxMask_Callback,myhandles});
 set(myhandles.AtlasBox,'Callback',{@boxAtlas_Callback,myhandles.CenterAxes});
 set(myhandles.CLimBox,'Callback',{@boxCLim_Callback,myhandles});
-set(myhandles.CropBox,'Callback',{@boxCrop_Callback,myhandles.CenterAxes,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab)});
+set(myhandles.CropBox,'Callback',{@boxCrop_Callback,myhandles.CenterAxes});
 
 end

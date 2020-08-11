@@ -121,11 +121,42 @@ elseif  strcmp(cur_list,'DIAGONAL')
 
 elseif  strcmp(cur_list,'FRONTAL')
     list_regions = {'M1-L.mat';'M1-R.mat';'M2-L.mat';'M2-R.mat';...
-            'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
-            'PrL-L.mat';'PrL-R.mat';'CPu-L.mat';'CPu-R.mat';...
-            'fmi-L.mat';'fmi-R.mat'};
+        'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
+        'PrL-L.mat';'PrL-R.mat';'CPu-L.mat';'CPu-R.mat';...
+        'fmi-L.mat';'fmi-R.mat'};
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
+    
+    %     %Building all_colors_frontal
+    %     l=findobj(myhandles.CenterAxes,'Type','Patch');
+    %     list_regions = {'M1-L';'M1-R';'M2-L';'M2-R';...
+    %         'Cg1-L';'Cg1-R';'IL-L';'IL-R';...
+    %         'PrL-L';'PrL-R';'CPu-L';'CPu-R';...
+    %         'fmi-L';'fmi-R'};
+    %     all_colors=[];
+    %     all_names =[];
+    %     for i =1:length(l)
+    %         all_colors = [all_colors;l(i).FaceColor];
+    %         all_names = [all_names;{l(i).UserData.UserData.Name}];
+    %     end
+    %
+    %     all_colors_frontal=[];
+    %     for i =1:length(list_regions)
+    %         ind_reg=contains(all_names,list_regions(i));
+    %         all_colors_frontal = [all_colors_frontal;all_colors(ind_reg,:)];
+    %     end
+    all_colors_frontal =[0.6900    1.0000    0.3100;
+        0.7500    1.0000    0.2500;
+        0.9400    1.0000    0.0600;
+        1.0000    1.0000         0;
+        0         0    0.6900;
+        0         0    0.7500;
+        0.8100    1.0000    0.1900;
+        0.8800    1.0000    0.1300;
+        1.0000    0.9400         0;
+        1.0000    0.8800         0;
+        0    0.8100    1.0000;
+        0    0.8800    1.0000];
     
 elseif  strcmp(cur_list,'SAGITTAL')
     list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'MPtA.mat';...
@@ -259,6 +290,7 @@ f = figure('Visible','off');
 colormap(f,'parula');
 P.Colormap = f.Colormap;
 P.f_colors = f.Colormap(round(1:64/length(R):64),:);
+P.f_colors = [all_colors_frontal;all_colors_frontal];
 close(f);
 
 P.margin_w = .01;
@@ -356,6 +388,7 @@ labels_gathered=regexprep(labels_gathered,'.mat','');
 % Plotting
 for index = 1:length(R)
     
+    index
     ax = all_axes(index);
     if contains(R(index).channel,'-L')
         marker = char(all_markers(1));
@@ -396,8 +429,8 @@ for index = 1:length(R)
 %             'FaceColor',f_colors(index,:),'FaceAlpha',patch_alpha,'EdgeColor','none',...
 %             'LineWidth',.25,'Parent',ax);
         % ticks on graph
-        if index<= length(list_regions)
-            ax.YLim = [-2;50];
+        if index<= 2%length(list_regions)
+            ax.YLim = [-2;75];
         end
         line('XData',[ref_time(R(index).ind_start(j)),ref_time(R(index).ind_start(j))],...
             'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
@@ -603,7 +636,7 @@ for index = 1:length(S)
     % axes limits
     ind_keep = find(sum(~isnan(S(index).Ydata),1)/size(S(index).Ydata,1)> thresh_average);
     ax.XLim = [ref_time(ind_keep(1))-.5, ref_time(ind_keep(end))];
-    ax.YLim = [-2;50];
+    ax.YLim = [0;60];
     %ax.XTick = ref_time(ind_keep(1):500:ind_keep(end));
     %ax.XTickLabel = {'.5';'1.0';'1.5';'2.0'};
     

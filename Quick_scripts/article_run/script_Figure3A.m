@@ -1,9 +1,8 @@
 % Article RUN
-% Figure 3
+% Figure 3 (Group Timing)
 % to run after batch fUS_Correlation 
-% Display (and save figure) mean correlation patterns
-
-function script_Figure3(cur_list,timegroup,flag_grouped,flag_sorted)
+% Display (and save figure) group timing Correlation patterns
+function script_Figure3A(cur_list,timegroup,flag_grouped,flag_sorted)
 
 close all;
 if nargin <4
@@ -35,8 +34,8 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20150724_170457_E';'20150726_152241_E';'20150728_134238_E';'20151126_170516_E';...
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
-    '20160629_191304_E'};
-% high-definition
+    '20160629_191304_E''20200709_092810_E';'20200710_123006_E'};
+% % high-definition
 % list_coronal = {'20141216_225758B_E';'20141226_154835B_E';'20150223_170742B_E';'20150224_175307B_E';...
 %     '20150225_154031B_E';'20150226_173600B_E';'20150619_132607B_E';'20150620_175137B_E';...
 %     '20150714_191128B_E';'20150715_181141B_E';'20150716_130039B_E';'20150717_133756B_E';...
@@ -45,12 +44,12 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
 %     '20160623_123336B_E';'20160624_120239B_E';'20160628_171324B_E';'20160629_134749B_E';...
 %     '20160629_191304B_E'};
 % high-quality
-% list_coronal = {'20141226_154835B_E';'20150223_170742B_E';'20150224_175307B_E';...
-%     '20150225_154031B_E';'20150226_173600B_E';'20150619_132607B_E';'20150620_175137B_E';...
-%     '20150714_191128B_E';'20150715_181141B_E';'20150716_130039B_E';'20150717_133756B_E';...
-%     '20150724_170457B_E';'20150726_152241B_E';'20151126_170516B_E';...
-%     '20151202_141449B_E';'20160622_191334B_E';...
-%     '20160623_123336B_E';'20160624_120239B_E'};
+list_coronal = {'20141226_154835B_E';'20150223_170742B_E';'20150224_175307B_E';...
+    '20150225_154031B_E';'20150226_173600B_E';'20150619_132607B_E';'20150620_175137B_E';...
+    '20150714_191128B_E';'20150715_181141B_E';'20150716_130039B_E';'20150717_133756B_E';...
+    '20150724_170457B_E';'20150726_152241B_E';'20151126_170516B_E';...
+    '20151202_141449B_E';'20160622_191334B_E';...
+    '20160623_123336B_E';'20160624_120239B_E';'20200709_092810_E';'20200710_123006_E'};%;
 
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
@@ -66,17 +65,17 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
 %     '20160623_193007B_E';'20160624_171440B_E';'20160625_113928B_E';'20160625_163710B_E';...
 %     '20160630_114317B_E';'20160701_130444B_E'};
 % high-quality
-% list_diagonal = {'20150227_134434B_E';'20150304_150247B_E';'20150305_190451B_E';'20150306_162342B_E';...
-%     '20150718_135026B_E';'20150722_121257B_E';'20150723_123927B_E';'20150724_131647B_E';...
-%     '20150725_160417B_E';'20150727_114851B_E';'20151127_120039B_E';...
-%     '20151204_135022B_E';'20160623_163228B_E';...
-%     '20160623_193007B_E';'20160625_113928B_E'};
+list_diagonal = {'20150227_134434B_E';'20150304_150247B_E';'20150305_190451B_E';'20150306_162342B_E';...
+    '20150718_135026B_E';'20150722_121257B_E';'20150723_123927B_E';'20150724_131647B_E';...
+    '20150725_160417B_E';'20150727_114851B_E';'20151127_120039B_E';...
+    '20151204_135022B_E';'20160623_163228B_E';...
+    '20160623_193007B_E'};%'20160625_113928B_E';
 
-list_frontal = {'20200616_135248_E_nlabSEP2';'20200618_132755_E';...
+list_frontal = {'20200616_135248_E';'20200618_132755_E';...
     '20200619_130453_E';'20200624_163458_E';...
     '20200701_092506_E';'20200701_113622_E';...
     '20200701_134008_E';'20200702_111111_E';...
-    '20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
+    '20200709_151857_E';...
     '20200710_093807_E'};
 
 list_sagittal = {'20200630_155022_E';'20200703_132316_E';...
@@ -87,7 +86,7 @@ list_sagittal = {'20200630_155022_E';'20200703_132316_E';...
 % list of references to search (in order)
 % list_ref = {'SPEED'};
 list_ref = {'SPEED';'ACCEL'};
-% list_ref = {'Power-theta'};
+list_ref = {'Power-theta'};
 
 for i = 1:length(all_files)
     
@@ -188,6 +187,9 @@ if strcmp(cur_list,'CORONAL')
         list_regions = {'AC';'S1BF';'LPtA';'RS';...
             'DG';'CA1';'CA2';'CA3';...
             'dThal';'Po';'VPM';'HypothalRg'};
+%         list_regions = {'RS';...
+%             'DG';'CA1';'CA3';...
+%             'dThal'};
     end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
@@ -202,6 +204,9 @@ elseif  strcmp(cur_list,'DIAGONAL')
         list_regions = {'AntCortex';'AMidCortex';'PMidCortex';'PostCortex';...
             'DG';'CA3';'CA1';'dHpc';'vHpc';...
             'dThal';'vThal';'Thalamus';'CPu'};
+%         list_regions = {'AMidCortex';'PMidCortex';...
+%             'DG';'CA3';'CA1';...
+%             'dThal'};
     end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
@@ -380,7 +385,7 @@ e2 = errorbar(diag(m(ind_sorted)),diag(s_sem(ind_sorted)),'Color','k',...
     'Parent',ax2,'LineStyle','none','LineWidth',1);
 % dots = 
 x_dots = repmat(1:length(list_regions_sorted),[length(D) 1]);
-plot(x_dots',tmax_regions(:,ind_sorted)','Linestyle','none','Linewidth',.1,'Color','k',...
+plot(x_dots',tmax_regions(:,ind_sorted)','Linestyle','none','Linewidth',.05,'Color','k',...
     'Marker','o','MarkerSize',3,'MarkerFaceColor','k','MarkerEdgeColor','none','Parent',ax2);
 ax2.XTick = 1:length(list_regions_sorted);
 ax2.XTickLabel = regexprep(list_regions_sorted,'.mat','');
@@ -389,13 +394,25 @@ ax2.YLabel.String = 'tmax';
 ax2.YLim = [0, 3.5];
 %[1.2, 1.6];
 colorbar(ax2,'northoutside');
+grid(ax2,'on');
+
+% Wilcoxon test
+Xstats = tmax_regions(:,ind_sorted_t);
+P = NaN(size(Xstats,2),size(Xstats,2));
+for i=1:length(P)
+    for j=i+1:length(P)
+        P(i,j) = ranksum(Xstats(:,i),Xstats(:,j));
+        text(i,2.25+j/5,sprintf('%.4f\n[%s][%s]',P(i,j),char(list_regions_sorted(i)),char(list_regions_sorted(j))),...
+            'Fontsize',6,'Parent',ax2);
+    end
+end
 
 % relative timing
 test_relative = true;
 if test_relative
-    ind_relative = find(strcmpi(list_regions,'M1'));
+    ind_relative = find(strcmpi(list_regions,'dg'));%dThal
     if isempty(ind_relative)
-        ind_relative = find(strcmpi(list_regions,'M1-L'));
+        ind_relative = find(strcmpi(list_regions,'dg-l'));%dThal-L
     end
     if ~isempty(ind_relative)
         t_relative =  repmat(tmax_regions(:,ind_relative),[1 size(tmax_regions,2)]);
@@ -420,9 +437,21 @@ ax3.XTick = 1:length(list_regions_sorted);
 ax3.XTickLabel = regexprep(list_regions_sorted,'.mat','');
 ax3.XTickLabelRotation = 45;
 ax3.YLabel.String = 'tmax-relative';
-ax3.YLim = [-1, 1.5];
+ax3.YLim = [-1, 2];
 %[1.2, 1.6];
 colorbar(ax3,'northoutside');
+grid(ax3,'on');
+
+% Wilcoxon test
+Xstats = tmax_regions_relative(:,ind_sorted_t);
+P = NaN(size(Xstats,2),size(Xstats,2));
+for i=1:length(P)
+    for j=i+1:length(P)
+        P(i,j) = ranksum(Xstats(:,i),Xstats(:,j));
+        text(i,.75+j/5,sprintf('%.4f\n[%s][%s]',P(i,j),char(list_regions_sorted(i)),char(list_regions_sorted(j))),...
+            'Fontsize',6,'Parent',ax3);
+    end
+end
 
 % colors
 %ind_cmap = round(1:length(cmap)/length(b1):length(cmap));
@@ -497,8 +526,8 @@ for i =1:length(m_t_)
     line('XData',[m_t_(i)-s_sem_(i) m_t_(i)+s_sem_(i)],'YData',[i i],'Color',colors_(i,:),...
         'LineStyle','-','LineWidth',1,'Parent',ax2);
     text(m_t_(i)-.1,i+.4,char(list_regions_sorted_t(i)));
-    text(m_t_(i)-s_sem_(i)-.1,i+.4,sprintf('%.2f',m_t_(i)-s_sem_(i)));
-    text(m_t_(i)+s_sem_(i)-.1,i+.4,sprintf('%.2f',m_t_(i)+s_sem_(i)));
+    text(m_t_(i)-s_sem_(i)-.1,i+.4,sprintf('%.3f',m_t_(i)-s_sem_(i)));
+    text(m_t_(i)+s_sem_(i)-.1,i+.4,sprintf('%.3f',m_t_(i)+s_sem_(i)));
 end
 ax2.YLim= [0 length(m_t)+1];
 ax2.XLim= ax1.XLim;
@@ -507,180 +536,5 @@ ax2.XTickLabel = ax1.XTickLabel;
 ax2.YTick = [];
 ax2.XGrid = 'on';
 
-% Drawing Rmax/Tmax_pattern
-f2 = figure;
-n_columns = 8;
-n_rows = ceil(length(S)/n_columns);
-margin_w=.01;
-margin_h=.02;
-alpha_value = .2;
-cmin = 0.2;
-cmax = 0.6;
-tmin = -1;
-tmax = 5;
 
-%Rmax
-% axes creation
-all_axes = gobjects(length(S),1);
-all_axes0 = gobjects(length(S),1);
-for i = 1:n_rows
-    for j = 1:n_columns
-        index = (i-1)*n_columns+j;
-        if index>length(S)
-            continue;
-        end
-        x = mod(index-1,n_columns)/n_columns;
-        y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
-        
-        ax0 = axes('Parent',f2);
-        ax0.Position = [x+margin_w y+.2*margin_h (1/n_columns)-2*margin_w (1/n_rows)-2*margin_h];
-        colormap(ax0,'gray');
-        all_axes0(index) = ax0;
-        
-        ax = axes('Parent',f2);
-        ax.Position = [x+margin_w y+.2*margin_h (1/n_columns)-2*margin_w (1/n_rows)-2*margin_h];
-        colormap(ax,'jet');
-        all_axes(index) = ax;
-        
-    end
-end
-%plotting
-for k =1:length(S)
-    
-    %background
-    ax0 = all_axes0(k);
-    imagesc(S(k).background,'Parent',ax0);
-    ax0.Visible = 'off';
-    
-    %image
-    ax = all_axes(k);
-    im = imagesc(S(k).Rmax_map,'Parent',ax);
-    im.AlphaData = im.CData>alpha_value;
-    ref = strrep(D(k).reference,'_','-');
-    ref = strrep(ref,'-Doppler-normalized','-');
-    ax.Title.String = sprintf('%s\n%s',strrep(D(k).file,'_','-'),ref);
-    ax.FontSize = 6;
-    
-    ax.Visible = 'off';
-    ax.Title.Visible ='on';
-    ax.CLim = [cmin cmax];
-    %colorbar
-    if k==length(S)
-        c = colorbar(ax);
-        c.Position = [ax.Position(1)+ax.Position(3)+margin_w ax.Position(2) margin_w ax.Position(4)];
-    end
-
-end
-
-f3 = figure;
-%Tmax
-% axes creation
-all_axes = gobjects(length(S),1);
-all_axes0 = gobjects(length(S),1);
-for i = 1:n_rows
-    for j = 1:n_columns
-        index = (i-1)*n_columns+j;
-        if index>length(S)
-            continue;
-        end
-        x = mod(index-1,n_columns)/n_columns;
-        y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
-        
-        ax0 = axes('Parent',f3);
-        ax0.Position = [x+margin_w y+.2*margin_h (1/n_columns)-2*margin_w (1/n_rows)-2*margin_h];
-        colormap(ax0,'gray');
-        all_axes0(index) = ax0;
-        
-        ax = axes('Parent',f3);
-        ax.Position = [x+margin_w y+.2*margin_h (1/n_columns)-2*margin_w (1/n_rows)-2*margin_h];
-        colormap(ax,'jet');
-        all_axes(index) = ax;
-        
-    end
-end
-%plotting
-for k =1:length(S)
-    
-    %background
-    ax0 = all_axes0(k);
-    imagesc(S(k).background,'Parent',ax0);
-    ax0.Visible = 'off';
-    
-    %image
-    ax = all_axes(k);
-    im = imagesc(S(k).Tmax_map,'Parent',ax);
-    im.AlphaData = S(k).Rmax_map>alpha_value;
-    ax.Title.String = strrep(D(k).file,'_','-');
-    ax.Visible = 'off';
-    ax.Title.Visible ='on';
-    ax.CLim = [tmin tmax];
-    %colorbar
-    if k==length(S)
-        c = colorbar(ax);
-        c.Position = [ax.Position(1)+ax.Position(3)+margin_w ax.Position(2) margin_w ax.Position(4)];
-    end
-
-end
-
-% Drawing Rmax_pattern
-f4 = figure;
-% axes creation
-all_axes = gobjects(length(S),1);
-for i = 1:n_rows
-    for j = 1:n_columns
-        index = (i-1)*n_columns+j;
-        if index>length(S)
-            continue;
-        end
-        x = mod(index-1,n_columns)/n_columns;
-        y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
-        ax = axes('Parent',f4);
-        ax.Position = [x+3*margin_w y+.2*margin_h (1/n_columns)-3*margin_w (1/n_rows)-2*margin_h];
-        colormap(ax,'jet');
-        all_axes(index) = ax;  
-    end
-end
-%plotting
-for k =1:length(S)
-    ax = all_axes(k);
-    colormap(ax,'parula');
-    RT_pattern = S(k).RT_pattern_resamp;
-    lags = S(k).lags_resampled;
-    % RT_pattern = S(k).RT_pattern;
-    % lags = S(k).lags*S(k).step; 
-    
-    imagesc('XData',lags,'YData',1:length(S(k).labels),'CData',RT_pattern,'Parent',ax);
-    ax.Title.String = strrep(D(k).file,'_','-');
-    %ax.Visible = 'off';
-    ax.Title.Visible ='on';
-    ax.CLim = [0 .8];
-    ax.XLim = [S(k).lags(1)*S(k).step S(k).lags(end)*S(k).step];
-    ax.XTick = S(k).lags(1:5:end)*S(k).step;
-    %ax.XTick = '';
-    ax.XTickLabel = round(S(k).lags(1:5:end)*S(k).step);
-    ax.FontSize = 5;
-    ax.Title.FontSize = 10;
-    
-    % ticks
-    [~,imax] = max(RT_pattern,[],2,'omitnan');
-    ydat = [];
-    for kk=1:size(RT_pattern,1)
-        ydat = [ydat;lags(imax(kk))];
-    end  
-%     line('YData',1:length(S(k).labels),'XData',ydat,'Parent',ax,...
-%         'LineStyle','none','MarkerSize',3,'Marker','o',...
-%         'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
-    line('YData',1:length(S(k).labels),'XData',ydat,'Parent',ax,...
-        'LineStyle','--','MarkerSize',3,'Marker','none',...
-        'Color',[.5 .5 .5],'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
-    
-    ax.YLim = [.5,length(S(k).labels)+.5];
-    ax.YTick = 1:length(S(k).labels);
-    ax.YTickLabel = S(k).labels;
-    
-    if k==length(S)
-        c = colorbar(ax);
-        c.Position = [ax.Position(1)+ax.Position(3)+margin_w ax.Position(2) margin_w ax.Position(4)];
-    end
-end
 end

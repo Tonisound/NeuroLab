@@ -574,13 +574,13 @@ if channels > l
         all_lines = flipud(findobj(old_handles.RightAxes,'type','line','-not','Tag','Cursor'));
         for i =1:length(all_lines)
             newl = copyobj(all_lines(i),ax);
-            if strcmp(newl.Tag,'Trace_Region')
-                newl.Marker ='.';
-                newl.MarkerSize = 5;
-%                 newl.Marker = 'o';
-%                 newl.MarkerSize = 3;
-                newl.LineStyle ='none';
-            end
+%             if strcmp(newl.Tag,'Trace_Region')
+%                 newl.Marker ='.';
+%                 newl.MarkerSize = 5;
+% %                 newl.Marker = 'o';
+% %                 newl.MarkerSize = 3;
+%                 newl.LineStyle ='none';
+%             end
         end
         
         all_obj = ax.Children;

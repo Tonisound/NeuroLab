@@ -699,6 +699,7 @@ for i=1:length(ax)
     end
 end
 c.Limits = ax.CLim;
+
 end
 
 function textbox_Callback(hObj,~,handles)
@@ -1092,7 +1093,7 @@ end
 
 % Display Time-Shift Correlogram
 cla(handles.Ax4);
-resample = false;
+resample = true;
 switch resample
     case true
         lags_ = lags_resampled;
@@ -1101,6 +1102,12 @@ switch resample
         lags_ = lags*step;
         A_ = A;
 end
+
+% remove first row
+A_=A_(2:end,:);
+labs=labs(2:end);
+labels = labels(2:end);
+
 imagesc('XData',lags_,'YData',1:length(labs),'CData',A_,...
     'Parent',handles.Ax4,...
     'Tag','TimeLagCorr');
