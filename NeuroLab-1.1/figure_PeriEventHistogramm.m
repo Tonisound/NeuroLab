@@ -612,7 +612,7 @@ end
 
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Episodes.mat'),'file') 
     load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Episodes.mat'),'episodes');
-elseif ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'file')
+elseif exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'file')
     load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'episodes');
 end
 
@@ -1045,11 +1045,17 @@ val_start = find(strcmp(handles.PopupStart.String,'AfterA_(s)')==1);
 if isempty(val_start)
     val_start = find(strcmp({episodes(:).shortname},'Begin_(s)')==1);
 end
+if isempty(val_start)
+    val_start = 1;
+end
 handles.PopupStart.Value = val_start;
 %handles.PopupEnd.Value = 5;
 val_end = find(strcmp({episodes(:).shortname},'BeforeB_(s)')==1);
 if isempty(val_end)
     val_end = find(strcmp(handles.PopupEnd.String,'End_(s)')==1);
+end
+if isempty(val_end)
+    val_end = 2;
 end
 handles.PopupEnd.Value = val_end;
  

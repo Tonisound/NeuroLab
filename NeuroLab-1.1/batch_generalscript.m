@@ -572,6 +572,9 @@ for i = 1:length(ind_files)
             case 'Detect Vascular Surges'
                 success = detect_vascular_surges(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
+            case 'Detect Sleep Events'
+                success = detect_sleep_events(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
             case 'Detect Locomotion Events'
                 success = detect_locomotion_events(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 

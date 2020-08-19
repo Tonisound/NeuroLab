@@ -64,6 +64,7 @@ ax_dummy = axes('Parent',f2,'Tag','Dummy','Visible','off');
 f2.UserData.data_config = data_config;
 f2.UserData.data_tg = data_tg;
 f2.UserData.data_tt = data_tt;
+f2.UserData.success = false;
 
 % Parameters
 % Lag Intervals for batch mode
@@ -175,7 +176,7 @@ e3 = uicontrol('Units','normalized',...
     'Parent',iP,...
     'String',1,...
     'Tag','Edit3',...
-    'Tooltipstring','Lag Step');
+    'Tooltipstring','Lag Step (batch mode)');
 
 bc = uicontrol('Units','normalized',...
     'Style','pushbutton',...
@@ -506,9 +507,11 @@ rt = uitable('Units','normalized',...
     'RowStriping','on',...
     'Parent',rPanel);
 % Intial Selection
-rt.UserData.Selection = strcmp(D(:,2),'Trace_Region');
-%rt.UserData.Selection = (1:size(D,1))';
-
+% rt.UserData.Selection = strcmp(D(:,2),'Trace_Region');
+% rt.UserData.Selection = (1:size(D,1))';
+sel1=strcmp(D(:,2),{'Trace_Region'});
+sel2=strcmp(D(:,2),{'Trace_RegionGroup'});
+rt.UserData.Selection = (sel1+sel2)>0;
 
 %Trace Panel
 tPanel = uipanel('Parent',tab6,...
@@ -748,7 +751,10 @@ function slider_Callback(hObj,~,handles)
 time_ref = handles.Text9.UserData.time_ref;
 hObj.Value = round(hObj.Value);
 handles.Text9.String = sprintf('Lag (s) : %.2f',(time_ref.Y(2)-time_ref.Y(1))*hObj.Value);
+
 lags = hObj.Min:hObj.Max;
+% slider_step = str2double(handles.Edit3.String);
+% lags = hObj.Min:slider_step:hObj.Max;
 
 if ~isempty(hObj.UserData)
     % Update Correlation Map
@@ -788,7 +794,7 @@ n_burst = 1;
 % Pointer Watch
 set(handles.MainFigure, 'pointer', 'watch')
 drawnow;
-handles.MainFigure.UserData.success = false;
+% handles.MainFigure.UserData.success = false;
 
 %Opening info file
 clock_start = clock;
@@ -819,7 +825,11 @@ fwrite(fid_info,sprintf('Stats type : %s \n',handles.Popup3.String(handles.Popup
 if val_batch == 0
     adapt_slider_batch(h_ref.Tag,handles);
 end
+
 lags = handles.Slider.Min:handles.Slider.Max;
+% slider_step = str2double(handles.Edit3.String);
+% lags = handles.Slider.Min:slider_step:handles.Slider.Max;
+
 step = handles.Text9.UserData.time_ref.Y(2)-handles.Text9.UserData.time_ref.Y(1);
 fwrite(fid_info,sprintf('Lags : %s \n',mat2str(lags)));
 fwrite(fid_info,sprintf('Step(s) : %.4f \n',step));
@@ -1678,6 +1688,8 @@ handles.Slider.Min = str2double(handles.Edit1.String);
 handles.Slider.Max = str2double(handles.Edit2.String);
 handles.Slider.Value = 0;
 handles.Slider.SliderStep = [1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
+% slider_step = str2double(handles.Edit3.String);
+% handles.Slider.SliderStep = slider_step*[1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
 drawnow;
 
 end
@@ -1721,7 +1733,7 @@ if isempty(str_ref)
         {'Power-gammahigh/'};{'SPEED'};{'Power-ACC/033'}];
     end
 end
-str_ref = [{data_config.File.mainlfp}];
+%str_ref = [{data_config.File.mainlfp}];
 
 for i=1:length(ind_group)
     ii = ind_group(i);
@@ -1731,8 +1743,21 @@ for i=1:length(ind_group)
     
     % Compute
     p1 = handles.Popup1;
-	bc = handles.ButtonCompute;
-	ind_pu = find(contains(p1.String,str_ref)==1);
+    bc = handles.ButtonCompute;
+    
+    test_contain = true;
+    if test_contain
+        % set test_contain to true to select matches containing str_ref
+        ind_pu = find(contains(p1.String,str_ref)==1);
+    else
+        % set test_contain to false to select matches exactly matching str_ref
+        indices_pu = zeros(size(p1.String,1),1);
+        for k =1:length(str_ref)
+            indices_pu = indices_pu + strcmp(p1.String,str_ref(k));
+        end
+        ind_pu = find(indices_pu>0);
+    end
+    
     for k =1:length(ind_pu)
         p1.Value = ind_pu(k);
         compute_Callback(bc,[],handles,val);
