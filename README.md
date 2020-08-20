@@ -25,7 +25,7 @@ o	Add Delete Sources_fUS option
 Figures
 o	Correlation Ananlysis: 
 		Add Autocorrelation fUS
-		Add slider step Callback -> update lags and slider => DONE
+		Add slider step Callback -> update lags and slider                  => DONE
 o	Add TimePatchBox in Movie_Normalized
 o	Add sliders for threshold in Figure Sleep Scoring
 o	Add click function for threshold in Detect Locomotion
@@ -34,9 +34,9 @@ Bug Fixes:
 o	Replace movefile by simple loading in Synthesis/Cross-Correlation LFP-fUS
 o	Save indexes as sources (detect surges/generate time indexes
 		See Detect Locomotion Events
-o	Fix Correlation Analysis when no regions selected
-o	Delete info.txt
-o	Fix boxMask_callback in Correlation Analysis
+o	Fix Correlation Analysis when no regions selected                       => DONE
+o	Delete info.txt                                                         => DONE
+o	Fix boxMask_callback in Correlation Analysis                            => DONE
 o	Divide LFP bands (Beta band)
 o	Pixel/Box smoothing upon click/cursor motion (main interface)
 o	Keep ratio video in Video Behavior

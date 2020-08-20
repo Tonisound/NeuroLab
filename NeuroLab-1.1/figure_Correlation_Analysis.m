@@ -630,8 +630,10 @@ set(handles2.MainFigure,'DeleteFcn',{@close_figure,CUR_IM,START_IM,END_IM});
 caxis(handles2.CenterAxes,[-1,1]);
 
 % Callback Function Attribution
-set(handles2.PatchBox,'Callback',{@boxPatch_Callback,handles2});
-set(handles2.MaskBox,'Callback',{@boxMask_Callback,handles2});
+set(handles2.PatchBox,'Callback',{@boxPatch_Callback2,handles2.CenterAxes});
+set(handles2.MaskBox,'Callback',{@boxMask_Callback2,handles2.CenterAxes});
+set(handles2.AtlasBox,'Callback',{@boxAtlas_Callback,handles2.CenterAxes});
+set(handles2.CropBox,'Callback',{@boxCrop_Callback,handles2.CenterAxes});
 
 set(handles2.Slider,'Callback',{@slider_Callback,handles2});  
 set(handles2.ButtonCompute,'Callback',{@compute_Callback,handles2,val});
@@ -671,10 +673,16 @@ end
 
 function close_figure(~,~,cur_im,start_im,end_im)
 
-global CUR_IM START_IM END_IM;
+global FILES CUR_FILE DIR_STATS CUR_IM START_IM END_IM;
 CUR_IM = cur_im ;
 START_IM = start_im;
 END_IM = end_im;
+
+% Delete _info.txt if exists
+stats_dir = fullfile(DIR_STATS,'fUS_Correlation',FILES(CUR_FILE).recording);
+if exist(fullfile(stats_dir,'_info.txt'),'file')
+    delete(fullfile(stats_dir,'_info.txt'));
+end
 
 end
 
@@ -785,7 +793,7 @@ function compute_Callback(hObj,~,handles,val_batch)
 % Compute Correlation Map
 % Compute Correlogram
 
-global START_IM END_IM IM DIR_SAVE FILES CUR_FILE;
+global START_IM END_IM IM DIR_SAVE FILES CUR_FILE DIR_STATS;
 data_tr = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),...
     'time_ref','length_burst','n_burst','rec_mode');
 time_ref = data_tr.time_ref;
@@ -801,7 +809,11 @@ drawnow;
 
 %Opening info file
 clock_start = clock;
-fid_info = fopen('_info.txt','w');
+stats_dir = fullfile(DIR_STATS,'fUS_Correlation',FILES(CUR_FILE).recording);
+if ~isdir(stats_dir)
+    mkdir(stats_dir);
+end
+fid_info = fopen(fullfile(stats_dir,'_info.txt'),'w');
 
 fwrite(fid_info,sprintf('%s \n',handles.Text1.String));
 fwrite(fid_info,sprintf('Doppler type : %s \n',handles.Text2.String));
@@ -1591,15 +1603,16 @@ fprintf('File Correlation_pattern Saved [%s].\n',fullfile(save_dir,'Correlation_
 %     fprintf('File %s Saved : Rmax %.2f t_max %.2f Rmin %.2f t_min %.2f.\n',filename,r_max(k),x_max(k),r_min(k),x_min(k));
 % end
 
-%Copying info file to stats_dir
-copyfile('_info.txt',save_dir);
+%Copying info file to save_dir
+copyfile(fullfile(stats_dir,'_info.txt'),save_dir);
 
 end
 
 function saveimage_Callback(~,~,handles)
 
-global DIR_SAVE FILES CUR_FILE DIR_FIG;
+global DIR_SAVE FILES CUR_FILE DIR_FIG DIR_STATS;
 load('Preferences.mat','GTraces');
+stats_dir = fullfile(DIR_STATS,'fUS_Correlation',FILES(CUR_FILE).recording);
 
 load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'n_burst');
 
@@ -1677,8 +1690,8 @@ handles.TabGroup.SelectedTab = handles.MainTab;
 handles.Slider.Value = val;
 slider_Callback(handles.Slider,[],handles);
 
-%Copying info file to stats_dir
-copyfile('_info.txt',save_dir);
+%Copying info file to save_dir
+copyfile(fullfile(stats_dir,'_info.txt'),save_dir);
 
 end
 
@@ -1793,11 +1806,67 @@ for i=1:length(ind_group)
             % Skip if needed
             saveimage_Callback([],[],handles);
         end
-        if exist('_info.txt','file')
-            delete('_info.txt');
-        end
+%         if exist('_info.txt','file')
+%             delete('_info.txt');
+%         end
     end
     hObj.UserData = [];
+end
+
+end
+
+function boxPatch_Callback2(src,~,ax)
+
+load('Preferences.mat','GColors');
+% Find all visible patches
+hm1 = findobj(ax,'Type','Patch','-and','Tag','Region');
+%hm2 = findobj(ax,'Type','Patch','-and','Tag','RegionGroup');
+hm2 = [];
+hm = [hm1;hm2];
+
+for i=1:length(hm)
+    if src.Value
+        hm(i).FaceAlpha = GColors.patch_transparency;
+        hm(i).EdgeColor = GColors.patch_color;
+        hm(i).LineWidth = GColors.patch_width;
+        hm(i).Visible ='on';  
+    else
+        hm(i).Visible = 'off'; 
+    end
+end
+
+end
+
+function boxMask_Callback2(src,~,ax)
+
+load('Preferences.mat','GColors');
+% Find all visible patches
+hm1 = findobj(ax,'Type','Patch','-and','Tag','Region');
+% hm2 = findobj(ax,'Type','Patch','-and','Tag','RegionGroup');
+hm2 = [];
+hm = [hm1;hm2];
+
+for i =1:length(hm)
+    if src.Value
+        hold(ax,'on');
+        color = hm(i).FaceColor;
+        %color_mask = cat(3, color(1)*ones(size(im.CData)),color(2)*ones(size(im.CData)),color(3)*ones(size(im.CData)));
+        mask = hm(i).UserData.UserData.Mask;
+        %bw = edge(mask,'canny');
+        % Extract boundaries
+        B = bwboundaries(mask);
+        for j=1:length(B)
+            boundary = B{j};
+            line('XData',boundary(:,2),'YData',boundary(:,1),...
+                'Color',color,...
+                'Parent',ax,...
+                'Tag','Mask',...
+                'Hittest','off');
+        end
+        hold(ax,'off');
+    else
+        delete(findobj(ax,'Tag','Mask'));
+    end
 end
 
 end
