@@ -70,6 +70,7 @@ f2.UserData.success = false;
 % Lag Intervals for batch mode
 f2.UserData.slider_values.lag1 = [-10;10];
 f2.UserData.slider_values.lag2 = [-5;15];
+f2.UserData.slider_values.lag_step = 2;
 %f2.UserData.slider_values.lag2 = [-100;500];
 
 
@@ -481,6 +482,7 @@ end
 lines = [lines_1;lines_2];
 bc.UserData.lines_1 = lines_1;
 bc.UserData.lines_2 = lines_2;
+bc.UserData.lags = [];
 p1.UserData.lines = lines;
 
 %Regions Panel
@@ -742,7 +744,9 @@ end
 
 handles.Slider.Min = str2double(handles.Edit1.String);
 handles.Slider.Max = str2double(handles.Edit2.String);
-handles.Slider.SliderStep = [1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
+% handles.Slider.SliderStep = [1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
+slider_step = str2double(handles.Edit3.String);
+handles.Slider.SliderStep = slider_step*[1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
 
 end
 
@@ -752,9 +756,8 @@ time_ref = handles.Text9.UserData.time_ref;
 hObj.Value = round(hObj.Value);
 handles.Text9.String = sprintf('Lag (s) : %.2f',(time_ref.Y(2)-time_ref.Y(1))*hObj.Value);
 
-lags = hObj.Min:hObj.Max;
-% slider_step = str2double(handles.Edit3.String);
-% lags = hObj.Min:slider_step:hObj.Max;
+% lags = hObj.Min:hObj.Max;
+lags = handles.ButtonCompute.UserData.lags;
 
 if ~isempty(hObj.UserData)
     % Update Correlation Map
@@ -824,11 +827,19 @@ fwrite(fid_info,sprintf('Stats type : %s \n',handles.Popup3.String(handles.Popup
 % Getting Lags
 if val_batch == 0
     adapt_slider_batch(h_ref.Tag,handles);
+else
+    adapt_slider(handles);
 end
 
-lags = handles.Slider.Min:handles.Slider.Max;
-% slider_step = str2double(handles.Edit3.String);
-% lags = handles.Slider.Min:slider_step:handles.Slider.Max;
+% lags = handles.Slider.Min:handles.Slider.Max;
+slider_step = str2double(handles.Edit3.String);
+handles.Slider.Min = slider_step*floor(handles.Slider.Min/slider_step);
+handles.Edit1.String = handles.Slider.Min;
+handles.Slider.Max = slider_step*ceil(handles.Slider.Max/slider_step);
+handles.Edit2.String = handles.Slider.Max;
+lags = handles.Slider.Min:slider_step:handles.Slider.Max;
+% Storing lags
+hObj.UserData.lags = lags;
 
 step = handles.Text9.UserData.time_ref.Y(2)-handles.Text9.UserData.time_ref.Y(1);
 fwrite(fid_info,sprintf('Lags : %s \n',mat2str(lags)));
@@ -1519,7 +1530,8 @@ mkdir(save_dir);
 
 % Saving Stats
 labels = handles.Slider.UserData.str_labels';
-lags = handles.Slider.Min:handles.Slider.Max;
+% lags = handles.Slider.Min:handles.Slider.Max;
+lags = handles.ButtonCompute.UserData.lags;
 step = handles.Text9.UserData.time_ref.Y(2)-handles.Text9.UserData.time_ref.Y(1);
 im4 = findobj(handles.Ax4,'type','image');
 A = im4.CData;
@@ -1609,7 +1621,8 @@ end
 
 handles.TabGroup.SelectedTab = handles.MainTab;
 val = handles.Slider.Value;
-lags = handles.Slider.Min:handles.Slider.Max;
+% lags = handles.Slider.Min:handles.Slider.Max;
+lags = handles.ButtonCompute.UserData.lags;
 
 % Saving Video frame
 ref_name = regexprep(strcat('Ref-',handles.ButtonReset.UserData.ref_name),'/','-');
@@ -1673,6 +1686,7 @@ function adapt_slider_batch(tag,handles)
 
 % Slider step Update
 sv = handles.MainFigure.UserData.slider_values;
+handles.Edit3.String = sv.lag_step;
 switch tag
     case {'Trace_Mean';'Trace_Region';'Trace_RegionGroup';'Trace_Box';'Trace_Pixel'}
         handles.Edit1.String = sv.lag1(1);
@@ -1687,9 +1701,22 @@ handles.Edit2.UserData.Previous = handles.Edit2.String;
 handles.Slider.Min = str2double(handles.Edit1.String);
 handles.Slider.Max = str2double(handles.Edit2.String);
 handles.Slider.Value = 0;
-handles.Slider.SliderStep = [1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
-% slider_step = str2double(handles.Edit3.String);
-% handles.Slider.SliderStep = slider_step*[1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
+
+% handles.Slider.SliderStep = [1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
+slider_step = str2double(handles.Edit3.String);
+handles.Slider.SliderStep = slider_step*[1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
+drawnow;
+
+end
+
+function adapt_slider(handles)
+
+handles.Slider.Min = str2double(handles.Edit1.String);
+handles.Slider.Max = str2double(handles.Edit2.String);
+% handles.Slider.Value = 0;
+% handles.Slider.SliderStep = [1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
+slider_step = str2double(handles.Edit3.String);
+handles.Slider.SliderStep = slider_step*[1/abs(handles.Slider.Max-handles.Slider.Min) 5/abs(handles.Slider.Max-handles.Slider.Min)];
 drawnow;
 
 end
@@ -1733,7 +1760,7 @@ if isempty(str_ref)
         {'Power-gammahigh/'};{'SPEED'};{'Power-ACC/033'}];
     end
 end
-%str_ref = [{data_config.File.mainlfp}];
+str_ref = [{'Power-theta/'};{'SPEED'};{'Power-ACC/033'}];
 
 for i=1:length(ind_group)
     ii = ind_group(i);
