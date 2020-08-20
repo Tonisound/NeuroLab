@@ -1085,7 +1085,14 @@ for i=1:length(episodes(val).Y)
         temp(i,:) = {'NaN'};
     end
 end
-handles.EventTable.Data(:,index) = temp;
+
+%handles.EventTable.Data(:,index) = temp;
+try
+    handles.EventTable.Data(:,index) = temp;
+catch
+    handles.EventTable.Data = {};
+    handles.EventTable.Data(:,index) = temp;
+end
 
 end
 
