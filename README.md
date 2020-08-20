@@ -25,7 +25,7 @@ o	Add Delete Sources_fUS option
 Figures
 o	Correlation Ananlysis: 
 		Add Autocorrelation fUS
-		Add slider step Callback -> update lags and slider
+		Add slider step Callback -> update lags and slider => DONE
 o	Add TimePatchBox in Movie_Normalized
 o	Add sliders for threshold in Figure Sleep Scoring
 o	Add click function for threshold in Detect Locomotion
