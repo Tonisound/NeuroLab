@@ -3933,6 +3933,15 @@ else
         else
             pattern_lfp = [{'SPEED'};{'Power-ACC'}];
         end
+        
+        % Using get_electrode
+        D = get_electrode(data_config.File.recording,1:2);
+        if isempty(D)
+            pattern_lfp = [{'SPEED'};{'ACCEL-POWER'}];
+        else
+            pattern_lfp = [{'SPEED'};{'ACCEL-POWER'};D'];
+        end
+        
         ind_keep = zeros(size(handles.LFPTable.Data,1),1);
         for k =1:length(pattern_lfp)
             ind_keep = ind_keep+contains(handles.LFPTable.Data(:,1),pattern_lfp(k));

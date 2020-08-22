@@ -702,7 +702,7 @@ x_im = [handles.MainFigure.UserData.time_ref.Y;NaN];
 x_start = handles.MainFigure.UserData.time_ref.Y(1);
 x_end = handles.MainFigure.UserData.time_ref.Y(end);
 % label_fus = {'cortex';'hpc';'thal';'whole'};
-label_fus = {'M1';'hpc';'thal';'whole'};
+label_fus = {'M1';'M2';'CPu';'whole'};
 rec_mode = handles.MainFigure.UserData.rec_mode;
 length_burst = handles.MainFigure.UserData.length_burst;
 n_burst = handles.MainFigure.UserData.n_burst;
@@ -715,11 +715,11 @@ ind_cortex = [];
 
 for i =1:length(lines)
     str = lower(lines(i).UserData.Name);
-    if contains(str,'dhpc')||contains(str,'vhpc')
+    if contains(str,'m2')||contains(str,'dhpc')||contains(str,'vhpc')
         ind_hpc = [ind_hpc;i];
-    elseif contains(str,'thalamus')
+    elseif contains(str,'cpu')||contains(str,'thalamus')
         ind_thal = [ind_thal;i];
-    elseif contains(str,'m1')%contains(str,'cortex-')
+    elseif contains(str,'m1')||contains(str,'cortex-')
         ind_cortex = [ind_cortex;i];
     end
 end
@@ -1025,13 +1025,16 @@ end
 S_fus = struct('x',[],'y',[],'name',[]);
 S_fus(1).x = x_im(:);
 S_fus(1).y = y_cortex(:);
-S_fus(1).name = 'M1';%'cortex';
+% S_fus(1).name = 'cortex';
+S_fus(1).name = 'M1';
 S_fus(2).x = x_im(:);
 S_fus(2).y = y_hpc(:);
-S_fus(2).name = 'hpc';
+%S_fus(2).name = 'hpc';
+S_fus(2).name = 'M2';
 S_fus(3).x = x_im(:);
 S_fus(3).y = y_thal(:);
-S_fus(3).name = 'thal';
+%S_fus(3).name = 'thal';
+S_fus(3).name = 'CPu';
 S_fus(4).x = x_im(:);
 S_fus(4).y = y_whole(:);
 S_fus(4).name = 'whole';

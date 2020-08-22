@@ -106,7 +106,7 @@ tband_smooth = [GFilt.broad_smooth;GFilt.delta_smooth;GFilt.theta_smooth;GFilt.b
 
 % Initial selection 
 %pattern_list = {'Broadband','Delta','Theta','Beta','Gamma Low','Gamma Mid','Gamma High','Ripple'};
-pattern_list = {'Ripple'};
+pattern_list = {'Delta','Theta','Beta','Gamma Low','Gamma Mid','Gamma High','Ripple'};
 ind_selected = find(contains(str_band,pattern_list)==1);
 % asks for user input if val == 1
 if val == 1

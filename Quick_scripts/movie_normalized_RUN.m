@@ -3,10 +3,10 @@ function h = movie_normalized_RUN(handles)
 
 global IM DIR_SAVE FILES CUR_FILE START_IM END_IM;
 % Loading time reference
-load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
 % Loading time tags
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).gfus,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images');
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'TimeTags_cell','TimeTags_images');
     flag_tag = 1;
     tt_cell = TimeTags_cell(2:end,2);
     ind1 = cellfun('isempty',strfind(tt_cell,'WHOLE'));
@@ -20,25 +20,27 @@ end
 
 % Parameters
 t_lfp  = 5;
-t_start = 0;
+t_start = 3;
 t_video = .005;
 clim_default = handles.CenterAxes.CLimMode;
 
 % Finding X Y if exist
-l = findobj(handles.RightAxes,'Tag','Trace_Spiko');
+l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
 X_m = [];
 Y_m = [];
 for i=1:length(l)
     if strcmp(l(i).UserData.Name,'X(m)')
         X_m = l(i).YData;
+        %X_m = l(i).UserData.Y;
     end
     if strcmp(l(i).UserData.Name,'Y(m)')
         Y_m = l(i).YData;
+        %Y_m = l(i).UserData.Y;
     end
 end
 
 % Finding LFP channels
-l = findobj(handles.RightAxes,'Tag','Trace_Spiko');
+l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
 str_lfp = [];
 % All channels
 ind_keep = ones(length(l),1);
@@ -134,7 +136,7 @@ uicontrol(f,'Units','normalized',...
     'Style','text',...
     'HorizontalAlignment','left',...
     'FontSize',14,...
-    'String',sprintf('%s (%s)',FILES(CUR_FILE).eeg,str),...
+    'String',sprintf('%s (%s)',FILES(CUR_FILE).recording,str),...
     'Position',[.02 .92 .9 .05]);
 
 cb1 = uicontrol(f,'Units','normalized',...
@@ -196,7 +198,11 @@ for i=1:L
     Y = l(i).UserData.Y;
     delta = X(2)-X(1);
     line('XData',X,'YData',Y,'Parent',ax);
-    s = Y(floor(t(START_IM)/delta):floor(t(END_IM)/delta),1);
+    try
+        s = Y(floor(t(START_IM)/delta):floor(t(END_IM)/delta),1);
+    catch
+        s = Y(1,floor(t(START_IM)/delta):floor(t(END_IM)/delta));
+    end
     lim_inf = mean(s,'omitnan')-3*std(s,[],'omitnan');
     lim_sup = mean(s,'omitnan')+3*std(s,[],'omitnan');
     ax.YLim = [lim_inf, lim_sup];
@@ -219,10 +225,16 @@ end
 
 im = imagesc(IM(:,:,START_IM),'Parent',ax_im);
 set(ax_im,'XTickLabel','','XTick','','YTick','','YTickLabel','');    
-colorbar(ax_im,'Parent',f,'Position',[.93 .1 .015 .4]);
+c = colorbar(ax_im,'Parent',f);
+c.Position=[.93 .1 .015 .4];
 ax_im.CLim = handles.CenterAxes.CLim;
 u7.Position = [.9-.35/(2*t_lfp) .05 .35/(2*t_lfp) .005];
 u8.Position = [.9-.35/(2*t_lfp) .055 .35/(2*t_lfp) .045];
+
+% Copy AlphaData
+im.AlphaData = handles.MainImage.AlphaData;
+atlasmask = findobj(handles.CenterAxes,'Tag','AtlasMask');
+copyobj(atlasmask,ax_im);
 
 %for i = 1:START_IM:END_IM
 i=START_IM;
@@ -278,6 +290,7 @@ while i>=START_IM && i<=END_IM
         % Update ax_track
         ind = i+floor(i/length_burst);
         %ind = floor(t(i)/delta);
+        ind = i;
         cla(ax_track);
         line(Y_m(1:ind),X_m(1:ind),'Parent',ax_track,'LineWidth',1,'Color',[.5 .5 .5]);
         line(Y_m(ind),X_m(ind),'Marker','.','Parent',ax_track,'MarkerSize',25,'Color','k');
@@ -294,6 +307,17 @@ while i>=START_IM && i<=END_IM
             pause(f.UserData.t_video);
         end
         
+        % Save frame
+        load('Preferences.mat','GTraces');
+        pic_name = sprintf('Frame_%06d',i);
+        savedir = fullfile('C:\Users\Antoine\Desktop\Movie_Normalized');
+        workingDir = fullfile(savedir,FILES(CUR_FILE).nlab);
+        if ~exist(workingDir,'dir')
+            mkdir(workingDir);
+        end
+        saveas(f,fullfile(workingDir,pic_name),GTraces.ImageSaveFormat);
+        fprintf('Image saved at %s.\n',fullfile(workingDir,pic_name));
+        
         % Iterate i depending on f.UserData value
         switch f.UserData.flag
             case 1
@@ -304,7 +328,7 @@ while i>=START_IM && i<=END_IM
                 if i~=START_IM
                     i=i-1;
                 end
-            case -100;
+            case -100
                 close(f);
                 return;
             case 10
@@ -320,7 +344,11 @@ while i>=START_IM && i<=END_IM
     end
     
 end
+
+% Save Video
+save_video(workingDir,savedir,FILES(CUR_FILE).nlab);
 close(f);
+
 end
 
 function f_keypress_fcn(hObj,evnt)

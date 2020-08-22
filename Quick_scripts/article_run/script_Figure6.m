@@ -4,21 +4,18 @@
 % Display (and save figure)vascular plasticity for all brain regions
 % Sorts all trials relative to the time of first trial 
 
-function script_Figure6(cur_list,timegroup,gather_regions)
+function script_Figure6(cur_list,timegroup)
 
-if nargin <3
-    gather_regions = false;
-end
+flag_group = true; % grouping regions (bilateral/unilateral)
+flag_norm = false; % normalizing data per recording
+flag_save = false; % saving figure
 
-flag_grouped = true;
-flag_save = true;
-
-[D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup,flag_grouped);
-plot1_Figure6(S,R,list_regions,cur_list,timegroup,gather_regions,flag_save);
+[D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup,flag_group);
+plot1_Figure6(S,R,list_regions,cur_list,timegroup,flag_group,flag_norm,flag_save);
 
 end
 
-function [D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup,flag_grouped)
+function [D,R,S,list_regions] = compute_script_Figure6(cur_list,timegroup,flag_group)
 
 close all;
 folder = 'I:\NEUROLAB\NLab_Statistics\fUS_PeriEventHistogram';
@@ -32,13 +29,13 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
-% high-quality
-list_coronal = {'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
-    '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
-    '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
-    '20150724_170457_E';'20150726_152241_E';'20151126_170516_E';...
-    '20151202_141449_E';'20160622_191334_E';...
-    '20160623_123336_E';'20160624_120239_E';'20200709_092810_E';'20200710_123006_E'};%;
+% % high-quality
+% list_coronal = {'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
+%     '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
+%     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
+%     '20150724_170457_E';'20150726_152241_E';'20151126_170516_E';...
+%     '20151202_141449_E';'20160622_191334_E';...
+%     '20160623_123336_E';'20160624_120239_E';'20200709_092810_E';'20200710_123006_E'};%;
 
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
@@ -47,12 +44,6 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
     '20160630_114317_E';'20160701_130444_E'};
 
-list_frontal = {'20200616_135248_E_nlabSEP2';'20200618_132755_E';...
-    '20200619_130453_E';'20200624_163458_E';...
-    '20200701_092506_E';'20200701_113622_E';...
-    '20200701_134008_E';'20200702_111111_E';...
-    '20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
-    '20200710_093807_E'};
 list_frontal = {'20200616_135248_E';'20200618_132755_E';...
     '20200619_130453_E';'20200624_163458_E';...
     '20200701_092506_E';'20200701_113622_E';...
@@ -115,7 +106,7 @@ end
 
 % list_regions
 if strcmp(cur_list,'CORONAL')
-    if ~flag_grouped
+    if ~flag_group
         list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
             'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
             'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
@@ -130,7 +121,7 @@ if strcmp(cur_list,'CORONAL')
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    if ~flag_grouped
+    if ~flag_group
         list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
             'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
             'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
@@ -144,7 +135,7 @@ elseif  strcmp(cur_list,'DIAGONAL')
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
 elseif  strcmp(cur_list,'FRONTAL')
-    if ~flag_grouped
+    if ~flag_group
         list_regions = {'M1-L.mat';'M1-R.mat';'M2-L.mat';'M2-R.mat';...
             'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
             'PrL-L.mat';'PrL-R.mat';'CPu-L.mat';'CPu-R.mat';...
@@ -164,7 +155,7 @@ elseif  strcmp(cur_list,'SAGITTAL')
     D = D(ind_keep);
     
 else
-    if ~flag_grouped
+    if ~flag_group
         list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
             'dHpc-L.mat';'dHpc-R.mat';...
             'Thalamus-L.mat';'Thalamus-R.mat';...
@@ -176,7 +167,7 @@ end
     
 % Buidling struct S
 % All_trials
-S = struct('Ydata',[],'Xdata',[],'ind_end',[],'ind_start',[],'label_events','','region','',...
+S = struct('Ydata',[],'Ydata_norm',[],'Xdata',[],'ind_end',[],'ind_start',[],'label_events','','region','',...
     't_start',[],'t_end',[],'file','','str_ref','','rat_name','','rat_id','');
 S(length(list_regions)).Ydata = [];
 
@@ -204,15 +195,24 @@ for index = 1:length(D)
         ind_keep = find(strcmp(data_fus.fUS_Selection(:,1),region_name)==1);
         
         if ~isempty(ind_keep)        
+            
+            % rescale
+            m_ = mean(data_fus.Ydata(:),'omitnan');
+            s_ = std(data_fus.Ydata(:),[],'omitnan');
+            data_fus.Ydata = 10*(data_fus.Ydata-m_)/s_;
+            
             Ydata_temp = cat(2,data_fus.Ydata(:,:,ind_keep),NaN(size(data_fus.Ydata,1),lmax-size(data_fus.Ydata,2)));
             S(i).Ydata = [S(i).Ydata;Ydata_temp];
             Xdata_temp = cat(2,data_fus.ref_time,NaN(1,lmax-length(data_fus.ref_time)));
             Xdata_temp = repmat(Xdata_temp,[size(Ydata_temp,1),1]);
             S(i).Xdata = [S(i).Xdata;Xdata_temp];
             S(i).label_events = [S(i).label_events;data_fus.label_events];
-            S(i).t_start = [S(i).t_start;data_fus.Time_indices(:,2)-data_fus.Time_indices(1,1)];
-            S(i).t_end = [S(i).t_end;data_fus.Time_indices(:,3)-data_fus.Time_indices(1,1)];
-            
+            % timing
+            t_start = data_fus.Time_indices(:,2)-data_fus.Time_indices(1,1);
+            t_end = data_fus.Time_indices(:,3)-data_fus.Time_indices(1,1);
+            S(i).t_start = [S(i).t_start;t_start];
+            S(i).t_end = [S(i).t_end;t_end];
+            % indexes_start
             S(i).region = region_name;
             S(i).ind_start = [S(i).ind_start;data_fus.ind_start];
             S(i).ind_end = [S(i).ind_end;data_fus.ind_end];
@@ -226,13 +226,24 @@ for index = 1:length(D)
             S(i).file = [S(i).file;{cur_file};repmat({''},[size(Ydata_temp,1),1])];
             S(i).str_ref =[S(i).str_ref;{D(index).str_ref};repmat({''},[size(Ydata_temp,1),1])];
             
+            % Normalized data
+            lag = 100;
+            ind_ref = data_fus.ind_end;
+            trial_norm = 1; % normalization trials
+            all_norm_fact = [];
+            for k =1:length(trial_norm)
+                all_norm_fact = [all_norm_fact;mean(Ydata_temp(trial_norm(k),ind_ref(trial_norm(k))-lag:ind_ref(trial_norm(k))+lag),'omitnan')];
+            end
+            norm_factor = max(mean(abs(all_norm_fact)),1);
+            Ydata_norm = Ydata_temp/norm_factor;
+            S(i).Ydata_norm = [S(i).Ydata_norm;Ydata_norm];
+            
             % polyfit
             x = data_fus.Time_indices(:,2)-data_fus.Time_indices(1,2);
             y = NaN(size(Ydata_temp,1),1);
-            ind_ref = S(i).ind_end;
-            lag = 100;
             for j=1:size(Ydata_temp,1)
                 y(j) = mean(Ydata_temp(j,ind_ref(j)-lag:ind_ref(j)+lag),'omitnan');
+                %y(j) = median(Ydata_temp(j,ind_ref(j)-lag:ind_ref(j)+lag),'omitnan');
             end
             x = x(~isnan(y));
             y = y(~isnan(y));
@@ -263,7 +274,7 @@ for index = 1:length(D)
 end
 end
 
-function plot1_Figure6(S,R,list_regions,cur_list,timegroup,gather_regions,flag_save)
+function plot1_Figure6(S,R,list_regions,cur_list,timegroup,flag_group,flag_norm,flag_save)
 
 % Drawing results
 f = figure;
@@ -301,8 +312,8 @@ for ii = 1:n_rows
     end
 end
 
-%gather_regions = false;
-if gather_regions
+%flag_group = false;
+if flag_group
     labels_gathered = strrep(list_regions,'-L','');
     labels_gathered = strrep(labels_gathered,'-R','');
     [C, ~, ic] = unique(labels_gathered,'stable');
@@ -331,7 +342,7 @@ labels_gathered=regexprep(labels_gathered,'.mat','');
 for index = 1:length(S)
     
    if isempty(S(index).region)
-        continue
+        continue;
    end
    
    ax = all_axes(index);
@@ -359,7 +370,13 @@ for index = 1:length(S)
     T(isnan(T))=0;
     
     Xdata = S(index).Xdata;
-    Ydata = S(index).Ydata;
+    if flag_norm
+        % working with normalized data
+        Ydata = S(index).Ydata_norm;
+    else
+        % working with raw data
+        Ydata = S(index).Ydata;
+    end
     ind_start = S(index).ind_start;
     ind_end = S(index).ind_end;
     %m1 = mean(Ydata,2,'omitnan');
@@ -371,8 +388,10 @@ for index = 1:length(S)
     % Reference time
     ind_ref = ind_end;
     for j=1:size(Ydata,1)
-        m2(j) = mean(Ydata(j,ind_start(j)-lag:ind_ref(j)+lag),'omitnan');
-        s2(j) = std(Ydata(j,ind_start(j)-lag:ind_ref(j)+lag),[],'omitnan');
+        m2(j) = mean(Ydata(j,ind_ref(j)-lag:ind_ref(j)+lag),'omitnan');
+        s2(j) = std(Ydata(j,ind_ref(j)-lag:ind_ref(j)+lag),[],'omitnan');
+        %m2(j) = mean(Ydata(j,ind_start(j)-lag:ind_ref(j)+lag),'omitnan');
+        %s2(j) = std(Ydata(j,ind_start(j)-lag:ind_ref(j)+lag),[],'omitnan');
     end
     %sem2 = s2/sqrt(1);
     m2(isnan(m2))=0;
@@ -389,31 +408,70 @@ for index = 1:length(S)
     div(div==0)=1;
     SEM_binned = S_binned./div;
     
-    b = bar(M_binned,'FaceColor',f_colors(index,:),...
-        'EdgeColor','none','Parent',ax);
+%     % Bar diagram
+%     b = bar(M_binned,'FaceColor',f_colors(index,:),...
+%         'EdgeColor','none','Parent',ax);
+%     title(ax,labels_gathered(index));
+%     hold(ax,'on');
+%     e = errorbar(M_binned,SEM_binned,'k',...
+%         'linewidth',.5,'linestyle','none',...
+%         'Parent',ax,'Tag','ErrorBar');
+%     e.CapSize = 2;
+% %     % Removing bar edges
+% %     for i =1:length(b)
+% %         b(i).EdgeColor='k';
+% %         b(i).LineWidth= .1;
+% %     end
+
+    % Whisker plot
+    % boxplot(M2,'Parent',ax,'Colors',f_colors(index,:),'PlotStyle','compact');
+    b = boxplot(M2,'Parent',ax,'Colors',f_colors(index,:),'BoxStyle','filled',...
+        'Symbol','k+','MedianStyle','target','OutlierSize',.1);
     title(ax,labels_gathered(index));
-    hold(ax,'on');
-    e = errorbar(M_binned,SEM_binned,'k',...
-        'linewidth',.5,'linestyle','none',...
-        'Parent',ax,'Tag','ErrorBar');
-    e.CapSize = 2;
-%     % Removing bar edges
-%     for i =1:length(b)
-%         b(i).EdgeColor='k';
-%         b(i).LineWidth= .1;
-%     end
+    %hold(ax,'on');
     
     % axes limits
     ax.FontSize = 8;
     ax.XTick = 0:10:60;
     ax.XTickLabel = {'0';'10';'20';'30';'40';'75';'60'};
     ax.XLim = [.5 30+.5];
-    ax.YLim = [-2 15];
-	ax.TickLength = [0 0];
+    if flag_norm
+        ax.YLim = [-1 3];
+    else
+        ax.YLim = [-20 30];
+    end
+     ax.TickLength = [0 0];
+     grid(ax,'on');
+     
+     % Summary Statistics
+     all_P_values = NaN(size(M2,2),1);
+     for k=2:size(M2,2)
+         X = M2(:,1);
+         X = X(~isnan(X));
+         Y = M2(:,k);
+         Y = Y(~isnan(Y));
+         if ~isempty(X) && ~isempty(Y)
+             all_P_values(k) = ranksum(X,Y);
+         end
+     end
+    % Plot Stats
+    X_stats = (1:length(all_P_values));
+    Y_stats = (ax.YLim(2)-(.05*(ax.YLim(2)-ax.YLim(1))))*(all_P_values<.05);
+    Y_stats(Y_stats==0)=NaN;
+    Y_stats2 = (ax.YLim(2)-(.03*(ax.YLim(2)-ax.YLim(1))))*(all_P_values<.01);
+    Y_stats2(Y_stats2==0)=NaN;
+    Y_stats3 = (ax.YLim(2)-(.01*(ax.YLim(2)-ax.YLim(1))))*(all_P_values<.001);
+    Y_stats3(Y_stats3==0)=NaN;
+    line('XData',X_stats,'YData',Y_stats,'Parent',ax,...
+        'Marker','*','MarkerSize',5,'MarkerFaceColor','k','LineStyle','none');
+    line('XData',X_stats,'YData',Y_stats2,'Parent',ax,...
+        'Marker','*','MarkerSize',5,'MarkerFaceColor','k','LineStyle','none');
+    line('XData',X_stats,'YData',Y_stats3,'Parent',ax,...
+        'Marker','*','MarkerSize',5,'MarkerFaceColor','k','LineStyle','none');
     
     % Linear Fit
-    x = b.XData(~isnan(b.YData));
-    y = b.YData(~isnan(b.YData));
+    x = 1:length(M_binned);
+    y = M_binned;
     y = y(x<ax.XLim(2));
     x = x(x<ax.XLim(2));
     n = 1;
@@ -430,7 +488,7 @@ for index = 1:length(S)
     
     % quadratic Error
     t = min(length(x),ax.XLim(2));
-    E = mean((l.YData(1:t)-b.YData(1:t)).^2,'omitnan');
+    E = mean((l.YData(1:t)-M_binned(1:t)).^2,'omitnan');
     all_E = [all_E;E];
     text(.7*ax.XLim(2),.9*ax.YLim(2),sprintf('err = %.1f',E),...
         'FontSize',9,'Parent',ax,'Color','r');

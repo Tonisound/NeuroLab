@@ -5,7 +5,7 @@
 function script_Figure2A(cur_list,timegroup,gather_regions)
 
 if nargin <3
-    gather_regions = false;
+    gather_regions = true;
 end
 
 [D,P,Q,R,S,list_regions,list_lfp] = browse_data(cur_list,timegroup,gather_regions);
@@ -38,7 +38,7 @@ list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20
     '20151128_133929_E';'20151204_135022_E';'20160622_122940_E';'20160623_163228_E';...
     '20160623_193007_E';'20160624_171440_E';'20160625_113928_E';'20160625_163710_E';...
     '20160630_114317_E';'20160701_130444_E'};
-list_frontal = {'20200616_135248_E_nlabSEP2';'20200618_132755_E';...
+list_frontal = {'20200616_135248_E_nlabSEP2';...'20200618_132755_E';...
     '20200619_130453_E';'20200624_163458_E';...
     '20200701_092506_E';'20200701_113622_E';...
     '20200701_134008_E';'20200702_111111_E';...
@@ -388,7 +388,6 @@ labels_gathered=regexprep(labels_gathered,'.mat','');
 % Plotting
 for index = 1:length(R)
     
-    index
     ax = all_axes(index);
     if contains(R(index).channel,'-L')
         marker = char(all_markers(1));
@@ -429,9 +428,7 @@ for index = 1:length(R)
 %             'FaceColor',f_colors(index,:),'FaceAlpha',patch_alpha,'EdgeColor','none',...
 %             'LineWidth',.25,'Parent',ax);
         % ticks on graph
-        if index<= 2%length(list_regions)
-            ax.YLim = [-2;75];
-        end
+        ax.YLim = [-15;20];
         line('XData',[ref_time(R(index).ind_start(j)),ref_time(R(index).ind_start(j))],...
             'YData',[val1*ax.YLim(2) val2*ax.YLim(2)],...
             'LineWidth',tick_width,'Tag','Ticks','Color',[.5 .5 .5],'Parent',ax);
@@ -636,7 +633,7 @@ for index = 1:length(S)
     % axes limits
     ind_keep = find(sum(~isnan(S(index).Ydata),1)/size(S(index).Ydata,1)> thresh_average);
     ax.XLim = [ref_time(ind_keep(1))-.5, ref_time(ind_keep(end))];
-    ax.YLim = [0;60];
+    ax.YLim = [-15;20];
     %ax.XTick = ref_time(ind_keep(1):500:ind_keep(end));
     %ax.XTickLabel = {'.5';'1.0';'1.5';'2.0'};
     

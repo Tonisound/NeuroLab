@@ -1,24 +1,21 @@
 % Article RUN
 % Figure 5
-% to run after batch Peri-Event Time Histogram 
+% to run after batch Peri-Event Time Histogram
 % Display (and save figure) all trials for all brain regions
 
-function script_Figure5(cur_list,timegroup,gather_regions)
+function script_Figure5(cur_list,timegroup)
 
-if nargin <3
-    gather_regions = true;
-end
+flag_group = true; % grouping regions (bilateral/unilateral)
+flag_norm = true; % normalizing data per recording
+flag_save = false; % saving figure
 
-flag_grouped = false;
-flag_save = true;
-
-[D,Q,R,S,list_regions,list_lfp] = compute_script_Figure5(cur_list,timegroup,flag_grouped);
-plot1_Figure5(S,list_regions,cur_list,timegroup,gather_regions,flag_save);
-plot2_Figure5(Q,list_lfp,cur_list,timegroup,flag_save);
+[D,Q,R,S,list_regions,list_lfp] = compute_script_Figure5(cur_list,timegroup,flag_group);
+plot1_Figure5(S,list_regions,cur_list,timegroup,flag_group,flag_norm,flag_save);
+plot2_Figure5(Q,list_lfp,cur_list,timegroup,flag_norm,flag_save);
 
 end
 
-function [D,Q,R,S,list_regions,list_lfp] = compute_script_Figure5(cur_list,timegroup,flag_grouped)
+function [D,Q,R,S,list_regions,list_lfp] = compute_script_Figure5(cur_list,timegroup,flag_group)
 
 close all;
 global DIR_STATS;
@@ -43,11 +40,11 @@ list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'201
 %     '20160623_123336_E';'20160624_120239_E';'20200709_092810_E';'20200710_123006_E'};%;
 
 list_frontal = {'20200616_135248_E';'20200618_132755_E';...
-    '20200619_130453_E';'20200624_163458_E';...
+    '20200619_130453_E';'20200624_163458_E';...'20200620_111356_E';'20200629_153606_E';'20200630_105640_E'};%'20200630_130712_E'
     '20200701_092506_E';'20200701_113622_E';...
     '20200701_134008_E';'20200702_111111_E';...
-    '20200702_152447_E';'20200709_151857_E';...'20200709_092810_E';;'20200710_123006_E'
-    '20200710_093807_E'};
+    '20200702_152447_E';'20200709_151857_E';...'20200709_092810_E';
+    '20200710_093807_E'};%'20200710_123006_E'
 
 list_sagittal = {'20200630_155022_E';'20200703_132316_E';...
     '20200703_153247_E';'20200703_183145_E';...
@@ -73,7 +70,7 @@ D = struct('file','','Doppler_ref','','str_ref','','timegroup','','plane','','ra
 for i = 1:length(all_files)
     cur_file = char(all_files(i).name);
     
-   % timegroup
+    % timegroup
     dd = dir(fullfile(folder,cur_file,timegroup,'RecordingInfo.mat'));
     if ~isempty(dd)
         data_dd = load(fullfile(folder,cur_file,timegroup,'RecordingInfo.mat'));
@@ -116,28 +113,26 @@ list_lfp = {'SPEED';'Power-ACC'};
 
 % list_regions
 if strcmp(cur_list,'CORONAL')
-    rescale_factor = 10*ones(length(D),1);
-    if ~flag_grouped
+    if ~flag_group
         list_regions = {'AC-L.mat';'AC-R.mat';'S1BF-L.mat';'S1BF-R.mat';'LPtA-L.mat';'LPtA-R.mat';'RS-L.mat';'RS-R.mat';...
             'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
             'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
             'HypothalRg-L.mat';'HypothalRg-R.mat'};
         % adding large regions
-        list_regions = {'Neocortex-L.mat';'Neocortex-R.mat';'dHpc-L.mat';'dHpc-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'HypothalRg-L.mat';'HypothalRg-R.mat'};
+        % list_regions = {'Neocortex-L.mat';'Neocortex-R.mat';'dHpc-L.mat';'dHpc-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'HypothalRg-L.mat';'HypothalRg-R.mat'};
     else
         list_regions = {'AC.mat';'S1BF.mat';'LPtA.mat';'RS.mat';...
             'DG.mat';'CA1.mat';'CA2.mat';'CA3.mat';...
             'dThal.mat';'Po.mat';'VPM.mat';'Thalamus.mat';...
             'HypothalRg.mat';'Whole.mat'};
         % adding large regions
-        list_regions =    {'Neocortex.mat';'dHpc.mat';'Thalamus.mat';'HypothalRg.mat';'Whole.mat'};
+        % list_regions =    {'Neocortex.mat';'dHpc.mat';'Thalamus.mat';'HypothalRg.mat';'Whole.mat'};
     end
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'DIAGONAL')
-    rescale_factor = 10*ones(length(D),1);
-    if ~flag_grouped
+    if ~flag_group
         list_regions = {'AntCortex-L.mat';'AMidCortex-L.mat';'PMidCortex-R.mat';'PostCortex-R.mat';...
             'DG-R.mat';'CA3-R.mat';'CA1-R.mat';'dHpc-R.mat';'vHpc-R.mat';...
             'dThal-R.mat';'vThal-R.mat';'Thalamus-L.mat';'Thalamus-R.mat';'CPu-L.mat';'CPu-R.mat';...
@@ -152,9 +147,7 @@ elseif  strcmp(cur_list,'DIAGONAL')
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'FRONTAL')
-    %rescale_factor = [20,6,6,20,20,20,3,10,10,5];
-    rescale_factor = 10*ones(length(D),1);
-    if ~flag_grouped
+    if ~flag_group
         list_regions = {'M1-L.mat';'M1-R.mat';'M2-L.mat';'M2-R.mat';...
             'Cg1-L.mat';'Cg1-R.mat';'IL-L.mat';'IL-R.mat';...
             'PrL-L.mat';'PrL-R.mat';'CPu-L.mat';'CPu-R.mat';...
@@ -167,15 +160,14 @@ elseif  strcmp(cur_list,'FRONTAL')
     D = D(ind_keep);
     
 elseif  strcmp(cur_list,'SAGITTAL')
-    rescale_factor = 10*ones(length(D),1);
     list_regions = {'M1.mat';'M2.mat';'Cg1.mat';'MPtA.mat';...
-            'VM.mat';'Po.mat';'CA3Py.mat';'GrDG.mat';...
-            'Neocortex.mat';'dHpc.mat';'Thalamus.mat'};
+        'VM.mat';'Po.mat';'CA3Py.mat';'GrDG.mat';...
+        'Neocortex.mat';'dHpc.mat';'Thalamus.mat'};
     ind_keep = strcmp({D(:).plane}',cur_list);
     D = D(ind_keep);
     
 else
-    if ~flag_grouped
+    if ~flag_group
         list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
             'dHpc-L.mat';'dHpc-R.mat';...
             'Thalamus-L.mat';'Thalamus-R.mat';...
@@ -184,16 +176,16 @@ else
         list_regions =    {'Neocortex.mat';'dHpc.mat';'Thalamus.mat';'HypothalRg.mat';'Whole.mat'};
     end
 end
-    
+
 % Buidling struct S
 % All_trials
-S = struct('Ydata',[],'Xdata',[],'ind_end',[],'ind_start',[],'label_events','','region','',...
+S = struct('Ydata',[],'Ydata_norm',[],'Xdata',[],'ind_end',[],'ind_start',[],'label_events','','region','',...
     't_start',[],'t_end',[],'file','','str_ref','','rat_name','','rat_id','');
 S(length(list_regions)).Ydata = [];
 
 % Buidling struct Q
 % All_trials
-Q = struct('Ydata',[],'Xdata',[],'ind_end',[],'ind_start',[],'label_events','','channel','',...
+Q = struct('Ydata',[],'Ydata_norm',[],'Xdata',[],'ind_end',[],'ind_start',[],'label_events','','channel','',...
     't_start',[],'t_end',[],'file','','str_ref','','rat_name','','rat_id','');
 Q(length(list_lfp)).Ydata = [];
 
@@ -202,7 +194,7 @@ list_average = [list_regions;list_lfp];
 R = struct('ref_time',[],'m',[],'s',[],'ind_start',[],'ind_end',[],'channel','','str_popup','');
 R(length(list_average)).ref_time = [];
 
-lmax = 5000;   
+lmax = 5000;
 for index = 1:length(D)
     
     cur_file = D(index).file;
@@ -217,15 +209,16 @@ for index = 1:length(D)
     data_lfp = load(fullfile(fullpath,'LFP_Data.mat'));
     
     % Collecting fUS data
-    for i=1:length(list_regions)  
+    for i=1:length(list_regions)
         region_name = strrep(char(list_regions(i)),'.mat','');
         ind_keep = find(strcmp(data_fus.fUS_Selection(:,1),region_name)==1);
         
-        if ~isempty(ind_keep)        
-            % rescale
-            m_ = mean(data_fus.Ydata(:),'omitnan');
-            s_ = std(data_fus.Ydata(:),[],'omitnan');
-            data_fus.Ydata = rescale_factor(index)*(data_fus.Ydata-m_)/s_;
+        if ~isempty(ind_keep)
+            %             % rescale
+            %             rescale_factor = 10*ones(length(D),1);
+            %             m_ = mean(data_fus.Ydata(:),'omitnan');
+            %             s_ = std(data_fus.Ydata(:),[],'omitnan');
+            %             data_fus.Ydata = rescale_factor(index)*(data_fus.Ydata-m_)/s_;
             
             Ydata_temp = cat(2,data_fus.Ydata(:,:,ind_keep),NaN(size(data_fus.Ydata,1),lmax-size(data_fus.Ydata,2)));
             S(i).Ydata = [S(i).Ydata;Ydata_temp];
@@ -240,19 +233,36 @@ for index = 1:length(D)
             S(i).ind_start = [S(i).ind_start;data_fus.ind_start];
             S(i).ind_end = [S(i).ind_end;data_fus.ind_end];
             
-%             S(i).rat_name = [S(i).rat_name;repmat({D(index).rat_name},[size(Ydata_temp,1),1])];
-%             S(i).rat_id = [S(i).rat_id;repmat({D(index).rat_id},[size(Ydata_temp,1),1])];
-%             S(i).file = [S(i).file;repmat({cur_file},[size(Ydata_temp,1),1])];
-%             S(i).str_ref =[S(i).str_ref;repmat({D(index).str_ref},[size(Ydata_temp,1),1])];      
+            % Normalized data
+            lag = 100;
+            ind_ref = data_fus.ind_end;
+            trial_norm = 1; % normalization trials
+            all_norm_fact = [];
+            for k =1:length(trial_norm)
+                all_norm_fact = [all_norm_fact;mean(Ydata_temp(trial_norm(k),ind_ref(trial_norm(k))-lag:ind_ref(trial_norm(k))+lag),'omitnan')];
+            end
+            norm_factor = max(mean(abs(all_norm_fact)),1);
+            Ydata_norm = Ydata_temp/norm_factor;
+            S(i).Ydata_norm = [S(i).Ydata_norm;Ydata_norm];
+            
+            %             S(i).rat_name = [S(i).rat_name;repmat({D(index).rat_name},[size(Ydata_temp,1),1])];
+            %             S(i).rat_id = [S(i).rat_id;repmat({D(index).rat_id},[size(Ydata_temp,1),1])];
+            %             S(i).file = [S(i).file;repmat({cur_file},[size(Ydata_temp,1),1])];
+            %             S(i).str_ref =[S(i).str_ref;repmat({D(index).str_ref},[size(Ydata_temp,1),1])];
             S(i).rat_name = [S(i).rat_name;{D(index).rat_name};repmat({''},[size(Ydata_temp,1)-1,1])];
             S(i).rat_id = [S(i).rat_id;{D(index).rat_id};repmat({''},[size(Ydata_temp,1)-1,1])];
             S(i).file = [S(i).file;{cur_file};repmat({''},[size(Ydata_temp,1)-1,1])];
             S(i).str_ref =[S(i).str_ref;{D(index).str_ref};repmat({''},[size(Ydata_temp,1)-1,1])];
+            
+            if i==1
+                fprintf('Norm factor : %.2f [File: %s, Region %s].\n',norm_factor,cur_file,region_name);
+            end
+            
         end
     end
     
     % Collecting LFP data
-    for i=1:length(list_lfp)  
+    for i=1:length(list_lfp)
         channel_name = strrep(char(list_lfp(i)),'.mat','');
         % ind_keep = find(strcmp(data_lfp.LFP_Selection(:,1),channel_name)==1);
         ind_keep = find(contains(data_lfp.LFP_Selection(:,1),channel_name)==1);
@@ -261,10 +271,10 @@ for index = 1:length(D)
         end
         
         if ~isempty(ind_keep)
-%             % rescale
-%             m_ = mean(data_lfp.Ydata(:),'omitnan');
-%             s_ = std(data_lfp.Ydata(:),[],'omitnan');
-%             data_lfp.Ydata = (data_lfp.Ydata-m_)/s_;
+            %             % rescale
+            %             m_ = mean(data_lfp.Ydata(:),'omitnan');
+            %             s_ = std(data_lfp.Ydata(:),[],'omitnan');
+            %             data_lfp.Ydata = (data_lfp.Ydata-m_)/s_;
             
             Ydata_temp = cat(2,data_lfp.Ydata(:,:,ind_keep),NaN(size(data_lfp.Ydata,1),lmax-size(data_lfp.Ydata,2)));
             Q(i).Ydata = [Q(i).Ydata;Ydata_temp];
@@ -279,14 +289,31 @@ for index = 1:length(D)
             Q(i).ind_start = [Q(i).ind_start;data_lfp.ind_start];
             Q(i).ind_end = [Q(i).ind_end;data_lfp.ind_end];
             
-%             Q(i).rat_name = [Q(i).rat_name;repmat({D(index).rat_name},[size(Ydata_temp,1),1])];
-%             Q(i).rat_id = [Q(i).rat_id;repmat({D(index).rat_id},[size(Ydata_temp,1),1])];
-%             Q(i).file = [Q(i).file;repmat({cur_file},[size(Ydata_temp,1),1])];
-%             Q(i).str_ref =[Q(i).str_ref;repmat({D(index).str_ref},[size(Ydata_temp,1),1])];      
+            % Normalized data
+            lag = 100;
+            ind_ref = data_lfp.ind_end;
+            trial_norm = 1; % normalization trials
+            all_norm_fact = [];
+            for k =1:length(trial_norm)
+                all_norm_fact = [all_norm_fact;mean(Ydata_temp(trial_norm(k),ind_ref(trial_norm(k))-lag:ind_ref(trial_norm(k))+lag),'omitnan')];
+            end
+            norm_factor = mean(abs(all_norm_fact));
+            % norm_factor = max(mean(abs(all_norm_fact)),1);
+            Ydata_norm = Ydata_temp/norm_factor;
+            Q(i).Ydata_norm = [Q(i).Ydata_norm;Ydata_norm];
+            
+            %             Q(i).rat_name = [Q(i).rat_name;repmat({D(index).rat_name},[size(Ydata_temp,1),1])];
+            %             Q(i).rat_id = [Q(i).rat_id;repmat({D(index).rat_id},[size(Ydata_temp,1),1])];
+            %             Q(i).file = [Q(i).file;repmat({cur_file},[size(Ydata_temp,1),1])];
+            %             Q(i).str_ref =[Q(i).str_ref;repmat({D(index).str_ref},[size(Ydata_temp,1),1])];
             Q(i).rat_name = [Q(i).rat_name;{D(index).rat_name};repmat({''},[size(Ydata_temp,1)-1,1])];
             Q(i).rat_id = [Q(i).rat_id;{D(index).rat_id};repmat({''},[size(Ydata_temp,1)-1,1])];
             Q(i).file = [Q(i).file;{cur_file};repmat({''},[size(Ydata_temp,1)-1,1])];
             Q(i).str_ref =[Q(i).str_ref;{D(index).str_ref};repmat({''},[size(Ydata_temp,1)-1,1])];
+            
+%             if i==3
+%                 fprintf('Norm factor : %.2f [File: %s, Region %s].\n',norm_factor,cur_file,channel_name);
+%             end
         end
     end
     
@@ -313,7 +340,7 @@ for index = 1:length(D)
 end
 end
 
-function plot1_Figure5(S,list_regions,cur_list,timegroup,gather_regions,flag_save)
+function plot1_Figure5(S,list_regions,cur_list,timegroup,flag_group,flag_norm,flag_save)
 
 % Drawing results
 f = figure;
@@ -349,15 +376,14 @@ for ii = 1:n_rows
         all_axes = [all_axes;ax];
         %ax2
         ax2 = axes('Parent',f);
-        ax2.Position = [ax.Position(1) ax.Position(2)+ax.Position(4)+0*margin_h ax.Position(3) 3*margin_h];
+        ax2.Position = [ax.Position(1) ax.Position(2)+ax.Position(4)+0.5*margin_h ax.Position(3) 2.5*margin_h];
         %ax2.Title.String = sprintf('Ax-%02d',index);
         ax2.Title.Visible = 'on';
         all_axes2 = [all_axes2;ax2];
     end
 end
 
-%gather_regions = false;
-if gather_regions
+if flag_group
     labels_gathered = strrep(list_regions,'-L','');
     labels_gathered = strrep(labels_gathered,'-R','');
     [C, ~, ic] = unique(labels_gathered,'stable');
@@ -373,7 +399,8 @@ if gather_regions
             x = mod(index-1,n_columns)/n_columns;
             y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
             ax = all_axes(index);
-            ax.Position= [x+margin_w y+3*margin_h (1/n_columns)-2*margin_w (1/n_rows)-4*margin_h];       
+            ax.Position = [x+margin_w y+2*margin_h (1/n_columns)-2*margin_w (1/n_rows)-6*margin_h];
+            %ax.Position= [x+margin_w y+3*margin_h (1/n_columns)-2*margin_w (1/n_rows)-4*margin_h];
         end
     end
     all_axes = all_axes(ic);
@@ -394,7 +421,14 @@ for index = 1:length(S)
     
     % Main line
     ref_time = mean(S(index).Xdata,1,'omitnan');
-    Ydata = S(index).Ydata;
+    
+    if flag_norm
+        % working with normalized data
+        Ydata = S(index).Ydata_norm;
+    else
+        % working with raw data
+        Ydata = S(index).Ydata;
+    end
     ind_start = S(index).ind_start;
     ind_end = S(index).ind_end;
     imagesc(Ydata,'Parent',ax);
@@ -416,9 +450,9 @@ for index = 1:length(S)
     ind_new = find(~strcmp(S(index).rat_id,'')==1);
     for j=1:length(ind_new)
         line('XData',[ax.XLim(1)-1000 ax.XLim(2)+1000],'YData',[ind_new(j) ind_new(j)]-.5,...
-        'Color','w','LineWidth',.2,'Linestyle','-',...
-        'Marker','none','MarkerSize',1,'MarkerFaceColor','w',...
-        'MarkerEdgeColor','w','Parent',ax);
+            'Color','w','LineWidth',.2,'Linestyle','-',...
+            'Marker','none','MarkerSize',1,'MarkerFaceColor','w',...
+            'MarkerEdgeColor','w','Parent',ax);
     end
     
     % potentiation line
@@ -458,7 +492,7 @@ for index = 1:length(S)
     c.Box = 'off';
     c.TickLength = [0 0];
     c.FontSize = 5;
-    ax.Position(4) = ax.Position(4)*.9;
+    %ax.Position(4) = ax.Position(4)*.9;
     
     % display average
     m = mean(Ydata,'omitnan');
@@ -489,8 +523,19 @@ for index = 1:length(S)
     ax2.TickLength = [0 0];
     grid(ax2,'on');
     
-    ax.CLim = [-5;15];
-    ax2.YLim = [-5;15];
+    if flag_norm
+        ax.CLim = [-1;5];
+        ax2.YLim = [-1;5];
+    else
+        if contains(ax2.Title.String,'M1')
+            ax.CLim = [-15;15];
+            ax2.YLim = [-15;15];
+        else
+            ax.CLim = [-5;15];
+            ax2.YLim = [-5;15];
+        end
+    end
+    
 end
 
 f.Units = 'pixels';
@@ -506,7 +551,7 @@ end
 
 end
 
-function plot2_Figure5(Q,list_lfp,cur_list,timegroup,flag_save)
+function plot2_Figure5(Q,list_lfp,cur_list,timegroup,flag_norm,flag_save)
 
 % Drawing results
 f = figure;
@@ -542,10 +587,11 @@ for ii = 1:n_rows
         all_axes = [all_axes;ax];
         %ax2
         ax2 = axes('Parent',f);
-        ax2.Position = [ax.Position(1) ax.Position(2)+ax.Position(4)+0*margin_h ax.Position(3) 3*margin_h];
+        ax2.Position = [ax.Position(1) ax.Position(2)+ax.Position(4)+0.5*margin_h ax.Position(3) 2.5*margin_h];
         %ax2.Title.String = sprintf('Ax-%02d',index);
         ax2.Title.Visible = 'on';
         all_axes2 = [all_axes2;ax2];
+        
     end
 end
 
@@ -565,7 +611,14 @@ for index = 1:length(Q)
     
     % Main line
     ref_time = mean(Q(index).Xdata,1,'omitnan');
-    Ydata = Q(index).Ydata;
+    if flag_norm
+        % working with normalized data
+        Ydata = Q(index).Ydata_norm;
+    else
+        % working with raw data
+        Ydata = Q(index).Ydata;
+    end
+    
     ind_start = Q(index).ind_start;
     ind_end = Q(index).ind_end;
     imagesc(Ydata,'Parent',ax);
@@ -586,9 +639,9 @@ for index = 1:length(Q)
     ind_new = find(~strcmp(Q(index).rat_id,'')==1);
     for j=1:length(ind_new)
         line('XData',[ax.XLim(1)-1000 ax.XLim(2)+1000],'YData',[ind_new(j) ind_new(j)]-.5,...
-        'Color','w','LineWidth',.2,'Linestyle','-',...
-        'Marker','none','MarkerSize',1,'MarkerFaceColor','w',...
-        'MarkerEdgeColor','w','Parent',ax);
+            'Color','w','LineWidth',.2,'Linestyle','-',...
+            'Marker','none','MarkerSize',1,'MarkerFaceColor','w',...
+            'MarkerEdgeColor','w','Parent',ax);
     end
     
     % potentiation line
@@ -619,7 +672,7 @@ for index = 1:length(Q)
         str_label = [str_label;{ref_time(ax.XTick(i))}];
     end
     ax.XTickLabel = str_label;
-    %ax.XLim = [ind_keep(1),ind_keep(end)];
+    ax.XLim = [ind_keep(1),ind_keep(end)];
     
     % colorbar
     c = colorbar(ax,'northoutside');
@@ -627,7 +680,7 @@ for index = 1:length(Q)
     c.Box = 'off';
     c.TickLength = [0 0];
     c.FontSize = 5;
-    ax.Position(4) = .9*ax.Position(4);
+    %ax.Position(4) = .9*ax.Position(4);
     
     % display average
     m = mean(Ydata,'omitnan');
@@ -658,19 +711,26 @@ for index = 1:length(Q)
     ax2.TickLength = [0 0];
     grid(ax2,'on');
     
-%     ax.CLim = [-.1;.5];
-%     ax2.YLim = [-.1;.5];
-    switch char(labels_gathered(index))
-        case 'SPEED'    
-            ax.CLim = [-.1;.5];
-            ax2.YLim = [-.1;.5];
-        case 'Power-ACC'    
-            ax.CLim = [-0;2000];
-            ax2.YLim = [0;2000];
-        otherwise    
-            ax.CLim = [-2;15];
-            ax2.YLim = [-2;15];
+    %     ax.CLim = [-.1;.5];
+    %     ax2.YLim = [-.1;.5];
+    
+    if flag_norm
+        ax.CLim = [0;1];
+        ax2.YLim = [0;1];
+    else
+        switch char(labels_gathered(index))
+            case 'SPEED'
+                ax.CLim = [-.1;.5];
+                ax2.YLim = [-.1;.5];
+            case 'Power-ACC'
+                ax.CLim = [-0;2000];
+                ax2.YLim = [0;2000];
+            otherwise
+                ax.CLim = [-2;15];
+                ax2.YLim = [-2;15];
+        end
     end
+    
 end
 
 f.Units = 'pixels';

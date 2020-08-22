@@ -355,6 +355,7 @@ for j =1:length(data.S_fus)
         ax.XLim = [data.thresh_inf data.thresh_sup];
         %ax.YLim = [min(rmin,ax.YLim(1)),max(rmax,ax.YLim(2))];
         ax.YLim = [-.2 .8];
+        %ax.YLim = [-.4 .4];
         delete(findobj(ax,'Tag','Hbar'));
         line([0 0],[-1 1],'Parent',ax,'Color','k','Tag','Hbar');
         %Marker
@@ -376,6 +377,7 @@ for j =1:length(data.S_fus)
         ax.XLim = [data.thresh_inf data.thresh_sup];
         %ax.YLim = [min(rmin,ax.YLim(1)),max(rmax,ax.YLim(2))];
         ax.YLim = [-.2 .8];
+        %ax.YLim = [-.4 .4];
         delete(findobj(ax,'Tag','Hbar'));
         line([0 0],[-1 1],'Parent',ax,'Color','k','Tag','Hbar');
         %Marker
