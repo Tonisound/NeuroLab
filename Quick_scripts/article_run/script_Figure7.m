@@ -9,14 +9,19 @@ function script_Figure7(cur_list,timegroup)
 flag_grouped = false;
 flag_save = true;
 thresh_events = 10;
+% ind_electrode = 1; %1: hpc; 2:cortex       
+% [D,S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup,flag_grouped,thresh_events,ind_electrode);
 
-[D,S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup,flag_grouped,thresh_events);
-plot1_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save);
+% Same graph
+[D,S1,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup,flag_grouped,thresh_events,1);
+[D,S2,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup,flag_grouped,thresh_events,2);
+%plot1_Figure7(S1,list_regions,list_lfp,cur_list,timegroup,flag_save);
+plot1_sameax_Figure7(S1,S2,list_regions,list_lfp,cur_list,timegroup,flag_save);
 %plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save);
 
 end
 
-function [D,S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup,flag_grouped,thresh_events)
+function [D,S,list_regions,list_lfp] = compute_script_Figure7(cur_list,timegroup,flag_grouped,thresh_events,ind_electrode)
 
 close all;
 folder = 'I:\NEUROLAB\NLab_Statistics\fUS_PeriEventHistogram';
@@ -25,15 +30,20 @@ index =0;
 list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
     '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
-    '20150724_170457_E';'20150726_152241_E';'20150728_134238_E';'20151126_170516_E';...
+    '20151126_170516_E';...'20150724_170457_E';'20150726_152241_E';'20150728_134238_E';
     '20151201_144024_E';'20151202_141449_E';'20151203_113703_E';'20160622_191334_E';...
     '20160623_123336_E';'20160624_120239_E';'20160628_171324_E';'20160629_134749_E';...
     '20160629_191304_E'};
+% high-quality
 list_coronal = {'20141216_225758_E';'20141226_154835_E';'20150223_170742_E';'20150224_175307_E';...
     '20150225_154031_E';'20150226_173600_E';'20150619_132607_E';'20150620_175137_E';...
     '20150714_191128_E';'20150715_181141_E';'20150716_130039_E';'20150717_133756_E';...
-    '20150724_170457_E';'20150726_152241_E';'20150728_134238_E';'20151126_170516_E';...
+    '20151126_170516_E';...'20150724_170457_E';'20150726_152241_E';'20150728_134238_E';
     '20160622_191334_E';'20160623_123336_E'};
+% % 6-best
+% list_coronal = {'20150225_154031_E';'20150226_173600_E';'20150620_175137_E';...
+%     '20150714_191128_E';'20150715_181141_E''20150717_133756_E'};
+
 list_diagonal = {'20150227_134434_E';'20150304_150247_E';'20150305_190451_E';'20150306_162342_E';...
     '20150718_135026_E';'20150722_121257_E';'20150723_123927_E';'20150724_131647_E';...
     '20150725_130514_E';'20150725_160417_E';'20150727_114851_E';'20151127_120039_E';...
@@ -217,9 +227,9 @@ for index = 1:length(D)
             continue;
         elseif length(ind_lfp)>1
             warning('Multiple pattern matches [Pattern: %s /File: %s /Selected: %s].',char(lfp_name),char(cur_file),char(data_fus.label_lfp(ind_lfp)));
-            %ind_lfp = ind_lfp(1);
-            index_electrode = 2; %1: hpc; 2:cortex
-            ind_lfp = ind_lfp(contains(data_fus.label_lfp(ind_lfp),get_electrode(cur_file,index_electrode)));
+            % ind_lfp = ind_lfp(1);
+            % ind_electrode = 1; %1: hpc; 2:cortex
+            ind_lfp = ind_lfp(contains(data_fus.label_lfp(ind_lfp),get_electrode(cur_file,ind_electrode)));
         end
             
         for j=1:length(list_regions)
@@ -253,7 +263,11 @@ for index = 1:length(D)
             N = length(data_fus.S_pp(ind_reg,ind_lfp).R_data1);
             S(i,j).R_data_file = [S(i,j).R_data_file; cellstr(repmat(cur_file,[N,1]))];
             S(i,j).R_data_str_ref = [S(i,j).R_data_str_ref; cellstr(repmat(str_ref,[N,1]))];
+    %        try
             S(i,j).R_data_rat_name = [S(i,j).R_data_rat_name; cellstr(repmat(rat_name,[N,1]))];
+%             catch
+%                 S(i,j).R_data_rat_name
+%             end
             S(i,j).R_data_rat_id = [S(i,j).R_data_rat_id; cellstr(repmat(rat_id,[N,1]))];
         end
     end
@@ -392,11 +406,159 @@ end
 
 end
 
-function plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save)
+function plot1_sameax_Figure7(S1,S2,list_regions,list_lfp,cur_list,timegroup,flag_save)
 
 % Drawing results
 f = figure;
 f.Name = sprintf('Fig7_SynthesisB_%s-%s',cur_list,timegroup);
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
+colormap(f,'jet');
+f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
+g_colors = f.Colormap(round(1:64/length(list_lfp):64),:);
+list_regions = regexprep(list_regions,'.mat','');
+list_lfp = regexprep(list_lfp,'/','');
+list_lfp = regexprep(list_lfp,'\','');
+str_fig =  char(S1(1,1).index_ref(1,:));
+
+% Sixth tab
+all_paxes = [];
+margin_w = .02;
+margin_h =.02;
+n_columns = 4;
+n_rows = ceil(length(list_lfp)/n_columns);
+lab_fus = [];
+
+for k=1:length(list_regions)
+    temp_regions = char(list_regions(k));
+    lab_fus = [lab_fus;{temp_regions(1:2)}];
+end
+
+% Creating axes
+P_value = NaN(length(list_lfp),length(list_regions));
+for ii = 1:n_rows
+    for jj = 1:n_columns
+        index = (ii-1)*n_columns+jj;
+        if index>length(list_lfp)
+            continue;
+        end
+        x = mod(index-1,n_columns)/n_columns;
+        y = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+        
+        % Creating polar axes
+        pax = polaraxes('Parent',f,'Tag',sprintf('PolarAx%d',index));
+        hold(pax,'on');
+        pax.Position= [x+margin_w y+margin_h (1/n_columns)-2*margin_w (1/n_rows)-3*margin_h];
+        
+        % polar hist with colors
+        theta = rescale(1:length(list_regions)+1,0,2*pi);
+        theta2 = theta(1:end-1)+.5*(theta(2)-theta(1));
+        theta_tick = theta+(theta(2)-theta(1))/2;
+        %rho = C_XY(:,index);
+        rho = [];
+        visible_1 = 'off';
+        visible_2 = 'off';
+        lab_fus_stats = [];
+        for k=1:length(list_regions)
+            rho_mean = [mean(S1(index,k).R,'omitnan'),mean(S2(index,k).R,'omitnan')];
+            rho_std = [std(S1(index,k).R,[],'omitnan'),std(S2(index,k).R,[],'omitnan')];
+            rho_sem = [rho_std(:,1)/sqrt(length(S1(index,k).R)),rho_std(:,2)/sqrt(length(S2(index,k).R))];
+            rho = [rho;rho_mean];
+            
+            p1 = polarplot([theta_tick(k) theta_tick(k)],[abs(rho_mean(:,1))-rho_sem(:,1) abs(rho_mean(:,1))+rho_sem(:,1)],...
+                'Parent',pax,'Color',g_colors(index,:),'Marker','none','MarkerSize',1,...
+                'LineStyle','-','LineWidth',1,'Visible',visible_1,...
+                'MarkerFaceColor',f_colors(k,:),'MarkerEdgeColor','k');
+            p2 = polarplot([theta_tick(k) theta_tick(k)],[abs(rho_mean(:,2))-rho_sem(:,2) abs(rho_mean(:,2))+rho_sem(:,2)],...
+                'Parent',pax,'Color',g_colors(index,:),'Marker','none','MarkerSize',1,...
+                'LineStyle','-','LineWidth',1,'Visible',visible_2,...
+                'MarkerFaceColor',f_colors(k,:),'MarkerEdgeColor','k');
+            
+            % stats
+            X = S1(index,k).R;
+            X = X(~isnan(X));
+            Zx = 0.5*(log(1+X)-log(1-X));
+            Y = S2(index,k).R;
+            Y = Y(~isnan(Y));
+            Zy = 0.5*(log(1+Y)-log(1-Y));
+            P = ranksum(Zx,Zy);
+            if P<.001
+                lab_fus_stats = [lab_fus_stats ;{'***'}];
+            elseif P<.01
+                lab_fus_stats = [lab_fus_stats ;{'**'}];
+            elseif P<.05
+                lab_fus_stats = [lab_fus_stats ;{'*'}];
+            else
+                lab_fus_stats = [lab_fus_stats ;{''}];
+            end
+            P_value(index,k)=P;
+            
+%             % fischer intervals
+%             z_inf = rho_mean-1.96*rho_sem;
+%             z_sup = rho_mean+1.96*rho_s;
+%             r_inf = (exp(2*z_inf)-1)./(exp(2*z_inf)+1);
+%             r_sup = (exp(2*z_sup)-1)./(exp(2*z_sup)+1);
+%             p1 = polarplot([theta_tick(k) theta_tick(k)],[r_inf(:,1) r_sup(:,1)],...
+%                 'Parent',pax,'Color',g_colors(index,:),'Marker','none','MarkerSize',1,...
+%                 'LineStyle','-','LineWidth',1,'Visible',visible_1,...
+%                 'MarkerFaceColor',f_colors(k,:),'MarkerEdgeColor','k');
+%             p2 = polarplot([theta_tick(k) theta_tick(k)],[r_inf(:,2) r_sup(:,2)],...
+%                 'Parent',pax,'Color',g_colors(index,:),'Marker','none','MarkerSize',1,...
+%                 'LineStyle','-','LineWidth',1,'Visible',visible_2,...
+%                 'MarkerFaceColor',f_colors(k,:),'MarkerEdgeColor','k');
+        end
+        
+        % Simple polar plot 
+        p1 = polarplot(theta2,abs(rho(:,1)),'Parent',pax,'Visible',visible_1,...
+            'Color','k','LineWidth',.5,'LineStyle','-',...
+            'Marker','o','MarkerSize',3,'MarkerFaceColor',g_colors(index,:),'MarkerEdgeColor','k');
+        p2 = polarplot(theta2,abs(rho(:,2)),'Parent',pax,'Visible',visible_2,...
+            'Color',[.5 .5 .5],'LineWidth',.5,'LineStyle','-',...
+            'Marker','s','MarkerSize',3,'MarkerFaceColor',g_colors(index,:),'MarkerEdgeColor',[.5 .5 .5]);
+        
+        % Title and label
+        pax.RLim = [0 .5];
+        pax.Title.String = list_lfp(index);
+        pax.ThetaAxisUnits = 'radian';
+        pax.ThetaTick = theta_tick;
+        %pax.ThetaTickLabel = lab_fus;
+        pax.ThetaTickLabel = lab_fus_stats;
+        if index==1
+            pax.ThetaTickLabel = 1:length(lab_fus);
+        else
+            pax.ThetaTickLabel = '';
+        end
+        pax.FontSize = 6;
+        all_paxes = [all_paxes;pax];
+        
+%         % Minimal Layout
+%         grid(pax,'off');
+%         pax.ThetaTick = '';
+%         pax.ThetaTickLabel = '';
+%         pax.Title.String = '';
+%         pax.RTick = '';
+%         pax.RTickLabel = '';
+    end
+end
+
+% Saving Figure
+f.Units = 'pixels';
+f.Position = [195          59        1045         919];
+
+global DIR_SYNT;
+savedir = fullfile(DIR_SYNT,'fUS_PeriEventHistogram');
+if flag_save
+    saveas(f,fullfile(savedir,sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+    fprintf('Figure Saved [%s].\n',fullfile(sprintf('%s%s%s',f.Name,str_fig,'.pdf')));
+end
+
+end
+
+function plot2_Figure7(S,list_regions,list_lfp,cur_list,timegroup,flag_save)
+
+% Drawing results
+f = figure;
+f.Name = sprintf('Fig7_SynthesisC_%s-%s',cur_list,timegroup);
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
 colormap(f,'parula');
