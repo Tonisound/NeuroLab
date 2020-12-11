@@ -290,7 +290,7 @@ f = figure('Visible','off');
 colormap(f,'parula');
 P.Colormap = f.Colormap;
 P.f_colors = f.Colormap(round(1:64/length(R):64),:);
-P.f_colors = [all_colors_frontal;all_colors_frontal];
+%P.f_colors = [all_colors_frontal;all_colors_frontal];
 close(f);
 
 P.margin_w = .01;

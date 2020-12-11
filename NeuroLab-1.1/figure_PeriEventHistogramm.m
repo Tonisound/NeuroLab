@@ -1353,7 +1353,7 @@ adaptation_Callback(handles);
 display_regression([],[],handles);
 
 % Update Peak-to-Peak Panel
-peak2peak_Callback([],[],handles);
+%peak2peak_Callback([],[],handles);
 
 % % Update Gaussian Panel
 % gaussianfit_Callback([],[],handles);
@@ -3850,18 +3850,18 @@ save(fullfile(folder_save,'AverageResponse.mat'),'ref_time','Time_indices','ind_
     'all_colors','thresh_prop','labels','str_popup','align1','align2','-v7.3');
 fprintf('Data saved at [%s].\n',fullfile(folder_save,'AverageResponseData.mat'));
 
-% PeaktoPeakData
-%S_pp = [];
-S_pp = handles.ButtonBatch.UserData.PeaktoPeakData.S_pp;
-index_ref = handles.ButtonBatch.UserData.PeaktoPeakData.index_ref;
-corr_type = handles.ButtonBatch.UserData.PeaktoPeakData.corr_type;
-C_XY = handles.ButtonBatch.UserData.PeaktoPeakData.C_XY;
-label_fus = handles.ButtonBatch.UserData.PeaktoPeakData.label_fus;
-label_lfp = handles.ButtonBatch.UserData.PeaktoPeakData.label_lfp;
-label_events = handles.ButtonBatch.UserData.PeaktoPeakData.label_events;
-save(fullfile(folder_save,'PeaktoPeak.mat'),'S_pp','C_XY','index_ref','corr_type',...
-    'label_fus','label_lfp','label_events','align1','align2','-v7.3');
-fprintf('Data saved at [%s].\n',fullfile(folder_save,'PeaktoPeakData.mat'));
+% % PeaktoPeakData
+% %S_pp = [];
+% S_pp = handles.ButtonBatch.UserData.PeaktoPeakData.S_pp;
+% index_ref = handles.ButtonBatch.UserData.PeaktoPeakData.index_ref;
+% corr_type = handles.ButtonBatch.UserData.PeaktoPeakData.corr_type;
+% C_XY = handles.ButtonBatch.UserData.PeaktoPeakData.C_XY;
+% label_fus = handles.ButtonBatch.UserData.PeaktoPeakData.label_fus;
+% label_lfp = handles.ButtonBatch.UserData.PeaktoPeakData.label_lfp;
+% label_events = handles.ButtonBatch.UserData.PeaktoPeakData.label_events;
+% save(fullfile(folder_save,'PeaktoPeak.mat'),'S_pp','C_XY','index_ref','corr_type',...
+%     'label_fus','label_lfp','label_events','align1','align2','-v7.3');
+% fprintf('Data saved at [%s].\n',fullfile(folder_save,'PeaktoPeakData.mat'));
 
 % AutoCorrData
 xdata = handles.ButtonBatch.UserData.AutoCorrData.xdata;

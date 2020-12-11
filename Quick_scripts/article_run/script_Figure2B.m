@@ -103,6 +103,10 @@ if strcmp(cur_list,'CORONAL')
         'DG-L.mat';'DG-R.mat';'CA1-L.mat';'CA1-R.mat';'CA2-L.mat';'CA2-R.mat';'CA3-L.mat';'CA3-R.mat';...
         'dThal-L.mat';'dThal-R.mat';'Po-L.mat';'Po-R.mat';'VPM-L.mat';'VPM-R.mat';...
         'HypothalRg-L.mat';'HypothalRg-R.mat'};
+%     list_regions =    {'Neocortex-L.mat';'Neocortex-R.mat';...
+%         'dHpc-L.mat';'dHpc-R.mat';...
+%         'Thalamus-L.mat';'Thalamus-R.mat';...
+%         'HypothalRg-L.mat';'HypothalRg-R.mat'};
     ind_keep = strcmp({D(:,1).plane}',cur_list);
     D = D(ind_keep,:);
     
@@ -441,6 +445,9 @@ all_linestyles = P.all_linestyles;
 patch_alpha = P.patch_alpha;
 leg_fontsize = P.leg_fontsize;
 
+% writing data
+filename_out = sprintf('DataFig5_%s_%s.txt',cur_list);
+fid = fopen(filename_out,'w');
 
 % Creating axes
 all_axes = [];
@@ -545,6 +552,17 @@ for index = 1:length(S)
             'MarkerEdgeColor',g_colors(j,:),'Parent',ax)
         grid(ax,'on');
         
+        % Writing data
+        Ydata_w = S(index,j).Ydata(:,1:100:2001);
+        fwrite(fid,sprintf('%s [%s] [n=%d]',char(list_regions(index)),timegroup,size(Ydata_w,1)));
+        fwrite(fid,newline);
+        fwrite(fid,sprintf('%.3f \t ', ref_time(1:100:2001)));
+        fwrite(fid,newline);      
+        for k = 1: size(Ydata_w,1)
+            fwrite(fid,sprintf('%.3f \t ', Ydata_w(k,:)));
+            fwrite(fid,newline);
+        end
+        
         %Patch
         p_xdat = [ref_time,fliplr(ref_time)];
         p_ydat = [m-sem,fliplr(m+sem)];
@@ -575,6 +593,8 @@ for index = 1:length(S)
     end
     
 end
+
+fclose(fid);
 
 % Legend once all has been drawn
 all_axes_unique = unique(all_axes);

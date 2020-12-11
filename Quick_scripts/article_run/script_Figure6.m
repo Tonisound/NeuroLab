@@ -387,6 +387,7 @@ for index = 1:length(S)
     lag = 100;
     % Reference time
     ind_ref = ind_end;
+    ind_ref = ind_start;
     for j=1:size(Ydata,1)
         m2(j) = mean(Ydata(j,ind_ref(j)-lag:ind_ref(j)+lag),'omitnan');
         s2(j) = std(Ydata(j,ind_ref(j)-lag:ind_ref(j)+lag),[],'omitnan');

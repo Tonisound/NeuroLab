@@ -93,7 +93,7 @@ t = (b-floor(b))*24*3600;
 % Building figure
 f = figure('Name','fUS-EEG Recording - Burst',...
     'Units','normalized',...
-    'Position',[.1 .1 .6 .4],...
+    'Position',[.01 .01 .8 .5],...
     'Colormap',handles.MainFigure.Colormap,...
     'KeyPressFcn',{@f_keypress_fcn},...   
     'MenuBar','none',...
@@ -187,6 +187,7 @@ for i=1:L
         'TooltipString','Scale',...
         'String','',...
         'BackgroundColor','k',...
+        'Visible','off',...
         'Position',[.905 .1+(i-1)*.8/L+margin .001 .8/L-margin]);
     ax.Tag = sprintf('Ax%d',i);
     ax.XAxis.Visible = 'off';
@@ -205,7 +206,11 @@ for i=1:L
     end
     lim_inf = mean(s,'omitnan')-3*std(s,[],'omitnan');
     lim_sup = mean(s,'omitnan')+3*std(s,[],'omitnan');
-    ax.YLim = [lim_inf, lim_sup];
+    try 
+        ax.YLim = [lim_inf, lim_sup];
+    catch
+        ax.YLim = [lim_inf, lim_sup];
+    end
     ax.XLim = [t(START_IM);t(END_IM)];
     % Adjusting scale bar
     length_scale = (.8/L-margin)*100/(lim_sup-lim_inf);
@@ -238,6 +243,7 @@ copyobj(atlasmask,ax_im);
 
 %for i = 1:START_IM:END_IM
 i=START_IM;
+
 while i>=START_IM && i<=END_IM
     if ishandle(f)
         u0.String = sprintf('%s',datestr(t(i)/(24*3600),'HH:MM:SS.FFF'));
@@ -256,6 +262,11 @@ while i>=START_IM && i<=END_IM
             e1.Visible = 'on';
             e2.Visible = 'on';
         end
+        
+        % Hard hiding controls
+        cb1.Visible='off';
+        e1.Visible='off';
+        e2.Visible='off';
         
         % Update LFP
         for j=1:length(all_axes)

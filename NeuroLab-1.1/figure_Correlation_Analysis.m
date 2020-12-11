@@ -1773,7 +1773,7 @@ if isempty(str_ref)
         {'Power-gammahigh/'};{'SPEED'};{'Power-ACC/033'}];
     end
 end
-str_ref = [{'Power-theta/'};{'SPEED'};{'Power-ACC/033'}];
+str_ref = [{'Power-beta/'}];
 
 for i=1:length(ind_group)
     ii = ind_group(i);

@@ -7,12 +7,12 @@
 % folder_out = 'C:\Users\Antoine\Desktop\fUS_PeriEvent\Regression2';
 
 % % PeriEvent Peak-to-Peak
-folder_in = 'I:\NEUROLAB\NLab_Figures\fUS_PeriEventHistogram\*\RUN\2015*Peak-to-Peak*';
-folder_out = 'C:\Users\Antoine\Desktop\fUS_PeriEvent\Peak-to-Peak2';
+% folder_in = 'I:\NEUROLAB\NLab_Figures\fUS_PeriEventHistogram\*\RUN\2015*Peak-to-Peak*';
+% folder_out = 'C:\Users\Antoine\Desktop\fUS_PeriEvent\Peak-to-Peak2';
 
-% % fUS_Correlation
-% folder_in = 'I:\NEUROLAB\NLab_Figures\fUS_Correlation\2020*\STABLE\Ref-Power-gamma*[M1]\*Pattern.jpg';
-% folder_out = 'C:\Users\Antoine\Desktop\CFC';
+% fUS_Correlation
+folder_in = 'D:\NEUROLAB\NLab_Figures\fUS_Correlation\*\REM\Ref-Power-gammamid*\*Pattern.jpg';
+folder_out = 'C:\Users\Antoine\Desktop\fUS_Correlation';
 
 % % fUS_Correlation
 % folder_in = 'I:\NEUROLAB\NLab_Figures\Cross_Correlation\2020*\*fUS-Synthesis_STABLE*';

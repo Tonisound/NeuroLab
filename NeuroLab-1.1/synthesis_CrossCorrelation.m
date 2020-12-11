@@ -152,12 +152,47 @@ for i =1:length(rec_list)
     display_data(data,handles,g_colors);  
 end
 
+% write data in file
+write_data(data,handles,list_name);
+
 S.x_corr_mean = mean(X_CORR_ALL,4,'omitnan');
 S.x_corr_std = std(X_CORR_ALL,[],4,'omitnan');
 S.T_PEAK_ALL = T_PEAK_ALL;
 S.t_mean = mean(T_PEAK_ALL,3,'omitnan');
 S.t_median = median(T_PEAK_ALL,3,'omitnan');
 display_data_mean(data,handles,g_colors,S,rec_list);
+
+end
+
+function write_data(data,handles,list_name)
+
+% writing data
+filename_out = sprintf('DataFig4_%s.txt',list_name);
+fid = fopen(filename_out,'w');
+
+for j =1:length(data.S_fus)
+    for i=1:length(data.S_lfp)
+       
+        lags = data.thresh_inf:data.thresh_step:data.thresh_sup;
+        lags = lags(:);
+        
+        %cross-correlation
+        ax = findobj(handles.FirstTab,'Tag',sprintf('Ax%d-%d',j,i));
+        l = findobj(ax,'Tag','XCorr');
+        lfp_name = data.S_lfp(i).name;
+        fus_name = data.S_fus(j).name;
+        fwrite(fid,sprintf('[%s] [%s]',char(fus_name),char(lfp_name)));
+        fwrite(fid,newline);
+        fwrite(fid,sprintf('%.3f \t ', lags(1:10:end)));
+        fwrite(fid,newline);      
+        for k = 1: length(l)
+            temp = l(k).YData(:);
+            fwrite(fid,sprintf('%.3f \t ', temp(1:10:end)));
+            fwrite(fid,newline);
+        end
+    end
+end
+fclose(fid);
 
 end
 
@@ -270,6 +305,7 @@ for j =1:length(data.S_fus)
         hold(ax,'on');
     end
 end
+
 end
 
 function display_data_mean(data,handles,g_colors,S,rec_list)
