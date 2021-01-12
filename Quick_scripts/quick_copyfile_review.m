@@ -10,16 +10,23 @@
 % folder_in = 'I:\NEUROLAB\NLab_Figures\fUS_PeriEventHistogram\*\RUN\2015*Peak-to-Peak*';
 % folder_out = 'C:\Users\Antoine\Desktop\fUS_PeriEvent\Peak-to-Peak2';
 
-% fUS_Correlation
-folder_in = 'D:\NEUROLAB\NLab_Figures\fUS_Correlation\*\REM\Ref-Power-gammamid*\*Pattern.jpg';
-folder_out = 'C:\Users\Antoine\Desktop\fUS_Correlation';
+% % Atlas
+% folder_in = 'D:\NEUROLAB\NLab_DATA\*\Atlas.mat';
+% folder_out = 'C:\Users\Antoine\Desktop\Atlas';
 
 % % fUS_Correlation
 % folder_in = 'I:\NEUROLAB\NLab_Figures\Cross_Correlation\2020*\*fUS-Synthesis_STABLE*';
 % folder_out = 'C:\Users\Antoine\Desktop\Cross_Correlation';
 
+% fUS_Episode_Statistics
+folder_in = 'F:\SHARED_DATASET\NEUROLAB\NLab_Figures\fUS_Statistics\*\*fUS_Statistics_Groups_BoxPlot.jpg';
+folder_out = 'C:\Users\Antoine\Desktop\fUS_Statistics';
+
 d = dir(folder_in);
 for i=1:length(d)
+    %temp = regexp(d(i).folder,filesep,'split');
+    %fname = strcat(char(temp(end)),'.mat');
+    %copyfile(fullfile(d(i).folder,d(i).name),fullfile(folder_out,fname));
     copyfile(fullfile(d(i).folder,d(i).name),fullfile(folder_out,d(i).name));
     fprintf('File [%s] => [%s].\n',char(d(i).name),folder_out);
 end

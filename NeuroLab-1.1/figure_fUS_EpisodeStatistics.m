@@ -38,6 +38,11 @@ f2.UserData.length_burst = length_burst;
 colormap(f2,'jet');
 clrmenu(f2);
 
+% Full-screen
+f2.Units ='normalized';
+f2.OuterPosition =[0.05 0.05 .9 .9];
+f2.Units ='characters';
+
 % Information Panel
 iP = uipanel('FontSize',12,...
     'Units','normalized',...
@@ -1913,12 +1918,18 @@ end
 %        'SelectionMode','single','ListString',TimeGroups_name,'InitialValue',1,'ListSize',[300 500]);
 %end
 
+% Keeping only Trace_Region_Group
+ind_keep1 = strcmp(handles.Trace_table.Data(:,2),'Trace_RegionGroup');
+ind_keep2 = strcmp(handles.Trace_table.Data(:,2),'Trace_Region');
+ind_traces = find((ind_keep1+ind_keep2)>0);
+handles.Trace_table.UserData.Selection = ind_traces;
+
 % Compute for handles.Popup2.Value =1:2
 % for j=1:size(handles.Popup2.String,1)
 %     handles.Popup2.Value =j;
     compute_Callback(handles.ButtonCompute,[],handles);
     savestats_Callback([],[],handles);
-    saveimage_Callback([],[],handles);
+    %saveimage_Callback([],[],handles);
 %end
 
 end
