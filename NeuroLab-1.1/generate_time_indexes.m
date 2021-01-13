@@ -1,7 +1,7 @@
 function success = generate_time_indexes(savedir,handles,val)
 % Generate Time indexes from Time Tags
 % Loading Time Tags and build Time Variable equals 1 for all frames in tags
-% Overwirte previous variables
+% Overwrite previous variables
 
 success = false;
 %global FILES CUR_FILE;
@@ -155,6 +155,9 @@ end
 % Delete Previous Data if exists
 l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
 ind_rem = [];
+ind_rem_tonic = [];
+ind_rem_phasic = [];
+ind_rem_phasic2 = [];
 ind_nrem = [];
 ind_sleep = [];
 ind_qw = [];
@@ -163,6 +166,12 @@ ind_wake = [];
 for k = 1:length(l)
     if strcmp(l(k).UserData.Name,'Index-REM')
         ind_rem = [ind_rem;k];
+    elseif strcmp(l(k).UserData.Name,'Index-REM-TONIC')
+        ind_rem_tonic = [ind_rem_tonic;k];
+    elseif strcmp(l(k).UserData.Name,'Index-REM-PHASIC')
+        ind_rem_phasic = [ind_rem_phasic;k];
+    elseif strcmp(l(k).UserData.Name,'Index-REM-PHASIC-2')
+        ind_remp_phasic2 = [ind_remp_phasic2;k];
     elseif strcmp(l(k).UserData.Name,'Index-NREM')
         ind_nrem = [ind_nrem;k];
     elseif strcmp(l(k).UserData.Name,'Index-SLEEP')
@@ -176,6 +185,7 @@ for k = 1:length(l)
     end
 end
 
+% Building Index-SLEEP
 if ~isempty(ind_rem) && ~isempty(ind_nrem)  
     % Creating line
     hl = line('XData',(1:n_images)',...
@@ -199,6 +209,7 @@ if ~isempty(ind_rem) && ~isempty(ind_nrem)
     end
 end
 
+% Building Index-WAKE
 if ~isempty(ind_aw) && ~isempty(ind_qw)
     % Creating line
     hl = line('XData',(1:n_images)',...
@@ -222,9 +233,33 @@ if ~isempty(ind_aw) && ~isempty(ind_qw)
     end
 end
 
+% Building Index-REM-PHASIC
+if ~isempty(ind_rem) && ~isempty(ind_rem_phasic)  
+    % Creating line
+    hl = line('XData',(1:n_images)',...
+        'YData',double((l(ind_rem(1)).YData+l(ind_rem_phasic(1)).YData)),...
+        'Color',(l(ind_rem(1)).Color+l(ind_rem_phasic(1)).Color)/2,...
+        'LineWidth',1,...
+        'Tag','Trace_Cerep',...
+        'Visible','on',...
+        'HitTest','off',...
+        'Parent', handles.RightAxes);
+    s.Name = sprintf('Index-REM-PHASIC-2');
+    s.Selected = 0;
+    s.X = t_ref;
+    s.Y = hl.YData;
+    hl.UserData = s;
+    % Message user
+    if ~isempty(ind_sleep)
+        fprintf('Time Index successfully updated (Index-REM-PHASIC-2).\n');
+    else
+        fprintf('Time Index successfully created (Index-REM-PHASIC-2).\n');
+    end
+end
+
 % removing Index-SLEEP
 % removing Index-WAKE
-delete(l([ind_sleep;ind_wake]));
+delete(l([ind_sleep;ind_wake;ind_rem_phasic2]));
 
 success = true;
 

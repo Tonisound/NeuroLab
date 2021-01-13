@@ -246,7 +246,7 @@ if sum(ind_surge)==0
     TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'}; 
     fprintf('No surges detected for threshold %.1f and sigma %.1f.\n',thresh_surge,n_aw);   
 else
-    % TimeTags_dur
+    % TimeTags_phasic
     tts1 = datenum(TimeTags_strings_phasic(:,1));
     tts2 = datenum(TimeTags_strings_phasic(:,2));
     TimeTags_seconds_phasic = [(tts1-floor(tts1)),(tts2-floor(tts2))]*24*3600;
@@ -269,7 +269,7 @@ else
         TimeTags_phasic(k,1).Tokens = '';
     end 
     
-    % TimeTags_dur
+    % TimeTags_tonic
     tts1 = datenum(TimeTags_strings_tonic(:,1));
     tts2 = datenum(TimeTags_strings_tonic(:,2));
     TimeTags_seconds_tonic = [(tts1-floor(tts1)),(tts2-floor(tts2))]*24*3600;
