@@ -1,25 +1,9 @@
 % Article REM 3d - Figure 2
 % Synthesis fUS episode statistics
 
-function script_Figure2A()
-
-if nargin <3
-    gather_regions = true;
-end
+function script_Figure2()
 
 fName = sprintf('Fig2A_Synthesis_%s-%s.mat','Episodes','Statistics');
-if exist(fName,'file')
-    load(fName,'S','P','list_regions','list_group','list_files');
-else
-    [S,P,list_regions,list_group,list_files] = browse_data(fName);
-end
-plot1(S,P,fName,list_regions,list_group,list_files)
-
-end
-
-function [S,P,list_regions,list_group,list_files] = browse_data(fName)
-
-folder = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics';
 
 list_files = {'20190225_SD025_P202_R_nlab';
     '20190226_SD025_P101_R_nlab';
@@ -95,55 +79,70 @@ list_files = {'20190225_SD025_P202_R_nlab';
     '20190718_SD041_P302_R_nlab'};
 
 % list of time groups
-% list_group = {'QW';'AW';'NREM';'REM';};
-list_group = {'QW';'AW';'NREM';'REM';'REM-TONIC';'REM-PHASIC';};
-
+list_group = {'QW';'AW';'NREM';'REM';};
+% list_group = {'QW';'AW';'NREM';'REM';'REM-TONIC';'REM-PHASIC';};
 
 % list_regions
-list_regions = {'OrbitalCtx';
-    'MotorCtx';
-    'CingulateCtx';
-    'LimbicCtx';
-    'ParietalCtx';
-    'RhinalCtx';
-    'SomatoSensoryCtx';
-    'InsularCtx';
-    'CaudatePutamen';
-    'GlobusPallidus';
-    'BasalGanglia';
-    'SubstantiaNigra';
+list_regions = {'SomatoSensoryCtx';
     'VisualCtx';
     'AuditoryCtx';
-    'MammillaryNuclei';
     'PiriformCtx';
-    'OlfactoryNuclei';
-    'Ventricules';
-    'ZonaIncerta';
-    'PAG';
-    'SuperiorColliculus';
-    'PretectalNuclei';
+    'MotorCtx';
+    'OrbitalCtx';
+    'RhinalCtx';
+    'CingulateCtx';
+    'LimbicCtx';
+    'InsularCtx';
+    'ParietalCtx';
+    'AssociationCtx';
     'RetrosplenialCtx';
-    'GeniculateNuclei';
+    %'CA';
     'DentateGyrus';
-    'PreopticArea';
-    'SeptalNuclei';
-    'Hypothalamus';
-    'PosteriorAmygdala';
-    'AnteriorAmygdala';
-    'CA';
     'CA1';
     'CA2';
     'CA3';
     'Thalamus';
-    'AssociationCtx';
-    'Vessels';
-    'ach';
-    'acer';
-    'mcer';
-    'basalvessel';
-    'vessel';
-    'lhia';};
+    'SubstantiaNigra';
+    'MammillaryNuclei';
+    'OlfactoryNuclei';
+    'ZonaIncerta';
+    'PAG';
+    'PosteriorAmygdala';
+    'AnteriorAmygdala';
+    'CaudatePutamen';
+    'GlobusPallidus';
+    'BasalGanglia';
+    'SuperiorColliculus';
+    'PretectalNuclei';
+    'GeniculateNuclei';
+    'PreopticArea';
+    'SeptalNuclei';
+    'Hypothalamus'};
+% list_regions = {'Ventricules';
+%     'Vessels';
+%     'ach';
+%     'acer';
+%     'mcer';
+%     'basalvessel';
+%     'vessel';
+%     'lhia'};
 
+if exist(fName,'file')
+    fprintf('Loading [%s]... ',fName);
+    load(fName,'S','P');
+    fprintf(' done.\n');
+else
+    [S,P] = browse_data(fName,list_regions,list_group,list_files);
+end
+
+%plot1(S,P,fName,list_regions,list_group,list_files);
+plot2(S,P,fName,list_regions,list_group,list_files);
+
+end
+
+function [S,P,list_regions,list_group,list_files] = browse_data(fName,list_regions,list_group,list_files)
+
+folder = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics';
     
 % Buidling struct S
 S = struct('t_data',[],'x_data',[],'y_data',[],...
@@ -224,7 +223,7 @@ panel = uipanel('Parent',f,'Position',[0 0 1 1]);
 ax = axes('Parent',panel,'Position',[.1 .1 .8 .8]);
 ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
 clrmenu(f);
-f.Name = fName;
+f.Name = strcat(fName,'-B');
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
 
@@ -284,6 +283,7 @@ for i=1:n_groups
         'colors',f_colors,...colors,...
         'OutlierSize',.1,...
         'symbol','',...
+        'PlotStyle','compact',...
         'Widths',gpwidth/(n_bars+1),...
         'Parent',ax);
 
@@ -306,7 +306,7 @@ ax_dummy.Position = [2 1 1 1];
 
 % Axis limits
 %ax.YLim = [min(tt_data(:)) max(tt_data(:))];
-ax.YLim = [-20 60];
+ax.YLim = [-40 80];
 ax.XLim = [.5 n_groups+.5];
 ax.XTick = 1:n_groups;
 ax.XTickLabel = xtick_labs;
@@ -325,7 +325,142 @@ leg.Units = 'normalized';
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-fullname = fullfile(strrep(fName,'.mat','.pdf'));
+fullname = fullfile(strrep(fName,'.mat','-A.pdf'));
+saveas(f,fullname);
+
+end
+
+function plot2(S,P,fName,list_regions,list_group,list_files)
+
+% Drawing results
+f = figure;
+panel = uipanel('Parent',f,'Position',[0 0 1 1]);
+ax1 = axes('Parent',panel,'Position',[.2 .1 .2 .8]);
+ax2 = axes('Parent',panel,'Position',[.6 .1 .2 .8]);
+ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
+clrmenu(f);
+f.Name = strcat(fName,'-B');
+f.Renderer = 'Painters';
+f.PaperPositionMode='manual';
+
+f.Colormap = P.Colormap;
+f_colors = P.f_colors;
+margin_w = P.margin_w;
+margin_h = P.margin_h;
+n_columns = P.n_columns;
+n_rows = P.n_rows;
+val1 = P.val1;
+val2 = P.val2;
+tick_width = P.tick_width;
+thresh_average = P.thresh_average;
+all_markers = P.all_markers;
+all_linestyles = P.all_linestyles;
+patch_alpha = P.patch_alpha;
+
+% Getting data
+%tt_data = rand(10000,length(list_regions),length(list_group));
+m = 0;
+for i =1:length(list_group)
+    for j = 1:length(list_regions)
+        m = max(m,length(S(i,j).y_data));
+    end
+end
+tt_data = NaN(length(list_group),length(list_regions));
+for i =1:length(list_group)
+    for j = 1:length(list_regions)
+        temp = S(i,j).y_data;
+        tt_data(i,j) = median(temp,'omitnan');
+    end
+end
+
+% Box Plot
+n_groups = length(list_group);
+n_bars = length(list_regions);
+
+% Finding QW AW REM 
+index_rem = find(strcmp(list_group,'REM')==1);
+index_aw = find(strcmp(list_group,'AW')==1);
+index_qw = find(strcmp(list_group,'QW')==1);
+tt_data2 = (tt_data(index_rem,:)-tt_data(index_qw,:))./(tt_data(index_aw,:)-tt_data(index_qw,:));
+
+% Sorting
+[~,ind_sorted_rem] = sort(tt_data(index_rem,:),'ascend');
+[~,ind_sorted_aw] = sort(tt_data2,'ascend');
+
+% Ax1
+b1 = barh(diag(tt_data(index_rem,ind_sorted_rem)),'stacked','Parent',ax1);
+for i=1:length(b1)
+    %bar color
+%     ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
+%     b(i).FaceColor = cmap(ind_color,:);
+    b1(i).FaceColor = f_colors(ind_sorted_rem(i),:);
+    b1(i).EdgeColor = 'k';
+    b1(i).LineWidth = .1;
+end
+
+% Axis limits
+%ax1.XDir='reverse';
+%ax1.YLim = [-40 80];
+%ax1.XLim = [.5 n_groups+.5];
+ax1.YTick = 1:n_bars;
+ax1.YTickLabel = list_regions(ind_sorted_rem);
+ax1.Title.String = 'REM sorted';
+%grid(ax,'on');
+
+
+% Ax2
+b2 = barh(diag(tt_data2(ind_sorted_aw)),'stacked','Parent',ax2);
+for i=1:length(b2)
+    %bar color
+%     ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
+%     b(i).FaceColor = cmap(ind_color,:);
+    b2(i).FaceColor = f_colors(ind_sorted_aw(i),:);
+    b2(i).EdgeColor = 'k';
+    b2(i).LineWidth = .1;
+end
+
+% Axis limits
+%ax1.XDir='reverse';
+%ax1.YLim = [-40 80];
+%ax1.XLim = [.5 n_groups+.5];
+ax2.YTick = 1:n_bars;
+ax2.YTickLabel = list_regions(ind_sorted_aw);
+ax2.Title.String = 'REM-QW/AW-QW sorted';
+%grid(ax,'on');
+
+
+dummy_data = rand(length(list_group),length(list_regions));
+xtick_labs = list_group;
+leg_labs = list_regions;
+
+% Dummy axes for legend
+b = bar(dummy_data,'Parent',ax_dummy);
+for i=1:length(b)
+    %bar color
+%     ind_color = max(round(i*length(cmap)/n_bars-1)+1,1);
+%     b(i).FaceColor = cmap(ind_color,:);
+    b(i).FaceColor = f_colors(i,:);
+    b(i).EdgeColor = 'k';
+    b(i).LineWidth = .1;
+end
+leg = legend(ax_dummy,leg_labs,'Visible','on');
+ax_dummy.Position = [2 1 1 1];
+
+
+
+% Legend Position
+panel = leg.Parent;
+panel.Units = 'characters';
+%leg.Units = 'characters';
+pos = panel.Position;
+leg.Position = [.8 .1 .15 .8];
+panel.Units = 'normalized';
+leg.Units = 'normalized';
+
+f.Units = 'pixels';
+f.Position = [195          59        1045         919];
+
+fullname = fullfile(strrep(fName,'.mat','-B.pdf'));
 saveas(f,fullname);
 
 end
