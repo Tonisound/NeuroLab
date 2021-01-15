@@ -1,0 +1,118 @@
+Group_name	Atlas_name	Plates	Region
+OrbitalCtx-L	-	-	MO-L VO-L LO-L DLO-L
+OrbitalCtx-R	-	-	MO-R VO-R LO-R DLO-R
+OrbitalCtx	-	-	MO VO LO DLO
+MotorCtx-L	-	-	M1-L M2-L
+MotorCtx-R	-	-	M1-R M2-R
+MotorCtx	-	-	M1 M2
+CingulateCtx-L	-	-	Cg1-L Cg2-L
+CingulateCtx-R	-	-	Cg1-R Cg2-R
+CingulateCtx	-	-	Cg1 Cg2
+LimbicCtx-L	-	-	PrL-L IL-L 
+LimbicCtx-R	-	-	PrL-R IL-R
+LimbicCtx	-	-	PrL IL
+ParietalCtx-L	-	-	PtPD-L PtPR-L
+ParietalCtx-R	-	-	PtPD-R PtPR-R
+ParietalCtx	-	-	PtPD PtPR
+RhinalCtx-L	-	-	Ect-L PRh-L DLEnt-L
+RhinalCtx-R	-	-	Ect-R PRh-R DLEnt-R
+RhinalCtx	-	-	Ect PRh DLEnt
+SomatoSensoryCtx-L	-	-	S1-L S1J-L S1FL-L S1DZ-L S1DZO-L S1ULp-L S1BF-L S1Sh-L S1HL-L S1Tr-L S2-L
+SomatoSensoryCtx-R	-	-	S1-R S1J-R S1FL-R S1DZ-R S1DZO-R S1ULp-R S1BF-R S1Sh-R S1HL-R S1Tr-R S2-R
+SomatoSensoryCtx	-	-	S1 S1J S1FL S1DZ S1DZO S1ULp S1BF S1Sh S1HL S1Tr S2
+InsularCtx-L	-	-	GI-L DI-L AID-L AIV-L AIP-L
+InsularCtx-R	-	-	GI-R DI-R AID-R AIV-R AIP-R
+InsularCtx	-	-	GI DI AID AIV AIP
+CaudatePutamen-L	-	-	CPu-L
+CaudatePutamen-R	-	-	CPu-R
+CaudatePutamen	-	-	CPu
+GlobusPallidus-L	-	-	GP-L
+GlobusPallidus-R	-	-	GP-R
+GlobusPallidus	-	-	GP
+BasalGanglia-L	-	-	CPu-L GP-L VP-L SNR-L AcbC-L LAcbSh-L AcbSh-L LOT1-L LOT2-L LOT3-L AOV-L AOE-L AOVP-L AOP-L AOM-L AOD-L AOL-L GrO-L 
+BasalGanglia-R	-	-	CPu-R GP-R VP-R SNR-R AcbC-R LAcbSh-R AcbSh-R LOT1-R LOT2-R LOT3-R AOV-R AOE-R AOVP-R AOP-R AOM-R AOD-R AOL-R GrO-R 
+BasalGanglia	-	-	CPu GP VP SNR AcbC LAcbSh AcbSh LOT1 LOT2 LOT3 AOV AOE AOVP AOP AOM AOD AOL GrO
+SubstantiaNigra-L	-	-	SNR-L SNL-L SNCD-L SNCV-L SNCM-L
+SubstantiaNigra-R	-	-	SNR-R SNL-R SNCD-R SNCV-R SNCM-R
+SubstantiaNigra	-	-	SNR SNL SNCD SNCV SNCM
+VisualCtx-L	-	-	V1-L V1M-L V1B-L V2MM-L V2ML-L V2L-L
+VisualCtx-R	-	-	V1-R V1M-R V1B-R V2MM-R V2ML-R V2L-R
+VisualCtx	-	-	V1 V1M V1B V2MM V2ML V2L
+AuditoryCtx-L	-	-	AuD-L Au1-L AuV-L
+AuditoryCtx-R	-	-	AuD-R Au1-R AuV-R
+AuditoryCtx	-	-	AuD Au1 AuV
+MammillaryNuclei-L	-	-	DTM-L PMV-L VTM-L PMD-L SMT-L mt-L SuML-L SuMM MnM MM ML-L LM-L pm-L mp-L SuM ML
+MammillaryNuclei-R	-	-	DTM-R PMV-R VTM-R PMD-R SMT-R mt-R SuML-R SuMM MnM MM ML-R LM-R pm-R mp-R SuM ML
+MammillaryNuclei	-	-	DTM PMV VTM PMD SMT mt SuML ML LM pm mp SuMM MnM MM SuM ML
+PiriformCtx-L	-	-	Pir1-L Pir2-L Pir3-L
+PiriformCtx-R	-	-	Pir1-R Pir2-R Pir3-R
+PiriformCtx	-	-	Pir1 Pir2 Pir3
+OlfactoryNuclei-L	-	-	LOT1-L LOT2-L LOT3-L AOVP-L AOP-L AOM-L AOD-L AOL-L AOV-L AOE-L GrO-L
+OlfactoryNuclei-R	-	-	LOT1-R LOT2-R LOT3-R AOVP-R AOP-R AOM-R AOD-R AOL-R AOV-R AOE-R GrO-R
+OlfactoryNuclei	-	-	LOT1 LOT2 LOT3 AOVP AOP AOM AOD AOL AOV AOE GrO
+Ventricules-L	-	-	LV-L chp-L IVF-L 3V chp D3V MRe Aq 
+Ventricules-R	-	-	LV-R chp-R IVF-R 3V chp D3V MRe Aq
+Ventricules	-	-	LV chp IVF 3V chp D3V MRe Aq
+ZonaIncerta-L	-	-	ZIR-L ZI-L ZID-L ZIV-L ZIC-L
+ZonaIncerta-R	-	-	ZIR-R ZI-R ZID-R ZIV-R ZIC-R
+ZonaIncerta	-	-	ZIR ZI ZID ZIV ZIC
+PAG-L	-	-	p1PAG-L LPAG-L DMPAG-L DLPAG-L VLPAG-L VLPAG PlPAG p1PAG
+PAG-R	-	-	p1PAG-R LPAG-R DMPAG-R DLPAG-R VLPAG-R VLPAG PlPAG p1PAG
+PAG	-	-	p1PAG LPAG DMPAG DLPAG VLPAG VLPAG PlPAG p1PAG
+SuperiorColliculus-L	-	-	Zo-L SuG-L Op-L InG-L bsc-L InWh-L DpG-L DpWh-L csc
+SuperiorColliculus-R	-	-	Zo-R SuG-R Op-R InG-R bsc-R InWh-R DpG-R DpWh-R csc
+SuperiorColliculus	-	-	Zo SuG Op InG bsc InWh DpG DpWh csc
+PretectalNuclei-L	-	-	APTD-L APTV-L OPT-L PPT-L MPT-L
+PretectalNuclei-R	-	-	APTD-R APTV-R OPT-R PPT-R MPT-R
+PretectalNuclei	-	-	APTD APTV OPT PPT MPT
+RetrosplenialCtx-L	-	-	RSGc-L RSGb-L RSGa-L RSD-L 
+RetrosplenialCtx-R	-	-	RSD-R RSGc-R RSGb-R RSGa-R
+RetrosplenialCtx	-	-	RSD RSGc RSGb RSGa
+GeniculateNuclei-L	-	-	DLG-L VG-L VG1-L VG2-L VG3-L IGL-L SubG-L MZMG-L MGV-L MGD-L MGM-L SG-L
+GeniculateNuclei-R	-	-	DLG-R VG-R VG1-R VG2-R VG3-R IGL-R SubG-R MZMG-R MGV-R MGD-R MGM-R SG-R
+GeniculateNuclei	-	-	DLG VG VG1 VG2 VG3 IGL SubG MZMG MGV MGD MGM SG
+DentateGyrus-L	-	-	MoDG-L PoDG-L GrDG-L
+DentateGyrus-R	-	-	MoDG-R PoDG-R GrDG-R
+DentateGyrus	-	-	MoDG PoDG GrDG
+PreopticArea-L	-	-	MPO-L MPOM-L LPO-L MCPO-L MPOL-L PDPO-L MPOC-L VLPO-L MPA-L VMPO-L MnPO
+PreopticArea-R	-	-	MPO-R MPOM-R LPO-R MCPO-R MPOL-R PDPO-R MPOC-R VLPO-R MPA-R VMPO-R MnPO
+PreopticArea	-	-	MPO MPOM LPO MCPO MPOL PDPO MPOC VLPO MPA VMPO MnPO
+SeptalNuclei-L	-	-	LSI-L LSI1-L LSI2-L LSI3-L LSI4-L LSV-L LSD-L SFi-L SHi-L MS-L PLd-L SHy-L TS-L MS SFi
+SeptalNuclei-R	-	-	LSI-R LSI1-R LSI2-R LSI3-R LSI4-R LSV-R LSD-R SFi-R SHi-R MS-R PLd-R SHy-R TS-R MS SFi
+SeptalNuclei	-	-	LSI LSI1 LSI2 LSI3 LSI4 LSV LSD SFi SHi MS PLd SHy TS MS SFi
+Hypothalamus-L	-	-	LA-L VLH-L AH-L AHA-L PLH-L AHC-L AHP-L VMHSh-L TuLH-L PaLM-L JPLH-L PaV-L VMH-L Arc-L ArcM-L SPa-L VMHDM-L VMHVL-L ArcD-L ArcL-L Stg-L PeFLH-L VMHC-L PaPo-L DMD-L DA-L MCLH-L DMC-L DMV-L Te-L PH-L ArcMP-L PHD PHA
+Hypothalamus-R	-	-	LA-R VLH-R AH-R AHA-R PLH-R AHC-R AHP-R VMHSh-R TuLH-R PaLM-R JPLH-R PaV-R VMH-R Arc-R ArcM-R SPa-R VMHDM-R VMHVL-R ArcD-R ArcL-R Stg-R PeFLH-R VMHC-R PaPo-R DMD-R DA-R MCLH-R DMC-R DMV-R Te-R PH-R ArcMP-R PHD PHA
+Hypothalamus	-	-	LA VLH AH AHA PLH AHC AHP VMHSh TuLH PaLM JPLH PaV VMH Arc ArcM SPa VMHDM VMHVL ArcD ArcL Stg PeFLH VMHC PaPo DMD DA MCLH DMC DMV Te PH ArcMP PHD PHA
+PosteriorAmygdala-L	-	-	PMCO-L APir-L AHiPM-L PLCo-L BLP-L BMP-L AHiPL-L LA-L
+PosteriorAmygdala-R	-	-	PMCO-R APir-R AHiPM-R PLCo-R BLP-R BMP-R AHiPL-R LA-R
+PosteriorAmygdala	-	-	PMCO APir AHiPM PLCo BLP BMP AHiPL LA
+AnteriorAmygdala-L	-	-	CxA1-L CxA2-L CxA3-L AA-L ACo-L MeAD-L BMA-L I-L BLA-L CeM-L CeC-L BAOT-L EAC-L EAM-L EA-L MeAV-L CeL-L BLV-L LaDL-L IM-L STIA-L MePD-L IMG-L LaVL-L LaVM-L AHiAL-L
+AnteriorAmygdala-R	-	-	CxA1-R CxA2-R CxA3-R AA-R ACo-R MeAD-R BMA-R I-R BLA-R CeM-R CeC-R BAOT-R EAC-R EAM-R EA-R MeAV-R CeL-R BLV-R LaDL-R IM-R STIA-R MePD-R IMG-R LaVL-R LaVM-R AHiAL-R
+AnteriorAmygdala	-	-	CxA1 CxA2 CxA3 AA ACo MeAD BMA I BLA CeM CeC BAOT EAC EAM EA MeAV CeL BLV LaDL IM STIA MePD IMG LaVL LaVM AHiAL
+CA-L	-	-	CA1-L OrCA1-L CA1Or-L PyCA1-L CA1Py-L RadCA1-L CA1Rad-L CA2-L OrCA2-L CA2Or-L PyCA2-L CA2Py-L RadCA2-L CA2Rad-L CA3-L OrCA3-L CA3Or-L PyCA3-L CA3Py-L RadCA3-L CA3Rad-L Rad-L SLu-L LMol-L
+CA-R	-	-	CA1-R OrCA1-R CA1Or-R PyCA1-R CA1Py-R RadCA1-R CA1Rad-R CA2-R OrCA2-R CA2Or-R PyCA2-R CA2Py-R RadCA2-R CA2Rad-R CA3-R OrCA3-R CA3Or-R PyCA3-R CA3Py-R RadCA3-R CA3Rad-R Rad-R SLu-R LMol-R
+CA	-	-	CA1 OrCA1 CA1Or PyCA1 CA1Py RadCA1 CA1Rad CA2 OrCA2 CA2Or PyCA2 CA2Py RadCA2 CA2Rad CA3 OrCA3 CA3Or PyCA3 CA3Py RadCA3 CA3Rad Rad SLu LMol
+CA1-L	-	-	CA1-L OrCA1-L CA1Or-L PyCA1-L CA1Py-L RadCA1-L CA1Rad-L Rad-L SLu-L LMol-L
+CA1-R	-	-	CA1-R OrCA1-R CA1Or-R PyCA1-R CA1Py-R RadCA1-R CA1Rad-R Rad-R SLu-R LMol-R
+CA1	-	-	CA1 OrCA1 CA1Or PyCA1 CA1Py RadCA1 CA1Rad Rad SLu LMol
+CA2-L	-	-	CA2-L OrCA2-L CA2Or-L PyCA2-L CA2Py-L RadCA2-L CA2Rad-L Rad-L SLu-L LMol-L
+CA2-R	-	-	CA2-R OrCA2-R CA2Or-R PyCA2-R CA2Py-R RadCA2-R CA2Rad-R Rad-R SLu-R LMol-R
+CA2	-	-	CA2 OrCA2 CA2Or PyCA2 CA2Py RadCA2 CA2Rad Rad SLu LMol
+CA3-L	-	-	CA3-L OrCA3-L CA3Or-L PyCA3-L CA3Py-L RadCA3-L CA3Rad-L Rad-L SLu-L LMol-L
+CA3-R	-	-	CA3-R OrCA3-R CA3Or-R PyCA3-R CA3Py-R RadCA3-R CA3Rad-R Rad-R SLu-R LMol-R
+CA3	-	-	CA3 OrCA3 CA3Or PyCA3 CA3Py RadCA3 CA3Rad Rad SLu LMol
+Thalamus-L	-	-	Rt-L PT-L PVA-L AM-L AD-L AVDM-L AVVL-L IAD-L Re-L VRe-L PC-L sm-L AMV-L PaXi-L VAVL-L MD-L VM-L VA-L VL-L LDDM-L LDVL-L Sub-L VPL-L MDM-L MDL-L CL-L SubV-L SubD-L Po-L VPM-L LHb-L LHbM-L LHbL-L MDC-L LPMR-L MHb-L OPC-L VPPC-L LPLR-L PF-L PVP-L PrC-L PIL-L PoM PVP IMD PV Rh IAM Xi Re CM PVA
+Thalamus-R	-	-	Rt-R PT-R PVA-R AM-R AD-R AVDM-R AVVL-R IAD-R Re-R VRe-R PC-R sm-R AMV-R PaXi-R VAVL-R MD-R VM-R VA-R VL-R LDDM-R LDVL-R Sub-R VPL-R MDM-R MDL-R CL-R SubV-R SubD-R Po-R VPM-R LHb-R LHbM-R LHbL-R MDC-R LPMR-R MHb-R OPC-R VPPC-R LPLR-R PF-R PVP-R PrC-R PIL-R PoM PVP IMD PV Rh IAM Xi Re CM PVA
+Thalamus	-	-	Rt PT PVA AM AD AVDM AVVL IAD Re VRe PC sm AMV PaXi VAVL MD VM VA VL LDDM LDVL Sub VPL MDM MDL CL SubV SubD Po VPM LHb LHbM LHbL MDC LPMR MHb OPC VPPC LPLR PF PVP PrC PIL PoM PVP IMD PV Rh IAM Xi Re CM PVA
+AssociationCtx-L	-	-	LPtA-L MPtA-L
+AssociationCtx-R	-	-	LPtA-R MPtA-R
+AssociationCtx	-	-	LPtA MPtA
+Vessels-L	-	-	uppervessel lowervessel ach-L azac acer-L mcer-L basalvessel-L vessel-L sinus lhia-L anteriorvessel
+Vessels-R	-	-	uppervessel lowervessel ch-R azac acer-R mcer-R basalvessel-R vessel-R sinus lhia-R anteriorvessel
+Vessels	-	-	uppervessel lowervessel ach-L ach-R azac acer-L acer-R mcer-L mcer-R basalvessel-L basalvessel-R vessel-L vessel-R sinus lhia-L lhia-R anteriorvessel
+ach	-	-	ach-L ach-R
+acer	-	-	acer-L acer-R
+mcer	-	-	mcer-L mcer-R
+basalvessel	-	-	basalvessel-L basalvessel-R
+vessel	-	-	vessel-L vessel-R
+lhia	-	-	lhia-L lhia-R
