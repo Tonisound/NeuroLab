@@ -83,49 +83,25 @@ list_group = {'QW';'AW';'NREM';'REM';};
 % list_group = {'QW';'AW';'NREM';'REM';'REM-TONIC';'REM-PHASIC';};
 
 % list_regions
-list_regions = {'SomatoSensoryCtx';
-    'VisualCtx';
-    'AuditoryCtx';
-    'PiriformCtx';
-    'MotorCtx';
-    'OrbitalCtx';
-    'RhinalCtx';
-    'CingulateCtx';
-    'LimbicCtx';
-    'InsularCtx';
-    'ParietalCtx';
-    'AssociationCtx';
-    'RetrosplenialCtx';
-    %'CA';
-    'DentateGyrus';
-    'CA1';
-    'CA2';
-    'CA3';
-    'Thalamus';
-    'SubstantiaNigra';
-    'MammillaryNuclei';
-    'OlfactoryNuclei';
-    'ZonaIncerta';
-    'PAG';
-    'PosteriorAmygdala';
-    'AnteriorAmygdala';
-    'CaudatePutamen';
-    'GlobusPallidus';
-    'BasalGanglia';
-    'SuperiorColliculus';
-    'PretectalNuclei';
-    'GeniculateNuclei';
-    'PreopticArea';
-    'SeptalNuclei';
-    'Hypothalamus'};
-% list_regions = {'Ventricules';
-%     'Vessels';
-%     'ach';
-%     'acer';
-%     'mcer';
-%     'basalvessel';
-%     'vessel';
-%     'lhia'};
+list_regions = {'SomatoSensoryCtx';'VisualCtx';'AuditoryCtx';'PiriformCtx';'MotorCtx';
+    'OrbitalCtx';'RhinalCtx';'CingulateCtx';'LimbicCtx';'InsularCtx';
+    'ParietalCtx';'AssociationCtx';'RetrosplenialCtx';'DentateGyrus';'CA1';'CA2';'CA3';
+    'Thalamus';'SubstantiaNigra';'MammillaryNuclei';'OlfactoryNuclei';'ZonaIncerta';
+    'PAG';'PosteriorAmygdala';'AnteriorAmygdala';'CaudatePutamen';'GlobusPallidus';'BasalGanglia';'SuperiorColliculus';
+    'PretectalNuclei';'GeniculateNuclei';'PreopticArea';'SeptalNuclei';'Hypothalamus'};
+% list_regions = {'SomatoSensoryCtx-L';'VisualCtx-L';'AuditoryCtx-L';'PiriformCtx-L';'MotorCtx-L';
+%     'OrbitalCtx-L';'RhinalCtx-L';'CingulateCtx-L';'LimbicCtx-L';'InsularCtx-L';
+%     'ParietalCtx-L';'AssociationCtx-L';'RetrosplenialCtx-L';'DentateGyrus-L';'CA1-L';'CA2-L';'CA3-L';
+%     'Thalamus-L';'SubstantiaNigra-L';'MammillaryNuclei-L';'OlfactoryNuclei-L';'ZonaIncerta-L';
+%     'PAG-L';'PosteriorAmygdala-L';'AnteriorAmygdala-L';'CaudatePutamen-L';'GlobusPallidus-L';'BasalGanglia-L';'SuperiorColliculus-L';
+%     'PretectalNuclei-L';'GeniculateNuclei-L';'PreopticArea-L';'SeptalNuclei-L';'Hypothalamus-L'};
+% list_regions = {'SomatoSensoryCtx-R';'VisualCtx-R';'AuditoryCtx-R';'PiriformCtx-R';'MotorCtx-R';
+%     'OrbitalCtx-R';'RhinalCtx-R';'CingulateCtx-R';'LimbicCtx-R';'InsularCtx-R';
+%     'ParietalCtx-R';'AssociationCtx-R';'RetrosplenialCtx-R';'DentateGyrus-R';'CA1-R';'CA2-R';'CA3-R';
+%     'Thalamus-R';'SubstantiaNigra-R';'MammillaryNuclei-R';'OlfactoryNuclei-R';'ZonaIncerta-R';
+%     'PAG-R';'PosteriorAmygdala-R';'AnteriorAmygdala-R';'CaudatePutamen-R';'GlobusPallidus-R';'BasalGanglia-R';'SuperiorColliculus-R';
+%     'PretectalNuclei-R';'GeniculateNuclei-R';'PreopticArea-R';'SeptalNuclei-R';'Hypothalamus-R'};
+% list_regions = {'Ventricules';'Vessels';'ach';'acer';'mcer';'basalvessel';'vessel';'lhia'};
 
 if exist(fName,'file')
     fprintf('Loading [%s]... ',fName);
@@ -135,8 +111,9 @@ else
     [S,P] = browse_data(fName,list_regions,list_group,list_files);
 end
 
-%plot1(S,P,fName,list_regions,list_group,list_files);
-plot2(S,P,fName,list_regions,list_group,list_files);
+tt_data = plot1(S,P,fName,list_regions,list_group,list_files);
+tt_data = plot2(S,P,fName,list_regions,list_group,list_files);
+plot_atlas(list_regions,tt_data(4,:)');
 
 end
 
@@ -215,7 +192,7 @@ fprintf('Synthesis Data Saved [%s]\n',fName);
 
 end
 
-function plot1(S,P,fName,list_regions,list_group,list_files)
+function tt_data = plot1(S,P,fName,list_regions,list_group,list_files)
 
 % Drawing results
 f = figure;
@@ -330,7 +307,7 @@ saveas(f,fullname);
 
 end
 
-function plot2(S,P,fName,list_regions,list_group,list_files)
+function tt_data = plot2(S,P,fName,list_regions,list_group,list_files)
 
 % Drawing results
 f = figure;
