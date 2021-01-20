@@ -69,8 +69,8 @@ f2.UserData.success = false;
 % Parameters
 % Lag Intervals for batch mode
 f2.UserData.slider_values.lag1 = [-10;10];
-f2.UserData.slider_values.lag2 = [-5;15];
-f2.UserData.slider_values.lag_step = 2;
+f2.UserData.slider_values.lag2 = [-25;25];
+f2.UserData.slider_values.lag_step = 5;
 %f2.UserData.slider_values.lag2 = [-100;500];
 
 
@@ -638,8 +638,8 @@ set(handles2.CropBox,'Callback',{@boxCrop_Callback,handles2.CenterAxes});
 set(handles2.Slider,'Callback',{@slider_Callback,handles2});  
 set(handles2.ButtonCompute,'Callback',{@compute_Callback,handles2,val});
 set(handles2.ButtonClear,'Callback',{@clear_Callback,handles2});
-set(handles2.ButtonSaveImage,'Callback',{@saveimage_Callback,handles2});
-set(handles2.ButtonSaveStats,'Callback',{@savestats_Callback,handles2});
+set(handles2.ButtonSaveImage,'Callback',{@saveimage_Callback,handles2,val});
+set(handles2.ButtonSaveStats,'Callback',{@savestats_Callback,handles2,val});
 set(handles2.ButtonReset,'Callback',{@reset_Callback,handles2});
 set(handles2.ButtonBatch,'Callback',{@batch_Correlation_Callback,handles2,val,str_group,[str_regions;str_traces]});
 set(handles2.TextBox,'Callback',{@textbox_Callback,handles2});
@@ -1506,7 +1506,7 @@ slider_Callback(handles.Slider,[],handles);
 
 end
 
-function savestats_Callback(~,~,handles)
+function savestats_Callback(~,~,handles,val_batch)
 
 global DIR_SAVE FILES CUR_FILE DIR_STATS;
 load('Preferences.mat','GTraces');
@@ -1520,7 +1520,11 @@ else
     prompt={'Saving Directory (Recording Group)'};
     name = 'Name';
     defaultans = {'CURRENT'};
-    answer = inputdlg(prompt,name,[1 40],defaultans);
+    if val_batch == 1
+        answer = inputdlg(prompt,name,[1 40],defaultans);
+    else
+        answer = defaultans;
+    end
     if ~isempty(answer)
         folder_name= char(answer);
     else
@@ -1608,7 +1612,7 @@ copyfile(fullfile(stats_dir,'_info.txt'),save_dir);
 
 end
 
-function saveimage_Callback(~,~,handles)
+function saveimage_Callback(~,~,handles,val_batch)
 
 global DIR_SAVE FILES CUR_FILE DIR_FIG DIR_STATS;
 load('Preferences.mat','GTraces');
@@ -1624,7 +1628,11 @@ else
     prompt={'Saving Directory (Recording Group)'};
     name = 'Name';
     defaultans = {'CURRENT'};
-    answer = inputdlg(prompt,name,[1 40],defaultans);
+    if val_batch == 1
+        answer = inputdlg(prompt,name,[1 40],defaultans);
+    else
+        answer = defaultans;
+    end
     if ~isempty(answer)
         folder_name= char(answer);
     else
@@ -1773,42 +1781,59 @@ if isempty(str_ref)
         {'Power-gammahigh/'};{'SPEED'};{'Power-ACC/033'}];
     end
 end
-str_ref = [{'Power-beta/'}];
 
+p1 = handles.Popup1;
+bc = handles.ButtonCompute;
+    
 for i=1:length(ind_group)
     ii = ind_group(i);
     % Update Tag_table
     hObj.UserData.folder_name = char(data_tg.TimeGroups_name(ii));
     handles.Tag_table.UserData.Selection = data_tg.TimeGroups_S(ii).Selected';
     
-    % Compute
-    p1 = handles.Popup1;
-    bc = handles.ButtonCompute;
-    
-    test_contain = true;
-    if test_contain
-        % set test_contain to true to select matches containing str_ref
-        ind_pu = find(contains(p1.String,str_ref)==1);
-    else
-        % set test_contain to false to select matches exactly matching str_ref
-        indices_pu = zeros(size(p1.String,1),1);
-        for k =1:length(str_ref)
-            indices_pu = indices_pu + strcmp(p1.String,str_ref(k));
-        end
-        ind_pu = find(indices_pu>0);
+%     % uncomment to select matches containing str_ref
+%     ind_pu = find(contains(p1.String,str_ref)==1);
+    % uncomment to select matches exactly matching str_ref
+    indices_pu = zeros(size(p1.String,1),1);
+    for k =1:length(str_ref)
+        indices_pu = indices_pu + strcmp(p1.String,str_ref(k));
     end
-    
+    ind_pu = find(indices_pu>0);
+
+    % Compute    
     for k =1:length(ind_pu)
         p1.Value = ind_pu(k);
         compute_Callback(bc,[],handles,val);
-        savestats_Callback([],[],handles);
+        savestats_Callback([],[],handles,val);
         if ~handles.Checkbox1.Value
             % Skip if needed
-            saveimage_Callback([],[],handles);
+            saveimage_Callback([],[],handles,val);
         end
-%         if exist('_info.txt','file')
-%             delete('_info.txt');
-%         end
+    end
+    hObj.UserData = [];
+end
+
+if isempty(ind_group)
+    selection = find(strcmp(handles.Tag_table.Data(:,1),'Whole-LFP')==1);
+    handles.Tag_table.UserData.Selection = selection;
+%     % uncomment to select matches containing str_ref
+%     ind_pu = find(contains(p1.String,str_ref)==1);
+    % uncomment to select matches exactly matching str_ref
+    indices_pu = zeros(size(p1.String,1),1);
+    for k =1:length(str_ref)
+        indices_pu = indices_pu + strcmp(p1.String,str_ref(k));
+    end
+    ind_pu = find(indices_pu>0);
+
+    % Compute    
+    for k =1:length(ind_pu)
+        p1.Value = ind_pu(k);
+        compute_Callback(bc,[],handles,val);
+        savestats_Callback([],[],handles,val);
+        if ~handles.Checkbox1.Value
+            % Skip if needed
+            saveimage_Callback([],[],handles,val);
+        end
     end
     hObj.UserData = [];
 end
