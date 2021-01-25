@@ -43,9 +43,12 @@ else
 end
 
 tt_data = plot1(L,P,S,'Rmax');
+value_regions=(tt_data(3,:)-tt_data(1,:))./tt_data(1,:);
+plot_atlas(L.list_regions,'Values',value_regions,'DisplayMode','bilateral',...
+    'VisibleColorbar','off','VisibleName','off','SaveName',fullfile(folder_save,'Rmax-RATIO.pdf'));
+
 tt_data = plot1(L,P,S,'Tmax');
 tt_data = plot1(L,P,S,'Xmax');
-%plot_atlas(list_regions,tt_data(3,:)./tt_data(1,:)');
 
 end
 
@@ -111,7 +114,7 @@ for index = 1:length(list_files)
             S(i,j).recording = [S(i,j).recording;{cur_file}];
             %S(i,j).RT_pattern = [S(i,j).RT_pattern; data_fus.RT_pattern(index_region,:)];
             %S(i,j).x_ = [S(i,j).x_;data_fus.x_];
-            fprintf('File[%s] Rmax[%.2f]\n',cur_file,data_fus.r_max(index_region));
+            %fprintf('File[%s] Rmax[%.2f]\n',cur_file,data_fus.r_max(index_region));
             S(i,j).r_max = [S(i,j).r_max;data_fus.r_max(index_region)];
             S(i,j).t_max = [S(i,j).t_max;data_fus.t_max(index_region)];
             S(i,j).x_max = [S(i,j).x_max;data_fus.x_max(index_region)];

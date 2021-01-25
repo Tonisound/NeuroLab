@@ -233,7 +233,7 @@ if ~isempty(ind_aw) && ~isempty(ind_qw)
     end
 end
 
-% Building Index-REM-PHASIC
+% Building Index-REM-PHASIC2
 if ~isempty(ind_rem) && ~isempty(ind_rem_phasic)  
     % Creating line
     hl = line('XData',(1:n_images)',...

@@ -30,3 +30,15 @@ for i=1:length(d)
     copyfile(fullfile(d(i).folder,d(i).name),fullfile(folder_out,d(i).name));
     fprintf('File [%s] => [%s].\n',char(d(i).name),folder_out);
 end
+
+% Time_Reference.mat
+folder_in = 'F:\BACKUP_ToniHD2\NEUROLAB\NLab_DATA\';
+folder_out = 'C:\Users\Antoine\Desktop\Time_Reference';
+d = dir(folder_in);
+for i=1:length(FILES)
+    %temp = regexp(d(i).folder,filesep,'split');
+    %fname = strcat(char(temp(end)),'.mat');
+    %copyfile(fullfile(d(i).folder,d(i).name),fullfile(folder_out,fname));
+    copyfile(fullfile(folder_in,FILES(i).nlab,'Time_Reference.mat'),fullfile(folder_out,strcat(strrep(FILES(i).nlab,'_nlab','-'),'Time_Reference.mat')));
+    fprintf('File [%s] => [%s].\n',fullfile(folder_in,FILES(i).nlab,'Time_Reference.mat'),fullfile(folder_out,strcat(FILES(i).nlab,'Time_Reference.mat')));
+end

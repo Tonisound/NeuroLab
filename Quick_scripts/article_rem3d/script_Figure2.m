@@ -43,8 +43,14 @@ end
 
 % Plotting/Saving Data
 tt_data = plot1(L,P,S);
-tt_data = plot2(L,P,S);
-%plot_atlas(list_regions,tt_data(4,:)');
+% plot_atlas(L.list_regions,'Values',tt_data(4,:)',...
+%     'SaveName',fullfile('Figure2','REM-Median-Agregated.pdf'),'DisplayMode','bilateral','VisibleName','off');
+tt_data = plot2(L,P,S,'Ydata');
+% plot_atlas(L.list_regions,'Values',tt_data(4,:)',...
+%     'SaveName',fullfile('Figure2','REM-Median-Agregated.pdf'),'DisplayMode','bilateral','VisibleName','off');
+tt_data = plot2(L,P,S,'Ymean');
+% plot_atlas(L.list_regions,'Values',tt_data(4,:)',...
+%     'SaveName',fullfile('Figure2','REM-Mean-per-recording.pdf'),'DisplayMode','bilateral','VisibleName','off');
 
 end
 
@@ -60,7 +66,7 @@ list_files = L.list_files;
 container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics';
     
 % Buidling struct S
-S = struct('t_data',[],'x_data',[],'y_data',[],...
+S = struct('t_data',[],'x_data',[],'y_data',[],'y_mean',[],...
     'group','','region','','recording','');
 S(length(list_group),length(list_regions)).y_data = [];
     
@@ -102,6 +108,7 @@ for index = 1:length(list_files)
                 S(i,j).t_data = [S(i,j).t_data;Sdata.t_data(:)];
                 S(i,j).x_data = [S(i,j).x_data;Sdata.x_data(:)];
                 S(i,j).y_data = [S(i,j).y_data;Sdata.y_data(:)];
+                S(i,j).y_mean = [S(i,j).y_mean;mean(Sdata.y_data(:),'omitnan')];
             end
         end
     end
@@ -147,7 +154,7 @@ panel = uipanel('Parent',f,'Position',[0 0 1 1]);
 ax = axes('Parent',panel,'Position',[.1 .1 .8 .8]);
 ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
 clrmenu(f);
-f.Name = strcat(fName,'-B');
+f.Name = strcat(fName,'-A');
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
 
@@ -176,7 +183,7 @@ end
 tt_data = NaN(m,length(list_regions),length(list_group));
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        temp = S(i,j).y_data;
+        temp = S(i,j).y_data; 
         tt_data(1:length(temp),j,i) = temp;
     end
 end
@@ -246,7 +253,7 @@ saveas(f,fullname);
 
 end
 
-function tt_data = plot2(L,P,S)
+function tt_data = plot2(L,P,S,str)
 
 fName = L.fName;
 folder_save = L.folder_save;
@@ -261,7 +268,12 @@ ax1 = axes('Parent',panel,'Position',[.2 .1 .2 .8]);
 ax2 = axes('Parent',panel,'Position',[.6 .1 .2 .8]);
 ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
 clrmenu(f);
-f.Name = strcat(fName,'-B');
+switch str
+    case 'Ymean'
+        f.Name = strcat(fName,'-B-MeanPerRecording');
+    case 'Ydata'
+        f.Name = strcat(fName,'-B-MeanAgregated');
+end
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
 
@@ -284,14 +296,42 @@ patch_alpha = P.patch_alpha;
 m = 0;
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        m = max(m,length(S(i,j).y_data));
+        switch str
+            case 'Ydata'
+                m = max(m,length(S(i,j).y_data));  
+            case 'Ymean'
+                m = max(m,length(S(i,j).y_mean)); 
+        end
     end
 end
-tt_data = NaN(length(list_group),length(list_regions));
+
+dots_data = NaN(m,length(list_regions),length(list_group));
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        temp = S(i,j).y_data;
-        tt_data(i,j) = median(temp,'omitnan');
+        switch str
+            case 'Ydata'
+                temp = S(i,j).y_data;
+            case 'Ymean'
+                temp = S(i,j).y_mean;
+        end 
+        dots_data(1:length(temp),j,i) = temp;
+    end
+end
+
+tt_data = NaN(length(list_group),length(list_regions));
+ebar_data = NaN(length(list_group),length(list_regions));
+n_samples = NaN(length(list_group),length(list_regions));
+for i =1:length(list_group)
+    for j = 1:length(list_regions)
+        switch str
+            case 'Ydata'
+                temp = S(i,j).y_data;
+            case 'Ymean'
+                temp = S(i,j).y_mean;
+        end
+        tt_data(i,j) = mean(temp,'omitnan');
+        n_samples(i,j)=sum(~isnan(temp));
+        ebar_data(i,j) = std(temp,[],'omitnan')./sqrt(n_samples(i,j));
     end
 end
 
@@ -307,15 +347,27 @@ tt_data2 = (tt_data(index_rem,:)-tt_data(index_qw,:))./(tt_data(index_aw,:)-tt_d
 
 % Sorting
 [~,ind_sorted_rem] = sort(tt_data(index_rem,:),'ascend');
+ebar_data_sorted = ebar_data(:,ind_sorted_rem);
 [~,ind_sorted_aw] = sort(tt_data2,'ascend');
 
 % Ax1
+hold(ax1,'on');
 b1 = barh(diag(tt_data(index_rem,ind_sorted_rem)),'stacked','Parent',ax1);
 for i=1:length(b1)
     %bar color
     b1(i).FaceColor = f_colors(ind_sorted_rem(i),:);
     b1(i).EdgeColor = 'k';
     b1(i).LineWidth = .1;
+    % errorbars
+    e = errorbar(b1(i).YData(i),b1(i).XData(i),-ebar_data_sorted(index_rem,i),ebar_data_sorted(index_rem,i),...
+        'horizontal','Parent',ax1);
+    e.Color='k';
+    % dots
+    temp = dots_data(:,ind_sorted_rem(i),index_rem);
+    temp(isnan(temp))=[];
+%     line('XData',temp,'YData',b1(i).XData(i)*ones(size(temp)),...
+%         'LineStyle','none','Marker','.','MarkerSize',5,...
+%         'MarkerFaceColor','k','Parent',ax1); 
 end
 
 % Axis limits
