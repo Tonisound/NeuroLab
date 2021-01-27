@@ -44,8 +44,9 @@ end
 
 tt_data = plot1(L,P,S,'Rmax');
 % tt_data = plot1(L,P,S,'Tmax');
-% tt_data = plot1(L,P,S,'Xmax');
-tt_data = plot2(L,P,S);
+tt_data = plot1(L,P,S,'Xmax');
+tt_data = plot2(L,P,S,'Mean');
+tt_data = plot2(L,P,S,'Median');
 
 end
 
@@ -337,13 +338,13 @@ switch str
 end
 saveas(f,fullname);
 
-plot_atlas(list_regions,'Values',tt_data(1,:)',...
-    'SaveName',fullfile(folder_save,strcat('PlotAtlas-',f.Name,'.pdf')),...
-    'DisplayMode','bilateral','VisibleName','off');
+% plot_atlas(list_regions,'Values',tt_data(1,:)',...
+%     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',f.Name,'.pdf')),...
+%     'DisplayMode','bilateral','VisibleName','off');
 
 end
 
-function tt_data = plot2(L,P,S)
+function tt_data = plot2(L,P,S,str)
 
 fName = L.fName;
 folder_save = L.folder_save;
@@ -356,10 +357,16 @@ f = figure;
 panel = uipanel('Parent',f,'Position',[0 0 1 1]);
 ax1 = axes('Parent',panel,'Position',[.05 .05 .4 .4]);
 ax2 = axes('Parent',panel,'Position',[.05 .55 .4 .4]);
-ax3 = axes('Parent',panel,'Position',[.55 .05 .4 .9]);
+ax3 = axes('Parent',panel,'Position',[.55 .05 .15 .9]);
+ax4 = axes('Parent',panel,'Position',[.8 .05 .15 .9]);
 %ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
 clrmenu(f);
-f.Name = strcat(fName,'-B');
+switch str
+    case 'Mean'
+        f.Name = strcat(fName,'-B-Mean');
+    case 'Median'
+        f.Name = strcat(fName,'-B-Median');
+end
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
 
@@ -399,6 +406,21 @@ for i =1:length(list_ref)
         temp = S(i,j).r_max;
         tt_data(i,j) = mean(temp,'omitnan');
         ebar_data(i,j) = std(temp,[],'omitnan');
+    end
+end
+
+ref_time = (-10:.01:10)';
+rt_data = NaN(length(list_regions),length(ref_time),length(list_ref));
+for i =1:length(list_ref)
+    for j = 1:length(list_regions)
+        temp = S(i,j).RT_pattern;
+        switch str
+            case 'Mean'
+                temp=mean(temp);
+            case 'Median'
+                temp=median(temp);
+        end
+        rt_data(j,:,i)=interp1(S(i,j).ref_time(:),temp(:),ref_time);
     end
 end
 
@@ -468,6 +490,43 @@ for i = 1:length(dots)
 end
 
 
+% Sorting rt_data
+[A,ind_max_a] = max(rt_data(:,:,1),[],2,'omitnan');
+[~,ind_sorted_a] = sort(A,'ascend');
+[B,ind_max_b] = max(rt_data(:,:,3),[],2,'omitnan');
+[~,ind_sorted_b] = sort(B,'ascend');
+
+
+% Ax3
+hold(ax3,'on');
+imagesc(rt_data(ind_sorted_a,:,1),'XData',ref_time,'Parent',ax3);
+line('XData',ref_time(ind_max_a(ind_sorted_a)),'YData',1:length(list_regions),...
+    'LineStyle','none','Marker','o','MarkerSize',3,...
+    'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
+ax3.YLim = [.5 length(list_regions)+.5];
+ax3.XLim = [ref_time(1) ref_time(end)];
+ax3.YTickLabel = list_regions(ind_sorted_a);
+ax3.YTick = 1:length(list_regions);
+ax3.CLim = [min(min(rt_data(:,:,1),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,1),[],'omitnan'),[],'omitnan')];
+colorbar(ax3,'southoutside');
+ax3.Title.String = char(list_ref(1));
+
+
+% Ax4
+hold(ax4,'on');
+imagesc(rt_data(ind_sorted_b,:,3),'XData',ref_time,'Parent',ax4);
+line('XData',ref_time(ind_max_b(ind_sorted_b)),'YData',1:length(list_regions),...
+    'LineStyle','none','Marker','o','MarkerSize',3,...
+    'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
+ax4.YLim = [.5 length(list_regions)+.5];
+ax4.XLim = [ref_time(1) ref_time(end)];
+ax4.YTickLabel = list_regions(ind_sorted_b);
+ax4.YTick = 1:length(list_regions);
+ax4.CLim = [min(min(rt_data(:,:,3),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,3),[],'omitnan'),[],'omitnan')];
+colorbar(ax4,'southoutside');
+ax4.Title.String = char(list_ref(3));
+
+
 % dummy_data = rand(length(list_ref),length(list_regions));
 % xtick_labs = list_ref;
 % leg_labs = list_regions;
@@ -497,7 +556,6 @@ end
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-%fullname = fullfile(folder_save,strcat(fName,'-A.pdf'));
 fullname = fullfile(folder_save,strcat(f.Name,'pdf'));
 saveas(f,fullname);
 
