@@ -1,7 +1,14 @@
-function movie_normalized(handles)
+function f = movie_normalized(handles,val,str_regions,str_traces)
 % Opens figure to display fUS movie and selected time variables
 % Interactive control of timing and scales
 % save_video(fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab,'CURRENT_Frames'),fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab),'test');
+
+% val indicates callback provenance (0 : batch mode - 1 : user mode)
+if nargin < 2 
+    val = 0;
+    str_regions = [];
+    str_traces = [];
+end
 
 global SEED IM DIR_SAVE DIR_FIG DIR_STATS FILES CUR_FILE START_IM END_IM;
 
@@ -9,16 +16,25 @@ global SEED IM DIR_SAVE DIR_FIG DIR_STATS FILES CUR_FILE START_IM END_IM;
 prompt={'Delay to start (s)';'Window size (s)';'Show video';'Save/Display mode (disp/frames/video)'};
 name = 'Select Movie Initialization Parameters';
 defaultans = {'0.0';'20.0';'true';'disp'};
-answer = inputdlg(prompt,name,[1 100],defaultans);
-if isempty(answer)
-    return;
+
+if val == 1
+    answer = inputdlg(prompt,name,[1 100],defaultans);
+    if isempty(answer)
+        return;
+    end
+    t_start_0 = str2double(char(answer(1)));
+    t_lfp_0 = str2double(char(answer(2)));
+    %flag_trace = char(answer(3));
+    %flag_spectro = char(answer(4));
+    flag_video = char(answer(3));
+    display_mode = char(answer(4));
+else
+    % batch mode
+    t_start_0 = 0;
+    t_lfp_0 = 10;
+    flag_video = 'true';
+    display_mode = 'video';
 end
-t_start_0 = str2double(char(answer(1)));
-t_lfp_0 = str2double(char(answer(2)));
-%flag_trace = char(answer(3));
-%flag_spectro = char(answer(4));
-flag_video = char(answer(3));
-display_mode = char(answer(4));
 
 
 % Loading Time Reference
@@ -93,8 +109,30 @@ for i=1:length(l)
 end
 
 if ~isempty(l)
-    [ind_lfp,v] = listdlg('Name','LFP Selection','PromptString','Select traces to display',...
-        'SelectionMode','multiple','ListString',str_lfp,'InitialValue',[],'ListSize',[300 500]);
+    
+    % initial values
+    str_ref = [str_traces;str_regions;'Whole'];
+    if isempty(str_ref)
+        initvalues = [];
+    else
+        initvalues = [];
+        for k=1:length(str_lfp)
+            if sum(strcmp(str_ref,str_lfp(k)))>0
+                initvalues = [initvalues;k];
+            end
+        end
+    end
+    % Selecting traces to display
+    if val == 0
+        % batch mode
+        ind_lfp = initvalues;
+        v = 1;
+    else
+        % user mode
+        [ind_lfp,v] = listdlg('Name','LFP Selection','PromptString','Select traces to display',...
+            'SelectionMode','multiple','ListString',str_lfp,'InitialValue',initvalues,'ListSize',[300 500]);      
+    end
+    
     if v==0
         warning('No trace selected .\n');
         str_lfp = [];
@@ -123,8 +161,31 @@ str_spec = {d(:).name}';
 str_spec = regexprep(str_spec,strcat(FILES(CUR_FILE).nlab,'_Wavelet_Analysis_'),'');
 % Spectrogram Selection
 if ~isempty(d)
-    [ind_spec,v] = listdlg('Name','Spectrogram Selection','PromptString','Select spectrogramms to display',...
-        'SelectionMode','multiple','ListString',str_spec,'InitialValue',[],'ListSize',[300 500]);
+    
+    % initial values (to be updated)
+    str_ref = [];
+    if isempty(str_ref)
+        initvalues = [];
+    else
+        initvalues = [];
+        for k=1:length(str_spec)
+            if sum(strcmp(str_ref,str_spec(k)))>0
+                initvalues = [initvalues;k];
+            end
+        end
+    end
+    % Selecting spectrograms to display
+    if val == 0
+        % batch mode
+        ind_spec = initvalues;
+        v = 1;
+    else
+        % user mode
+        [ind_spec,v] = listdlg('Name','Spectrogram Selection','PromptString','Select spectrogramms to display',...
+            'SelectionMode','multiple','ListString',str_spec,'InitialValue',[],'ListSize',[300 500]);
+    end
+    
+    
     if v==0
         warning('No spectrogramm selected .\n');
         str_spec = [];
@@ -249,6 +310,8 @@ f = figure('Name',sprintf('fUS-EEG Recording - %s (%s)',FILES(CUR_FILE).nlab,str
     'Colormap',handles.MainFigure.Colormap,...
     'KeyPressFcn',{@f_keypress_fcn},...
     'Toolbar','none');
+f.UserData.success = false;
+
 e0 = uicontrol(f,'Units','normalized','Style','edit','Tag','Edit0',...
     'String','','TooltipString','pause between frame (s)');
 % Time Tags
@@ -918,7 +981,9 @@ while i>=START_IM && i<=END_IM
     end
     
 end
-close(f);
+
+f.UserData.success = true;
+% close(f);
 
 end
 

@@ -153,12 +153,11 @@ ft.Units = 'normalized';
 ft.UserData.Selection = [];
 
 % Process Table
-ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
-% ind_1 = ~(contains(strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
+%ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
 D = [{'Delete Sources_LFP'};{'Delete Region Traces'};...
     {'Import Doppler film'};{'Import Reference Time'};{'Import Time Tags'};{'Import - Crop Video'};{'Import LFP Configuration'};...
     cellstr(myhandles.ProcessListPopup.String);...
-    cellstr(myhandles.FigureListPopup.String(ind_1,:));...
+    cellstr(myhandles.FigureListPopup.String);...cellstr(myhandles.FigureListPopup.String(ind_1,:))
     {'Edit Traces'};{'Edit Time Tags'};{'Edit Time Groups'};{'Edit LFP Configuration'}];
 pt = uitable('Units','normalized',...
     'Position',[0 0 1 1],...
@@ -598,6 +597,9 @@ for i = 1:length(ind_files)
                 
             case 'Export Image Patches'
                 success = export_image_patches(myhandles,fullfile(DIR_SAVE,FILES(ii).nlab),0);
+                
+            case '(Movie) Normalized Movie'
+                f2 = movie_normalized(myhandles,0,str_regions,str_traces);
                 
             case '(Figure) Global Episode Display'
                 f2 = figure_GlobalDisplay(myhandles,0,str_tag);
