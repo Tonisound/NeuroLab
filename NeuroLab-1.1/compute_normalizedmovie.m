@@ -58,8 +58,8 @@ switch normalization
         Doppler_normalized = 100*(Doppler_film-M)./M;
     case 'baseline'
         dt = load(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_images');
-        %ind_base = contains({dt.TimeTags(:).Tag}','BASELINE');
-        ind_base = contains({dt.TimeTags(:).Tag}','STABLE');
+        ind_base = contains({dt.TimeTags(:).Tag}','BASELINE');
+        %ind_base = contains({dt.TimeTags(:).Tag}','STABLE');
         if isempty(dt.TimeTags_images(ind_base))
             warning('No Tag baseline defined.\n')
             return;

@@ -6,7 +6,7 @@
 function script_Figure5(cur_list,timegroup)
 
 flag_group = true; % grouping regions (bilateral/unilateral)
-flag_norm = true; % normalizing data per recording
+flag_norm = false; % normalizing data per recording
 flag_save = false; % saving figure
 
 [D,Q,R,S,list_regions,list_lfp] = compute_script_Figure5(cur_list,timegroup,flag_group);

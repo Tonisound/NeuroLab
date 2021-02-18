@@ -2101,6 +2101,9 @@ if dir_regions==0
     return;
 end
 
+if ischar(files_regions)
+    files_regions = {files_regions};
+end
 files_regions = files_regions';
 % Building regions structure
 regions = struct('name',{},'mask',{},'patch_x',{},'patch_y',{});

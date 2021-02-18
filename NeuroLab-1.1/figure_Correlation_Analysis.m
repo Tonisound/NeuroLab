@@ -69,7 +69,7 @@ f2.UserData.success = false;
 % Parameters
 % Lag Intervals for batch mode
 f2.UserData.slider_values.lag1 = [-10;10];
-f2.UserData.slider_values.lag2 = [-25;25];
+f2.UserData.slider_values.lag2 = [-30;30];
 f2.UserData.slider_values.lag_step = 5;
 %f2.UserData.slider_values.lag2 = [-100;500];
 
@@ -1777,10 +1777,11 @@ if isempty(str_ref)
         % Including main channel
         str_ref = [{data_config.File.mainlfp};{'SPEED'};{'Power-ACC/033'}];
     else
-        str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
+            str_ref = [{'Power-theta/'};{'Power-gammalow/'};{'Power-gammamid/'};...
         {'Power-gammahigh/'};{'SPEED'};{'Power-ACC/033'}];
     end
 end
+str_ref = [{'Power-beta'}];
 
 p1 = handles.Popup1;
 bc = handles.ButtonCompute;
@@ -1791,14 +1792,14 @@ for i=1:length(ind_group)
     hObj.UserData.folder_name = char(data_tg.TimeGroups_name(ii));
     handles.Tag_table.UserData.Selection = data_tg.TimeGroups_S(ii).Selected';
     
-%     % uncomment to select matches containing str_ref
-%     ind_pu = find(contains(p1.String,str_ref)==1);
-    % uncomment to select matches exactly matching str_ref
-    indices_pu = zeros(size(p1.String,1),1);
-    for k =1:length(str_ref)
-        indices_pu = indices_pu + strcmp(p1.String,str_ref(k));
-    end
-    ind_pu = find(indices_pu>0);
+    % uncomment to select matches containing str_ref
+    ind_pu = find(contains(p1.String,str_ref)==1);
+%     % uncomment to select matches exactly matching str_ref
+%     indices_pu = zeros(size(p1.String,1),1);
+%     for k =1:length(str_ref)
+%         indices_pu = indices_pu + strcmp(p1.String,str_ref(k));
+%     end
+%     ind_pu = find(indices_pu>0);
 
     % Compute    
     for k =1:length(ind_pu)

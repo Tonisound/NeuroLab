@@ -7,15 +7,16 @@ success = false;
 str_disk_1 = fullfile('D:','DATA');
 str_disk_2 = fullfile('G:','DATA');
 str_disk_3 = fullfile(filesep,'Volumes','ETNA','DATA');
-str_disk_4 = fullfile(filesep,'Volumes','Toni_HD2','DATA_NLAB');
+str_disk_4 = fullfile(filesep,'Volumes','Toni_HD2','DATA');
 str_disk_5 = fullfile(filesep,'Users','tonio','Documents','DATA');
 
 str_save_1 = fullfile('D:','NEUROLAB');
-str_save_2 = fullfile(filesep,'Users','tonio','Documents','NEUROLAB');
+str_save_2 = fullfile(filesep,'Volumes','Toni_HD2','NEUROLAB');
+str_save_3 = fullfile(filesep,'Users','tonio','Documents','NEUROLAB');
 
 % Inputdlg to choose booting options
 prompt={sprintf('(1) %s \n(2) %s \n(3) %s \n(4) %s\n(5) %s',str_disk_1,str_disk_2,str_disk_3,str_disk_4,str_disk_5);
-    sprintf('(1) %s \n(2) %s',str_save_1,str_save_2)};
+    sprintf('(1) %s \n(2) %s \n(3) %s',str_save_1,str_save_2,str_save_3)};
 name = 'Booting options';
 defaultans = {'1';'1'};
 options.Interpreter = 'tex';
@@ -52,6 +53,8 @@ switch strtrim(char(answer(2)))
         str_save = str_save_1;
     case '2'
         str_save = str_save_2;
+    case '3'
+        str_save = str_save_3;
     otherwise
         str_save = char(answer(2));
 end

@@ -44,6 +44,9 @@ end
 % Plotting/Saving Data
 tt_data = plot1(L,P,S);
 tt_data = plot2(L,P,S,'Ymean','Mean');
+plot_atlas(L.list_regions,'Values',tt_data(4,:)',...
+    'SaveName',fullfile(folder_save,strcat('PlotAtlas-',fName,'.pdf')),...
+    'DisplayMode','bilateral','VisibleName','off','VisibleColorbar','on');
 tt_data = plot2(L,P,S,'Ydata','Mean');
 tt_data = plot2(L,P,S,'Ydata','Median');
 tt_data = plot2(L,P,S,'Ymean','Median');
@@ -498,8 +501,8 @@ f.Position = [195          59        1045         919];
 fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
 saveas(f,fullname);
 
-plot_atlas(list_regions,'Values',tt_data(4,:)',...
-    'SaveName',fullfile(folder_save,strcat('PlotAtlas-',f.Name,'.pdf')),...
-    'DisplayMode','bilateral','VisibleName','off');
+% plot_atlas(list_regions,'Values',tt_data(4,:)',...
+%     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',f.Name,'.pdf')),...
+%     'DisplayMode','bilateral','VisibleName','off');
 
 end

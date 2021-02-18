@@ -44,6 +44,10 @@ end
 
 tt_data = plot1(L,P,S,'Rmax');
 % tt_data = plot1(L,P,S,'Tmax');
+plot_atlas(L.list_regions,'Values',tt_data(1,:)',...
+    'SaveName',fullfile(folder_save,strcat('PlotAtlas-',fName,'.pdf')),...
+    'DisplayMode','bilateral','VisibleName','off','VisibleColorbar','on');
+
 tt_data = plot1(L,P,S,'Xmax');
 tt_data = plot2(L,P,S,'Mean');
 tt_data = plot2(L,P,S,'Median');
@@ -330,17 +334,13 @@ f.Position = [195          59        1045         919];
 %fullname = fullfile(folder_save,strcat(fName,'-A.pdf'));
 switch str
     case 'Rmax'
-        fullname = fullfile(folder_save,strcat(f.Name,'pdf'));
+        fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
     case 'Tmax'
         fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
     case 'Xmax'
         fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
 end
 saveas(f,fullname);
-
-% plot_atlas(list_regions,'Values',tt_data(1,:)',...
-%     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',f.Name,'.pdf')),...
-%     'DisplayMode','bilateral','VisibleName','off');
 
 end
 
@@ -556,7 +556,7 @@ ax4.Title.String = char(list_ref(3));
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
 
-fullname = fullfile(folder_save,strcat(f.Name,'pdf'));
+fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
 saveas(f,fullname);
 
 end

@@ -32,8 +32,10 @@ for i=1:length(d)
 end
 
 % Time_Reference.mat
-folder_in = 'F:\BACKUP_ToniHD2\NEUROLAB\NLab_DATA\';
-folder_out = 'C:\Users\Antoine\Desktop\Time_Reference';
+% folder_in = 'F:\BACKUP_ToniHD2\NEUROLAB\NLab_DATA\';
+% folder_out = 'C:\Users\Antoine\Desktop\Time_Reference';
+folder_in = '/Volumes/Toni_HD2/NEUROLAB/NLab_DATA';
+folder_out = '/Users/tonio/Desktop/Time_Reference';
 d = dir(folder_in);
 for i=1:length(FILES)
     %temp = regexp(d(i).folder,filesep,'split');
