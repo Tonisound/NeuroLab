@@ -922,10 +922,11 @@ while i>=START_IM && i<=END_IM
                     saveas(f,fullfile(work_dir,pic_name),GTraces.ImageSaveFormat);
                     fprintf('Saving frame %s.\n',pic_name);
                     if i == END_IM
-                        close(f);
+                        %close(f);
                         if strcmp(display_mode,'video')
                             save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).nlab,tag));
                         end
+                        f.UserData.success = true;
                         return;
                     end
                 end
@@ -966,7 +967,7 @@ while i>=START_IM && i<=END_IM
                     f.UserData.flag = 0;
                 end
             case -100
-                close(f);
+                %close(f);
                 return;
             case 10
                 i = min(i+100,END_IM);

@@ -73,7 +73,7 @@ S = struct('reference','','region','','recording','',...
     'r_abs',[],'t_abs',[],'x_abs',[],...
     'ref_time',[],'RT_pattern',[]);...    
 S(length(list_ref),length(list_regions)).r_max = [];
-ref_time = [-10:.1:10];
+ref_time = (-20:.1:20);
     
 counter = 0;
 for index = 1:length(list_files)
@@ -112,6 +112,10 @@ for index = 1:length(list_files)
             if isempty(index_region)
                 continue;
             end
+%             if sum(isnan(data_fus.RT_pattern(index_region,:)))==length(data_fus.RT_pattern(index_region,:))
+%                 continue;
+%             end
+            
             % Getting data
             S(i,j).reference = [S(i,j).reference;{cur_ref}];
             S(i,j).region = [S(i,j).region;{cur_region}];
@@ -294,7 +298,7 @@ for k=1:length(all_axes)
         case 'Tmax'
             ax.XLim = [500 2000];
         case 'Xmax'
-            ax.XLim = [-10 10];
+            ax.XLim = [-20 20];
     end
     for i=1:length(b)
         text(ax.XLim(2),b(i).XData(i),sprintf('%.2f',b(i).YData(i)),'Parent',ax);
@@ -409,7 +413,7 @@ for i =1:length(list_ref)
     end
 end
 
-ref_time = (-10:.01:10)';
+ref_time = (-20:.01:20)';
 rt_data = NaN(length(list_regions),length(ref_time),length(list_ref));
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
@@ -421,6 +425,7 @@ for i =1:length(list_ref)
                 temp=median(temp);
         end
         rt_data(j,:,i)=interp1(S(i,j).ref_time(:),temp(:),ref_time);
+        
     end
 end
 

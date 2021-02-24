@@ -44,6 +44,7 @@ index_baseline = zeros(size(Doppler_film,3),1);
 im_baseline = [];
 im_mean = [];
 im_std = [];
+str_baseline = []; 
 
 switch normalization
     case 'std'
@@ -52,16 +53,26 @@ switch normalization
         M = repmat(im_mean,1,1,size(Doppler_film,3));
         S = repmat(im_std,1,1,size(Doppler_film,3));
         Doppler_normalized = (Doppler_film-M)./S;
+        fprintf('Normalized Movie computed from %s.\n',normalization);
     case 'mean'
         im_mean = mean(Doppler_film,3,'omitnan');
         M = repmat(im_mean,1,1,size(Doppler_film,3));
         Doppler_normalized = 100*(Doppler_film-M)./M;
-    case 'baseline'
+        fprintf('Normalized Movie computed from %s.\n',normalization);
+    case {'baseline1';'baseline2';'baseline3'}
+        switch normalization
+            case 'baseline1'
+                str_baseline='BASELINE';
+            case 'baseline2'
+                str_baseline='BASELINE-QW';
+            case 'baseline3'
+                str_baseline='BASELINE-AW';       
+        end
         dt = load(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_images');
-        ind_base = contains({dt.TimeTags(:).Tag}','BASELINE');
-        %ind_base = contains({dt.TimeTags(:).Tag}','STABLE');
+        % ind_base = contains({dt.TimeTags(:).Tag}',str_baseline);
+        ind_base = strcmp({dt.TimeTags(:).Tag}',str_baseline);
         if isempty(dt.TimeTags_images(ind_base))
-            warning('No Tag baseline defined.\n')
+            warning('Cannot compute Normalized Movie: Missing baseline Tag [%s].',str_baseline);
             return;
         else
             temp = dt.TimeTags_images(ind_base,:);
@@ -74,18 +85,17 @@ switch normalization
         im_baseline = mean(Doppler_baseline,3,'omitnan');
         M = repmat(im_baseline,1,1,size(Doppler_film,3));
         Doppler_normalized = 100*(Doppler_film-M)./M;
+        fprintf('Normalized Movie computed from %s [Tag:%s].\n',normalization,str_baseline);
     otherwise
         return
 end
-fprintf('Normalized Movie computed from %s\n',normalization);
+
 
 fprintf('Saving Doppler_normalized ...');
 Doppler_film = Doppler_normalized;
 Doppler_type = 'Doppler_normalized';
-% save(fullfile(folder_name,'Doppler_normalized.mat'),'Doppler_normalized',...
-% 'normalization','im_mean','im_std','im_baseline','ind_keep','-v7.3');
 save(fullfile(folder_name,'Doppler.mat'),'Doppler_film','Doppler_type',...
-    'normalization','im_mean','im_std','im_baseline','index_baseline','-append');
+    'normalization','str_baseline','im_mean','im_std','im_baseline','index_baseline','-append');
 fprintf(' done.\n');
 fprintf('===> File Doppler.mat appended [%s].\n',fullfile(folder_name,'Doppler.mat'));
 

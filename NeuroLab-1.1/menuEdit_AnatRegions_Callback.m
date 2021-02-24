@@ -2035,38 +2035,6 @@ switch temp
                 f.UserData.IM = Doppler_film;
                 
             case 'normalized'
-%                 normalization = GImport.Doppler_normalization;
-%                 index_baseline = zeros(size(Doppler_film,3),1);
-%                 
-%                 switch normalization
-%                     case 'std'
-%                         im_mean = mean(Doppler_film,3,'omitnan');
-%                         im_std = std(Doppler_film,0,3,'omitnan');
-%                         M = repmat(im_mean,1,1,size(Doppler_film,3));
-%                         S = repmat(im_std,1,1,size(Doppler_film,3));
-%                         Doppler_normalized = (Doppler_film-M)./S;
-%                     case 'mean'
-%                         im_mean = mean(Doppler_film,3,'omitnan');
-%                         M = repmat(im_mean,1,1,size(Doppler_film,3));
-%                         Doppler_normalized = 100*(Doppler_film-M)./M;
-%                     case 'baseline'
-%                         dt = load(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_images');
-%                         ind_base = contains({dt.TimeTags(:).Tag}','BASELINE');
-%                         if isempty(dt.TimeTags_images(ind_base))
-%                             warning('No Tag baseline defined.\n')
-%                             return;
-%                         else
-%                             temp = dt.TimeTags_images(ind_base,:);
-%                             for i=1:size(temp,1)
-%                                 index_baseline(temp(i,1):temp(i,2))=1;
-%                             end
-%                         end
-%                         
-%                         Doppler_baseline = Doppler_film(:,:,index_baseline==1);
-%                         im_baseline = mean(Doppler_baseline,3,'omitnan');
-%                         M = repmat(im_baseline,1,1,size(Doppler_film,3));
-%                         Doppler_normalized = 100*(Doppler_film-M)./M;
-%                 end
                 im_mean = mean(Doppler_film,3,'omitnan');
                 M = repmat(im_mean,1,1,size(Doppler_film,3));
                 f.UserData.IM = 100*(Doppler_film-M)./M;

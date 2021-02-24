@@ -82,6 +82,7 @@ else
                     im_baseline = [];
                     im_mean = [];
                     im_std = [];
+                    str_baseline = [];
                     
                     switch normalization
                         case 'std'
@@ -94,11 +95,20 @@ else
                             im_mean = mean(Doppler_film,3,'omitnan');
                             M = repmat(im_mean,1,1,size(Doppler_film,3));
                             Doppler_normalized = 100*(Doppler_film-M)./M;
-                        case 'baseline'
+                        case {'baseline1';'baseline2';'baseline3'}
+                            switch normalization
+                                case 'baseline1'
+                                    str_baseline='BASELINE';
+                                case 'baseline2'
+                                    str_baseline='BASELINE-QW';
+                                case 'baseline3'
+                                    str_baseline='BASELINE-AW';
+                            end
                             dt = load(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_images');
-                            ind_base = contains({dt.TimeTags(:).Tag}','BASELINE');
+                            % ind_base = contains({dt.TimeTags(:).Tag}',str_baseline);
+                            ind_base = strcmp({dt.TimeTags(:).Tag}',str_baseline);
                             if isempty(dt.TimeTags_images(ind_base))
-                                warning('No Tag baseline defined.\n')
+                                warning('Cannot compute Normalized Movie: Missing baseline Tag [%s].',str_baseline);
                                 return;
                             else
                                 temp = dt.TimeTags_images(ind_base,:);

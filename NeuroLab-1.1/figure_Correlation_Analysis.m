@@ -69,8 +69,8 @@ f2.UserData.success = false;
 % Parameters
 % Lag Intervals for batch mode
 f2.UserData.slider_values.lag1 = [-10;10];
-f2.UserData.slider_values.lag2 = [-30;30];
-f2.UserData.slider_values.lag_step = 5;
+f2.UserData.slider_values.lag2 = [-50;50];
+f2.UserData.slider_values.lag_step =2;
 %f2.UserData.slider_values.lag2 = [-100;500];
 
 
@@ -1343,7 +1343,11 @@ for i = 1:length(all_axes)
         mask  = l.UserData.Mask;
         im = imagesc(255*mask,'Parent',ax);
 %         im.AlphaData = mask*abs(A0(ind_keep,i));
-        im.AlphaData = mask*abs(A0(ind_keep,index_lags(i)));
+        try
+            im.AlphaData = mask*abs(A0(ind_keep,index_lags(i)));
+        catch
+            im.AlphaData = 1;
+        end
     end
     ax.YLim = [.5 size(mask,1)+.5];
     ax.XLim = [.5 size(mask,2)+.5];
@@ -1781,7 +1785,7 @@ if isempty(str_ref)
         {'Power-gammahigh/'};{'SPEED'};{'Power-ACC/033'}];
     end
 end
-str_ref = [{'Power-beta'}];
+%str_ref = [{'Power-beta'}];
 
 p1 = handles.Popup1;
 bc = handles.ButtonCompute;
