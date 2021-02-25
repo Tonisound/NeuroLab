@@ -371,13 +371,24 @@ if ~isempty(FILES)
         'TooltipString', '.dir_ext',...
         'Parent',tab1);
     % Loading normalization
-    d1 = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'));
-    if ~isfield(d1,'normalization')
-        d1.normalization = '';
+%     d1 = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'));
+%     if ~isfield(d1,'normalization')
+%         d1.normalization = '';
+%     end
+%     if ~isfield(d1,'str_baseline')
+%         d1.str_baseline = '';
+%     end
+    d_norm = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'normalization');
+    if ~isfield(d_norm,'normalization')
+        d_norm.normalization = '';
     end
-    if ~isfield(d1,'str_baseline')
-        d1.str_baseline = '';
+    d_str = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'str_baseline');
+    if ~isfield(d_str,'str_baseline')
+        d_str.str_baseline = '';
     end
+    d1.normalization = d_norm.normalization;
+    d1.str_baseline = d_str.str_baseline;
+    
     uicontrol('Style','text',...
         'Units','characters',...
         'Position',[2 pos(4)-46 30 2],...

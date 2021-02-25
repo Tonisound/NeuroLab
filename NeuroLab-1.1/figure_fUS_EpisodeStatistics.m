@@ -1825,7 +1825,7 @@ end
 
 function savestats_Callback(~,~,handles)
 
-global FILES CUR_FILE DIR_STATS LAST_IM;
+global FILES CUR_FILE DIR_SAVE DIR_STATS LAST_IM;
 load('Preferences.mat','GTraces');
 
 TimeTag_Data = handles.Popup1.UserData.TimeTag_Data;
@@ -1891,8 +1891,19 @@ end
 % Saving Stats Whole
 filename = sprintf('%s_fUS_Statistics_WHOLE.mat',FILES(CUR_FILE).nlab);
 recording = FILES(CUR_FILE).nlab;
+d_norm = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'normalization');
+if ~isfield(d_norm,'normalization')
+    d_norm.normalization = '';
+end
+d_str = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Doppler.mat'),'str_baseline');
+if ~isfield(d_str,'str_baseline')
+    d_str.str_baseline = '';
+end
+normalization = d_norm.normalization;
+str_baseline = d_str.str_baseline;
+
 r_length = LAST_IM;
-save(fullfile(data_dir,filename),'S','recording','r_length','Tag_Selection','Tag_Name',...
+save(fullfile(data_dir,filename),'S','recording','normalization','str_baseline','r_length','Tag_Selection','Tag_Name',...
     'label_episodes','label_channels','label_ampli','all_rhos','all_bars','-v7.3');
 fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
 
