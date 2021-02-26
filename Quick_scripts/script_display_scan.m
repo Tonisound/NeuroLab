@@ -4,7 +4,7 @@ function script_display_scan(subfolder)
 
 %folder = fullfile('F:\DATA\ATLAS_NLAB\20190228_SD025_scan',subfolder);
 %folder = fullfile('F:\DATA\ATLAS_NLAB\20190307_SD025_scan',subfolder);
-folder = fullfile('D:\SCANS\20200626_SD071_scan',subfolder);
+folder = fullfile('D:\SCANS\20190307_SD025_scan',subfolder);
 
 d = dir(fullfile(folder,'*.acq'));
 load(fullfile(folder,char(d.name)),'-mat');

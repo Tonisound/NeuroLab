@@ -44,9 +44,9 @@ end
 % Plotting/Saving Data
 tt_data = plot1(L,P,S);
 tt_data = plot2(L,P,S,'Ymean','Mean');
-plot_atlas(L.list_regions,'Values',tt_data(4,:)',...
-    'SaveName',fullfile(folder_save,strcat('PlotAtlas-',fName,'.pdf')),...
-    'DisplayMode','bilateral','VisibleName','off','VisibleColorbar','on');
+% plot_atlas(L.list_regions,'Values',tt_data(4,:)',...
+%     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',fName,'.pdf')),...
+%     'DisplayMode','bilateral','VisibleName','off','VisibleColorbar','on');
 tt_data = plot2(L,P,S,'Ydata','Mean');
 tt_data = plot2(L,P,S,'Ydata','Median');
 tt_data = plot2(L,P,S,'Ymean','Median');
@@ -62,7 +62,9 @@ list_group = L.list_group;
 list_files = L.list_files;
 
 % Location of source files
-container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics';
+container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[Normalization=Mean]';
+% container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[Normalization=QW]';
+% container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[Normalization=AW]';
     
 % Buidling struct S
 S = struct('t_data',[],'x_data',[],'y_data',[],'y_mean',[],...
@@ -118,7 +120,11 @@ fprintf('Data Browsed [%d files loaded].\n',counter);
 f = figure('Visible','off');
 colormap(f,'parula');
 P.Colormap = f.Colormap;
-P.f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
+% uncomment if list_regions is not ALL
+%P.f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
+% comment if list_regions is not ALL
+ind_colors = [1,2,3,4,5,6,7,8,9,10,11,12,13,25,27,28,29,30,38,39,40,46,47,48,49,50,51,52,53,61,62,63,64];
+P.f_colors = f.Colormap(ind_colors,:);
 close(f);
 
 P.margin_w = .01;
@@ -251,7 +257,7 @@ ax_dummy.Position = [2 1 1 1];
 
 % Axis limits
 %ax.YLim = [min(tt_data(:)) max(tt_data(:))];
-ax.YLim = [-40 80];
+ax.YLim = [-60 140];
 ax.XLim = [.5 n_groups+.5];
 ax.XTick = 1:n_groups;
 ax.XTickLabel = xtick_labs;

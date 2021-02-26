@@ -43,11 +43,10 @@ else
 end
 
 tt_data = plot1(L,P,S,'Rmax');
-% tt_data = plot1(L,P,S,'Tmax');
-plot_atlas(L.list_regions,'Values',tt_data(1,:)',...
-    'SaveName',fullfile(folder_save,strcat('PlotAtlas-',fName,'.pdf')),...
-    'DisplayMode','bilateral','VisibleName','off','VisibleColorbar','on');
-
+tt_data = plot1(L,P,S,'Tmax');
+% plot_atlas(L.list_regions,'Values',tt_data(1,:)',...
+%     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',fName,'.pdf')),...
+%     'DisplayMode','bilateral','VisibleName','off','VisibleColorbar','on');
 tt_data = plot1(L,P,S,'Xmax');
 tt_data = plot2(L,P,S,'Mean');
 tt_data = plot2(L,P,S,'Median');
@@ -149,7 +148,7 @@ fprintf('Data Browsed [%d files loaded].\n',counter);
 
 % Setting Parameters
 f = figure('Visible','off');
-colormap(f,'parula');
+colormap(f,'jet');
 P.Colormap = f.Colormap;
 P.f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
 close(f);
@@ -504,7 +503,8 @@ end
 
 % Ax3
 hold(ax3,'on');
-imagesc(rt_data(ind_sorted_a,:,1),'XData',ref_time,'Parent',ax3);
+im = imagesc(rt_data(ind_sorted_a,:,1),'XData',ref_time,'Parent',ax3);
+% peak
 line('XData',ref_time(ind_max_a(ind_sorted_a)),'YData',1:length(list_regions),...
     'LineStyle','none','Marker','o','MarkerSize',3,...
     'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
@@ -515,7 +515,17 @@ ax3.YTick = 1:length(list_regions);
 ax3.CLim = [min(min(rt_data(:,:,1),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,1),[],'omitnan'),[],'omitnan')];
 colorbar(ax3,'southoutside');
 ax3.Title.String = char(list_ref(1));
-
+% half-width
+% for k =1:size(im.CData,1)
+%     [~,ind_max]=max(im.CData(k,:));
+%     line('XData',im.XData(ind_max),'YData',im.YData(k),...
+%     'LineStyle','none','Marker','o','MarkerSize',3,...
+%     'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
+%     [~,ind_min]=min(im.CData(k,:));
+%     line('XData',im.XData(ind_min),'YData',im.YData(k),...
+%     'LineStyle','none','Marker','o','MarkerSize',3,...
+%     'MarkerFaceColor','w','MarkeredgeColor','w','Parent',ax3);
+% end
 
 % Ax4
 hold(ax4,'on');
