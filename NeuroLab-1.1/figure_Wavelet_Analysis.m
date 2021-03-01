@@ -178,7 +178,7 @@ efd = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',iP,...
-    'String',.5,...
+    'String',1,...%.5
     'Tag','fdom_step',...
     'Tooltipstring','Step Frequency');
 
@@ -624,8 +624,7 @@ end
 function initialize_botPanel(handles)
 
 fmin = 1;
-% fmax = 150;
-fmax = 20;
+fmax = 150;
 bands = str2double(handles.Edit4.String);
 bot_axes = findobj(handles.BotPanel,'Type','axes');
 l = length(bot_axes);
@@ -2182,7 +2181,7 @@ load('Preferences.mat','GTraces');
 tag = char(handles.ButtonCompute.UserData.Tag_Selection(1));
 
 % Creating Save Directory
-save_dir = fullfile(DIR_FIG,'Wavelet_Analysis',FILES(CUR_FILE).nlab);
+save_dir = fullfile(DIR_FIG,'Wavelet_Analysis',FILES(CUR_FILE).nlab,tag);
 if ~isdir(save_dir)
     mkdir(save_dir);
 end
@@ -2237,7 +2236,7 @@ delta_d = params.delta_d;
 bins = params.bins;
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).nlab);
+data_dir = fullfile(DIR_STATS,'Wavelet_Analysis',FILES(CUR_FILE).nlab,tag);
 if ~isdir(data_dir)
     mkdir(data_dir);
 end
@@ -2277,12 +2276,13 @@ for i =1:length(data)
     Xdata_sub  = X_trace(1:step_sub:end);
     
     temp = regexprep(trace_name,'/','_');
-    filename = sprintf('%s_Wavelet_Analysis_%s_%s.mat',FILES(CUR_FILE).nlab,char(temp),tag);
+    filename = sprintf('%s_Wavelet_Analysis_%s.mat',FILES(CUR_FILE).nlab,char(temp));
     save(fullfile(data_dir,filename),'Fb','Fc','fdom_step','fdom_min','fdom_max','freqdom',...
         'delta_d','bins','trace_name','X_trace','X_phase','Y_trace','Y_phase',...
         'f_sub','f_samp','Tag_Selection','x_start','x_end','gamma','gamma_ascend','gamma_descend',...
         'r_low','r_mid','r_high','lags','labels',...
         'Cdata_sub','Xdata_sub','step_sub','Cdata_phase_ascend','Cdata_phase_descend','-v7.3');
+    
     fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
 end
 

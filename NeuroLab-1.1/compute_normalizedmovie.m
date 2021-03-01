@@ -45,6 +45,7 @@ im_baseline = [];
 im_mean = [];
 im_std = [];
 str_baseline = []; 
+baseline_tags = [];
 
 switch normalization
     case 'std'
@@ -62,15 +63,22 @@ switch normalization
     case {'baseline1';'baseline2';'baseline3'}
         switch normalization
             case 'baseline1'
-                str_baseline='BASELINE';
+                str_baseline=GImport.str_baseline1;
             case 'baseline2'
-                str_baseline='BASELINE-QW';
+                str_baseline=GImport.str_baseline2;
             case 'baseline3'
-                str_baseline='BASELINE-AW';       
+                str_baseline=GImport.str_baseline1;       
         end
-        dt = load(fullfile(folder_name,'Time_Tags.mat'),'TimeTags','TimeTags_images');
-        % ind_base = contains({dt.TimeTags(:).Tag}',str_baseline);
-        ind_base = strcmp({dt.TimeTags(:).Tag}',str_baseline);
+        dt = load(fullfile(folder_name,'Time_Tags.mat'));
+        if GImport.strict_baseline
+            % Strict matching
+            ind_base = strcmp({dt.TimeTags(:).Tag}',str_baseline);
+        else
+            % String contained
+            ind_base = contains({dt.TimeTags(:).Tag}',str_baseline);
+        end
+        baseline_tags = dt.TimeTags(ind_base);
+            
         if isempty(dt.TimeTags_images(ind_base))
             warning('Cannot compute Normalized Movie: Missing baseline Tag [%s].',str_baseline);
             return;
@@ -85,9 +93,12 @@ switch normalization
         im_baseline = mean(Doppler_baseline,3,'omitnan');
         M = repmat(im_baseline,1,1,size(Doppler_film,3));
         Doppler_normalized = 100*(Doppler_film-M)./M;
-        fprintf('Normalized Movie computed from %s [Tag:%s].\n',normalization,str_baseline);
+        fprintf('Normalized Movie computed from %s [%s].\n',normalization,str_baseline);
+        for j = 1:length(baseline_tags)
+            fprintf('Baseline Tag %d [%s].\n',j,char(baseline_tags(j).Tag));
+        end
     otherwise
-        return
+        return;
 end
 
 
@@ -95,7 +106,8 @@ fprintf('Saving Doppler_normalized ...');
 Doppler_film = Doppler_normalized;
 Doppler_type = 'Doppler_normalized';
 save(fullfile(folder_name,'Doppler.mat'),'Doppler_film','Doppler_type',...
-    'normalization','str_baseline','im_mean','im_std','im_baseline','index_baseline','-append');
+    'normalization','str_baseline','baseline_tags',...
+    'im_mean','im_std','im_baseline','index_baseline','-append');
 fprintf(' done.\n');
 fprintf('===> File Doppler.mat appended [%s].\n',fullfile(folder_name,'Doppler.mat'));
 
