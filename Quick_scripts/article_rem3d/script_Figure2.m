@@ -279,6 +279,25 @@ f.Position = [195          59        1045         919];
 fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
 saveas(f,fullname);
 
+% Save in txt file
+fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
+fwrite(fid,sprintf('Region \t'));
+for j =1:length(list_group)
+    fwrite(fid,sprintf('%s \t ', char(list_group(j))));
+end
+fwrite(fid,newline);
+for i =1:length(list_regions)
+    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
+    for j =1:length(list_group)
+        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
+    end
+    if i~=length(list_regions)
+        fwrite(fid,newline);
+    end
+end
+fclose(fid);
+fprintf('Data Saved in txt file [%s].\n',fullfile(folder_save,strcat(f.Name,'.txt')));
+
 end
 
 function tt_data = plot2(L,P,S,str1,str2)
@@ -510,5 +529,24 @@ saveas(f,fullname);
 % plot_atlas(list_regions,'Values',tt_data(4,:)',...
 %     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',f.Name,'.pdf')),...
 %     'DisplayMode','bilateral','VisibleName','off');
+
+% Save in txt file
+fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
+fwrite(fid,sprintf('Region \t'));
+for j =1:length(list_group)
+    fwrite(fid,sprintf('%s \t ', char(list_group(j))));
+end
+fwrite(fid,newline);
+for i =1:length(list_regions)
+    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
+    for j =1:length(list_group)
+        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
+    end
+    if i~=length(list_regions)
+        fwrite(fid,newline);
+    end
+end
+fclose(fid);
+fprintf('Data Saved in txt file [%s].\n',fullfile(folder_save,strcat(f.Name,'.txt')));
 
 end
