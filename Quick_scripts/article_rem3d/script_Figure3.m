@@ -15,7 +15,7 @@ if nargin <2
 end
 
 % Generate Lists
-L = generate_lists(rec_list,reg_group);
+L = get_lists(rec_list,reg_group);
 fName = sprintf('Fig3_%s-%s',rec_list,reg_group);
 folder_save = fullfile(pwd,'Figure3');
 if ~exist(folder_save,'dir')
