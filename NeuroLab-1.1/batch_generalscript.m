@@ -1,7 +1,7 @@
 function batch_generalscript(~,~,myhandles)
 % Batch Processing
 
-%global DIR_SAVE FILES;
+global FILES;
 %val = handles.FileSelectPopup.Value;
 %handles = myhandles;
 load('Preferences.mat','GTraces','GImport');
@@ -89,14 +89,14 @@ ot.Units = 'normalized';
 
 % File Panel
 fP = uipanel('Units','normalized',...
-    'Position',[0 h_infoPanel .25 1-h_infoPanel],...
+    'Position',[0 h_infoPanel .2 1-h_infoPanel],...
     'bordertype','etchedin',...
     'Title','Files',...
     'Tag','FilesPanel',...
     'Parent',f2);
 % Process Panel
 pP = uipanel('Units','normalized',...
-    'Position',[.25 h_infoPanel .15 1-h_infoPanel],...
+    'Position',[.2 h_infoPanel .2 1-h_infoPanel],...
     'bordertype','etchedin',...
     'Title','Processes',...
     'Tag','ProcessPanel',...
@@ -132,7 +132,8 @@ sP = uipanel('Units','normalized',...
 
 
 % Files Table
-D = cellstr(myhandles.FileSelectPopup.String);
+%D = cellstr(myhandles.FileSelectPopup.String);
+D = {FILES(:).nlab}';
 ft = uitable('Units','normalized',...
     'ColumnName','',...
     'RowName','',...
@@ -154,7 +155,7 @@ ft.UserData.Selection = [];
 
 % Process Table
 %ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
-D = [{'Delete Sources_LFP'};{'Delete Region Traces'};...
+D = [{'Clear Sources_LFP'};{'Clear Sources_fUS'};{'Delete Region Traces'};{'Delete Region Group Traces'};...
     {'Import Doppler film'};{'Import Reference Time'};{'Import Time Tags'};{'Import - Crop Video'};{'Import LFP Configuration'};...
     cellstr(myhandles.ProcessListPopup.String);...
     cellstr(myhandles.FigureListPopup.String);...cellstr(myhandles.FigureListPopup.String(ind_1,:))
@@ -490,20 +491,8 @@ for i = 1:length(ind_files)
         
         %try
         switch process_name
-            case 'Delete Sources_LFP'
-                % Housecleaning: emptying Sources_LFP/ before saving
-                %                 load('Preferences.mat','GTraces');
-                %                 save_fmt = GTraces.GraphicSaveFormat;
-                %                 success=false;
-                %                 if strcmp(save_fmt,'Graphic_objects_full.mat')
-                %                     disp('============== Housecleaning ==================');
-                %                     if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'dir')
-                %                         delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
-                %                         rmdir(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'s');
-                %                         success=true;
-                %                     end
-                %                 end
-                disp('============== Housecleaning ==================');
+            case 'Clear Sources_LFP'
+                disp('============== LFP Housecleaning ==================');
                 if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'dir')
                     delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
                     rmdir(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_LFP'),'s');
@@ -512,8 +501,23 @@ for i = 1:length(ind_files)
                     success=false;
                 end
                 
+            case 'Clear Sources_fUS'
+                disp('============== fUS Housecleaning ==================');
+                if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_fUS'),'dir')
+                    delete(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+                    delete(findobj(myhandles.RightAxes,'Tag','Trace_RegionGroup'));
+                    rmdir(fullfile(DIR_SAVE,FILES(ii).nlab,'Sources_fUS'),'s');
+                    success=true;
+                else
+                    success=false;
+                end
+                
             case 'Delete Region Traces'
                 delete(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+                success=true;
+                
+            case 'Delete Region Group Traces'
+                delete(findobj(myhandles.RightAxes,'Tag','Trace_RegionGroup'));
                 success=true;
                 
             case 'Import Doppler film'

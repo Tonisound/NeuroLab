@@ -45,7 +45,7 @@ for i=1:length(ind_export)
     Y = size(mask,1);
     z=0;
     % Writing into file
-    filename = strcat('NLab-reg_',lines_regions(ind_export(i)).UserData.Name,sprintf('_%d_%d.U8',X,Y));
+    filename = strcat('Nshop_',lines_regions(ind_export(i)).UserData.Name,sprintf('_%d_%d.U8',X,Y));
     filename_full = fullfile(SEED_REGION,file_recording,filename);
     fileID = fopen(filename_full,'w');
     fwrite(fileID,z,'uint8');

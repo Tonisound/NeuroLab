@@ -28,7 +28,6 @@ if val==1
     num_lines = 1;
     def = [{sprintf('%d',test_whole)};{sprintf('%d',test_erase)}];
     answer = inputdlg(prompt,dlg_title,num_lines,def);
-    
     if ~isempty(answer)
         test_whole=str2num(answer{1});
         test_erase=str2num(answer{2});
@@ -64,6 +63,7 @@ if exist(atlas_txt,'file')
         c1 = strtrim(cline(1));
         c2 = strtrim(cline(2));
         c2 = strrep(c2,'_','-');
+        c2 = strrep(c2,'*','');
         %c3 = strtrim(cline(3));
         region_id = [region_id;eval(char(c1))];
         atlas_name = [atlas_name;c2];
