@@ -19,7 +19,7 @@ main_sep = '\t';                                                % ledger file se
 empty_c2 = '-';                                                 % empty atlas symbol 
 empty_c3 = '-';                                                 % empty plate symbol 
 region_sep = ' ';                                               % empty plate symbol 
-case_sensitive = false;                                         % Case sensitivity 
+% case_sensitive = false;                                         % Case sensitivity 
 
 
 % Getting region directory
@@ -30,11 +30,12 @@ else
     dir_regions = fullfile(SEED_REGION,file_recording);
     files_regions = dir(fullfile(dir_regions,strcat(prefix,'*',suffix)));
     %files_regions = files_regions(arrayfun(@(x) ~strcmp(x.name(1),'.'),files_regions));
-    if case_sensitive
-        all_regions = regexprep({files_regions(:).name}',{prefix,suffix},'');
-    else
-        all_regions = lower(regexprep({files_regions(:).name}',{prefix,suffix},''));
-    end
+%     if case_sensitive
+%         all_regions = regexprep({files_regions(:).name}',{prefix,suffix},'');
+%     else
+%         all_regions = lower(regexprep({files_regions(:).name}',{prefix,suffix},''));
+%     end
+     all_regions = regexprep({files_regions(:).name}',{prefix,suffix},'');
 end
 
 % Getting Time Reference

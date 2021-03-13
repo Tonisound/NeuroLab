@@ -70,7 +70,7 @@ f2.UserData.success = false;
 % Lag Intervals for batch mode
 f2.UserData.slider_values.lag1 = [-10;10];
 f2.UserData.slider_values.lag2 = [-50;50];
-f2.UserData.slider_values.lag_step =2;
+f2.UserData.slider_values.lag_step =1;
 %f2.UserData.slider_values.lag2 = [-100;500];
 
 
@@ -1836,10 +1836,10 @@ if isempty(ind_group)
         compute_Callback(bc,[],handles,val);
         savestats_Callback([],[],handles,val);
         % uncomment to save images in batch mode
-%         if ~handles.Checkbox1.Value
-%             % Skip if needed
-%             saveimage_Callback([],[],handles,val);
-%         end
+        if ~handles.Checkbox1.Value
+            % Skip if needed
+            saveimage_Callback([],[],handles,val);
+        end
     end
     hObj.UserData = [];
 end

@@ -7,7 +7,7 @@ main_sep = '\t';                                                % ledger file se
 empty_c2 = '-';                                                 % empty atlas symbol 
 empty_c3 = '-';                                                 % empty plate symbol 
 region_sep = ' ';                                               % empty plate symbol 
-case_sensitive = false;                                         % Case sensitivity 
+% case_sensitive = false;                                         % Case sensitivity 
 
 if ~exist(ledger_txt,'file')
     errordlg(sprintf('Missing Ledger File [%s]',ledger_txt));
@@ -49,14 +49,15 @@ else
         % filenames
         filenames = cell(length(temp4),1);
         flag_filenames = zeros(length(temp4),1);
+        flag_found = false;
         for i=1:length(temp4)
-            if case_sensitive
-                index_region = find(strcmp(all_regions,char(temp4(i)))==1);
-            else
-                index_region = find(strcmpi(all_regions,char(temp4(i)))==1);
-            end
+%             if case_sensitive
+%                 index_region = find(strcmp(all_regions,char(temp4(i)))==1);
+%             else
+%                 index_region = find(strcmpi(all_regions,char(temp4(i)))==1);
+%             end
+            index_region = find(strcmp(all_regions,char(temp4(i)))==1);
             
-            flag_found = false;
             if ~isempty(index_region)
                 filenames(i) = {files_regions(index_region).name};
                 flag_filenames(i) = 1;
