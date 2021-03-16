@@ -44,7 +44,71 @@ f2.UserData.rec_mode = rec_mode;
 f2.UserData.TimeTags = TimeTags;
 f2.UserData.TimeTags_strings = TimeTags_strings;
 f2.UserData.TimeTags_cell = TimeTags_cell;
-f2.UserData.g_colors = get(groot,'DefaultAxesColorOrder');
+%f2.UserData.g_colors = get(groot,'DefaultAxesColorOrder');
+f2.UserData.g_colors = [0         0    0.5625;
+         0         0    0.6250;
+         0         0    0.6875;
+         0         0    0.7500;
+         0         0    0.8125;
+         0         0    0.8750;
+         0         0    0.9375;
+         0         0    1.0000;
+         0    0.0625    1.0000;
+         0    0.1250    1.0000;
+         0    0.1875    1.0000;
+         0    0.2500    1.0000;
+         0    0.3125    1.0000;
+         0    0.3750    1.0000;
+         0    0.4375    1.0000;
+         0    0.5000    1.0000;
+         0    0.5625    1.0000;
+         0    0.6250    1.0000;
+         0    0.6875    1.0000;
+         0    0.7500    1.0000;
+         0    0.8125    1.0000;
+         0    0.8750    1.0000;
+         0    0.9375    1.0000;
+         0    1.0000    1.0000;
+    0.0625    1.0000    0.9375;
+    0.1250    1.0000    0.8750;
+    0.1875    1.0000    0.8125;
+    0.2500    1.0000    0.7500;
+    0.3125    1.0000    0.6875;
+    0.3750    1.0000    0.6250;
+    0.4375    1.0000    0.5625;
+    0.5000    1.0000    0.5000;
+    0.5625    1.0000    0.4375;
+    0.6250    1.0000    0.3750;
+    0.6875    1.0000    0.3125;
+    0.7500    1.0000    0.2500;
+    0.8125    1.0000    0.1875;
+    0.8750    1.0000    0.1250;
+    0.9375    1.0000    0.0625;
+    1.0000    1.0000         0;
+    1.0000    0.9375         0;
+    1.0000    0.8750         0;
+    1.0000    0.8125         0;
+    1.0000    0.7500         0;
+    1.0000    0.6875         0;
+    1.0000    0.6250         0;
+    1.0000    0.5625         0;
+    1.0000    0.5000         0;
+    1.0000    0.4375         0;
+    1.0000    0.3750         0;
+    1.0000    0.3125         0;
+    1.0000    0.2500         0;
+    1.0000    0.1875         0;
+    1.0000    0.1250         0;
+    1.0000    0.0625         0;
+    1.0000         0         0;
+    0.9375         0         0;
+    0.8750         0         0;
+    0.8125         0         0;
+    0.7500         0         0;
+    0.6875         0         0;
+    0.6250         0         0;
+    0.5625         0         0;
+    0.5000         0         0;];
 f2.UserData.folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
 
 %Parameters
@@ -80,7 +144,8 @@ t1 = uicontrol('Units','normalized',...
     'Style','text',...
     'HorizontalAlignment','left',...
     'Parent',iP,...
-    'String',sprintf('File : %s\n (Source : %s) ',FILES(CUR_FILE).nlab,strtrim(myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:))),...
+    'String',sprintf('File : %s\n (Source : %s) ',FILES(CUR_FILE).nlab,...
+    strtrim(myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:))),...
     'Tag','Text1');
 
 p = uicontrol('Units','normalized',...
@@ -278,53 +343,8 @@ uitab('Parent',tabgp,...
 
 
 %Traces
-subplot(211,'Parent',tab0,'Tag','Ax_LFP');
-subplot(212,'Parent',tab0,'Tag','Ax_fUS');
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .58 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','glow','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .62 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','gmid','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .66 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','gmidup','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .7 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','ghigh','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .74 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','ghighup','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .78 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','ripple','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .82 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','theta','Value',1);
-
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .21 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','ycortex','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .25 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','yhpc','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .29 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','ythal','Value',1);
-uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
-    'TooltipString','Visibility','Position',[0 .33 .08 .04],...
-    'Callback',{@boxVisible_Callback},...
-    'Tag','BoxVisible','String','ywhole','Value',1);
+ax1 = axes('Parent',tab0,'Tag','Ax_LFP','Position',[.06 .54 .9 .435]);
+ax2 = axes('Parent',tab0,'Tag','Ax_fUS','Position',[.06 .04 .9 .435]);
 
 
 handles2 = guihandles(f2) ;
@@ -347,7 +367,7 @@ end
 
 function boxVisible_Callback(hObj,~)
 
-l = findobj(hObj.Parent,'Tag',hObj.String);
+l = findobj(hObj.Parent,'Tag',hObj.TooltipString);
 %ylim = l(1).Parent.YLim;
 if hObj.Value
     for i =1:length(l)
@@ -380,7 +400,7 @@ update_popup_Callback(pu,[],handles);
 update_cbv_traces(handles,old_handles);
 
 % BoxVisible
-boxes = findobj(handles.MainFigure,'Tag','BoxVisible');
+boxes = findobj(handles.MainFigure,'Tag','BoxVisibleCBV','-or','Tag','BoxVisibleLFP');
 for i =1:length(boxes)
     boxVisible_Callback(boxes(i),[]);
 end
@@ -423,7 +443,7 @@ checkbox1_Callback(handles.Checkbox1,[],handles);
 
 % Linking axes x
 linkaxes([handles.Ax_LFP;handles.Ax_fUS],'x');
-buttonAutoScale_Callback([],[],handles);
+%buttonAutoScale_Callback([],[],handles);
 
 end
 
@@ -464,6 +484,7 @@ x_start = handles.MainFigure.UserData.x_start;
 x_end = handles.MainFigure.UserData.x_end;
 t_gauss = str2double(handles.Edit3.String);
 ax = handles.Ax_LFP;
+tab0 = handles.MainTab;
 channel = char(pu.String(pu.Value,:));
 folder_name = handles.MainFigure.UserData.folder_name;
 time_ref = handles.MainFigure.UserData.time_ref;
@@ -472,224 +493,68 @@ time_ref = handles.MainFigure.UserData.time_ref;
 dir_traces = dir(fullfile(folder_name,'Sources_LFP','Power-*.mat'));
 dir_traces = dir_traces(contains({dir_traces(:).name}',sprintf('_%s.',channel)));
 str_traces = {dir_traces(:).name}';
-ind_glow = contains(str_traces,{'gammalow_'});
-ind_gmid = contains(str_traces,{'gammamid_'});
-ind_gmidup = contains(str_traces,{'gammamidup_'});
-ind_ghigh = contains(str_traces,{'gammahigh_'});
-ind_ghighup = contains(str_traces,{'gammahighup_'});
-ind_ripple = contains(str_traces,{'ripple_'});
-ind_theta = contains(str_traces,{'theta_'});
 
+% Building reference time
 f_samp = .1;
-if sum(ind_glow)>0
-%     x_glow = traces(ind_glow).UserData.X(:);
-%     y_glow = traces(ind_glow).UserData.Y(:);
-    data_channel = load(fullfile(dir_traces(ind_glow).folder,dir_traces(ind_glow).name));
-    x_glow = (data_channel.x_start:data_channel.f:data_channel.x_end)';
-    y_glow = data_channel.Y;
-    %Resamp
-    y_glow = interp1(x_glow,y_glow,(data_channel.x_start:f_samp:data_channel.x_end)');
-    x_glow = (data_channel.x_start:f_samp:data_channel.x_end)';
-else
-    x_glow = time_ref.Y;
-    y_glow = NaN(size(time_ref.Y));
-    %y_glow = rand(size(x_glow));
-    warning('No trace found Gamma Low [%s]',channel);
-end
-if sum(ind_gmid)>0
-%     x_gmid = traces(ind_gmid).UserData.X(:);
-%     y_gmid = traces(ind_gmid).UserData.Y(:);
-    data_channel = load(fullfile(dir_traces(ind_gmid).folder,dir_traces(ind_gmid).name));
-    x_gmid = (data_channel.x_start:data_channel.f:data_channel.x_end)';
-    y_gmid = data_channel.Y;
-    %Resamp
-    y_gmid= interp1(x_gmid,y_gmid,(data_channel.x_start:f_samp:data_channel.x_end)');
-    x_gmid= (data_channel.x_start:f_samp:data_channel.x_end)';
-else
-    x_gmid = time_ref.Y;
-    y_gmid = NaN(size(time_ref.Y));
-    % y_gmid = rand(size(x_gmid));
-    warning('No trace found Gamma Mid [%s]',channel);
-end
-if sum(ind_gmidup)>0
-%     x_gmidup = traces(ind_gmidup).UserData.X(:);
-%     y_gmidup = traces(ind_gmidup).UserData.Y(:);
-    data_channel = load(fullfile(dir_traces(ind_gmidup).folder,dir_traces(ind_gmidup).name));
-    x_gmidup = (data_channel.x_start:data_channel.f:data_channel.x_end)';
-    y_gmidup = data_channel.Y;
-    %Resamp
-    y_gmidup = interp1(x_gmidup,y_gmidup,(data_channel.x_start:f_samp:data_channel.x_end)');
-    x_gmidup = (data_channel.x_start:f_samp:data_channel.x_end)';
-else
-    x_gmidup = time_ref.Y;
-    y_gmidup = NaN(size(time_ref.Y));
-    % y_gmidup = rand(size(x_gmidup));
-    warning('No trace found Gamma Mid Up [%s]',channel);
-end
-if sum(ind_ghigh)>0
-%     x_ghigh = traces(ind_ghigh).UserData.X(:);
-%     y_ghigh = traces(ind_ghigh).UserData.Y(:);
-    data_channel = load(fullfile(dir_traces(ind_ghigh).folder,dir_traces(ind_ghigh).name));
-    x_ghigh = (data_channel.x_start:data_channel.f:data_channel.x_end)';
-    y_ghigh = data_channel.Y;
-    %Resamp
-    y_ghigh = interp1(x_ghigh,y_ghigh,(data_channel.x_start:f_samp:data_channel.x_end)');
-    x_ghigh = (data_channel.x_start:f_samp:data_channel.x_end)';
-else
-    x_ghigh = time_ref.Y;
-    y_ghigh = NaN(size(time_ref.Y));
-    % y_ghigh = rand(size(x_ghigh));
-    warning('No trace found Gamma High [%s]',channel);
-end
-if sum(ind_ghighup)>0
-%     x_ghighup = traces(ind_ghighup).UserData.X(:);
-%     y_ghighup = traces(ind_ghighup).UserData.Y(:);
-    data_channel = load(fullfile(dir_traces(ind_ghighup).folder,dir_traces(ind_ghighup).name));
-    x_ghighup = (data_channel.x_start:data_channel.f:data_channel.x_end)';
-    y_ghighup = data_channel.Y;
-    %Resamp
-    y_ghighup = interp1(x_ghighup,y_ghighup,(data_channel.x_start:f_samp:data_channel.x_end)');
-    x_ghighup = (data_channel.x_start:f_samp:data_channel.x_end)';
-else
-    x_ghighup = time_ref.Y;
-    y_ghighup = NaN(size(time_ref.Y));
-    % y_ghighup = rand(size(x_ghighup));
-    warning('No trace found Gamma High Up [%s]',channel);
-end
-if sum(ind_ripple)>0
-%     x_ripple = traces(ind_ripple).UserData.X(:);
-%     y_ripple = traces(ind_ripple).UserData.Y(:);
-    data_channel = load(fullfile(dir_traces(ind_ripple).folder,dir_traces(ind_ripple).name));
-    x_ripple = (data_channel.x_start:data_channel.f:data_channel.x_end)';
-    y_ripple = data_channel.Y;
-    %Resamp
-    y_ripple = interp1(x_ripple,y_ripple,(data_channel.x_start:f_samp:data_channel.x_end)');
-    x_ripple = (data_channel.x_start:f_samp:data_channel.x_end)';
-else
-    x_ripple = time_ref.Y;
-    y_ripple = NaN(size(time_ref.Y));
-    % y_ripple = rand(size(x_ripple));
-    warning('No trace found Ripple [%s]',channel);
-end
-if sum(ind_theta)>0
-%     x_theta = traces(ind_theta).UserData.X(:);
-%     y_theta = traces(ind_theta).UserData.Y(:);
-    data_channel = load(fullfile(dir_traces(ind_theta).folder,dir_traces(ind_theta).name));
-    x_theta = (data_channel.x_start:data_channel.f:data_channel.x_end)';
-    y_theta = data_channel.Y;
-    %Resamp
-    y_theta = interp1(x_theta,y_theta,(data_channel.x_start:f_samp:data_channel.x_end)');
-    x_theta = (data_channel.x_start:f_samp:data_channel.x_end)';
-else
-    x_theta = time_ref.Y;
-    y_theta = NaN(size(time_ref.Y));
-    %y_theta = rand(size(x_theta));
-    warning('No trace found Theta [%s]',channel);
+x_lfp = (x_start:f_samp:x_end)';
+all_patterns = {'delta_';'theta_';'beta_';'gammalow_';'gammamid_';'gammamidup_';'gammahigh_';'gammahighup_';'ripple_'};
+label_lfp = {'delta';'theta';'beta';'gamma low';'gamma-mid';'gamma-mid-up';'gamma-high';'gamma-high-up';'ripple'};
+LFP_data = NaN(length(all_patterns),length(x_lfp));
+
+for j=1:length(all_patterns)
+    ind_band = contains(str_traces,all_patterns(j));
+    if sum(ind_band)>0
+        data_channel = load(fullfile(dir_traces(ind_band).folder,dir_traces(ind_band).name));
+        x_band = (data_channel.x_start:data_channel.f:data_channel.x_end)';
+        y_band = data_channel.Y;
+        %Resamp
+        y_band = interp1(x_band,y_band,x_lfp);
+%         % Rescale
+%         y_band = rescale(y_band,0,1);
+        % Filter
+        y_band = imgaussfilt(y_band,round(2*t_gauss/f_samp));
+    else
+        y_band = NaN(size(x_lfp));
+        warning('No trace found[%s-%s]',char(all_patterns(j)),channel);
+    end
+    LFP_data(j,:) = y_band';
 end
 
-x = x_glow;
-y = y_glow;
-[~,ind_1_glow] = min((x-x_start).^2);
-[~,ind_2_glow] = min((x-x_end).^2);
-factor_glow = max(y(ind_1_glow:ind_2_glow));
-delta_glow = x_glow(2)-x_glow(1);
-y_glow = imgaussfilt(y_glow/factor_glow,round(t_gauss/delta_glow));
-
-x = x_gmid;
-y = y_gmid;
-[~,ind_1_gmid] = min((x-x_start).^2);
-[~,ind_2_gmid] = min((x-x_end).^2);
-factor_gmid = max(y(ind_1_gmid:ind_2_gmid));
-delta_gmid = x_gmid(2)-x_gmid(1);
-y_gmid = imgaussfilt(y_gmid/factor_gmid,round(t_gauss/delta_gmid));
-
-x = x_gmidup;
-y = y_gmidup;
-[~,ind_1_gmidup] = min((x-x_start).^2);
-[~,ind_2_gmidup] = min((x-x_end).^2);
-factor_gmidup = max(y(ind_1_gmidup:ind_2_gmidup));
-delta_gmidup = x_gmidup(2)-x_gmidup(1);
-y_gmidup = imgaussfilt(y_gmidup/factor_gmidup,round(t_gauss/delta_gmidup));
-
-x = x_ghigh;
-y = y_ghigh;
-[~,ind_1_ghigh] = min((x-x_start).^2);
-[~,ind_2_ghigh] = min((x-x_end).^2);
-factor_ghigh = max(y(ind_1_ghigh:ind_2_ghigh));
-delta_ghigh = x_ghigh(2)-x_ghigh(1);
-y_ghigh = imgaussfilt(y_ghigh/factor_ghigh,round(t_gauss/delta_ghigh));
-
-x = x_ghighup;
-y = y_ghighup;
-[~,ind_1_ghighup] = min((x-x_start).^2);
-[~,ind_2_ghighup] = min((x-x_end).^2);
-factor_ghighup = max(y(ind_1_ghighup:ind_2_ghighup));
-delta_ghighup = x_ghighup(2)-x_ghighup(1);
-y_ghighup = imgaussfilt(y_ghighup/factor_ghighup,round(t_gauss/delta_ghighup));
-
-x = x_ripple;
-y = y_ripple;
-[~,ind_1_ripple] = min((x-x_start).^2);
-[~,ind_2_ripple] = min((x-x_end).^2);
-factor_ripple = max(y(ind_1_ripple:ind_2_ripple));
-delta_ripple = x_ripple(2)-x_ripple(1);
-y_ripple = imgaussfilt(y_ripple/factor_ripple,round(t_gauss/delta_ripple));
-
-x = x_theta;
-y = y_theta;
-[~,ind_1_theta] = min((x-x_start).^2);
-[~,ind_2_theta] = min((x-x_end).^2);
-factor_theta = max(y(ind_1_theta:ind_2_theta));
-delta_theta = x_theta(2)-x_theta(1);
-y_theta = imgaussfilt(y_theta/factor_theta,round(t_gauss/delta_theta));
 
 % Plotting
-g_colors = handles.MainFigure.UserData.g_colors;
+ind_colors = round(rescale(1:length(label_lfp),1,64));
+g_colors = handles.MainFigure.UserData.g_colors(ind_colors,:);
+ax.UserData.Colors = g_colors;
+
 delete(ax.Children);
 hold(ax,'on');
-plot(x_glow,y_glow,'Tag','glow','LineWidth',2,'Parent',ax,'Color',g_colors(1,:));
-plot(x_gmid,y_gmid,'Tag','gmid','LineWidth',2,'Parent',ax,'Color',g_colors(2,:));
-plot(x_gmidup,y_gmidup,'Tag','gmidup','LineWidth',2,'Parent',ax,'Color',g_colors(3,:));
-plot(x_ghigh,y_ghigh,'Tag','ghigh','LineWidth',2,'Parent',ax,'Color',g_colors(4,:));
-plot(x_ghighup,y_ghighup,'Tag','ghighup','LineWidth',2,'Parent',ax,'Color',g_colors(5,:));
-plot(x_ripple,y_ripple,'Tag','ripple','LineWidth',2,'Parent',ax,'Color',g_colors(6,:));
-plot(x_theta,y_theta,'k','Tag','theta','LineWidth',.5,'Parent',ax);
+for j = 1:length(all_patterns)
+    y_band = LFP_data(j,:);
+    plot(x_lfp,y_band,'Color',g_colors(j,:),'Tag',char(label_lfp(j)),'LineWidth',1,'Parent',ax);
+end
 ax.YLabel.String = 'LFP filtered';
-label_lfp = {'gamma low';'gamma mid';'gamma mid up';'gamma high';'gamma high up';'ripple';'theta'};
 legend(ax,label_lfp,'Tag','Legend');
 hold(ax,'off');
 
-% Visible/Not vsible
-all_boxes = findobj(handles.MainTab,'Tag','BoxVisible');
+delete(findobj(tab0,'Tag','BoxVisibleLFP'));
+for i =1:length(label_lfp)
+    uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
+        'TooltipString',char(label_lfp(i)),'Position',[.98 .04*(i-1) .02 .04],...
+        'Callback',{@boxVisible_Callback},'Tag','BoxVisibleLFP','Value',1);
+end
+
+% Visible/Not visible
+all_boxes = findobj(handles.MainTab,'Tag','BoxVisibleLFP');
 for i =1:length(all_boxes)
     boxVisible_Callback(all_boxes(i),[]);
 end
 
-% Storing
-handles.MainFigure.UserData.t_gauss_lfp = t_gauss;
-handles.MainFigure.UserData.x_glow = x_glow;
-handles.MainFigure.UserData.y_glow = y_glow;
-handles.MainFigure.UserData.x_gmid = x_gmid;
-handles.MainFigure.UserData.y_gmid = y_gmid;
-handles.MainFigure.UserData.x_gmidup = x_gmidup;
-handles.MainFigure.UserData.y_gmidup = y_gmidup;
-handles.MainFigure.UserData.x_ghigh = x_ghigh;
-handles.MainFigure.UserData.y_ghigh = y_ghigh;
-handles.MainFigure.UserData.x_ghighup = x_ghighup;
-handles.MainFigure.UserData.y_ghighup = y_ghighup;
-handles.MainFigure.UserData.x_ripple = x_ripple;
-handles.MainFigure.UserData.y_ripple = y_ripple;
-handles.MainFigure.UserData.x_theta = x_theta;
-handles.MainFigure.UserData.y_theta = y_theta;
 % Storing 
-handles.MainFigure.UserData.delta_glow = delta_glow;
-handles.MainFigure.UserData.delta_gmid = delta_gmid;
-handles.MainFigure.UserData.delta_gmidup = delta_gmidup;
-handles.MainFigure.UserData.delta_ghigh = delta_ghigh;
-handles.MainFigure.UserData.delta_ghighup = delta_ghighup;
-handles.MainFigure.UserData.delta_ripple = delta_ripple;
-handles.MainFigure.UserData.delta_theta = delta_theta;
+handles.MainFigure.UserData.t_gauss_lfp = t_gauss;
+handles.MainFigure.UserData.x_lfp = x_lfp;
+handles.MainFigure.UserData.LFP_data = LFP_data;
 handles.MainFigure.UserData.label_lfp = label_lfp;
+%handles.MainFigure.UserData.all_patterns = all_patterns;
 
 end
 
@@ -697,155 +562,32 @@ function update_cbv_traces(handles,myhandles)
 
 %global LAST_IM;
 ax1 = handles.Ax_fUS;
+tab0 = handles.MainTab;
 t_gauss = str2double(handles.Edit4.String);
-x_im = [handles.MainFigure.UserData.time_ref.Y;NaN];
+x_fus = [handles.MainFigure.UserData.time_ref.Y;NaN];
 x_start = handles.MainFigure.UserData.time_ref.Y(1);
 x_end = handles.MainFigure.UserData.time_ref.Y(end);
-% label_fus = {'cortex';'hpc';'thal';'whole'};
-label_fus = {'M1';'M2';'CPu';'whole'};
+
 rec_mode = handles.MainFigure.UserData.rec_mode;
 length_burst = handles.MainFigure.UserData.length_burst;
 n_burst = handles.MainFigure.UserData.n_burst;
 
 % Loading lines
-lines = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Region','-or','Tag','Trace_RegionGroup'));
-ind_hpc = [];
-ind_thal = [];
-ind_cortex = [];
+% lines = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Region','-or','Tag','Trace_RegionGroup'));
+% lines = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+lines = flipud(findobj(myhandles.RightAxes,'Tag','Trace_RegionGroup'));
 
-for i =1:length(lines)
-    str = lower(lines(i).UserData.Name);
-    if contains(str,'m2')||contains(str,'dhpc')||contains(str,'vhpc')
-        ind_hpc = [ind_hpc;i];
-    elseif contains(str,'cpu')||contains(str,'thalamus')
-        ind_thal = [ind_thal;i];
-    elseif contains(str,'m1')||contains(str,'cortex-')
-        ind_cortex = [ind_cortex;i];
-    end
-end
-
-lines_cortex = lines(ind_cortex);
-lines_hpc = lines(ind_hpc);
-lines_thal = lines(ind_thal);
-lines_whole = findobj(myhandles.RightAxes,'Tag','Trace_Mean');
-
-if isempty(lines_cortex)
-    y_cortex = rand(size(lines_whole.YData));
-    label_fus(1)={'rand'};
-else
-    % Extracting main regions average
-    coeff = [];
-    data = [];
-    for i = 1:length(lines_cortex)
-        l = lines_cortex(i);
-        coeff = [coeff;sum(sum(l.UserData.Mask))*ones(1,length(l.YData))];
-        data = [data; l.YData];
-    end
-    coeff = coeff/sum(coeff(:,1));
-    y_cortex = sum(coeff.*data,1);
-end
-
-if isempty(lines_hpc)
-    y_hpc = rand(size(lines_whole.YData));
-    label_fus(2)={'rand'};
-else
-    coeff = [];
-    data = [];
-    for i = 1:length(lines_hpc)
-        l = lines_hpc(i);
-        coeff = [coeff;sum(sum(l.UserData.Mask))*ones(1,length(l.YData))];
-        data = [data; l.YData];
-    end
-    coeff = coeff/sum(coeff(:,1));
-    y_hpc = sum(coeff.*data,1);
-end
-
-if isempty(lines_thal)
-    y_thal = rand(size(lines_whole.YData));
-    label_fus(3)={'rand'};
-else
-    coeff = [];
-    data = [];
-    for i = 1:length(lines_thal)
-        l = lines_thal(i);
-        coeff = [coeff;sum(sum(l.UserData.Mask))*ones(1,length(l.YData))];
-        data = [data; l.YData];
-    end
-    coeff = coeff/sum(coeff(:,1));
-    y_thal = sum(coeff.*data,1);
-end
-y_whole = lines_whole.YData;
-
-% Reshaping if rec_mode = BURST
-if strcmp(rec_mode,'BURST')
-    f_samp = .1;
-    %length_burst_smooth = 1181;
-    %n_burst = LAST_IM/length_burst_smooth;
-    xq = x_start:f_samp:x_end;
-    yq = NaN(4,size(xq,2));
-    % add NaN values between bursts
-    all_y_im = [y_cortex;y_hpc;y_thal;y_whole];
-    for k=1:4
-        y_im = all_y_im(k,:);
-        for i=1:n_burst
-            % adding values to yq for each burst
-            ind_burst = (i-1)*length_burst+1:(i*length_burst);
-            xburst = x_im(ind_burst);
-            yburst = y_im(ind_burst);
-            [~,i1]=min((xq-xburst(1)).^2);
-            [~,i2]=min((xq-xburst(end)).^2);
-            y_int = interp1(xburst,yburst,xq(i1:i2));
-            yq(k,i1:i2) = y_int;
-        end
-    end
-    %renaming
-    x_im = xq;
-    handles.MainFigure.UserData.x_im = x_im;
-    y_cortex = yq(1,:);
-    y_hpc = yq(2,:);
-    y_thal = yq(3,:);
-    y_whole = yq(4,:);
-end
-
-% Gaussian Smoothing
-% delta = x_im(2)-x_im(1);
-% y_cortex = imgaussfilt(y_cortex,round(t_gauss/delta));
-% y_hpc = imgaussfilt(y_hpc,round(t_gauss/delta));
-% y_thal = imgaussfilt(y_thal,round(t_gauss/delta));
-% y_whole = imgaussfilt(y_whole,round(t_gauss/delta));
-delta = x_im(2)-x_im(1);
+% Building CBV data
+CBV_data = NaN(length(lines),length(x_fus));
+label_fus = cell(length(lines),1);
+x_fus = [handles.MainFigure.UserData.time_ref.Y;NaN];
+delta = x_fus(2)-x_fus(1);
 w = gausswin(round(2*t_gauss/delta));
 s=sum(w);
 w = w/s;
-y_cortex = s*nanconv(y_cortex,w,'same');
-y_hpc = s*nanconv(y_hpc,w,'same');
-y_thal = s*nanconv(y_thal,w,'same');
-y_whole = s*nanconv(y_whole,w,'same');
 
-% Plotting fus
-g_colors = handles.MainFigure.UserData.g_colors;
-delete(ax1.Children);
-hold(ax1,'on');
-plot(x_im,y_cortex,'Tag','ycortex','LineWidth',2,'Parent',ax1,'Color',g_colors(1,:))
-plot(x_im,y_hpc,'Tag','yhpc','LineWidth',2,'Parent',ax1,'Color',g_colors(2,:))
-plot(x_im,y_thal,'Tag','ythal','LineWidth',2,'Parent',ax1,'Color',g_colors(3,:))
-plot(x_im,y_whole,'k','Tag','ywhole','LineWidth',.5,'Parent',ax1);
-ax1.YLabel.String = 'CBV traces';
-legend(ax1,label_fus,'Tag','Legend');
-hold(ax1,'off');
-
-% Visible/Not vsible
-all_boxes = findobj(handles.MainTab,'Tag','BoxVisible');
-for i =1:length(all_boxes)
-    boxVisible_Callback(all_boxes(i),[]);
-end
-
-% Storing CBV data
-CBV_data = NaN(length(lines),length(x_im));
-label_channels = cell(length(lines),1);
-x_im = [handles.MainFigure.UserData.time_ref.Y;NaN];
 for i =1:length(lines)
-    label_channels(i) = {lines(i).UserData.Name};
+    label_fus(i) = {lines(i).UserData.Name};
     y = lines(i).YData;
     
     % Reshaping if rec_mode = BURST
@@ -856,7 +598,7 @@ for i =1:length(lines)
         for ii=1:n_burst
             % adding values to yq for each burst
             ind_burst = (ii-1)*length_burst+1:(ii*length_burst);
-            xburst = x_im(ind_burst);
+            xburst = x_fus(ind_burst);
             yburst = y(ind_burst);
             [~,i1]=min((xq-xburst(1)).^2);
             [~,i2]=min((xq-xburst(end)).^2);
@@ -865,31 +607,49 @@ for i =1:length(lines)
         end
         y = yq;
     end
-    
+    % gaussian filtering
     %y = imgaussfilt(y,round(t_gauss/delta));
-    w = gausswin(round(2*t_gauss/delta));
-    s = sum(w);
-    w = w/s;
     y_conv = s*nanconv(y,w,'same');
     CBV_data(i,:) = y_conv;
-    
 end
 
 %renaming
 if strcmp(rec_mode,'BURST')
-    x_im = xq;
+    x_fus = xq;
+end
+
+
+% Plotting fus
+% g_colors = handles.MainFigure.UserData.g_colors;
+ind_colors = round(rescale(1:length(label_fus),1,64));
+g_colors = handles.MainFigure.Colormap(ind_colors,:);
+ax1.UserData.Colors = g_colors;
+delete(ax1.Children);
+hold(ax1,'on');
+for i =1:length(label_fus)
+    plot(x_fus,CBV_data(i,:),'Tag',char(label_fus(i)),'LineWidth',1,'Parent',ax1,'Color',g_colors(i,:));
+end
+ax1.YLabel.String = 'CBV traces';
+legend(ax1,label_fus,'Tag','Legend');
+hold(ax1,'off');
+
+% Visible/Not visible
+delete(findobj(tab0,'Tag','BoxVisibleCBV'));
+for i =1:length(label_fus)
+    uicontrol('Units','normalized','Style','checkbox','Parent',tab0,...
+        'TooltipString',char(label_fus(i)),'Position',[0 .04*(i-1) .02 .04],...
+        'Callback',{@boxVisible_Callback},'Tag','BoxVisibleCBV','Value',1);
+end
+all_boxes = findobj(tab0,'Tag','BoxVisibleCBV');
+for i =1:length(all_boxes)
+    boxVisible_Callback(all_boxes(i),[]);
 end
 
 % Storing 
 handles.MainFigure.UserData.t_gauss_cbv = t_gauss;
-handles.MainFigure.UserData.x_im = x_im;
-handles.MainFigure.UserData.y_cortex = y_cortex;
-handles.MainFigure.UserData.y_hpc = y_hpc;
-handles.MainFigure.UserData.y_thal = y_thal;
-handles.MainFigure.UserData.y_whole = y_whole;
+handles.MainFigure.UserData.x_fus = x_fus;
 handles.MainFigure.UserData.label_fus = label_fus;
 handles.MainFigure.UserData.CBV_data = CBV_data;
-handles.MainFigure.UserData.label_channels = label_channels;
 
 end
 
@@ -956,59 +716,16 @@ handles.MainFigure.UserData.Tag_Selection = Tag_Selection;
 handles.MainFigure.UserData.channel = strcat('LFP_',channel);
 
 % Loading 
-x_glow = handles.MainFigure.UserData.x_glow;
-y_glow = handles.MainFigure.UserData.y_glow;
-x_gmid = handles.MainFigure.UserData.x_gmid;
-y_gmid = handles.MainFigure.UserData.y_gmid;
-x_gmidup = handles.MainFigure.UserData.x_gmidup;
-y_gmidup = handles.MainFigure.UserData.y_gmidup;
-x_ghigh = handles.MainFigure.UserData.x_ghigh;
-y_ghigh = handles.MainFigure.UserData.y_ghigh;
-x_ghighup = handles.MainFigure.UserData.x_ghighup;
-y_ghighup = handles.MainFigure.UserData.y_ghighup;
-x_ripple = handles.MainFigure.UserData.x_ripple;
-y_ripple = handles.MainFigure.UserData.y_ripple;
-x_theta = handles.MainFigure.UserData.x_theta;
-y_theta = handles.MainFigure.UserData.y_theta;
+x_lfp = handles.MainFigure.UserData.x_lfp;
+LFP_data = handles.MainFigure.UserData.LFP_data;
+label_lfp = handles.MainFigure.UserData.label_lfp;
 % Loading 
-x_im = handles.MainFigure.UserData.x_im;
-y_cortex = handles.MainFigure.UserData.y_cortex;
-y_thal = handles.MainFigure.UserData.y_thal;
-y_hpc = handles.MainFigure.UserData.y_hpc;
-y_whole = handles.MainFigure.UserData.y_whole;
+x_fus = handles.MainFigure.UserData.x_fus;
 CBV_data = handles.MainFigure.UserData.CBV_data;
-
-% Extracting indices
-[~,ind_1_glow] = min((x_glow-x_start).^2);
-[~,ind_2_glow] = min((x_glow-x_end).^2);
-[~,ind_1_gmid] = min((x_gmid-x_start).^2);
-[~,ind_2_gmid] = min((x_gmid-x_end).^2);
-[~,ind_1_gmidup] = min((x_gmidup-x_start).^2);
-[~,ind_2_gmidup] = min((x_gmidup-x_end).^2);
-[~,ind_1_ghigh] = min((x_ghigh-x_start).^2);
-[~,ind_2_ghigh] = min((x_ghigh-x_end).^2);
-[~,ind_1_ghighup] = min((x_ghighup-x_start).^2);
-[~,ind_2_ghighup] = min((x_ghighup-x_end).^2);
-[~,ind_1_ripple] = min((x_ripple-x_start).^2);
-[~,ind_2_ripple] = min((x_ripple-x_end).^2);
-[~,ind_1_theta] = min((x_theta-x_start).^2);
-[~,ind_2_theta] = min((x_theta-x_end).^2);
-
-% Keeping only relevant traces
-x_glow = x_glow(ind_1_glow:ind_2_glow);
-x_gmid = x_gmid(ind_1_gmid:ind_2_gmid);
-x_gmidup = x_gmidup(ind_1_gmidup:ind_2_gmidup);
-x_ghigh = x_ghigh(ind_1_ghigh:ind_2_ghigh);
-x_ghighup = x_ghighup(ind_1_ghighup:ind_2_ghighup);
-x_ripple = x_ripple(ind_1_ripple:ind_2_ripple);
-x_theta = x_theta(ind_1_theta:ind_2_theta);
-y_glow = y_glow(ind_1_glow:ind_2_glow);
-y_gmid = y_gmid(ind_1_gmid:ind_2_gmid);
-y_gmidup = y_gmidup(ind_1_gmidup:ind_2_gmidup);
-y_ghigh = y_ghigh(ind_1_ghigh:ind_2_ghigh);
-y_ghighup = y_ghighup(ind_1_ghighup:ind_2_ghighup);
-y_ripple = y_ripple(ind_1_ripple:ind_2_ripple);
-y_theta = y_theta(ind_1_theta:ind_2_theta);
+label_fus = handles.MainFigure.UserData.label_fus;
+% Colors
+g_colors = handles.Ax_LFP.UserData.Colors;
+f_colors = handles.Ax_fUS.UserData.Colors;
 
 % Clear secondary panels
 all_tabs = [handles.FirstTab;handles.SecondTab;handles.ThirdTab];
@@ -1023,49 +740,22 @@ end
 
 % Building S_fus
 S_fus = struct('x',[],'y',[],'name',[]);
-S_fus(1).x = x_im(:);
-S_fus(1).y = y_cortex(:);
-% S_fus(1).name = 'cortex';
-S_fus(1).name = 'M1';
-S_fus(2).x = x_im(:);
-S_fus(2).y = y_hpc(:);
-%S_fus(2).name = 'hpc';
-S_fus(2).name = 'M2';
-S_fus(3).x = x_im(:);
-S_fus(3).y = y_thal(:);
-%S_fus(3).name = 'thal';
-S_fus(3).name = 'CPu';
-S_fus(4).x = x_im(:);
-S_fus(4).y = y_whole(:);
-S_fus(4).name = 'whole';
-
+for i = 1:length(label_fus)
+    S_fus(i).x = x_fus(:);
+    S_fus(i).y = CBV_data(i,:);
+    S_fus(i).name = char(label_fus(i));
+end
 
 % Building S_lfp
 S_lfp = struct('x',[],'y',[],'name',[]);
-S_lfp(1).x = x_glow;
-S_lfp(1).y = y_glow;
-S_lfp(1).name = 'gamma-low';
-S_lfp(2).x = x_gmid;
-S_lfp(2).y = y_gmid;
-S_lfp(2).name = 'gamma-mid';
-S_lfp(3).x = x_gmidup;
-S_lfp(3).y = y_gmidup;
-S_lfp(3).name = 'gamma-midup';
-S_lfp(4).x = x_ghigh;
-S_lfp(4).y = y_ghigh;
-S_lfp(4).name = 'gamma-high';
-S_lfp(5).x = x_ghighup;
-S_lfp(5).y = y_ghighup;
-S_lfp(5).name = 'gamma-highup';
-S_lfp(6).x = x_ripple;
-S_lfp(6).y = y_ripple;
-S_lfp(6).name = 'ripple';
-S_lfp(7).x = x_theta;
-S_lfp(7).y = y_theta;
-S_lfp(7).name = 'theta';
+for i = 1:length(label_lfp)
+    S_lfp(i).x = x_lfp(:);
+    S_lfp(i).y = LFP_data(i,:);
+    S_lfp(i).name = char(label_lfp(i));
+end
 
 
-% Compute Raster & timing y
+% Compute cross-correlations
 fprintf('Computing cross-correlations lfp-fus ...');
 
 thresh_inf = str2double(handles.Edit7.String);
@@ -1185,7 +875,7 @@ for j =1:length(S_fus)
         if j==length(S_fus) && i==length(S_lfp)
             ax = findobj(handles.SecondTab,'Tag',sprintf('Ax%d',i));
             l = flipud(findobj(ax,'Type','line','-not','Tag','Hbar','-not','Tag','Peak'));
-            ax = findobj(handles.SecondTab,'Tag',sprintf('Ax%d',i+1));
+            ax = findobj(handles.SecondTab,'Tag',sprintf('Ax%d',i));
             set(ax,'XTick','','YTick','','XTickLabel','','YTickLabel','');
             for k =1:length(l)
                 copyobj(l(k),ax);
@@ -1196,7 +886,7 @@ for j =1:length(S_fus)
             
             ax = findobj(handles.ThirdTab,'Tag',sprintf('Ax%d',j));
             l = flipud(findobj(ax,'Type','line','-not','Tag','Hbar','-not','Tag','Peak'));
-            ax = findobj(handles.ThirdTab,'Tag',sprintf('Ax%d',j+1));
+            ax = findobj(handles.ThirdTab,'Tag',sprintf('Ax%d',j));
             set(ax,'XTick','','YTick','','XTickLabel','','YTickLabel','');
             for k =1:length(l)
                 copyobj(l(k),ax);
@@ -1248,69 +938,16 @@ function buttonAutoScale_Callback(~,~,handles)
 ax = handles.Ax_LFP;
 x_start = ax.XLim(1);
 x_end = ax.XLim(2);
-glow = findobj(handles.MainFigure,'Tag','glow');
-gmid = findobj(handles.MainFigure,'Tag','gmid');
-gmidup = findobj(handles.MainFigure,'Tag','gmidup');
-ghigh = findobj(handles.MainFigure,'Tag','ghigh');
-ghighup = findobj(handles.MainFigure,'Tag','ghighup');
-ripple = findobj(handles.MainFigure,'Tag','ripple');
-theta = findobj(handles.MainFigure,'Tag','theta');
-
-x = glow.XData;
-y = glow.YData;
-[~,ind_1] = min((x-x_start).^2);
-[~,ind_2] = min((x-x_end).^2);
-factor = max(y(ind_1:ind_2));
-glow.YData = glow.YData/factor;
-handles.MainFigure.UserData.y_glow = handles.MainFigure.UserData.y_glow/factor;
-
-x = gmid.XData;
-y = gmid.YData;
-[~,ind_1] = min((x-x_start).^2);
-[~,ind_2] = min((x-x_end).^2);
-factor = max(y(ind_1:ind_2));
-gmid.YData = gmid.YData/factor;
-handles.MainFigure.UserData.y_gmid = handles.MainFigure.UserData.y_gmid/factor;
-
-x = gmidup.XData;
-y = gmidup.YData;
-[~,ind_1] = min((x-x_start).^2);
-[~,ind_2] = min((x-x_end).^2);
-factor = max(y(ind_1:ind_2));
-gmidup.YData = gmidup.YData/factor;
-handles.MainFigure.UserData.y_gmidup = handles.MainFigure.UserData.y_gmidup/factor;
-
-x = ghigh.XData;
-y = ghigh.YData;
-[~,ind_1] = min((x-x_start).^2);
-[~,ind_2] = min((x-x_end).^2);
-factor = max(y(ind_1:ind_2));
-ghigh.YData = ghigh.YData/factor;
-handles.MainFigure.UserData.y_ghigh = handles.MainFigure.UserData.y_ghigh/factor;
-
-x = ghighup.XData;
-y = ghighup.YData;
-[~,ind_1] = min((x-x_start).^2);
-[~,ind_2] = min((x-x_end).^2);
-factor = max(y(ind_1:ind_2));
-ghighup.YData = ghighup.YData/factor;
-handles.MainFigure.UserData.y_ghighup = handles.MainFigure.UserData.y_ghighup/factor;
-
-x = ripple.XData;
-y = ripple.YData;
-[~,ind_1] = min((x-x_start).^2);
-[~,ind_2] = min((x-x_end).^2);
-factor = max(y(ind_1:ind_2));
-ripple.YData = ripple.YData/factor;
-handles.MainFigure.UserData.y_ripple = handles.MainFigure.UserData.y_ripple/factor;
-
-x = theta.XData;
-y = theta.YData;
-[~,ind_1] = min((x-x_start).^2);
-[~,ind_2] = min((x-x_end).^2);
-factor = max(y(ind_1:ind_2));
-theta.YData = theta.YData/factor;
-handles.MainFigure.UserData.y_theta = handles.MainFigure.UserData.y_theta/factor;
+label_lfp = handles.MainFigure.UserData.label_lfp;
+for i =1:length(label_lfp)
+    l=findobj(handles.MainFigure,'Tag',char(label_lfp(i)));
+    x = l.XData;
+    y = l.YData;
+    [~,ind_1] = min((x-x_start).^2);
+    [~,ind_2] = min((x-x_end).^2);
+    factor = max(y(ind_1:ind_2));
+    l.YData = l.YData/factor;
+end
 
 end
 
@@ -1323,7 +960,7 @@ load('Preferences.mat','GTraces');
 tag = char(handles.MainFigure.UserData.Tag_Selection(1));
 channel = handles.MainFigure.UserData.channel;
 % Creating Save Directory
-save_dir = fullfile(DIR_FIG,'Cross_Correlation',FILES(CUR_FILE).recording);
+save_dir = fullfile(DIR_FIG,'Cross_Correlation',FILES(CUR_FILE).recording,tag);
 if ~isdir(save_dir)
     mkdir(save_dir);
 end
@@ -1331,22 +968,22 @@ end
 % Saving Image
 cur_tab = handles.TabGroup.SelectedTab;
 handles.TabGroup.SelectedTab = handles.MainTab;
-pic_name = sprintf('%s_Cross_Correlation_traces_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Cross_Correlation_traces_%s%s',FILES(CUR_FILE).recording,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.FirstTab;
-pic_name = sprintf('%s_Cross_Correlation_Full_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Cross_Correlation_Full_%s%s',FILES(CUR_FILE).recording,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.SecondTab;
-pic_name = sprintf('%s_Cross_Correlation_LFP-Synthesis_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Cross_Correlation_LFP-Synthesis_%s%s',FILES(CUR_FILE).recording,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = handles.ThirdTab;
-pic_name = sprintf('%s_Cross_Correlation_fUS-Synthesis_%s_%s%s',FILES(CUR_FILE).recording,tag,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Cross_Correlation_fUS-Synthesis_%s%s',FILES(CUR_FILE).recording,channel,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
@@ -1380,13 +1017,13 @@ S_fus = handles.MainFigure.UserData.S_fus;
 
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'Cross_Correlation',FILES(CUR_FILE).recording);
+data_dir = fullfile(DIR_STATS,'Cross_Correlation',FILES(CUR_FILE).recording,tag);
 if ~isdir(data_dir)
     mkdir(data_dir);
 end
 
 % Saving data
-filename = sprintf('%s_Cross_Correlation_%s_%s.mat',FILES(CUR_FILE).recording,channel,tag);
+filename = sprintf('%s_Cross_Correlation_%s.mat',FILES(CUR_FILE).recording,channel);
 save(fullfile(data_dir,filename),'recording','tag','channel','label_lfp','label_fus','Tag_Selection',...
     'thresh_inf','thresh_sup','thresh_step','t_gauss_lfp','t_gauss_cbv',...
     'S_lfp','S_fus','R_peak','T_peak','X_corr','-v7.3');
@@ -1443,8 +1080,9 @@ end
 
 function initialize_panels(handles,x,y)
 
-%x = 4
-%y = 5
+margin_w = .05;
+margin_h = .05;
+
 tab1 = handles.FirstTab;
 tab2 = handles.SecondTab;
 tab3 = handles.ThirdTab;
@@ -1455,30 +1093,57 @@ end
 
 %Cross-correlations
 ax_1 = gobjects(x,y);
-for ind = 1:x*y
-    i = ceil(ind/y);
-    j = mod(ind-1,y)+1;
-    ax_1(i,j) = subplot(x,y,ind,'Parent',tab1,'Tag',sprintf('Ax%d-%d',i,j));
-    ax_1(i,j).Title.String = sprintf('Ax%d-%d',i,j);
-    ax_1(i,j).YLim = [0 .1];
+n_rows = x;
+n_columns = y;
+for ii = 1:n_rows
+    for jj = 1:n_columns
+        index = (ii-1)*n_columns+jj;
+        xx = mod(index-1,n_columns)/n_columns;
+        yy = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+        ax_1(ii,jj) = axes('Parent',tab1);
+        ax_1(ii,jj).Position= [xx+margin_w yy+margin_h/2 (1/n_columns)-margin_w (1/n_rows)-1.5*margin_h];
+        ax_1(ii,jj).Title.String = sprintf('Ax%d-%d',ii,jj);
+        ax_1(ii,jj).Tag = sprintf('Ax%d-%d',ii,jj);
+        ax_1(ii,jj).YLim = [0 .1];
+    end
 end
 
 %Band Synthesis 
 ax_2 = gobjects(y);
-for ind = 1:y+1
-    %i = ceil(ind/y);
-    %j = mod(ind-1,y)+1;
-    ax_2(ind) = subplot(2,ceil(y/2),ind,'Parent',tab2,'Tag',sprintf('Ax%d',ind));
-    ax_2(ind).Title.String = sprintf('Ax%d',ind);
+n_rows = ceil(sqrt(y));
+n_columns = ceil(y/n_rows);
+for ii = 1:n_rows
+    for jj = 1:n_columns
+        index = (ii-1)*n_columns+jj;
+        if index>y
+            continue;
+        end
+        xx = mod(index-1,n_columns)/n_columns;
+        yy = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+        ax_2(index) = axes('Parent',tab2);
+        ax_2(index).Position= [xx+margin_w yy+margin_h/2 (1/n_columns)-margin_w (1/n_rows)-1.5*margin_h];
+        ax_2(index).Tag= sprintf('Ax%d',index);
+        ax_2(index).Title.String= sprintf('Ax%d',index);
+    end
 end
 
 %Band Synthesis 
 ax_3 = gobjects(x);
-for ind = 1:x+1
-    %i = ceil(ind/y);
-    %j = mod(ind-1,y)+1;
-    ax_3(ind) = subplot(2,ceil((x+1)/2),ind,'Parent',tab3,'Tag',sprintf('Ax%d',ind));
-    ax_3(ind).Title.String = sprintf('Ax%d',ind);
+n_rows = ceil(sqrt(x));
+n_columns = ceil(x/n_rows);
+for ii = 1:n_rows
+    for jj = 1:n_columns
+        index = (ii-1)*n_columns+jj;
+        if index>x
+            continue;
+        end
+        xx = mod(index-1,n_columns)/n_columns;
+        yy = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
+        ax_3(index) = axes('Parent',tab3);
+        ax_3(index).Position= [xx+margin_w yy+margin_h/2 (1/n_columns)-margin_w (1/n_rows)-1.5*margin_h];
+        ax_3(index).Tag= sprintf('Ax%d',index);
+        ax_3(index).Title.String= sprintf('Ax%d',index);
+    end
 end
 
 end
