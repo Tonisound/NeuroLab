@@ -42,14 +42,12 @@ else
 end
 
 % Plotting/Saving Data
+only_txt = true;
 tt_data = plot1(L,P,S);
-tt_data = plot2(L,P,S,'Ymean','Mean');
-% plot_atlas(L.list_regions,'Values',tt_data(4,:)',...
-%     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',fName,'.pdf')),...
-%     'DisplayMode','bilateral','VisibleName','off','VisibleColorbar','on');
-tt_data = plot2(L,P,S,'Ydata','Mean');
-tt_data = plot2(L,P,S,'Ydata','Median');
-tt_data = plot2(L,P,S,'Ymean','Median');
+tt_data = plot2(L,P,S,'Ymean','Mean',only_txt);
+tt_data = plot2(L,P,S,'Ydata','Mean',only_txt);
+tt_data = plot2(L,P,S,'Ydata','Median',only_txt);
+tt_data = plot2(L,P,S,'Ymean','Median',only_txt);
 
 end
 
@@ -151,7 +149,6 @@ fName = L.fName;
 folder_save = L.folder_save;
 list_regions = L.list_regions;
 list_group = L.list_group;
-%list_files = L.list_files;
 
 % Drawing results
 f = figure;
@@ -281,13 +278,12 @@ saveas(f,fullname);
 
 end
 
-function tt_data = plot2(L,P,S,str1,str2)
+function tt_data = plot2(L,P,S,str1,str2,only_txt)
 
 fName = L.fName;
 folder_save = L.folder_save;
 list_regions = L.list_regions;
 list_group = L.list_group;
-%list_files = L.list_files;
 
 % Drawing results
 f = figure;
@@ -379,6 +375,30 @@ for i =1:length(list_group)
         n_recordings(i,j)=sum(~isnan(S(i,j).y_mean));
         ebar_data(i,j) = std(temp,[],'omitnan')./sqrt(n_samples(i,j));
     end
+end
+
+% Save in txt file
+fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
+fwrite(fid,sprintf('Region \t'));
+for j =1:length(list_group)
+    fwrite(fid,sprintf('%s \t ', char(list_group(j))));
+end
+fwrite(fid,newline);
+for i =1:length(list_regions)
+    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
+    for j =1:length(list_group)
+        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
+    end
+    if i~=length(list_regions)
+        fwrite(fid,newline);
+    end
+end
+fclose(fid);
+fprintf('Data Saved in txt file [%s].\n',fullfile(folder_save,strcat(f.Name,'.txt')));
+
+% Early Break
+if only_txt == true
+    warning('Early Break: Text File saved only.');
 end
 
 % Box Plot
@@ -506,28 +526,5 @@ f.Position = [195          59        1045         919];
 
 fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
 saveas(f,fullname);
-
-% plot_atlas(list_regions,'Values',tt_data(4,:)',...
-%     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',f.Name,'.pdf')),...
-%     'DisplayMode','bilateral','VisibleName','off');
-
-% Save in txt file
-fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
-fwrite(fid,sprintf('Region \t'));
-for j =1:length(list_group)
-    fwrite(fid,sprintf('%s \t ', char(list_group(j))));
-end
-fwrite(fid,newline);
-for i =1:length(list_regions)
-    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
-    for j =1:length(list_group)
-        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
-    end
-    if i~=length(list_regions)
-        fwrite(fid,newline);
-    end
-end
-fclose(fid);
-fprintf('Data Saved in txt file [%s].\n',fullfile(folder_save,strcat(f.Name,'.txt')));
 
 end

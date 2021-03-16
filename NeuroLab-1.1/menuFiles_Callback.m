@@ -15,8 +15,8 @@ global FILES CUR_FILE;
 files_temp = FILES;
 
 % Display Parameters
-W = 160;
-H = 60;
+W = 120;
+H = 40;
 ftsize = 10;
 panelColor = get(0,'DefaultUicontrolBackgroundColor');
 backColor = [.75 .75 .75];

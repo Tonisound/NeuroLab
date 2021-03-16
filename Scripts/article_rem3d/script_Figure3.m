@@ -23,7 +23,10 @@ if ~exist(folder_save,'dir')
 end
 
 % list of time groups
-list_ref = {'Ref-Index-REM';'Ref-Index-REM-PHASIC';'Ref-Index-REM-PHASIC-2'};
+list_ref = {'Ref-Index-REM';'Ref-Index-REM-PHASIC';'Ref-Index-REM-PHASIC-2';...
+    'Ref-Index-QW';'Ref-Index-AW';'Ref-Index-NREM';...
+    'Ref-Index-WAKE';'Ref-Index-SLEEP';'Ref-Index-REM-TONIC';...
+    };
 
 % Storing
 L.list_ref = list_ref;
@@ -48,9 +51,6 @@ tt_data = plot1(L,P,S,'Xmax');
 tt_data = plot2(L,P,S,'Mean');
 tt_data = plot2(L,P,S,'Median');
 
-% plot_atlas(L.list_regions,'Values',tt_data(1,:)',...
-%     'SaveName',fullfile(folder_save,strcat('PlotAtlas-',fName,'.pdf')),...
-%     'DisplayMode','bilateral','VisibleName','off','VisibleColorbar','on');
 end
 
 function [S,P] = browse_data(L)
@@ -471,10 +471,13 @@ for i =1:length(list_ref)
     end
 end
 
-% Finding QW AW REM 
-index_rem = find(strcmp(list_ref,'Ref-Index-REM')==1);
-index_remphasic = find(strcmp(list_ref,'Ref-Index-REM-PHASIC')==1);
-index_remphasic2 = find(strcmp(list_ref,'Ref-Index-REM-PHASIC-2')==1);
+% Finding patterns 
+pattern1 = 'Ref-Index-REM';
+pattern2 = 'Ref-Index-REM-PHASIC';
+pattern3 = 'Ref-Index-REM-PHASIC2';
+index_pattern1 = find(strcmp(list_ref,pattern1)==1);
+index_pattern2 = find(strcmp(list_ref,pattern2)==1);
+index_pattern3 = find(strcmp(list_ref,pattern3)==1);
 
 % Bar Plot
 n_groups = length(list_ref);
@@ -485,24 +488,24 @@ n_bars = length(list_regions);
 hold(ax1,'on');
 for i=1:length(list_regions)
     %bar color
-    line('XData',tt_data(index_rem,i),'YData',tt_data(index_remphasic,i),...
+    line('XData',tt_data(index_pattern1,i),'YData',tt_data(index_pattern2,i),...
         'LineStyle','none','Marker','+','MarkerSize',15,'LineWidth',1,...
         'MarkerFaceColor',f_colors(i,:),'MarkerEdgeColor',f_colors(i,:),'Parent',ax1);
     % dots
-    line('XData',dots_data(:,i,index_rem),'YData',dots_data(:,i,index_remphasic),...
+    line('XData',dots_data(:,i,index_pattern1),'YData',dots_data(:,i,index_pattern2),...
         'LineStyle','none','Marker','.','MarkerSize',5,'Tag','dots',...
         'MarkerFaceColor',f_colors(i,:),'MarkeredgeColor',f_colors(i,:),'Parent',ax1);
     % text
-    text(tt_data(index_rem,i)+.05,tt_data(index_remphasic,i)-.05,char(list_regions(i)),...
+    text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern2,i)-.05,char(list_regions(i)),...
         'Color',f_colors(i,:),'Parent',ax1);
 end
 % Axis limits
 line('XData',[-1 1],'YData',[-1 1],'Color',[.5 .5 .5],'Parent',ax1);
 ax1.XLim = [0 1];
 ax1.YLim = [0 1];
-ax1.XLabel.String = list_ref(index_rem);
-ax1.YLabel.String = list_ref(index_remphasic);
-ax1.Title.String = 'REM vs REM-PHASIC';
+ax1.XLabel.String = list_ref(index_pattern1);
+ax1.YLabel.String = list_ref(index_pattern2);
+ax1.Title.String = sprintf('%s vs %s',char(list_ref(index_pattern1)),char(list_ref(index_pattern2)));
 grid(ax1,'on');
 
 
@@ -510,24 +513,24 @@ grid(ax1,'on');
 hold(ax2,'on');
 for i=1:length(list_regions)
     %bar color
-    line('XData',tt_data(index_rem,i),'YData',tt_data(index_remphasic2,i),...
+    line('XData',tt_data(index_pattern1,i),'YData',tt_data(index_pattern3,i),...
         'LineStyle','none','Marker','+','MarkerSize',15,'LineWidth',1,...
         'MarkerFaceColor',f_colors(i,:),'MarkerEdgeColor',f_colors(i,:),'Parent',ax2);
     % dots
-    line('XData',dots_data(:,i,index_rem),'YData',dots_data(:,i,index_remphasic2),...
+    line('XData',dots_data(:,i,index_pattern1),'YData',dots_data(:,i,index_pattern3),...
         'LineStyle','none','Marker','.','MarkerSize',5,'Tag','dots',...
         'MarkerFaceColor',f_colors(i,:),'MarkeredgeColor',f_colors(i,:),'Parent',ax2);
     % text
-    text(tt_data(index_rem,i)+.05,tt_data(index_remphasic2,i)-.05,char(list_regions(i)),...
+    text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern3,i)-.05,char(list_regions(i)),...
         'Color',f_colors(i,:),'Parent',ax2);
 end
 % Axis limits
 line('XData',[-1 1],'YData',[-1 1],'Color',[.5 .5 .5],'Parent',ax2);
 ax2.XLim = [0 1];
 ax2.YLim = [0 1];
-ax2.XLabel.String = list_ref(index_rem);
-ax2.YLabel.String = list_ref(index_remphasic2);
-ax2.Title.String = 'REM vs REM-PHASIC-2';
+ax2.XLabel.String = list_ref(index_pattern1);
+ax2.YLabel.String = list_ref(index_pattern3);
+ax2.Title.String = sprintf('%s vs %s',char(list_ref(index_pattern1)),char(list_ref(index_pattern3)));
 grid(ax2,'on');
 
 dots_visibility = 'off';
