@@ -23,10 +23,9 @@ if ~exist(folder_save,'dir')
 end
 
 % list of time groups
-list_ref = {'Ref-Index-REM';'Ref-Index-REM-PHASIC';'Ref-Index-REM-PHASIC-2';...
-    'Ref-Index-QW';'Ref-Index-AW';'Ref-Index-NREM';...
-    'Ref-Index-WAKE';'Ref-Index-SLEEP';'Ref-Index-REM-TONIC';...
-    };
+list_ref = {'Ref-Index-REM';'Ref-Index-REM-PHASIC';'Ref-Index-REM-PHASIC-2'};
+% list_ref = {'Ref-Index-QW';'Ref-Index-AW';'Ref-Index-NREM'};
+% list_ref = {'Ref-Index-WAKE';'Ref-Index-SLEEP';'Ref-Index-REM-TONIC'};
 
 % Storing
 L.list_ref = list_ref;
@@ -45,9 +44,9 @@ else
     [S,P] = browse_data(L);
 end
 
-tt_data = plot1(L,P,S,'Rmax');
-tt_data = plot1(L,P,S,'Tmax');
-tt_data = plot1(L,P,S,'Xmax');
+% tt_data = plot1(L,P,S,'Rmax');
+% tt_data = plot1(L,P,S,'Tmax');
+% tt_data = plot1(L,P,S,'Xmax');
 tt_data = plot2(L,P,S,'Mean');
 tt_data = plot2(L,P,S,'Median');
 
@@ -64,16 +63,16 @@ list_files = L.list_files;
 container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Correlation';
 time_group = 'CURRENT';
 list_files=strrep(list_files,'R_nlab','R');
-    
+
 % Buidling struct S
 S = struct('reference','','region','','recording','',...
     'r_max',[],'t_max',[],'x_max',[],...
     'r_min',[],'t_min',[],'x_min',[],...
     'r_abs',[],'t_abs',[],'x_abs',[],...
-    'ref_time',[],'RT_pattern',[]);...    
-S(length(list_ref),length(list_regions)).r_max = [];
+    'ref_time',[],'RT_pattern',[]);...
+    S(length(list_ref),length(list_regions)).r_max = [];
 ref_time = (-20:.1:20);
-    
+
 counter = 0;
 for index = 1:length(list_files)
     
@@ -93,15 +92,15 @@ for index = 1:length(list_files)
         data_fus = load(fullfile(d.folder,d.name));
         fprintf('fUS Correlation loaded [File: %s, Ref: %s]\n',cur_file,cur_ref);
         counter = counter +1;
-    
-        % Collecting fUS data  
+        
+        % Collecting fUS data
         % removing ref-index if needed
         if length(data_fus.labels)>size(data_fus.RT_pattern,1)
             ind_rm=find(strcmp(data_fus.labels,strrep(cur_ref,'Ref-',''))==1);
             data_fus.labels(ind_rm)=[];
         end
         
-        for j=1:length(list_regions) 
+        for j=1:length(list_regions)
             cur_region = char(list_regions(j));
             index_region = find(strcmp(data_fus.labels,cur_region)==1);
             if length(index_region)>1
@@ -111,9 +110,9 @@ for index = 1:length(list_files)
             if isempty(index_region)
                 continue;
             end
-%             if sum(isnan(data_fus.RT_pattern(index_region,:)))==length(data_fus.RT_pattern(index_region,:))
-%                 continue;
-%             end
+            %             if sum(isnan(data_fus.RT_pattern(index_region,:)))==length(data_fus.RT_pattern(index_region,:))
+            %                 continue;
+            %             end
             
             % Getting data
             S(i,j).reference = [S(i,j).reference;{cur_ref}];
@@ -255,7 +254,7 @@ end
 dots_data = NaN(m,length(list_regions),length(list_ref));
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
-        %temp = S(i,j).r_max;    
+        %temp = S(i,j).r_max;
         switch str
             case 'Rmax'
                 temp = S(i,j).r_max;
@@ -263,7 +262,7 @@ for i =1:length(list_ref)
                 temp = S(i,j).t_max;
             case 'Xmax'
                 temp = S(i,j).x_max;
-        end 
+        end
         dots_data(1:length(temp),j,i) = temp;
     end
 end
@@ -301,7 +300,7 @@ for k=1:length(all_axes)
     [~,ind_sorted] = sort(tt_data(k,:),'ascend');
     %ind_sorted = 1:size(tt_data,2);
     ebar_data_sorted = ebar_data(:,ind_sorted);
-
+    
     b = barh(diag(tt_data(k,ind_sorted)),'stacked','Parent',ax);
     for i=1:length(b)
         %bar color
@@ -328,7 +327,7 @@ for k=1:length(all_axes)
         case 'Rmax'
             ax.XLim = [-.5 1];
         case 'Tmax'
-            ax.XLim = [500 2000];
+            ax.XLim = [500 4000];
         case 'Xmax'
             ax.XLim = [-20 20];
     end
@@ -341,7 +340,7 @@ end
 % dummy_data = rand(length(list_ref),length(list_regions));
 % xtick_labs = list_ref;
 % leg_labs = list_regions;
-% 
+%
 % % Dummy axes for legend
 % b = bar(dummy_data,'Parent',ax_dummy);
 % for i=1:length(b)
@@ -354,7 +353,7 @@ end
 % end
 % leg = legend(ax_dummy,leg_labs,'Visible','on');
 % ax_dummy.Position = [2 1 1 1];
-% 
+%
 % % Legend Position
 % panel = leg.Parent;
 % panel.Units = 'characters';
@@ -385,15 +384,17 @@ function tt_data = plot2(L,P,S,str)
 fName = L.fName;
 folder_save = L.folder_save;
 list_regions = L.list_regions;
+label_regions = L.label_regions;
 list_ref = L.list_ref;
 %list_files = L.list_files;
 
 % Drawing results
 f = figure;
 panel = uipanel('Parent',f,'Position',[0 0 1 1]);
-ax1 = axes('Parent',panel,'Position',[.05 .05 .4 .4]);
-ax2 = axes('Parent',panel,'Position',[.05 .55 .4 .4]);
-ax3 = axes('Parent',panel,'Position',[.55 .05 .15 .9]);
+ax1 = axes('Parent',panel,'Position',[.05 .1 .25 .3]);
+ax2 = axes('Parent',panel,'Position',[.05 .6 .25 .3]);
+ax3 = axes('Parent',panel,'Position',[.4 .05 .15 .9]);
+ax3b = axes('Parent',panel,'Position',[.6 .05 .15 .9]);
 ax4 = axes('Parent',panel,'Position',[.8 .05 .15 .9]);
 %ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
 clrmenu(f);
@@ -430,7 +431,7 @@ end
 dots_data = NaN(m,length(list_regions),length(list_ref));
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
-        temp = S(i,j).r_max;     
+        temp = S(i,j).r_max;
         dots_data(1:length(temp),j,i) = temp;
     end
 end
@@ -439,7 +440,7 @@ std_data = NaN(length(list_regions),length(list_ref));
 sem_data = NaN(length(list_regions),length(list_ref));
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
-        temp = S(i,j).x_max;     
+        temp = S(i,j).x_max;
         dots_data2(1:length(temp),j,i) = temp;
         std_data(j,i) = std(temp);
         sem_data(j,i) = std(temp)/sqrt(length(temp));
@@ -467,14 +468,20 @@ for i =1:length(list_ref)
             case 'Median'
                 temp=median(temp);
         end
-        rt_data(j,:,i)=interp1(S(i,j).ref_time(:),temp(:),ref_time); 
+        try
+            rt_data(j,:,i)=interp1(S(i,j).ref_time(:),temp(:),ref_time);
+        catch
+        end
     end
 end
 
-% Finding patterns 
-pattern1 = 'Ref-Index-REM';
-pattern2 = 'Ref-Index-REM-PHASIC';
-pattern3 = 'Ref-Index-REM-PHASIC2';
+% Finding patterns
+pattern1 = char(list_ref(1));
+pattern2 = char(list_ref(2));
+pattern3 = char(list_ref(3));
+% pattern1 = 'Ref-Index-REM';
+% pattern2 = 'Ref-Index-REM-PHASIC';
+% pattern3 = 'Ref-Index-REM-PHASIC-2';
 index_pattern1 = find(strcmp(list_ref,pattern1)==1);
 index_pattern2 = find(strcmp(list_ref,pattern2)==1);
 index_pattern3 = find(strcmp(list_ref,pattern3)==1);
@@ -496,7 +503,7 @@ for i=1:length(list_regions)
         'LineStyle','none','Marker','.','MarkerSize',5,'Tag','dots',...
         'MarkerFaceColor',f_colors(i,:),'MarkeredgeColor',f_colors(i,:),'Parent',ax1);
     % text
-    text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern2,i)-.05,char(list_regions(i)),...
+    text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern2,i)-.05,char(label_regions(i)),...
         'Color',f_colors(i,:),'Parent',ax1);
 end
 % Axis limits
@@ -521,8 +528,12 @@ for i=1:length(list_regions)
         'LineStyle','none','Marker','.','MarkerSize',5,'Tag','dots',...
         'MarkerFaceColor',f_colors(i,:),'MarkeredgeColor',f_colors(i,:),'Parent',ax2);
     % text
-    text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern3,i)-.05,char(list_regions(i)),...
-        'Color',f_colors(i,:),'Parent',ax2);
+    try
+        text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern3,i)-.05,char(label_regions(i)),...
+            'Color',f_colors(i,:),'Parent',ax2);
+    catch
+        %tt_data
+    end
 end
 % Axis limits
 line('XData',[-1 1],'YData',[-1 1],'Color',[.5 .5 .5],'Parent',ax2);
@@ -543,11 +554,13 @@ end
 % Sorting rt_data
 [A,ind_max_a] = max(rt_data(:,:,1),[],2,'omitnan');
 [~,ind_sorted_a] = sort(A,'ascend');
-[B,ind_max_b] = max(rt_data(:,:,3),[],2,'omitnan');
+[B,ind_max_b] = max(rt_data(:,:,2),[],2,'omitnan');
 [~,ind_sorted_b] = sort(B,'ascend');
-% % manual sorted
-ind_sorted_a=fliplr([3 2 1 4 6 5 8 13 10 9 7 11 12 14 16 15 17 18 21 20 19 27 25 24 22 28 23 26 29 31 30 32 33]);
-ind_sorted_b=fliplr([2 3 4 1 6 5 8 13 9 10 7 11 12 14 16 15 17 18 21 20 19 27 25 24 22 26 23 28 29 30 32 31 33]);
+[C,ind_max_c] = max(rt_data(:,:,3),[],2,'omitnan');
+[~,ind_sorted_c] = sort(C,'ascend');
+% % % manual sorted
+% ind_sorted_a=fliplr([3 2 1 4 6 5 8 13 10 9 7 11 12 14 16 15 17 18 21 20 19 27 25 24 22 28 23 26 29 31 30 32 33]);
+% ind_sorted_c=fliplr([2 3 4 1 6 5 8 13 9 10 7 11 12 14 16 15 17 18 21 20 19 27 25 24 22 26 23 28 29 30 32 31 33]);
 
 
 % Ax3
@@ -559,7 +572,8 @@ im = imagesc(rt_data(ind_sorted_a,:,1),'XData',ref_time,'Parent',ax3);
 %     'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
 ax3.YLim = [.5 length(list_regions)+.5];
 ax3.XLim = [ref_time(1) ref_time(end)];
-ax3.YTickLabel = list_regions(ind_sorted_a);
+% ax3.YTickLabel = list_regions(ind_sorted_a);
+ax3.YTickLabel = label_regions(ind_sorted_a);
 ax3.YTick = 1:length(list_regions);
 ax3.CLim = [min(min(rt_data(:,:,1),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,1),[],'omitnan'),[],'omitnan')];
 colorbar(ax3,'southoutside');
@@ -568,23 +582,50 @@ ax3.Title.String = char(list_ref(1));
 for k =1:size(im.CData,1)
     [~,ind_max]=max(im.CData(k,:));
     line('XData',im.XData(ind_max),'YData',k,...
-    'LineStyle','none','Marker','o','MarkerSize',2,...
-    'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
+        'LineStyle','none','Marker','o','MarkerSize',2,...
+        'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
     line('XData',[im.XData(ind_max)-std_data(ind_sorted_a(k),1) im.XData(ind_max)+std_data(ind_sorted_a(k),1)],'YData',[k k],...
-    'LineStyle','-','Marker','none','MarkerSize',2,...
-    'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
+        'LineStyle','-','Marker','none','MarkerSize',2,...
+        'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
+end
+
+% Ax3b
+hold(ax3b,'on');
+im = imagesc(rt_data(ind_sorted_b,:,2),'XData',ref_time,'Parent',ax3b);
+% peak
+% line('XData',ref_time(ind_max_b(ind_sorted_b)),'YData',1:length(list_regions),...
+%     'LineStyle','none','Marker','o','MarkerSize',3,...
+%     'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
+ax3b.YLim = [.5 length(list_regions)+.5];
+ax3b.XLim = [ref_time(1) ref_time(end)];
+% ax3b.YTickLabel = list_regions(ind_sorted_b);
+ax3b.YTickLabel = label_regions(ind_sorted_b);
+ax3b.YTick = 1:length(list_regions);
+ax3b.CLim = [min(min(rt_data(:,:,2),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,2),[],'omitnan'),[],'omitnan')];
+colorbar(ax3b,'southoutside');
+ax3b.Title.String = char(list_ref(2));
+% half-width
+for k =1:size(im.CData,1)
+    [~,ind_max]=max(im.CData(k,:));
+    line('XData',im.XData(ind_max),'YData',k,...
+        'LineStyle','none','Marker','o','MarkerSize',2,...
+        'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3b);
+    line('XData',[im.XData(ind_max)-std_data(ind_sorted_b(k),1) im.XData(ind_max)+std_data(ind_sorted_b(k),1)],'YData',[k k],...
+        'LineStyle','-','Marker','none','MarkerSize',2,...
+        'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3b);
 end
 
 % Ax4
 hold(ax4,'on');
-im = imagesc(rt_data(ind_sorted_b,:,3),'XData',ref_time,'Parent',ax4);
+im = imagesc(rt_data(ind_sorted_c,:,3),'XData',ref_time,'Parent',ax4);
 % peak
-% line('XData',ref_time(ind_max_b(ind_sorted_b)),'YData',1:length(list_regions),...
+% line('XData',ref_time(ind_max_b(ind_sorted_c)),'YData',1:length(list_regions),...
 %     'LineStyle','none','Marker','o','MarkerSize',3,...
 %     'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
 ax4.YLim = [.5 length(list_regions)+.5];
 ax4.XLim = [ref_time(1) ref_time(end)];
-ax4.YTickLabel = list_regions(ind_sorted_b);
+ax4.YTickLabel = label_regions(ind_sorted_c);
+% ax4.YTickLabel = list_regions(ind_sorted_c);
 ax4.YTick = 1:length(list_regions);
 ax4.CLim = [min(min(rt_data(:,:,3),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,3),[],'omitnan'),[],'omitnan')];
 colorbar(ax4,'southoutside');
@@ -593,18 +634,18 @@ ax4.Title.String = char(list_ref(3));
 for k =1:size(im.CData,1)
     [~,ind_max]=max(im.CData(k,:));
     line('XData',im.XData(ind_max),'YData',k,...
-    'LineStyle','none','Marker','o','MarkerSize',2,...
-    'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
-    line('XData',[im.XData(ind_max)-std_data(ind_sorted_b(k),3) im.XData(ind_max)+std_data(ind_sorted_b(k),3)],'YData',[k k],...
-    'LineStyle','-','Marker','none','MarkerSize',2,...
-    'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
+        'LineStyle','none','Marker','o','MarkerSize',2,...
+        'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
+    line('XData',[im.XData(ind_max)-std_data(ind_sorted_c(k),3) im.XData(ind_max)+std_data(ind_sorted_c(k),3)],'YData',[k k],...
+        'LineStyle','-','Marker','none','MarkerSize',2,...
+        'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
 end
 
 
 % dummy_data = rand(length(list_ref),length(list_regions));
 % xtick_labs = list_ref;
 % leg_labs = list_regions;
-% 
+%
 % % Dummy axes for legend
 % b = bar(dummy_data,'Parent',ax_dummy);
 % for i=1:length(b)
@@ -617,7 +658,7 @@ end
 % end
 % leg = legend(ax_dummy,leg_labs,'Visible','on');
 % ax_dummy.Position = [2 1 1 1];
-% 
+%
 % % Legend Position
 % panel = leg.Parent;
 % panel.Units = 'characters';
@@ -628,7 +669,7 @@ end
 % leg.Units = 'normalized';
 
 f.Units = 'pixels';
-f.Position = [195          59        1045         919];
+f.Position = [195          59        1245         919];
 
 fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
 saveas(f,fullname);

@@ -17,7 +17,7 @@ d = dir('packages*');
 for i = 1:length(d)
     addpath(genpath(char(d(i).name)));
 end
-addpath(genpath('Quick_scripts'));
+addpath(genpath('Scripts'));
 
 
 % Initializing Preferences.mat if Preferences file is missing

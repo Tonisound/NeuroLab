@@ -110,7 +110,7 @@ function traces = generate_traces_data(ax)
     % Saving lines name
     % Lines Array
     m = findobj(ax,'Tag','Trace_Mean');
-    l1 = flipud(findobj(ax,'Tag','Trace_Region','-or','Tag','RegionGroup'));
+    l1 = flipud(findobj(ax,'Tag','Trace_Region','-or','Tag','Trace_RegionGroup'));
     l2 = flipud(findobj(ax,'Tag','Trace_Pixel'));
     l3 = flipud(findobj(ax,'Tag','Trace_Box'));
     l = [l1;l2;l3];

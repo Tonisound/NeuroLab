@@ -103,28 +103,35 @@ pP = uipanel('Units','normalized',...
     'Parent',f2);
 % Time Groups Panel
 gP = uipanel('Units','normalized',...
-    'Position',[.4 h_infoPanel .15 1-h_infoPanel],...
+    'Position',[.4 h_infoPanel .12 1-h_infoPanel],...
     'bordertype','etchedin',...
     'Title','Time Groups',...
     'Tag','GroupPanel',...
     'Parent',f2);
 % Time Tags Panel
 tP = uipanel('Units','normalized',...
-    'Position',[.55 h_infoPanel .15 1-h_infoPanel],...
+    'Position',[.52 h_infoPanel .12 1-h_infoPanel],...
     'bordertype','etchedin',...
     'Title','Time Tags',...
     'Tag','TimePanel',...
     'Parent',f2);
+% Trace Region Group Panel
+rgP = uipanel('Units','normalized',...
+    'Position',[.64 h_infoPanel .12 1-h_infoPanel],...
+    'bordertype','etchedin',...
+    'Title','Region Groups',...
+    'Tag','RegionGroupPanel',...
+    'Parent',f2);
 % Trace Region Panel
 rP = uipanel('Units','normalized',...
-    'Position',[.7 h_infoPanel .15 1-h_infoPanel],...
+    'Position',[.76 h_infoPanel .12 1-h_infoPanel],...
     'bordertype','etchedin',...
     'Title','Regions',...
     'Tag','RegionPanel',...
     'Parent',f2);
 % Traces Spiko Panel
 sP = uipanel('Units','normalized',...
-    'Position',[.85 h_infoPanel .15 1-h_infoPanel],...
+    'Position',[.88 h_infoPanel .12 1-h_infoPanel],...
     'bordertype','etchedin',...
     'Title','Traces',...
     'Tag','SpikoPanel',...
@@ -187,7 +194,7 @@ gt = uitable('Units','normalized',...
     'ColumnName','',...
     'Data','',...
     'RowName','',...
-    'Tag','Group_table',...
+    'Tag','TimeGroup_table',...
     'CellSelectionCallback',@template_uitable_select,...
     'RowStriping','on',...
     'Parent',gP);
@@ -215,6 +222,25 @@ tt.Units = 'pixels';
 tt.ColumnWidth ={tt.Position(3)-6*w_margin};
 tt.Units = 'normalized';
 tt.UserData.Selection = [];
+
+% Region group Table
+rgt = uitable('Units','normalized',...
+    'Position',[0 0 1 1],...
+    'ColumnFormat',{'char'},...
+    'ColumnWidth',{w_col},...
+    'ColumnEditable',false,...
+    'ColumnName','',...
+    'Data',[],...
+    'RowName','',...
+    'Tag','RegionGroup_table',...
+    'CellSelectionCallback',@template_uitable_select,...
+    'RowStriping','on',...
+    'Parent',rgP);
+% Adjust Columns
+rgt.Units = 'pixels';
+rgt.ColumnWidth ={rgt.Position(3)-w_margin};
+rgt.Units = 'normalized';
+rgt.UserData.Selection = [];
 
 % Region Table
 rt = uitable('Units','normalized',...
@@ -270,13 +296,15 @@ if ~isempty(evnt.Indices)
     hObj.UserData.Selection = unique(evnt.Indices(:,1));
 else
     hObj.UserData.Selection = [];
-    handles.Group_table.UserData.Selection = [];
+    handles.TimeGroup_table.UserData.Selection = [];
     handles.Tag_table.UserData.Selection = [];
     handles.Region_table.UserData.Selection = [];
+    handles.RegionGroup_table.UserData.Selection = [];
     handles.Spiko_table.UserData.Selection = [];
-    handles.Group_table.Data = [];
+    handles.TimeGroup_table.Data = [];
     handles.Tag_table.Data = [];
     handles.Region_table.Data = [];
+    handles.RegionGroup_table.Data = [];
     handles.Spiko_table.Data = [];
     return;
 end
@@ -293,9 +321,9 @@ end
 
 if ~isempty(str_group)
     str_group = unique(str_group);
-    handles.Group_table.Data = cellstr(str_group);
+    handles.TimeGroup_table.Data = cellstr(str_group);
 end
-handles.Group_table.UserData.Selection = [];
+handles.TimeGroup_table.UserData.Selection = [];
 
 % Loading all Time Tags
 str_tag = [];
@@ -320,6 +348,7 @@ function update_popup1_Callback(hObj,~,handles)
 global DIR_SAVE FILES;
 str = strtrim(hObj.String(hObj.Value,:));
 rt = handles.Region_table;
+rgt = handles.RegionGroup_table;
 st = handles.Spiko_table;
 ft = handles.File_table;
 
@@ -330,6 +359,7 @@ end
 % Loading all Regions
 % Loading all Spiko
 str_regions = [];
+str_group_regions = [];
 str_spiko = [];
 for i =1:length(ft.UserData.Selection)%size(FILES,2)
     ii = ft.UserData.Selection(i);
@@ -339,16 +369,20 @@ for i =1:length(ft.UserData.Selection)%size(FILES,2)
             if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_light.mat'),'file')
                 data = load(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_light.mat'),'traces');
                 ind_regions = strcmp(data.traces(:,2),'Trace_Region');
+                ind_group_regions = strcmp(data.traces(:,2),'Trace_RegionGroup');
                 ind_spiko = strcmp(data.traces(:,2),'Trace_Cerep');
                 str_regions = [str_regions;data.traces(ind_regions,1)];
+                str_group_regions = [str_group_regions;data.traces(ind_group_regions,1)];
                 str_spiko = [str_spiko;data.traces(ind_spiko,1)];
             end
         case 'Graphic_objects_full.mat'
             if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_light.mat'),'file')
                 data = load(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_light.mat'),'traces');
                 ind_regions = strcmp(data.traces(:,2),'Trace_Region');
+                ind_group_regions = strcmp(data.traces(:,2),'Trace_RegionGroup');
                 ind_spiko = strcmp(data.traces(:,2),'Trace_Cerep');
                 str_regions = [str_regions;data.traces(ind_regions,1)];
+                str_group_regions = [str_group_regions;data.traces(ind_group_regions,1)];
                 str_spiko = [str_spiko;data.traces(ind_spiko,1)];
             end
             if exist(fullfile(DIR_SAVE,FILES(ii).nlab,'Trace_LFP.mat'),'file')
@@ -361,6 +395,7 @@ for i =1:length(ft.UserData.Selection)%size(FILES,2)
     end
 end
 
+% sorting
 str_regions_unique = unique(str_regions);
 occurences= zeros(size(str_regions_unique));
 for i =1:size(occurences,1)
@@ -368,6 +403,14 @@ for i =1:size(occurences,1)
 end
 [~,ind_sorted]=sort(occurences,'descend');
 str_regions = str_regions_unique(ind_sorted);
+% sorting
+str_group_regions_unique = unique(str_group_regions);
+occurences= zeros(size(str_group_regions_unique));
+for i =1:size(occurences,1)
+    occurences(i) = sum(strcmp(str_group_regions,str_group_regions_unique(i)));
+end
+[~,ind_sorted]=sort(occurences,'descend');
+str_group_regions = str_group_regions_unique(ind_sorted);
 str_spiko = unique(str_spiko);
 
 w_margin = 20;
@@ -377,6 +420,13 @@ rt.Units = 'pixels';
 rt.ColumnWidth ={rt.Position(3)-w_margin};
 rt.Units = 'normalized';
 rt.UserData.Selection = [];
+
+rgt.Data = str_group_regions;
+% Adjust Columns
+rgt.Units = 'pixels';
+rgt.ColumnWidth ={rgt.Position(3)-w_margin};
+rgt.Units = 'normalized';
+rgt.UserData.Selection = [];
 
 st.Data = str_spiko;
 % Adjust Columns
@@ -392,7 +442,7 @@ function reset_Callback(~,~,handles)
 handles.Output_table.Data = [];
 %handles.File_table.UserData.Selection = [];
 %handles.Process_table.UserData.Selection = [];
-%handles.Group_table.UserData.Selection = [];
+%handles.TimeGroup_table.UserData.Selection = [];
 %handles.Tag_table.UserData.Selection = [];
 
 end
@@ -442,7 +492,7 @@ save('Preferences.mat','GTraces','GImport','-append');
 ot = handles.Output_table;
 ind_files = handles.File_table.UserData.Selection;
 ind_processes = handles.Process_table.UserData.Selection;
-ind_group = handles.Group_table.UserData.Selection;
+ind_group = handles.TimeGroup_table.UserData.Selection;
 ind_tag = handles.Tag_table.UserData.Selection;
 
 if isempty(ind_files)
@@ -453,7 +503,7 @@ end
 %     ot.Data = {'No Process Selected'};
 %     return;
 % end
-str_group = handles.Group_table.Data(ind_group,:);
+str_group = handles.TimeGroup_table.Data(ind_group,:);
 str_tag = handles.Tag_table.Data(ind_tag,:);
 str_processes = handles.Process_table.Data;
 
@@ -461,6 +511,10 @@ str_processes = handles.Process_table.Data;
 str_regions = [];
 if ~isempty(handles.Region_table.UserData)
     str_regions = handles.Region_table.Data(handles.Region_table.UserData.Selection,1);
+end
+str_group_regions = [];
+if ~isempty(handles.RegionGroup_table.UserData)
+    str_group_regions = handles.RegionGroup_table.Data(handles.RegionGroup_table.UserData.Selection,1);
 end
 str_traces = [];
 if ~isempty(handles.Spiko_table.UserData)

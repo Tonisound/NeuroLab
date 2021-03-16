@@ -42,7 +42,7 @@ else
 end
 
 % Plotting/Saving Data
-only_txt = true;
+only_txt = false;
 tt_data = plot1(L,P,S);
 tt_data = plot2(L,P,S,'Ymean','Mean',only_txt);
 tt_data = plot2(L,P,S,'Ydata','Mean',only_txt);
@@ -399,6 +399,7 @@ fprintf('Data Saved in txt file [%s].\n',fullfile(folder_save,strcat(f.Name,'.tx
 % Early Break
 if only_txt == true
     warning('Early Break: Text File saved only.');
+    return;
 end
 
 % Box Plot
