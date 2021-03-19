@@ -724,8 +724,8 @@ x_fus = handles.MainFigure.UserData.x_fus;
 CBV_data = handles.MainFigure.UserData.CBV_data;
 label_fus = handles.MainFigure.UserData.label_fus;
 % Colors
-g_colors = handles.Ax_LFP.UserData.Colors;
-f_colors = handles.Ax_fUS.UserData.Colors;
+g_colors = repmat(handles.Ax_LFP.UserData.Colors,[50,1]);
+f_colors =  repmat(handles.Ax_fUS.UserData.Colors,[50,1]);
 
 % Clear secondary panels
 all_tabs = [handles.FirstTab;handles.SecondTab;handles.ThirdTab];
@@ -1080,13 +1080,13 @@ end
 
 function initialize_panels(handles,x,y)
 
-margin_w = .05;
-margin_h = .05;
+margin_w = 0;%.05;
+margin_h = 0;%.05;
 
 tab1 = handles.FirstTab;
 tab2 = handles.SecondTab;
 tab3 = handles.ThirdTab;
-all_tabs = [tab1;tab2];
+all_tabs = [tab1;tab2;tab3];
 for i =1:length(all_tabs)
     delete(all_tabs(i).Children);
 end
@@ -1109,7 +1109,7 @@ for ii = 1:n_rows
 end
 
 %Band Synthesis 
-ax_2 = gobjects(y);
+ax_2 = gobjects(y,1);
 n_rows = ceil(sqrt(y));
 n_columns = ceil(y/n_rows);
 for ii = 1:n_rows
@@ -1120,15 +1120,15 @@ for ii = 1:n_rows
         end
         xx = mod(index-1,n_columns)/n_columns;
         yy = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
-        ax_2(index) = axes('Parent',tab2);
-        ax_2(index).Position= [xx+margin_w yy+margin_h/2 (1/n_columns)-margin_w (1/n_rows)-1.5*margin_h];
-        ax_2(index).Tag= sprintf('Ax%d',index);
-        ax_2(index).Title.String= sprintf('Ax%d',index);
+        ax_2(index,1) = axes('Parent',tab2);
+        ax_2(index,1).Position= [xx+margin_w yy+margin_h/2 (1/n_columns)-margin_w (1/n_rows)-1.5*margin_h];
+        ax_2(index,1).Tag= sprintf('Ax%d',index);
+        ax_2(index,1).Title.String= sprintf('Ax%d',index);
     end
 end
 
 %Band Synthesis 
-ax_3 = gobjects(x);
+ax_3 = gobjects(x,1);
 n_rows = ceil(sqrt(x));
 n_columns = ceil(x/n_rows);
 for ii = 1:n_rows
@@ -1139,10 +1139,10 @@ for ii = 1:n_rows
         end
         xx = mod(index-1,n_columns)/n_columns;
         yy = (n_rows-1-(floor((index-1)/n_columns)))/n_rows;
-        ax_3(index) = axes('Parent',tab3);
-        ax_3(index).Position= [xx+margin_w yy+margin_h/2 (1/n_columns)-margin_w (1/n_rows)-1.5*margin_h];
-        ax_3(index).Tag= sprintf('Ax%d',index);
-        ax_3(index).Title.String= sprintf('Ax%d',index);
+        ax_3(index,1) = axes('Parent',tab3);
+        ax_3(index,1).Position= [xx+margin_w yy+margin_h/2 (1/n_columns)-margin_w (1/n_rows)-1.5*margin_h];
+        ax_3(index,1).Tag= sprintf('Ax%d',index);
+        ax_3(index,1).Title.String= sprintf('Ax%d',index);
     end
 end
 

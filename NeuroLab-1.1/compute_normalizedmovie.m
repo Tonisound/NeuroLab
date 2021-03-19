@@ -67,7 +67,7 @@ switch normalization
             case 'baseline2'
                 str_baseline=GImport.str_baseline2;
             case 'baseline3'
-                str_baseline=GImport.str_baseline1;       
+                str_baseline=GImport.str_baseline3;       
         end
         dt = load(fullfile(folder_name,'Time_Tags.mat'));
         if GImport.strict_baseline

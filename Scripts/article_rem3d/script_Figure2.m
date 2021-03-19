@@ -60,7 +60,7 @@ list_group = L.list_group;
 list_files = L.list_files;
 
 % Location of source files
-container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[Normalization=Mean]';
+container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics';
 % container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[Normalization=QW]';
 % container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[Normalization=AW]';
     
