@@ -35,6 +35,7 @@ set(f2,'Position',[.1 .1 .6 .6]);
 clrmenu(f2);
 
 % Storing Time reference
+f2.UserData.success = false;
 f2.UserData.time_ref = time_ref;
 f2.UserData.x_start = time_ref.Y(1);
 f2.UserData.x_end = time_ref.Y(end);
@@ -1054,7 +1055,15 @@ else
         if sum(ind_keep)>0
             ind_tag=[ind_tag,i];
         end
-    end  
+    end
+    
+    % Restricts to episodes longer than 120 seconds
+    tts1 = datenum(handles.MainFigure.UserData.TimeTags_strings(ind_tag,1));
+    tts2 = datenum(handles.MainFigure.UserData.TimeTags_strings(ind_tag,2));
+    TimeTags_seconds = [(tts1-floor(tts1)),(tts2-floor(tts2))]*24*3600;
+    TimeTags_dur = TimeTags_seconds(:,2)-TimeTags_seconds(:,1);
+    ind_tag = ind_tag(TimeTags_dur>120);
+
 end
 
 % Compute for whole recording

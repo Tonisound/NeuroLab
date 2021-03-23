@@ -44,9 +44,9 @@ else
     [S,P] = browse_data(L);
 end
 
-% tt_data = plot1(L,P,S,'Rmax');
-% tt_data = plot1(L,P,S,'Tmax');
-% tt_data = plot1(L,P,S,'Xmax');
+tt_data = plot1(L,P,S,'Rmax');
+tt_data = plot1(L,P,S,'Tmax');
+tt_data = plot1(L,P,S,'Xmax');
 tt_data = plot2(L,P,S,'Mean');
 tt_data = plot2(L,P,S,'Median');
 

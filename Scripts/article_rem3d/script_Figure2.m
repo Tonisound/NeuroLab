@@ -60,9 +60,9 @@ list_group = L.list_group;
 list_files = L.list_files;
 
 % Location of source files
-container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics';
-% container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[Normalization=QW]';
-% container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[Normalization=AW]';
+%container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-QW]';
+%container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-AW]';
+container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-mean]';
     
 % Buidling struct S
 S = struct('t_data',[],'x_data',[],'y_data',[],'y_mean',[],...
