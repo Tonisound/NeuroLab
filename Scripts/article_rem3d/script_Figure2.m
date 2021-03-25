@@ -43,11 +43,11 @@ end
 
 % Plotting/Saving Data
 only_txt = false;
-tt_data = plot1(L,P,S);
+%tt_data = plot1(L,P,S);
 tt_data = plot2(L,P,S,'Ymean','Mean',only_txt);
-tt_data = plot2(L,P,S,'Ydata','Mean',only_txt);
-tt_data = plot2(L,P,S,'Ydata','Median',only_txt);
+% tt_data = plot2(L,P,S,'Ydata','Mean',only_txt);
 tt_data = plot2(L,P,S,'Ymean','Median',only_txt);
+% tt_data = plot2(L,P,S,'Ydata','Median',only_txt);
 
 end
 
@@ -159,6 +159,7 @@ clrmenu(f);
 f.Name = strcat(fName,'-A');
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
+% f.PaperPositionMode='auto';
 
 f.Colormap = P.Colormap;
 f_colors = P.f_colors;
@@ -254,12 +255,15 @@ ax_dummy.Position = [2 1 1 1];
 
 % Axis limits
 %ax.YLim = [min(tt_data(:)) max(tt_data(:))];
-ax.YLim = [-60 140];
+ax.YLim = [-40 100];
 ax.XLim = [.5 n_groups+.5];
 ax.XTick = 1:n_groups;
 ax.XTickLabel = xtick_labs;
 ax.Title.String = 'Synthesis Episode Statistics';
+ax.TickLength = [0 0];
 grid(ax,'on');
+ax.Visible ='on';
+%ax.Position =[0 0 .05 .05];
 
 % Legend Position
 panel = leg.Parent;
@@ -269,6 +273,7 @@ pos = panel.Position;
 leg.Position = [.875*pos(3) .05*pos(4) .1*pos(3) .9*pos(4)];
 panel.Units = 'normalized';
 leg.Units = 'normalized';
+leg.Visible ='on';
 
 f.Units = 'pixels';
 f.Position = [195          59        1045         919];
@@ -283,6 +288,7 @@ function tt_data = plot2(L,P,S,str1,str2,only_txt)
 fName = L.fName;
 folder_save = L.folder_save;
 list_regions = L.list_regions;
+label_regions = L.label_regions;
 list_group = L.list_group;
 
 % Drawing results
@@ -310,6 +316,7 @@ switch str1
 end
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
+% f.PaperPositionMode='auto';
 
 f.Colormap = P.Colormap;
 f_colors = P.f_colors;
@@ -441,28 +448,32 @@ b1 = barh(diag(tt_data(index_rem,ind_sorted_rem)),'stacked','Parent',ax1);
 for i=1:length(b1)
     %bar color
     b1(i).FaceColor = f_colors(ind_sorted_rem(i),:);
-    b1(i).EdgeColor = 'k';
+    b1(i).EdgeColor = 'none';
     b1(i).LineWidth = .1;
     % Plot dots and ebar data for Mean per recording
     if strcmp(str1, 'Ymean')
-        % errorbars
-        e = errorbar(b1(i).YData(i),b1(i).XData(i),-ebar_data_sorted(index_rem,i),ebar_data_sorted(index_rem,i),...
-            'horizontal','Parent',ax1);
-        e.Color='k';
         % dots
         temp = dots_data(:,ind_sorted_rem(i),index_rem);
         temp(isnan(temp))=[];
         line('XData',temp,'YData',b1(i).XData(i)*ones(size(temp)),...
-            'LineStyle','none','Marker','.','MarkerSize',5,...
-            'MarkerFaceColor','k','Parent',ax1);
+            'LineStyle','none','Marker','.','MarkerSize',8,...
+            'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5],'Parent',ax1);
+        % errorbars
+        e = errorbar(b1(i).YData(i),b1(i).XData(i),-ebar_data_sorted(index_rem,i),ebar_data_sorted(index_rem,i),...
+            'horizontal','Parent',ax1,'LineWidth',1,'Color','k');
+%         e.Color='k';
     end
 end
 
 % Axis limits
 ax1.YTick = 1:n_bars;
-ax1.YTickLabel = list_regions(ind_sorted_rem);
+% ax1.YTickLabel = list_regions(ind_sorted_rem);
+ax1.YTickLabel = label_regions(ind_sorted_rem);
 ax1.Title.String = 'REM sorted';
-%grid(ax1,'on');
+ax1.TickLength = [0 0];
+ax1.XLim = [-10 60];
+grid(ax1,'on');
+ax1.YGrid='off';
 
 
 % Ax2
@@ -523,7 +534,7 @@ panel.Units = 'normalized';
 leg.Units = 'normalized';
 
 f.Units = 'pixels';
-f.Position = [195          59        1045         919];
+f.Position = [195          59        1045         719];
 
 fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
 saveas(f,fullname);

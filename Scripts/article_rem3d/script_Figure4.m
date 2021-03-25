@@ -75,6 +75,11 @@ else
     [S,P] = browse_data(L);
 end
 
+% Sorting reference
+ind_sorted_ref = [3 1 5 8 6 2 4 7 10 9 14 13 12 11 15 16 19 20 17 21 18 22 23 24]';
+L.list_ref = list_ref(ind_sorted_ref,:);
+S = S(:,:,ind_sorted_ref);
+
 R_peak_data = plot2(L,P,S,'Mean');
 R_peak_data = plot2(L,P,S,'Median');
 
@@ -90,8 +95,8 @@ list_bands = L.list_bands;
 list_files = L.list_files;
 
 % container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\Cross_Correlation';
-% container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\Cross_Correlation[rem-120s]';
-container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\Cross_Correlation[whole-lfp]';
+container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\Cross_Correlation[rem-120s]';
+% container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\Cross_Correlation[whole-lfp]';
 % tag_container = 'Whole-LFP';
 tag_container = '*';
 list_files=strrep(list_files,'R_nlab','R');
@@ -271,6 +276,7 @@ f_colors = P.f_colors;
 % Getting data
 R_peak_data = NaN(length(list_regions),length(list_bands),length(list_ref));
 T_peak_data = NaN(length(list_regions),length(list_bands),length(list_ref));
+n_recordings = NaN(length(list_regions),length(list_ref));
 for k =1:length(list_ref)
     for i = 1:length(list_regions)
         for j = 1:length(list_bands)
@@ -285,6 +291,7 @@ for k =1:length(list_ref)
                     R_peak_data(i,j,k)=median(temp);
                     T_peak_data(i,j,k)=median(temp2);
             end
+            n_recordings(i,k) = length(temp);
         end
     end
 end
@@ -328,7 +335,12 @@ for index=1:length(all_axes)
     ax.YLim = [.5 length(list_regions)+.5];
     ax.XLim = [.5 length(list_bands)+.5];
     ax.YTick = 1:length(list_regions);
-    ax.YTickLabel = label_regions(ind_sorted_a);
+    if mod(index,8)==1
+        ax.YTickLabel = label_regions(ind_sorted_a);
+    else
+        ax.YTickLabel = strcat('(',num2str(n_recordings(ind_sorted_a,index)),')');
+    end
+    
     ax.XTick = 1:length(list_bands);
     ax.XTickLabel = label_lfp(ind_sorted_b);
     ax.XTickLabelRotation = 45;

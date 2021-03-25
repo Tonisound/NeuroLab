@@ -44,9 +44,9 @@ else
     [S,P] = browse_data(L);
 end
 
-tt_data = plot1(L,P,S,'Rmax');
-tt_data = plot1(L,P,S,'Tmax');
-tt_data = plot1(L,P,S,'Xmax');
+% tt_data = plot1(L,P,S,'Rmax');
+% tt_data = plot1(L,P,S,'Tmax');
+% tt_data = plot1(L,P,S,'Xmax');
 tt_data = plot2(L,P,S,'Mean');
 tt_data = plot2(L,P,S,'Median');
 
@@ -452,7 +452,13 @@ ebar_data = NaN(length(list_ref),length(list_regions));
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
         temp = S(i,j).r_max;
-        tt_data(i,j) = mean(temp,'omitnan');
+        switch str
+            case 'Mean'
+                tt_data(i,j) = mean(temp,'omitnan');
+            case 'Median'
+                tt_data(i,j) = median(temp,'omitnan');
+        end
+        %tt_data(i,j) = mean(temp,'omitnan');
         ebar_data(i,j) = std(temp,[],'omitnan');
     end
 end
@@ -468,10 +474,8 @@ for i =1:length(list_ref)
             case 'Median'
                 temp=median(temp);
         end
-        try
-            rt_data(j,:,i)=interp1(S(i,j).ref_time(:),temp(:),ref_time);
-        catch
-        end
+        rt_data(j,:,i)=interp1(S(i,j).ref_time(:),temp(:),ref_time);
+        
     end
 end
 
@@ -491,66 +495,6 @@ n_groups = length(list_ref);
 n_bars = length(list_regions);
 
 
-% Ax1
-hold(ax1,'on');
-for i=1:length(list_regions)
-    %bar color
-    line('XData',tt_data(index_pattern1,i),'YData',tt_data(index_pattern2,i),...
-        'LineStyle','none','Marker','+','MarkerSize',15,'LineWidth',1,...
-        'MarkerFaceColor',f_colors(i,:),'MarkerEdgeColor',f_colors(i,:),'Parent',ax1);
-    % dots
-    line('XData',dots_data(:,i,index_pattern1),'YData',dots_data(:,i,index_pattern2),...
-        'LineStyle','none','Marker','.','MarkerSize',5,'Tag','dots',...
-        'MarkerFaceColor',f_colors(i,:),'MarkeredgeColor',f_colors(i,:),'Parent',ax1);
-    % text
-    text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern2,i)-.05,char(label_regions(i)),...
-        'Color',f_colors(i,:),'Parent',ax1);
-end
-% Axis limits
-line('XData',[-1 1],'YData',[-1 1],'Color',[.5 .5 .5],'Parent',ax1);
-ax1.XLim = [0 1];
-ax1.YLim = [0 1];
-ax1.XLabel.String = list_ref(index_pattern1);
-ax1.YLabel.String = list_ref(index_pattern2);
-ax1.Title.String = sprintf('%s vs %s',char(list_ref(index_pattern1)),char(list_ref(index_pattern2)));
-grid(ax1,'on');
-
-
-% Ax2
-hold(ax2,'on');
-for i=1:length(list_regions)
-    %bar color
-    line('XData',tt_data(index_pattern1,i),'YData',tt_data(index_pattern3,i),...
-        'LineStyle','none','Marker','+','MarkerSize',15,'LineWidth',1,...
-        'MarkerFaceColor',f_colors(i,:),'MarkerEdgeColor',f_colors(i,:),'Parent',ax2);
-    % dots
-    line('XData',dots_data(:,i,index_pattern1),'YData',dots_data(:,i,index_pattern3),...
-        'LineStyle','none','Marker','.','MarkerSize',5,'Tag','dots',...
-        'MarkerFaceColor',f_colors(i,:),'MarkeredgeColor',f_colors(i,:),'Parent',ax2);
-    % text
-    try
-        text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern3,i)-.05,char(label_regions(i)),...
-            'Color',f_colors(i,:),'Parent',ax2);
-    catch
-        %tt_data
-    end
-end
-% Axis limits
-line('XData',[-1 1],'YData',[-1 1],'Color',[.5 .5 .5],'Parent',ax2);
-ax2.XLim = [0 1];
-ax2.YLim = [0 1];
-ax2.XLabel.String = list_ref(index_pattern1);
-ax2.YLabel.String = list_ref(index_pattern3);
-ax2.Title.String = sprintf('%s vs %s',char(list_ref(index_pattern1)),char(list_ref(index_pattern3)));
-grid(ax2,'on');
-
-dots_visibility = 'off';
-dots = findobj([ax1;ax2],'Tag','dots');
-for i = 1:length(dots)
-    dots(i).Visible = dots_visibility;
-end
-
-
 % Sorting rt_data
 [A,ind_max_a] = max(rt_data(:,:,1),[],2,'omitnan');
 [~,ind_sorted_a] = sort(A,'ascend');
@@ -559,8 +503,130 @@ end
 [C,ind_max_c] = max(rt_data(:,:,3),[],2,'omitnan');
 [~,ind_sorted_c] = sort(C,'ascend');
 % % % manual sorted
-% ind_sorted_a=fliplr([3 2 1 4 6 5 8 13 10 9 7 11 12 14 16 15 17 18 21 20 19 27 25 24 22 28 23 26 29 31 30 32 33]);
-% ind_sorted_c=fliplr([2 3 4 1 6 5 8 13 9 10 7 11 12 14 16 15 17 18 21 20 19 27 25 24 22 26 23 28 29 30 32 31 33]);
+ind_sorted_a=fliplr([2 3 4 6 5 1 8 13 10 9 7 11 12 14 15 16 17 18 21 20 19 27 25 24 22 23 28 26 29 31 30 33 32]);
+ind_sorted_c=fliplr([2 3 4 6 5 1 8 13 9 10 7 11 12 14 15 16 17 18 21 20 19 27 24 25 22 23 28 26 29 31 30 33 32]);
+
+
+
+% % Ax1
+% hold(ax1,'on');
+% for i=1:length(list_regions)
+%     %bar color
+%     line('XData',tt_data(index_pattern1,i),'YData',tt_data(index_pattern2,i),...
+%         'LineStyle','none','Marker','+','MarkerSize',15,'LineWidth',1,...
+%         'MarkerFaceColor',f_colors(i,:),'MarkerEdgeColor',f_colors(i,:),'Parent',ax1);
+%     % dots
+%     line('XData',dots_data(:,i,index_pattern1),'YData',dots_data(:,i,index_pattern2),...
+%         'LineStyle','none','Marker','.','MarkerSize',5,'Tag','dots',...
+%         'MarkerFaceColor',f_colors(i,:),'MarkeredgeColor',f_colors(i,:),'Parent',ax1);
+%     % text
+%     text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern2,i)-.05,char(label_regions(i)),...
+%         'Color',f_colors(i,:),'Parent',ax1);
+% end
+% % Axis limits
+% line('XData',[-1 1],'YData',[-1 1],'Color',[.5 .5 .5],'Parent',ax1);
+% ax1.XLim = [0 1];
+% ax1.YLim = [0 1];
+% ax1.XLabel.String = list_ref(index_pattern1);
+% ax1.YLabel.String = list_ref(index_pattern2);
+% ax1.Title.String = sprintf('%s vs %s',char(list_ref(index_pattern1)),char(list_ref(index_pattern2)));
+% grid(ax1,'on');
+
+% Ax1
+show_bars = true; % display mode for ax1, ax2
+hold(ax1,'on');
+bdata = (tt_data(index_pattern2,:)./tt_data(index_pattern1,:))';
+bdata = bdata(ind_sorted_a);
+for i=1:length(list_regions)
+    %bar color
+    if show_bars
+        b = barh(i,bdata(i)-1,'Parent',ax1);
+        b.FaceColor = f_colors(ind_sorted_a(i),:);
+        b.EdgeColor = [.5 .5 .5];   
+    else
+        line('XData',bdata(i)-1,'YData',i,...
+        'LineStyle','none','Marker','o','MarkerSize',10,'LineWidth',1,...
+        'MarkerFaceColor',f_colors(ind_sorted_a(i),:),'MarkerEdgeColor',[.5 .5 .5],'Parent',ax1);
+    end
+end
+% Axis limits
+ax1.XLim = [-.4 .4];
+ax1.XTick = [-.4 -.2 0 .2 .4];
+ax1.XTickLabel = {'-40%','-20%','0%','+20%','+40%'};
+ax1.YTickLabel = label_regions(ind_sorted_a);
+%ax1.YTickLabel = label_regions;
+
+
+ax1.YLim = [.5 length(list_regions)+.5];
+ax1.Title.String = sprintf('%s / %s',char(list_ref(index_pattern2)),char(list_ref(index_pattern1)));
+ax1.YTick = 1:length(list_regions);
+grid(ax1,'on');
+
+
+% % Ax2
+% hold(ax2,'on');
+% for i=1:length(list_regions)
+%     %bar color
+%     line('XData',tt_data(index_pattern1,i),'YData',tt_data(index_pattern3,i),...
+%         'LineStyle','none','Marker','+','MarkerSize',15,'LineWidth',1,...
+%         'MarkerFaceColor',f_colors(i,:),'MarkerEdgeColor',f_colors(i,:),'Parent',ax2);
+%     % dots
+%     line('XData',dots_data(:,i,index_pattern1),'YData',dots_data(:,i,index_pattern3),...
+%         'LineStyle','none','Marker','.','MarkerSize',5,'Tag','dots',...
+%         'MarkerFaceColor',f_colors(i,:),'MarkeredgeColor',f_colors(i,:),'Parent',ax2);
+%     % text
+%     try
+%         text(tt_data(index_pattern1,i)+.05,tt_data(index_pattern3,i)-.05,char(label_regions(i)),...
+%             'Color',f_colors(i,:),'Parent',ax2);
+%     catch
+%         %tt_data
+%     end
+% end
+% % Axis limits
+% line('XData',[-1 1],'YData',[-1 1],'Color',[.5 .5 .5],'Parent',ax2);
+% ax2.XLim = [0 1];
+% ax2.YLim = [0 1];
+% ax2.XLabel.String = list_ref(index_pattern1);
+% ax2.YLabel.String = list_ref(index_pattern3);
+% ax2.Title.String = sprintf('%s vs %s',char(list_ref(index_pattern1)),char(list_ref(index_pattern3)));
+% grid(ax2,'on');
+
+% Ax1
+hold(ax2,'on');
+bdata = (tt_data(index_pattern3,:)./tt_data(index_pattern1,:))';
+bdata = bdata (ind_sorted_c);
+
+for i=1:length(list_regions)
+    %bar color
+    if show_bars
+        b = barh(i,bdata(i)-1,'Parent',ax2);
+        b.FaceColor = f_colors(ind_sorted_c(i),:);
+        b.EdgeColor = [.5 .5 .5];
+    else
+        line('XData',bdata(i)-1,'YData',i,...
+            'LineStyle','none','Marker','o','MarkerSize',10,'LineWidth',1,...
+            'MarkerFaceColor',f_colors(ind_sorted_c(i),:),'MarkerEdgeColor',[.5 .5 .5],'Parent',ax2);
+    end
+    
+end
+% Axis limits
+ax2.XLim = [-.2 .2];
+ax2.XTick = [-.2 -.1 0 .1 .2];
+ax2.XTickLabel = {'-20%','-10%','0%','+10%','+20%'};
+ax2.YTickLabel = label_regions(ind_sorted_c);
+%ax2.YTickLabel = label_regions;
+
+ax2.YLim = [.5 length(list_regions)+.5];
+ax2.Title.String = sprintf('%s / %s',char(list_ref(index_pattern3)),char(list_ref(index_pattern1)));
+ax2.YTick = 1:length(list_regions);
+grid(ax2,'on');
+
+dots_visibility = 'off';
+dots = findobj([ax1;ax2],'Tag','dots');
+for i = 1:length(dots)
+    dots(i).Visible = dots_visibility;
+end
+
 
 
 % Ax3
