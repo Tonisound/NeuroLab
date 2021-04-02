@@ -42,7 +42,7 @@ else
 end
 
 % Plotting/Saving Data
-only_txt = false;
+only_txt = true;
 %tt_data = plot1(L,P,S);
 tt_data = plot2(L,P,S,'Ymean','Mean',only_txt);
 % tt_data = plot2(L,P,S,'Ydata','Mean',only_txt);
@@ -60,9 +60,11 @@ list_group = L.list_group;
 list_files = L.list_files;
 
 % Location of source files
-%container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-QW]';
+container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-QW]';
 %container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-AW]';
-container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-mean]';
+%container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-mean]';
+%container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[bea-regions-QW]';
+
     
 % Buidling struct S
 S = struct('t_data',[],'x_data',[],'y_data',[],'y_mean',[],...
@@ -118,11 +120,11 @@ fprintf('Data Browsed [%d files loaded].\n',counter);
 f = figure('Visible','off');
 colormap(f,'parula');
 P.Colormap = f.Colormap;
-% uncomment if list_regions is not ALL
-%P.f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
-% comment if list_regions is not ALL
-ind_colors = [1,2,3,4,5,6,7,8,9,10,11,12,13,25,27,28,29,30,38,39,40,46,47,48,49,50,51,52,53,61,62,63,64];
-P.f_colors = f.Colormap(ind_colors,:);
+%uncomment if list_regions is not ALL
+P.f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
+% % comment if list_regions is not ALL
+% ind_colors = [1,2,3,4,5,6,7,8,9,10,11,12,13,25,27,28,29,30,38,39,40,46,47,48,49,50,51,52,53,61,62,63,64];
+% P.f_colors = f.Colormap(ind_colors,:);
 close(f);
 
 P.margin_w = .01;

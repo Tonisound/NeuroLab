@@ -44,11 +44,13 @@ else
     [S,P] = browse_data(L);
 end
 
-% tt_data = plot1(L,P,S,'Rmax');
-% tt_data = plot1(L,P,S,'Tmax');
-% tt_data = plot1(L,P,S,'Xmax');
-tt_data = plot2(L,P,S,'Mean');
-tt_data = plot2(L,P,S,'Median');
+% Plotting/Saving Data
+only_txt = true;
+% tt_data = plot1(L,P,S,'Rmax',only_txt);
+% tt_data = plot1(L,P,S,'Tmax',only_txt);
+% tt_data = plot1(L,P,S,'Xmax',only_txt);
+tt_data = plot2(L,P,S,'Mean',only_txt);
+tt_data = plot2(L,P,S,'Median',only_txt);
 
 end
 
@@ -203,7 +205,7 @@ fprintf('Synthesis Data Saved [%s]\n',fullfile(folder_save,strcat(fName,'.mat'))
 
 end
 
-function tt_data = plot1(L,P,S,str)
+function tt_data = plot1(L,P,S,str,only_txt)
 
 fName = L.fName;
 folder_save = L.folder_save;
@@ -284,6 +286,33 @@ for i =1:length(list_ref)
         ebar_data(i,j) = std(temp,[],'omitnan');
     end
 end
+
+
+% Save in txt file
+fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
+fwrite(fid,sprintf('Region \t'));
+for j =1:length(list_ref)
+    fwrite(fid,sprintf('%s \t ', char(list_ref(j))));
+end
+fwrite(fid,newline);
+for i =1:length(list_regions)
+    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
+    for j =1:length(list_ref)
+        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
+    end
+    if i~=length(list_regions)
+        fwrite(fid,newline);
+    end
+end
+fclose(fid);
+fprintf('Data Saved in txt file [%s].\n',fullfile(folder_save,strcat(f.Name,'.txt')));
+
+% Early Break
+if only_txt == true
+    warning('Early Break: Text File saved only.');
+    return;
+end
+
 
 % Bar Plot
 n_groups = length(list_ref);
@@ -379,7 +408,7 @@ saveas(f,fullname);
 
 end
 
-function tt_data = plot2(L,P,S,str)
+function tt_data = plot2(L,P,S,str,only_txt)
 
 fName = L.fName;
 folder_save = L.folder_save;
@@ -463,6 +492,31 @@ for i =1:length(list_ref)
     end
 end
 
+% Save in txt file
+fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
+fwrite(fid,sprintf('Region \t'));
+for j =1:length(list_ref)
+    fwrite(fid,sprintf('%s \t ', char(list_ref(j))));
+end
+fwrite(fid,newline);
+for i =1:length(list_regions)
+    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
+    for j =1:length(list_ref)
+        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
+    end
+    if i~=length(list_regions)
+        fwrite(fid,newline);
+    end
+end
+fclose(fid);
+fprintf('Data Saved in txt file [%s].\n',fullfile(folder_save,strcat(f.Name,'.txt')));
+
+% Early Break
+if only_txt == true
+    warning('Early Break: Text File saved only.');
+    return;
+end
+
 ref_time = (-20:.01:20)';
 rt_data = NaN(length(list_regions),length(ref_time),length(list_ref));
 for i =1:length(list_ref)
@@ -474,10 +528,10 @@ for i =1:length(list_ref)
             case 'Median'
                 temp=median(temp);
         end
-        rt_data(j,:,i)=interp1(S(i,j).ref_time(:),temp(:),ref_time);
-        
+        rt_data(j,:,i)=interp1(S(i,j).ref_time(:),temp(:),ref_time); 
     end
 end
+
 
 % Finding patterns
 pattern1 = char(list_ref(1));

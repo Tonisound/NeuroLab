@@ -11,6 +11,7 @@ end
 
 % Parameters
 data_config = load(fullfile(foldername,'Config.mat'));
+% ledger_name = 'RegionLedger_BB_v2.txt';
 ledger_name = 'RegionLedger.txt';                               % ledger filename
 prefix = 'Nshop_';                                              % prefix used to search region directory
 % suffix = '.U8';                                               % suffix used to search region directory

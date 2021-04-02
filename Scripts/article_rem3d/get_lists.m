@@ -56,6 +56,20 @@ if strcmp(reg_group,'GROUPS')
         'Th';'GN';'PN';'SC';'ZI';'PAG';'AAm';'PAm';
         'Hyth';'POA';'ON';'MN'};
     
+%     list_regions =     {'AComm';'Amygdala';'AmygdaloCortical';'AmygdaloHippocampal';'AuCortex';...
+%         'BasalForebrain';'CA1';'CA3';'CCallosum';'CThalamus';'CgCortex';'Claustrum';...'DG';
+%     'DHypothalamus';'DThalamus';'EctCortex';'Endopiriform';'EntCortex';'GeniculateN';'Habenulla';...
+%     'HipFimbria';'InsularCortex';'LimbicCortex';'Mammillary';'MotorCortex';'OlfactoryBulb';'OpticChiasm';...
+%     'PAG';'PreopticN';'PretectalN';'PrhCortex';'PtCortex';'RSCortex';'S1Cortex';'S2Cortex';'Septum';...
+%     'StriTer';'Striatum';'Subiculum';'SubstantiaNigra';'SupColliculus';'TeCortex';'TeniaTecta';'V1Cortex';...
+%     'V2Cortex';'VHypothalamus';'VTegmentalArea';'VThalamus';'Ventricles';'ZonaIncerta';'mch'};
+%     label_regions = list_regions;
+%     label_regions =[];
+%     for i=1:length(list_regions)
+%         temp = char(list_regions(i));
+%         label_regions =[label_regions;{temp(1:3)}];
+%     end
+    
 elseif strcmp(reg_group,'LEFT-GROUPS')
     list_regions = {'OrbitalCtx-L';'LimbicCtx-L';'CingulateCtx-L';'MotorCtx-L';'InsularCtx-L';'SomatoSensoryCtx-L';...
         'PiriformCtx-L';'RetrosplenialCtx-L';'AssociationCtx-L';'ParietalCtx-L';'AuditoryCtx-L';'RhinalCtx-L';'VisualCtx-L';
@@ -84,6 +98,32 @@ elseif strcmp(reg_group,'RIGHT-GROUPS')
         'Th-R';'GN-R';'PN-R';'SC-R';'ZI-R';'PAG-R';'AAm-R';'PAm-R';
         'Hyth-R';'POA-R';'ON-R';'MN-R'};
     
+elseif strcmp(reg_group,'LEFT-RIGHT-GROUPS')
+    list_regions = {'OrbitalCtx-R';'LimbicCtx-R';'CingulateCtx-R';'MotorCtx-R';'InsularCtx-R';'SomatoSensoryCtx-R';...
+        'PiriformCtx-R';'RetrosplenialCtx-R';'AssociationCtx-R';'ParietalCtx-R';'AuditoryCtx-R';'RhinalCtx-R';'VisualCtx-R';
+        'SeptalNuclei-R';'DentateGyrus-R';'CA3-R';'CA2-R';'CA1-R';
+        'CaudatePutamen-R';'GlobusPallidus-R';'SubstantiaNigra-R';%'BasalGanglia-R';
+        'Thalamus-R';'GeniculateNuclei-R';'PretectalNuclei-R';'SuperiorColliculus-R';'ZonaIncerta-R';'PAG-R';'AnteriorAmygdala-R';'PosteriorAmygdala-R';
+        'Hypothalamus-R';'PreopticArea-R';'OlfactoryNuclei-R';'MammillaryNuclei-R';...
+        'OrbitalCtx-R';'LimbicCtx-R';'CingulateCtx-R';'MotorCtx-R';'InsularCtx-R';'SomatoSensoryCtx-R';...
+        'PiriformCtx-R';'RetrosplenialCtx-R';'AssociationCtx-R';'ParietalCtx-R';'AuditoryCtx-R';'RhinalCtx-R';'VisualCtx-R';
+        'SeptalNuclei-R';'DentateGyrus-R';'CA3-R';'CA2-R';'CA1-R';
+        'CaudatePutamen-R';'GlobusPallidus-R';'SubstantiaNigra-R';%'BasalGanglia-R';
+        'Thalamus-R';'GeniculateNuclei-R';'PretectalNuclei-R';'SuperiorColliculus-R';'ZonaIncerta-R';'PAG-R';'AnteriorAmygdala-R';'PosteriorAmygdala-R';
+        'Hypothalamus-R';'PreopticArea-R';'OlfactoryNuclei-R';'MammillaryNuclei-R'};
+    label_regions = {'OrCx-R';'LiCx-R';'CCx-R';'MCx-R';'ICx-R';'SSCx-R';...
+        'PiCx-R';'RsCx-R';'AsCx-R';'PaCx-R';'AuCtx-R';'RhCx-R';'VCx-R';
+        'Sep-R';'DG-R';'CA3-R';'CA2-R';'CA1-R';
+        'CPu-R';'GP-R';'SNi-R';%'BGa-R';
+        'Th-R';'GN-R';'PN-R';'SC-R';'ZI-R';'PAG-R';'AAm-R';'PAm-R';
+        'Hyth-R';'POA-R';'ON-R';'MN-R';...
+        'OrCx-R';'LiCx-R';'CCx-R';'MCx-R';'ICx-R';'SSCx-R';...
+        'PiCx-R';'RsCx-R';'AsCx-R';'PaCx-R';'AuCtx-R';'RhCx-R';'VCx-R';
+        'Sep-R';'DG-R';'CA3-R';'CA2-R';'CA1-R';
+        'CPu-R';'GP-R';'SNi-R';%'BGa-R';
+        'Th-R';'GN-R';'PN-R';'SC-R';'ZI-R';'PAG-R';'AAm-R';'PAm-R';
+        'Hyth-R';'POA-R';'ON-R';'MN-R'};
+    
 elseif strcmp(reg_group,'REGIONS')
     list_regions = generate_lists('AtlasType','ratcoronal','DisplayObj','regions','DisplayMode','bilateral');
     label_regions=list_regions;
@@ -96,6 +136,11 @@ elseif strcmp(reg_group,'LEFT-REGIONS')
 elseif strcmp(reg_group,'RIGHT-REGIONS')
     l1 = generate_lists('AtlasType','ratcoronal','DisplayObj','regions','DisplayMode','unilateral');
     list_regions = l1(endsWith(l1,'-R'));
+    label_regions=list_regions;
+    
+elseif strcmp(reg_group,'LEFT-RIGHT-REGIONS')
+    l1 = generate_lists('AtlasType','ratcoronal','DisplayObj','regions','DisplayMode','unilateral');
+    list_regions = l1;
     label_regions=list_regions;
     
 elseif strcmp(reg_group,'VESSEL-GROUPS')
