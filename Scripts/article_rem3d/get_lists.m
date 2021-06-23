@@ -56,19 +56,9 @@ if strcmp(reg_group,'GROUPS')
         'Th';'GN';'PN';'SC';'ZI';'PAG';'AAm';'PAm';
         'Hyth';'POA';'ON';'MN'};
     
-%     list_regions =     {'AComm';'Amygdala';'AmygdaloCortical';'AmygdaloHippocampal';'AuCortex';...
-%         'BasalForebrain';'CA1';'CA3';'CCallosum';'CThalamus';'CgCortex';'Claustrum';...'DG';
-%     'DHypothalamus';'DThalamus';'EctCortex';'Endopiriform';'EntCortex';'GeniculateN';'Habenulla';...
-%     'HipFimbria';'InsularCortex';'LimbicCortex';'Mammillary';'MotorCortex';'OlfactoryBulb';'OpticChiasm';...
-%     'PAG';'PreopticN';'PretectalN';'PrhCortex';'PtCortex';'RSCortex';'S1Cortex';'S2Cortex';'Septum';...
-%     'StriTer';'Striatum';'Subiculum';'SubstantiaNigra';'SupColliculus';'TeCortex';'TeniaTecta';'V1Cortex';...
-%     'V2Cortex';'VHypothalamus';'VTegmentalArea';'VThalamus';'Ventricles';'ZonaIncerta';'mch'};
-%     label_regions = list_regions;
-%     label_regions =[];
-%     for i=1:length(list_regions)
-%         temp = char(list_regions(i));
-%         label_regions =[label_regions;{temp(1:3)}];
-%     end
+    list_regions = generate_lists('DisplayObj','groups','DisplayMode','bilateral');
+    list_regions(strcmp(list_regions,'Vessels'))=[];
+    label_regions = list_regions;
     
 elseif strcmp(reg_group,'LEFT-GROUPS')
     list_regions = {'OrbitalCtx-L';'LimbicCtx-L';'CingulateCtx-L';'MotorCtx-L';'InsularCtx-L';'SomatoSensoryCtx-L';...

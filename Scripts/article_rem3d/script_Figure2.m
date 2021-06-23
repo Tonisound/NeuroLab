@@ -42,7 +42,7 @@ else
 end
 
 % Plotting/Saving Data
-only_txt = true;
+only_txt = false;
 %tt_data = plot1(L,P,S);
 tt_data = plot2(L,P,S,'Ymean','Mean',only_txt);
 % tt_data = plot2(L,P,S,'Ydata','Mean',only_txt);
@@ -60,7 +60,7 @@ list_group = L.list_group;
 list_files = L.list_files;
 
 % Location of source files
-container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-QW]';
+container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[newest-regions-QW]';
 %container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-AW]';
 %container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-mean]';
 %container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[bea-regions-QW]';
