@@ -199,6 +199,7 @@ mergeButton = uicontrol('Style','pushbutton',...
     'String','Merge Regions',...
     'Tag','mergeButton',...
     'Parent',f);
+
 newgroupButton = uicontrol('Style','pushbutton',... 
     'Units','normalized',...
     'String','New Group',...
@@ -317,8 +318,9 @@ edit_okButton.Position = [.825 .87 .075 .04];
 edit_cancelButton.Position = [.9 .87 .075 .04];
 duplicateButton.Position = [.825 .83 .15 .04];
 mergeButton.Position = [.825 .79 .15 .04];
-newgroupButton.Position = [.825 .73 .15 .04];
-removeButton.Position = [.825 .67 .15 .04];
+
+newgroupButton.Position = [.825 .69 .15 .04];
+removeButton.Position = [.825 .63 .15 .04];
 
 registerButton.Position = [.825 .57 .15 .04];
 register_okButton.Position = [.825 .57 .075 .04];
@@ -346,6 +348,7 @@ set(edit_cancelButton,'Callback',{@edit_cancel_Button_callback,handles2});
 set(duplicateButton,'Callback',{@duplicateButton_callback,handles2});
 set(removeButton,'Callback',{@removeButton_callback,handles2});
 set(mergeButton,'Callback',{@mergeButton_callback,handles2});
+
 set(newgroupButton,'Callback',{@newgroupButton_callback,handles2});
 
 set(importButton,'Callback',{@importButton_Callback,file_recording,handles2});
@@ -373,6 +376,8 @@ table_group.CellEditCallback = {@uitablegroup_edit};
 set(l_cursor,'ButtonDownFcn',{@click_l_cursor});
 set(ax,'ButtonDownFcn',{@axedit_clickFcn,handles2});
 % set(ax,'ButtonDownFcn','disp(1)');
+
+set(f,'KeyPressFcn',{@f_keypressFcn,handles2});
 
 % Changing main image
 % n_images = 100;
@@ -1448,7 +1453,8 @@ ax.YLabel.String = '';
 % Turning off interactive control
 set (handles.EditFigure, 'WindowButtonDownFcn', '');
 set (handles.EditFigure, 'WindowButtonMotionFcn', '');
-set (handles.EditFigure, 'KeyPressFcn', '');
+% set (handles.EditFigure, 'KeyPressFcn', '');
+set(handles.EditFigure,'KeyPressFcn',{@f_keypressFcn,handles})
 set(handles.EditFigure,'Pointer','arrow');
 
 % Turning all regions and stickers visible
@@ -2381,6 +2387,92 @@ set(hObj,'WindowButtonMotionFcn','');
 set(hObj,'WindowButtonUp','');
 delete(reg);
 
+end
+
+function f_keypressFcn(hObj,evnt,handles)
+
+load('Preferences.mat','GColors');
+% alpha = GColors.patch_transparency;
+% patch_width = GColors.patch_width;
+alpha_mask = GColors.mask_transparency;
+
+selection = handles.Region_table.UserData.Selection;
+all_keys = {'leftarrow';'rightarrow';'uparrow';'downarrow'};
+if sum(strcmp(evnt.Key,all_keys))==0 
+    return;  
+elseif isempty(selection)
+    warning('Empty Selection: Select region(s) to move.');
+    return;
+end
+
+% Converting region to line_marker
+all_p = handles.Region_table.UserData.patches(selection);
+for k=1:length(all_p)
+    p = all_p(k);
+    
+    switch evnt.Key
+        case {'leftarrow'}
+            % Patch update
+            p.XData = p.XData-1;
+            % mask update
+            old_mask = p.UserData.Mask;
+            A=old_mask(:,2:end);
+            B=zeros(size(old_mask,1),1);
+            new_mask = [A,B];
+            
+        case {'rightarrow'}
+            % Patch update
+            p.XData = p.XData+1;
+            % mask update
+            old_mask = p.UserData.Mask;
+            A=old_mask(:,1:end-1);
+            B=zeros(size(old_mask,1),1);
+            new_mask = [B,A];
+            
+        case {'uparrow'}
+            % Patch update
+            p.YData = p.YData-1;
+            % mask update
+            old_mask = p.UserData.Mask;
+            A=old_mask(2:end,:);
+            B=zeros(1,size(old_mask,2));
+            new_mask = [A;B];
+            
+        case {'downarrow'}
+            % Patch update
+            p.YData = p.YData+1;
+            % mask update
+            old_mask = p.UserData.Mask;
+            A=old_mask(1:end-1,:);
+            B=zeros(1,size(old_mask,2));
+            new_mask = [B;A];
+            
+    end
+    color = p.FaceColor;
+    cdata = repmat(permute(color,[3,1,2]),[size(new_mask,1),size(new_mask,2)]);
+    p.UserData.ImMask.CData = cdata;
+    p.UserData.ImMask.AlphaData = alpha_mask*new_mask;
+    p.UserData.Mask = new_mask;
+    % adding boundary
+    delete(p.UserData.Line_Boundary);
+    B = bwboundaries(new_mask);
+    line_boundary=[];
+    for j=1:length(B)
+        boundary = B{j};
+        l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+            'Color',color,...
+            'Parent',handles.AxEdit,...
+            'Tag','Boundary',...
+            'Hittest','off',...
+            'Visible','off');
+        line_boundary=[line_boundary;l];
+    end
+    p.UserData.Line_Boundary = line_boundary;
+    % sticker update
+    p.UserData.Sticker.Position(1) = mean(boundary(:,2));
+    p.UserData.Sticker.Position(2) = mean(boundary(:,1));
+end
+ 
 end
 
 %% NeuroShop functions
