@@ -43,7 +43,7 @@ end
 
 % Plotting/Saving Data
 only_txt = false;
-%tt_data = plot1(L,P,S);
+tt_data = plot1(L,P,S);
 tt_data = plot2(L,P,S,'Ymean','Mean',only_txt);
 % tt_data = plot2(L,P,S,'Ydata','Mean',only_txt);
 tt_data = plot2(L,P,S,'Ymean','Median',only_txt);
@@ -253,11 +253,12 @@ for i=1:length(b)
     b(i).LineWidth = .1;
 end
 leg = legend(ax_dummy,leg_labs,'Visible','on');
+%leg = legend(ax,leg_labs,'Visible','on');
 ax_dummy.Position = [2 1 1 1];
 
 % Axis limits
 %ax.YLim = [min(tt_data(:)) max(tt_data(:))];
-ax.YLim = [-40 100];
+ax.YLim = [-60 140];
 ax.XLim = [.5 n_groups+.5];
 ax.XTick = 1:n_groups;
 ax.XTickLabel = xtick_labs;
