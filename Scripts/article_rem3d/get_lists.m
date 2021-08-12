@@ -43,76 +43,65 @@ L.list_files = list_files;
 
 % list_regions
 if strcmp(reg_group,'GROUPS')
-    list_regions = {'OrbitalCtx';'LimbicCtx';'CingulateCtx';'MotorCtx';'InsularCtx';'SomatoSensoryCtx';...
-        'PiriformCtx';'RetrosplenialCtx';'AssociationCtx';'ParietalCtx';'AuditoryCtx';'RhinalCtx';'VisualCtx';
-        'SeptalNuclei';'DentateGyrus';'CA3';'CA2';'CA1';
-        'CaudatePutamen';'GlobusPallidus';'SubstantiaNigra';%'BasalGanglia';
-        'Thalamus';'GeniculateNuclei';'PretectalNuclei';'SuperiorColliculus';'ZonaIncerta';'PAG';'AnteriorAmygdala';'PosteriorAmygdala';
-        'Hypothalamus';'PreopticArea';'OlfactoryNuclei';'MammillaryNuclei'};
-    label_regions = {'OrCx';'LiCx';'CCx';'MCx';'ICx';'SSCx';...
-        'PiCx';'RsCx';'AsCx';'PaCx';'AuCtx';'RhCx';'VCx';
-        'Sep';'DG';'CA3';'CA2';'CA1';
-        'CPu';'GP';'SNi';%'BGa';
-        'Th';'GN';'PN';'SC';'ZI';'PAG';'AAm';'PAm';
-        'Hyth';'POA';'ON';'MN'};
     
-    list_regions = generate_lists('DisplayObj','groups','DisplayMode','bilateral');
-    list_regions(strcmp(list_regions,'Vessels'))=[];
-    label_regions = list_regions;
+    list_regions = {'OrbitalCortex';'LimbicCortex';'CingulateCortex';'InsularCortex';'MotorCortex';'SomatosensoryCortex';...
+        'PiriformCortex';'RetrosplenialCortex';'ParietalCortex';'EntorhinalCortex';'VisualCortex';'AuditoryCortex';'RhinalCortex';
+        'DentateGyrus';'CA1Region';'CA2Region';'CA3Region';'ResidualHippocampus';'Subiculum';'Fimbria';
+        'Striatum';'BasalForebrain';'SubstantiaNigra';'Septum';
+        'StriataTerminalis';'SuperiorColliculus';'InferiorColliculus';'DPAG';'VPAG';'DThalamus';'VThalamus';'Habenulla';'ZonaIncerta';'PretectalNuclei';'GeniculateNuclei';'ReticularFormation';
+        'BasalAmygdala';'LateralAmygdala';'CentromedialAmygdala';'CorticalAmygdala';'ResidualAmygdala';
+        'DHypothalamus';'LHypothalamus';'VHypothalamus';'VTegmentalArea';'PreopticArea';'MammillaryNuclei';'OlfactoryNuclei';
+        'Cerebellum';'BrainStem';'PinealGland';'OptChiasm';'Claustrum';'CCallosum';'Ventricles'};
+    label_regions = {'OrCx';'LiCx';'CCx';'ICx';'MCx';'SSCx';...
+        'PiCx';'RSCx';'PaCx';'EnCx';'VCx';'AuCx';'RhCx';
+        'DG';'CA1';'CA2';'CA3';'RHip';'Sub';'Fim';
+        'Stri';'BFb';'SNi';'Sep';
+        'StrTer';'SC';'IC';'DPAG';'VPAG';'DThal';'VThal';'Hab';'ZI';'PN';'GN';'RF';
+        'BasAm';'LatAm';'CenAm';'CorAm';'ResAm';
+        'DHthal';'LHthal';'VHthal';'VTA';'POA';'MN';'ON';
+        'Cereb';'BS';'PG';'Opt';'Clau';'CC';'Ven'};
+    
+%     list_regions = generate_lists('DisplayObj','groups','DisplayMode','bilateral');
+%     list_regions(strcmp(list_regions,'Vessels'))=[];
+%     label_regions = list_regions;
     
 elseif strcmp(reg_group,'LEFT-GROUPS')
-    list_regions = {'OrbitalCtx-L';'LimbicCtx-L';'CingulateCtx-L';'MotorCtx-L';'InsularCtx-L';'SomatoSensoryCtx-L';...
-        'PiriformCtx-L';'RetrosplenialCtx-L';'AssociationCtx-L';'ParietalCtx-L';'AuditoryCtx-L';'RhinalCtx-L';'VisualCtx-L';
-        'SeptalNuclei-L';'DentateGyrus-L';'CA3-L';'CA2-L';'CA1-L';
-        'CaudatePutamen-L';'GlobusPallidus-L';'SubstantiaNigra-L';%'BasalGanglia-L';
-        'Thalamus-L';'GeniculateNuclei-L';'PretectalNuclei-L';'SuperiorColliculus-L';'ZonaIncerta-L';'PAG-L';'AnteriorAmygdala-L';'PosteriorAmygdala-L';
-        'Hypothalamus-L';'PreopticArea-L';'OlfactoryNuclei-L';'MammillaryNuclei-L'};
-    label_regions = {'OrCx-L';'LiCx-L';'CCx-L';'MCx-L';'ICx-L';'SSCx-L';...
-        'PiCx-L';'RsCx-L';'AsCx-L';'PaCx-L';'AuCtx-L';'RhCx-L';'VCx-L';
-        'Sep-L';'DG-L';'CA3-L';'CA2-L';'CA1-L';
-        'CPu-L';'GP-L';'SNi-L';%'BGa-L';
-        'Th-L';'GN-L';'PN-L';'SC-L';'ZI-L';'PAG-L';'AAm-L';'PAm-L';
-        'Hyth-L';'POA-L';'ON-L';'MN-L'};
+    
+    list_regions = {'OrbitalCortex-L';'LimbicCortex-L';'CingulateCortex-L';'InsularCortex-L';'MotorCortex-L';'SomatosensoryCortex-L';...
+        'PiriformCortex-L';'RetrosplenialCortex-L';'ParietalCortex-L';'EntorhinalCortex-L';'VisualCortex-L';'AuditoryCortex-L';'RhinalCortex-L';
+        'DentateGyrus-L';'CA1Region-L';'CA2Region-L';'CA3Region-L';'ResidualHippocampus-L';'Subiculum-L';'Fimbria-L';
+        'Striatum-L';'BasalForebrain-L';'SubstantiaNigra-L';'Septum-L';
+        'StriataTerminalis-L';'SuperiorColliculus-L';'InferiorColliculus-L';'DPAG-L';'VPAG-L';'DThalamus-L';'VThalamus-L';'Habenulla-L';'ZonaIncerta-L';'PretectalNuclei-L';'GeniculateNuclei-L';'ReticularFormation-L';
+        'BasalAmygdala-L';'LateralAmygdala-L';'CentromedialAmygdala-L';'CorticalAmygdala-L';'ResidualAmygdala-L';
+        'DHypothalamus-L';'LHypothalamus-L';'VHypothalamus-L';'VTegmentalArea-L';'PreopticArea-L';'MammillaryNuclei-L';'OlfactoryNuclei-L';
+        'Cerebellum-L';'BrainStem-L';'PinealGland-L';'OptChiasm-L';'Claustrum-L';'CCallosum-L';'Ventricles-L'};
+    label_regions = {'OrCx-L';'LiCx-L';'CCx-L';'ICx-L';'MCx-L';'SSCx-L';...
+        'PiCx-L';'RSCx-L';'PaCx-L';'EnCx-L';'VCx-L';'AuCx-L';'RhCx-L';
+        'DG-L';'CA1-L';'CA2-L';'CA3-L';'RHip-L';'Sub-L';'Fim-L';
+        'Stri-L';'BFb-L';'SNi-L';'Sep-L';
+        'StrTer-L';'SC-L';'IC-L';'DPAG-L';'VPAG-L';'DThal-L';'VThal-L';'Hab-L';'ZI-L';'PN-L';'GN-L';'RF-L';
+        'BasAm-L';'LatAm-L';'CenAm-L';'CorAm-L';'ResAm-L';
+        'DHthal-L';'LHthal-L';'VHthal-L';'VTA-L';'POA-L';'MN-L';'ON-L';
+        'Cereb-L';'BS-L';'PG-L';'Opt-L';'Clau-L';'CC-L';'Ven-L'};
     
 elseif strcmp(reg_group,'RIGHT-GROUPS')
-    list_regions = {'OrbitalCtx-R';'LimbicCtx-R';'CingulateCtx-R';'MotorCtx-R';'InsularCtx-R';'SomatoSensoryCtx-R';...
-        'PiriformCtx-R';'RetrosplenialCtx-R';'AssociationCtx-R';'ParietalCtx-R';'AuditoryCtx-R';'RhinalCtx-R';'VisualCtx-R';
-        'SeptalNuclei-R';'DentateGyrus-R';'CA3-R';'CA2-R';'CA1-R';
-        'CaudatePutamen-R';'GlobusPallidus-R';'SubstantiaNigra-R';%'BasalGanglia-R';
-        'Thalamus-R';'GeniculateNuclei-R';'PretectalNuclei-R';'SuperiorColliculus-R';'ZonaIncerta-R';'PAG-R';'AnteriorAmygdala-R';'PosteriorAmygdala-R';
-        'Hypothalamus-R';'PreopticArea-R';'OlfactoryNuclei-R';'MammillaryNuclei-R'};
-    label_regions = {'OrCx-R';'LiCx-R';'CCx-R';'MCx-R';'ICx-R';'SSCx-R';...
-        'PiCx-R';'RsCx-R';'AsCx-R';'PaCx-R';'AuCtx-R';'RhCx-R';'VCx-R';
-        'Sep-R';'DG-R';'CA3-R';'CA2-R';'CA1-R';
-        'CPu-R';'GP-R';'SNi-R';%'BGa-R';
-        'Th-R';'GN-R';'PN-R';'SC-R';'ZI-R';'PAG-R';'AAm-R';'PAm-R';
-        'Hyth-R';'POA-R';'ON-R';'MN-R'};
-    
-elseif strcmp(reg_group,'LEFT-RIGHT-GROUPS')
-    list_regions = {'OrbitalCtx-R';'LimbicCtx-R';'CingulateCtx-R';'MotorCtx-R';'InsularCtx-R';'SomatoSensoryCtx-R';...
-        'PiriformCtx-R';'RetrosplenialCtx-R';'AssociationCtx-R';'ParietalCtx-R';'AuditoryCtx-R';'RhinalCtx-R';'VisualCtx-R';
-        'SeptalNuclei-R';'DentateGyrus-R';'CA3-R';'CA2-R';'CA1-R';
-        'CaudatePutamen-R';'GlobusPallidus-R';'SubstantiaNigra-R';%'BasalGanglia-R';
-        'Thalamus-R';'GeniculateNuclei-R';'PretectalNuclei-R';'SuperiorColliculus-R';'ZonaIncerta-R';'PAG-R';'AnteriorAmygdala-R';'PosteriorAmygdala-R';
-        'Hypothalamus-R';'PreopticArea-R';'OlfactoryNuclei-R';'MammillaryNuclei-R';...
-        'OrbitalCtx-R';'LimbicCtx-R';'CingulateCtx-R';'MotorCtx-R';'InsularCtx-R';'SomatoSensoryCtx-R';...
-        'PiriformCtx-R';'RetrosplenialCtx-R';'AssociationCtx-R';'ParietalCtx-R';'AuditoryCtx-R';'RhinalCtx-R';'VisualCtx-R';
-        'SeptalNuclei-R';'DentateGyrus-R';'CA3-R';'CA2-R';'CA1-R';
-        'CaudatePutamen-R';'GlobusPallidus-R';'SubstantiaNigra-R';%'BasalGanglia-R';
-        'Thalamus-R';'GeniculateNuclei-R';'PretectalNuclei-R';'SuperiorColliculus-R';'ZonaIncerta-R';'PAG-R';'AnteriorAmygdala-R';'PosteriorAmygdala-R';
-        'Hypothalamus-R';'PreopticArea-R';'OlfactoryNuclei-R';'MammillaryNuclei-R'};
-    label_regions = {'OrCx-R';'LiCx-R';'CCx-R';'MCx-R';'ICx-R';'SSCx-R';...
-        'PiCx-R';'RsCx-R';'AsCx-R';'PaCx-R';'AuCtx-R';'RhCx-R';'VCx-R';
-        'Sep-R';'DG-R';'CA3-R';'CA2-R';'CA1-R';
-        'CPu-R';'GP-R';'SNi-R';%'BGa-R';
-        'Th-R';'GN-R';'PN-R';'SC-R';'ZI-R';'PAG-R';'AAm-R';'PAm-R';
-        'Hyth-R';'POA-R';'ON-R';'MN-R';...
-        'OrCx-R';'LiCx-R';'CCx-R';'MCx-R';'ICx-R';'SSCx-R';...
-        'PiCx-R';'RsCx-R';'AsCx-R';'PaCx-R';'AuCtx-R';'RhCx-R';'VCx-R';
-        'Sep-R';'DG-R';'CA3-R';'CA2-R';'CA1-R';
-        'CPu-R';'GP-R';'SNi-R';%'BGa-R';
-        'Th-R';'GN-R';'PN-R';'SC-R';'ZI-R';'PAG-R';'AAm-R';'PAm-R';
-        'Hyth-R';'POA-R';'ON-R';'MN-R'};
+
+        list_regions = {'OrbitalCortex-R';'LimbicCortex-R';'CingulateCortex-R';'InsularCortex-R';'MotorCortex-R';'SomatosensoryCortex-R';...
+        'PiriformCortex-R';'RetrosplenialCortex-R';'ParietalCortex-R';'EntorhinalCortex-R';'VisualCortex-R';'AuditoryCortex-R';'RhinalCortex-R';
+        'DentateGyrus-R';'CA1Region-R';'CA2Region-R';'CA3Region-R';'ResidualHippocampus-R';'Subiculum-R';'Fimbria-R';
+        'Striatum-R';'BasalForebrain-R';'SubstantiaNigra-R';'Septum-R';
+        'StriataTerminalis-R';'SuperiorColliculus-R';'InferiorColliculus-R';'DPAG-R';'VPAG-R';'DThalamus-R';'VThalamus-R';'Habenulla-R';'ZonaIncerta-R';'PretectalNuclei-R';'GeniculateNuclei-R';'ReticularFormation-R';
+        'BasalAmygdala-R';'LateralAmygdala-R';'CentromedialAmygdala-R';'CorticalAmygdala-R';'ResidualAmygdala-R';
+        'DHypothalamus-R';'LHypothalamus-R';'VHypothalamus-R';'VTegmentalArea-R';'PreopticArea-R';'MammillaryNuclei-R';'OlfactoryNuclei-R';
+        'Cerebellum-R';'BrainStem-R';'PinealGland-R';'OptChiasm-R';'Claustrum-R';'CCallosum-R';'Ventricles-R'};
+    label_regions = {'OrCx-R';'LiCx-R';'CCx-R';'ICx-R';'MCx-R';'SSCx-R';...
+        'PiCx-R';'RSCx-R';'PaCx-R';'EnCx-R';'VCx-R';'AuCx-R';'RhCx-R';
+        'DG-R';'CA1-R';'CA2-R';'CA3-R';'RHip-R';'Sub-R';'Fim-R';
+        'Stri-R';'BFb-R';'SNi-R';'Sep-R';
+        'StrTer-R';'SC-R';'IC-R';'DPAG-R';'VPAG-R';'DThal-R';'VThal-R';'Hab-R';'ZI-R';'PN-R';'GN-R';'RF-R';
+        'BasAm-R';'LatAm-R';'CenAm-R';'CorAm-R';'ResAm-R';
+        'DHthal-R';'LHthal-R';'VHthal-R';'VTA-R';'POA-R';'MN-R';'ON-R';
+        'Cereb-R';'BS-R';'PG-R';'Opt-R';'Clau-R';'CC-R';'Ven-R'};
     
 elseif strcmp(reg_group,'REGIONS')
     list_regions = generate_lists('AtlasType','ratcoronal','DisplayObj','regions','DisplayMode','bilateral');
