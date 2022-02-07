@@ -51,7 +51,7 @@ else
 end
 
 % Plotting/Saving Data
-only_txt = false;
+only_txt = true;
 % tt_data = plot1(L,P,S,'Rmax',only_txt);
 % tt_data = plot1(L,P,S,'Tmax',only_txt);
 % tt_data = plot1(L,P,S,'Xmax',only_txt);
@@ -460,7 +460,7 @@ patch_alpha = P.patch_alpha;
 m = 0;
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
-        m = max(m,length(S(i,j).r_max));
+        m = max(m,length(S(i,j).r_max))
     end
 end
 dots_data = NaN(m,length(list_regions),length(list_ref));

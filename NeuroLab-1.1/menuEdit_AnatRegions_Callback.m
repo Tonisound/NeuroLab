@@ -1,5 +1,5 @@
 function success = menuEdit_AnatRegions_Callback(folder_name,file_recording,handles,val)
-
+ 
 global IM CUR_IM;
 success = false;
 
