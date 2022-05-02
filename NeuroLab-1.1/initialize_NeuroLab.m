@@ -187,6 +187,7 @@ m2d = uimenu('Label','Export','Tag','Export Menu','Parent',f);
 uimenu(m2d,'Label','Export Time Tags','Tag','ExportMenu_TimeTags');
 uimenu(m2d,'Label','Export Anatomical Regions','Tag','ExportMenu_Regions');
 uimenu(m2d,'Label','Export Image Patches','Tag','ExportMenu_Patches');
+uimenu(m2d,'Label','Export LFP Traces (.dat)','Tag','ExportMenu_LFPTraces');
 
 
 % handles.ColorMapsMenu
@@ -343,7 +344,7 @@ pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import Exter
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Locomotion Events|Detect Sleep Events|Detect Left-Right Runs|Detect Early-Mid-Late Runs');
 pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Generate Region Groups');
-pl_str = strcat(pl_str,'|Export Time Tags|Export Image Patches|Export Anatomical Regions');
+pl_str = strcat(pl_str,'|Export Time Tags|Export Image Patches|Export Anatomical Regions|Export LFP Traces (.dat)');
 pl.String = pl_str;
 
 % Process Button
@@ -703,6 +704,7 @@ set(myhandles.SynthesisMenu_PeakCount,'Callback','synthesis_PeakCount();');
 set(myhandles.ExportMenu_TimeTags,'Callback','export_time_tags(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ExportMenu_Patches,'Callback','export_image_patches(myhandles,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ExportMenu_Regions,'Callback','export_regions(myhandles,FILES(CUR_FILE).recording);');
+set(myhandles.ExportMenu_LFPTraces,'Callback','export_lfptraces(myhandles,FILES(CUR_FILE));');
 
 % Control Callback Attribution
 set(myhandles.FileSelectPopup,'Callback', {@fileSelectionPopup_Callback,myhandles});

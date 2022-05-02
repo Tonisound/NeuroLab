@@ -71,6 +71,8 @@ switch strtrim(str(val,:))
     case 'Export Anatomical Regions'
         export_regions(handles,FILES(CUR_FILE).recording);
         
+    case 'Export LFP Traces (.dat)'
+        export_lfptraces(handles,FILES(CUR_FILE));
 end
 
 end

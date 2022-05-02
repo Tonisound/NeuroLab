@@ -658,6 +658,9 @@ for i = 1:length(ind_files)
                 
             case 'Export Image Patches'
                 success = export_image_patches(myhandles,fullfile(DIR_SAVE,FILES(ii).nlab),0);
+                    
+            case 'Export LFP Traces (.dat)'
+                success = export_lfptraces(myhandles,FILES(ii),0);
                 
             case '(Movie) Normalized Movie'
                 f2 = movie_normalized(myhandles,0,str_regions,str_traces);
