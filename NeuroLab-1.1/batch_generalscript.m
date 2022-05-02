@@ -650,6 +650,9 @@ for i = 1:length(ind_files)
             case 'Generate Region Groups'
                 success = generate_region_groups(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                 
+            case 'Export Time Tags'
+                success = export_time_tags(FILES(ii).fullpath,fullfile(DIR_SAVE,FILES(ii).nlab));
+            
             case 'Export Anatomical Regions'
                 success = export_regions(myhandles,FILES(ii).recording,0);
                 

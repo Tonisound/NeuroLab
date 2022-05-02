@@ -1,9 +1,9 @@
- function success = export_time_tags(dir_tags,dir_save)
-
+ function success = export_time_tags(dir_tags,dir_save) 
+ 
 success = false;
 temp = regexp(dir_save,filesep,'split');
 filename = char(temp(end));
-file_txt = fullfile(dir_tags,strcat(filename,'_tags.txt')); 
+file_txt = fullfile(dir_tags,strcat(filename,sprintf('(%s)',datetime),'_tags.txt')); 
 
 
 % Loading Time Tags
