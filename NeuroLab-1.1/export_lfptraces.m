@@ -83,7 +83,7 @@ fprintf('LFP data loaded [%s].\n',path_to_lfp);
 
 
 % Sorting filename
-temp = regexp(path_to_lfp,'/','split');
+temp = regexp(path_to_lfp,filesep,'split');
 lfp_filename = char(temp(end));
 % dat_filename = sprintf('%s[%s].dat',strrep(lfp_filename,'.','-'),datestr(now));
 % meta_filename = sprintf('%s[%s].txt',strrep(lfp_filename,'.','-'),datestr(now));
@@ -118,7 +118,7 @@ fprintf('LFP data exported [%s].\n',dat_filename);
 
 % Writing metadata
 fid_info = fopen(fullfile(F.fullpath,F.dir_lfp,meta_filename),'w');
-fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeIDMetaData));
+fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeID));
 fwrite(fid_info,sprintf('SamplingLabel : %s \n',MetaData.SamplingLabel));
 fwrite(fid_info,sprintf('ChannelCount : %d \n',MetaData.ChannelCount));
 fwrite(fid_info,sprintf('SamplingFreq : %.2f \n',MetaData.SamplingFreq));
