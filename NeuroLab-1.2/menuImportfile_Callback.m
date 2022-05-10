@@ -2,8 +2,7 @@ function F = menuImportfile_Callback(~,~,handles,flag)
 % File Importation
 % Searches for EEG, fUS and video files
 
-global SEED SEED_SWL DIR_SAVE;
-%global CUR_IM START_IM END_IM LAST_IM;
+global SEED STR_SAVE SEED_SWL DIR_SAVE;
 
 % Initialization
 F = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},...
@@ -13,12 +12,12 @@ F = struct('session',{},'recording',{},'parent',{},'fullpath',{},'info',{},...
 
 if flag == 1
     % Manual Import
-%     FileName = uigetdir(SEED,'Select file');
-%     if FileName==0
-%         return;
-%     else
-%         FileList = {FileName};
-%     end
+    %     FileName = uigetdir(SEED,'Select file');
+    %     if FileName==0
+    %         return;
+    %     else
+    %         FileList = {FileName};
+    %     end
     FileList = uigetdir2(SEED,'Select file');
     if isempty(FileList)
         return;
@@ -27,7 +26,7 @@ if flag == 1
 else
     % Recording list Import
     rec_list = dir(fullfile(SEED_SWL,'*.txt'));
-%     ind_rm = ~(cellfun('isempty',strfind({rec_list(:).name(1)}','.')));
+    %     ind_rm = ~(cellfun('isempty',strfind({rec_list(:).name(1)}','.')));
     ind_rm = zeros(size(rec_list));
     for j=1:length(ind_rm)
         temp = char(rec_list(j).name);
@@ -44,24 +43,27 @@ else
     if isempty(s)
         return;
     else
-        % Loading Separators
-        load('Preferences.mat','GParams');
-        sep_swl_1 = GParams.sep_swl_1;
-        sep_swl_2 = GParams.sep_swl_2;
+        
         % Extracting FileName
         fid = fopen(fullfile(SEED_SWL,char(rec_list(s).name)),'r');
-        raw_list = fread(fid,'*char')';
-        index1 = strfind(raw_list,sep_swl_1);
-        index2 = strfind(raw_list,sep_swl_2);
-        n_files = length(index1);
         FileList = [];
-        for i = 1:n_files
-            line_ex = raw_list(index1(i)+length(sep_swl_1):index2(i)-1);
+        while ~feof(fid)
+            line_ex = fgetl(fid);
+            if strcmp(line_ex(1:8),'NEUROLAB')
+                line_ex = strrep(line_ex,'NEUROLAB',STR_SAVE);
+            elseif strcmp(line_ex(1:4),'DATA')
+                line_ex = strrep(line_ex,'DATA',SEED);
+            end
+            line_ex = strrep(line_ex,'/',filesep);
+            line_ex = strrep(line_ex,'\',filesep);
             FileList = [FileList;{line_ex}];
-        end    
+        end
+        fclose(fid);
     end
 end
 
+
+% If FileList contains full session name
 % Convert FileList in format parent/session/recording
 FileList_converted = [];
 for i = 1:length(FileList)
@@ -90,41 +92,53 @@ for i = 1:length(FileList)
     end
 end
 FileList = FileList_converted;
-%fprintf('%d recording detected. Proceed.\n',length(FileList));
 
+
+% Recording Importation
 ind_failed = [];
-for i = 1:length(FileList)
-    % Extracting FileName
-    ind_file = i;
+for ind_file = 1:length(FileList)
+    
     FileName = char(FileList(ind_file));
-    % Extracting session name
     FileName_split = regexp(FileName,'/|\','split');
     index_session = contains(FileName_split,'_MySession');
     
     if contains(FileName_split(end),'_nlab')
-        l = load(fullfile(FileName,'Config.mat'),'File');
-        F(ind_file) = l.File;
+        % Direct Importation from nlab file if specified in FileName
+        if isfile(fullfile(FileName,'Config.mat'))
+            l = load(fullfile(FileName,'Config.mat'),'File');
+            F(ind_file) = l.File;
+            fprintf('File Imported [%s]\n',FileName);
+        else
+            warning('Importation aborted - Incorrect file path [%s].',FileName);
+            ind_failed = [ind_failed;ind_file];
+        end
         continue;
+        
     elseif index_session(end-1)==1 && contains(FileName_split(end),["pre","per","post","E","R"])
+        % Extracting parent, session and recording
         session = char(FileName_split(end-1));
-        % Extracting parent
         temp = regexp(FileName,session,'split');
         parent = strrep(char(temp(1)),SEED,'');
-        % parent = parent(1:end-1);
-        %parent = strrep(parent,filesep,'');
-        if strcmp(parent(1),filesep)
-            parent = parent(2:end);
-        end
-        if strcmp(parent(end),filesep)
-            parent = parent(1:end-1);
-        end
-        % Extracting recording
+        parent = strip(parent,filesep);
         recording = char(FileName_split(end));
+        
     else
-        % Return if incorrect path
-        errordlg('Please select a file path with _MySession');
-        return;
+        % Continue if incorrect path and issue warning
+        warning('Importation aborted - Incorrect file path [%s].',FileName);
+        ind_failed = [ind_failed;ind_file];
+        continue;
     end
+    
+    % Direct Importation from nlab file if exists
+    if isdir(fullfile(DIR_SAVE,strcat(recording,'_nlab')))
+        l = load(fullfile(DIR_SAVE,strcat(recording,'_nlab'),'Config.mat'),'File');
+        F(ind_file) = l.File;
+        fprintf('File Imported [%s]\n',fullfile(DIR_SAVE,strcat(recording,'_nlab')));
+        continue;
+    end
+    
+    % Assigning parent, session and recording
+    fprintf('Importing File [%s]...',FileName);
     F(ind_file).session = session;
     F(ind_file).recording = recording;
     F(ind_file).parent = parent;
@@ -231,7 +245,7 @@ for i = 1:length(FileList)
             str = char(dd(1).name);
             F(ind_file).rcf = str;
         end
-    end   
+    end
     
     % File type
     if isempty(F(ind_file).acq)
@@ -256,7 +270,7 @@ for i = 1:length(FileList)
             def_frames = round(1800/GImport.f_def);
             Doppler_film = rand(10,10,def_frames);
             save(fullfile(FileName,dir_fus,'Doppler.mat'),'Doppler_film','-v7.3');
-            F(ind_file).acq = 'Doppler.mat';   
+            F(ind_file).acq = 'Doppler.mat';
             
         end
     else
@@ -271,80 +285,79 @@ for i = 1:length(FileList)
             F(ind_file).type = 'fUS';
         end
     end
+    fprintf(' done.\n');
     
-    % Looking for NLab File
-    d = dir(fullfile(DIR_SAVE,strcat('*',recording,'*')));
-    if ~isempty(d)
-        str = char(d(1).name);
-        F(ind_file).nlab = str;
+    % Creating NLab File
+    % ask confirmation before importation
+    F(ind_file).nlab = strcat('~',recording,'_nlab');
+    
+    % Comment in batch mode
+    str_quest = strcat(fieldnames(F(ind_file)),sprintf(' : '),struct2cell(F(ind_file)));
+    button = questdlg(str_quest,'New Importation','OK','Cancel','OK');
+    % %Comment in user mode
+    % button = 'ok';
+    
+    % Creating nlab file if confirmation and
+    if isempty(button) || strcmp(button,'Cancel')
+        ind_failed = [ind_failed;ind_file];
+        continue;
     else
-        %F(ind_file).nlab = regexprep(session,'_MySession','_nlab');
-        F(ind_file).nlab = strcat(recording,'_nlab');
-        % ask confirmation before importation
+        mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
+        fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
         
-        % Comment for batch
-        str_quest = strcat(fieldnames(F(ind_file)),sprintf(' : '),struct2cell(F(ind_file)));
-        button = questdlg(str_quest,'New Importation','OK','Cancel','OK');
-        % %Comment for not batch
-        % button = 'ok';
+        % Detect trigger
+        [~,Doppler_film,F_out] = import_reference_time(F(ind_file),handles,0);
+        F(ind_file) = F_out;
         
-        % Creating nlab file if confirmation and
-        if isempty(button) || strcmp(button,'Cancel')
-            return;
-        else
-            %try
-                mkdir(fullfile(DIR_SAVE,F(ind_file).nlab));
-                fprintf('Nlab directory created : %s.\n',F(ind_file).nlab);
-                
-                % Detect trigger
-                [~,Doppler_film,F_out] = import_reference_time(F(ind_file),handles,0);
-                F(ind_file) = F_out;
-                
-                % Import fUS Movie and Save Config.mat
-                tag = import_DopplerFilm(F(ind_file),handles,0,Doppler_film);
-                
-                % Import/Crop Video
-                import_crop_video(F(ind_file),handles,0);
-                
-                % Save UF Params
-                saving_UFParams(fullfile(F(ind_file).fullpath,F(ind_file).dir_fus),fullfile(DIR_SAVE,F(ind_file).nlab));
-                
-                % save TimeTags.mat (whole episode)
-                data_t = load(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),'time_ref');
-                TimeTags_images = [data_t.time_ref.X(1),data_t.time_ref.X(end)];
-                TimeTags_strings = [{handles.TimeDisplay.UserData(1,:)},{handles.TimeDisplay.UserData(end,:)}];
-                TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
-                TimeTags(1,1).Episode = '';
-                TimeTags(1,1).Tag = 'Whole-fUS';
-                TimeTags(1,1).Onset = handles.TimeDisplay.UserData(1,:);
-                TimeTags(1,1).Duration = handles.TimeDisplay.UserData(end,:);
-                TimeTags(1,1).Reference = handles.TimeDisplay.UserData(1,:);
-                TimeTags(1,1).Tokens = '';
-                TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'};
-                TimeTags_cell(2,:) = {'',TimeTags(1).Tag,TimeTags(1).Onset,TimeTags(1).Duration,TimeTags(1).Reference,''};
-                
-                if ~isempty(tag)
-                    TimeTags_images(2,:) = [data_t.time_ref.X(tag.im1),data_t.time_ref.X(tag.im2)];
-                    dur = data_t.time_ref.Y(tag.im2) - data_t.time_ref.Y(tag.im1);
-                    str_dur = datestr(dur/(24*3600),'HH:MM:SS.FFF');
-                    TimeTags_strings(2,:) = [{handles.TimeDisplay.UserData(tag.im1,:)},{handles.TimeDisplay.UserData(tag.im2,:)}];
-                    TimeTags(2,1).Episode = '';
-                    TimeTags(2,1).Tag = 'BASELINE';
-                    TimeTags(2,1).Onset = handles.TimeDisplay.UserData(tag.im1,:);
-                    TimeTags(2,1).Duration = str_dur;
-                    TimeTags(2,1).Reference = handles.TimeDisplay.UserData(tag.im1,:);
-                    TimeTags(2,1).Tokens = '';
-                    TimeTags_cell(3,:) = {'',TimeTags(2).Tag,TimeTags(2).Onset,TimeTags(2).Duration,TimeTags(2).Reference,''};
-                end
-                save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images');
-%             catch
-%                 % Removing nlab folder
-%                 rmdir(fullfile(DIR_SAVE,F(ind_file).nlab),'s');
-%                 warning('Failed Importation: Nlab directory deleted [%s].',F(ind_file).nlab);
-%                 F(ind_file).nlab = '';
-%                 ind_failed = [ind_failed;ind_file];
-%             end
+        % Import fUS Movie and Save Config.mat
+        tag = import_DopplerFilm(F(ind_file),handles,0,Doppler_film);
+        
+        % Import/Crop Video
+        import_crop_video(F(ind_file),handles,0);
+        
+        % Save UF Params
+        saving_UFParams(fullfile(F(ind_file).fullpath,F(ind_file).dir_fus),fullfile(DIR_SAVE,F(ind_file).nlab));
+        
+        % save TimeTags.mat (whole episode)
+        data_t = load(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Reference.mat'),'time_ref');
+        TimeTags_images = [data_t.time_ref.X(1),data_t.time_ref.X(end)];
+        TimeTags_strings = [{handles.TimeDisplay.UserData(1,:)},{handles.TimeDisplay.UserData(end,:)}];
+        TimeTags = struct('Episode',[],'Tag',[],'Onset',[],'Duration',[],'Reference',[]);
+        TimeTags(1,1).Episode = '';
+        TimeTags(1,1).Tag = 'Whole-fUS';
+        TimeTags(1,1).Onset = handles.TimeDisplay.UserData(1,:);
+        TimeTags(1,1).Duration = handles.TimeDisplay.UserData(end,:);
+        TimeTags(1,1).Reference = handles.TimeDisplay.UserData(1,:);
+        TimeTags(1,1).Tokens = '';
+        TimeTags_cell(1,:) = {'Episode','Tag','Onset','Duration','Reference','Tokens'};
+        TimeTags_cell(2,:) = {'',TimeTags(1).Tag,TimeTags(1).Onset,TimeTags(1).Duration,TimeTags(1).Reference,''};
+        
+        if ~isempty(tag)
+            TimeTags_images(2,:) = [data_t.time_ref.X(tag.im1),data_t.time_ref.X(tag.im2)];
+            dur = data_t.time_ref.Y(tag.im2) - data_t.time_ref.Y(tag.im1);
+            str_dur = datestr(dur/(24*3600),'HH:MM:SS.FFF');
+            TimeTags_strings(2,:) = [{handles.TimeDisplay.UserData(tag.im1,:)},{handles.TimeDisplay.UserData(tag.im2,:)}];
+            TimeTags(2,1).Episode = '';
+            TimeTags(2,1).Tag = 'BASELINE';
+            TimeTags(2,1).Onset = handles.TimeDisplay.UserData(tag.im1,:);
+            TimeTags(2,1).Duration = str_dur;
+            TimeTags(2,1).Reference = handles.TimeDisplay.UserData(tag.im1,:);
+            TimeTags(2,1).Tokens = '';
+            TimeTags_cell(3,:) = {'',TimeTags(2).Tag,TimeTags(2).Onset,TimeTags(2).Duration,TimeTags(2).Reference,''};
         end
+        save(fullfile(DIR_SAVE,F(ind_file).nlab,'Time_Tags.mat'),'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images'); 
+        
+        % Renaming folder and nlab file
+        movefile(fullfile(DIR_SAVE,F(ind_file).nlab),fullfile(DIR_SAVE,strrep(F(ind_file).nlab,'~','')));
+        % Updating nlab field
+        F(ind_file).nlab = strrep(F(ind_file).nlab,'~','');
+        fprintf('Nlab directory renamed : %s.\n',F(ind_file).nlab);
+        % Updating Config.mat
+        dd = load(fullfile(DIR_SAVE,F(ind_file).nlab,'Config.mat'),'File');
+        File = dd.File;
+        File.nlab = F(ind_file).nlab;
+        save(fullfile(DIR_SAVE,F(ind_file).nlab,'Config.mat'),'File','-append');
+        
     end
 end
 

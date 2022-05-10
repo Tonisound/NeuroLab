@@ -1,5 +1,5 @@
 === NeuroLab ===
-Main developer : Antoine Bergel <antoine.bergel@gmail.com>
+Main developer : Antoine Bergel <bergel.antoine.pro@gmail.com>
 Copyright INSERM
 Software IDDN : IDDN.FR.001.090004.000.SP.2019.000.31230
 
@@ -7,7 +7,19 @@ This software allows to synchronize and visualize simultaneously ultrasound data
 It offers a variety of analysis and processing tools embedded in a user-friendly and compact graphical interface in MATLAB.
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update August 2020
+NeuroLab Version 1.2 (May 2022)
+
+- Nlab_files changed to NLab_files
+- GParams modified (SWL separators removed, STR_SAVE added)
+- Menu Preferences (General Tab) modified
+- Recording Lists reading & writing independent of OS used
+- Bug Fix: 'Remove' Button in File Manager (long delay)
+- New 'File Info' Button in File Manager
+- File Importation more fluid (continues even if bad recordings are found/stopped)
+- Unimported folders removed from NLab_DATA folder
+
+---------------------------------------------------------------------------
+NeuroLab Directions ï¿½ Update August 2020
 
 Importation
 o	Homogenize length_burst/n_burst
@@ -43,7 +55,7 @@ o	Keep ratio video in Video Behavior
 o	Detect left/right runs based on sources (not lines)
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update May 2020
+NeuroLab Directions ï¿½ Update May 2020
 
 Importation
 o	Merge Doppler/Doppler_normalized in Doppler.mat
@@ -84,7 +96,7 @@ o	Bug Reset Button in Menu Edit Traces
 o	Filter temperature upon import (bug fix)
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update January 2020
+NeuroLab Directions ï¿½ Update January 2020
 
 Importation
 o	Merge Doppler/Doppler_normalized
@@ -101,7 +113,7 @@ o	Hide _S recording lists
 Processes
 o	Ajouter sleep scoring
 o	Ajout automatique time-groups
-o	Définition de groupes de regions 
+o	Dï¿½finition de groupes de regions 
 o	Add delay LFP video
 o	Divide frequency bands
 
@@ -114,10 +126,10 @@ Figures
 o	Wavelet: Bug autoscale Wavelet
 o	Wavelet: Update/show time upon cursor motion
 o	Add figure autocorrelation fUS
-o	Pb de légende Figure fus_statistics
+o	Pb de lï¿½gende Figure fus_statistics
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update November 2019
+NeuroLab Directions ï¿½ Update November 2019
 
 Figure Wavelet
 o	Bug autoscale Wavelet
@@ -130,14 +142,14 @@ o	Add delay video-LFP to read video
 
 Processes
 o	Integrate sleep scoring (base: script Marta)
-o	Integrate Figure autocorrelation (base: script Chloé)
+o	Integrate Figure autocorrelation (base: script Chloï¿½)
 o	Option divide frequency bands
-o	Automatic grouping of time tags – Define time groups
-		(Grouper les tags qui contiennent une string puis écraser time groups)
-o	Définir des groupes de régions (Trace_group) automatiquement/manuellement
+o	Automatic grouping of time tags ï¿½ Define time groups
+		(Grouper les tags qui contiennent une string puis ï¿½craser time groups)
+o	Dï¿½finir des groupes de rï¿½gions (Trace_group) automatiquement/manuellement
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update October 2019
+NeuroLab Directions ï¿½ Update October 2019
 
 To fix 
 o	Multiple File Selection upon Importation
@@ -148,7 +160,7 @@ o	Figure Peak Detection Wavelet: bug nanconv does not work
 o	Figure fUS Correlation Analysis (in Traces & Tags) Tab Time_group for selection
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update April 2019
+NeuroLab Directions ï¿½ Update April 2019
 
 To do 
 o	Synthesis Cross-correlation LFP-fUS (Burst mode)
@@ -164,7 +176,7 @@ o	Movie add listeners
 o	Export Raw Dataset > Export videos
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update January 2019
+NeuroLab Directions ï¿½ Update January 2019
 
 To do 
 o	Load Time_reference.mat (n_burst, length_burst, rec_mode)
@@ -176,7 +188,7 @@ o	Bug Trace creation -> smoothing
 o	Check recording list without parent
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update December 2018
+NeuroLab Directions ï¿½ Update December 2018
 
 Video
 o	Resize video to screen
@@ -188,11 +200,11 @@ o	Import/export spiko regions (check importation file)
 
 Filter/smooth
 o	Export LFPband (Filter band + extract envelope)
-o	Écraser les traces de même nom
+o	ï¿½craser les traces de mï¿½me nom
 
 Affichage
 o	Pouvoir cliquer sur une trace -> selection
-o	Option d’offset pour affichage
+o	Option dï¿½offset pour affichage
 o	Afficher les traces en mode full (tous les points)
 
 Figure Wavelet
@@ -203,10 +215,10 @@ Figure Peri Event
 o	Add gaussian smoothing
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update June 2018
+NeuroLab Directions ï¿½ Update June 2018
 
 To do
-o	Réhabiliter les différentes synthèses
+o	Rï¿½habiliter les diffï¿½rentes synthï¿½ses
 o	Fix figure PeriEvent Time Histogram
 o	Complete figure fUS frequency analysis (autoscale / time button / multiply by n / coherence)
 o	Detect behavior
@@ -215,7 +227,7 @@ o	Sleep scoring algorithm
 To do (future)
 o	Remove length_burst/n_burst
 o	Mettre le temps en secondes dans UserData
-o	Charger mode d’affichage temporel
+o	Charger mode dï¿½affichage temporel
 o	Charger video dans video.mat
 
 To fix
@@ -224,21 +236,21 @@ o	Bug Batch first file
 o	Changer resample to interp1
 
 ---------------------------------------------------------------------------
-NeuroLab Directions – Update August 2017
+NeuroLab Directions ï¿½ Update August 2017
 
 Wavelet Fourier analysis
-o	Pouvoir calculer la cohérence inter-électrodes / inter-regions
+o	Pouvoir calculer la cohï¿½rence inter-ï¿½lectrodes / inter-regions
 
 fUS PeriEvent
-o	Pouvoir sélectionner tout type d’épisode
-o	Réparer sort
+o	Pouvoir sï¿½lectionner tout type dï¿½ï¿½pisode
+o	Rï¿½parer sort
 o	Affichage Trace_spiko
 o	Synthesis inter-recording
-o	Carte variabilité / pixel
+o	Carte variabilitï¿½ / pixel
 
 Synthesis Correlation 
 o	Slider dans infoPanel
-o	Cartes différentielles theta/gamma
+o	Cartes diffï¿½rentielles theta/gamma
 o	Comparer RT pattern
 
 Saving Configuration

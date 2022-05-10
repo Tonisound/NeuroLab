@@ -62,16 +62,15 @@ end
 % Data Disk
 GParams.SEED = fullfile(str_disk);
 % Local Disk
+GParams.STR_SAVE = str_save;
 GParams.DIR_SAVE = fullfile(str_save,'NLab_DATA');
 GParams.DIR_FIG = fullfile(str_save,'NLab_Figures');
 GParams.DIR_STATS = fullfile(str_save,'NLab_Statistics');
 GParams.DIR_SYNT = fullfile(str_save,'NLab_Synthesis');
-GParams.SEED_REGION = fullfile(str_save,'Nlab_Files','NRegions');
-GParams.SEED_SWL = fullfile(str_save,'Nlab_Files','NReclists');
-GParams.SEED_CONFIG = fullfile(str_save,'Nlab_Files','NConfigs');
-GParams.SEED_ATLAS = fullfile(str_save,'Nlab_Files','NAtlas');
-GParams.sep_swl_1 = 'SEP1';
-GParams.sep_swl_2 = 'SEP2';
+GParams.SEED_REGION = fullfile(str_save,'NLab_Files','NRegions');
+GParams.SEED_SWL = fullfile(str_save,'NLab_Files','NReclists');
+GParams.SEED_CONFIG = fullfile(str_save,'NLab_Files','NConfigs');
+GParams.SEED_ATLAS = fullfile(str_save,'NLab_Files','NAtlas');
 
 % Checking if folder exist
 % data disk

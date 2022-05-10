@@ -36,6 +36,7 @@ end
 
 % Setting Global Variables from Preferences.mat and Files.mat
 global SEED;                    % String : Main Directory
+global STR_SAVE;                % String : Save Directory
 global SEED_SWL;                % String : Recording List Directory
 global SEED_REGION;             % String : Spikoscope Regions Directory
 global SEED_CONFIG;             % String : Configuration Directory
@@ -55,6 +56,7 @@ global LAST_IM;                 % int : Index of Last Image
 load('Preferences.mat', 'GParams','GDisp');
 load('Files.mat','FILES','CUR_FILE','str','UiValues');
 SEED =          GParams.SEED;
+STR_SAVE =      GParams.STR_SAVE;
 SEED_SWL =      GParams.SEED_SWL;
 SEED_REGION =   GParams.SEED_REGION;
 SEED_ATLAS =    GParams.SEED_ATLAS;
@@ -74,6 +76,16 @@ for i =1:length(FILES)
     % Saving Config.mat
     save(fullfile(DIR_SAVE,FILES(i).nlab,'Config.mat'),'File','-append');
     % fprintf('File [%s] updated.\n',fullfile(DIR_SAVE,files_temp(i).nlab,'Config.mat'));
+end
+
+% Removing temporary folders (~*_nlab) in NLab_DATA
+dd = dir(fullfile(DIR_SAVE,'~*_nlab'));
+for i=1:length(dd)
+    dir_name = fullfile(dd(i).folder,dd(i).name);
+    if isdir(dir_name)
+        rmdir(dir_name,'s');
+        fprintf('Folder removed: [%s].\n',dir_name);
+    end
 end
 
 if isempty(FILES)
