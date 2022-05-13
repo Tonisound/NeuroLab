@@ -98,6 +98,9 @@ FileList = FileList_converted;
 ind_failed = [];
 for ind_file = 1:length(FileList)
     
+    % Allocate empty fields in F
+    F(ind_file).recording = '';
+    
     FileName = char(FileList(ind_file));
     FileName_split = regexp(FileName,'/|\','split');
     index_session = contains(FileName_split,'_MySession');
