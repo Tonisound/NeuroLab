@@ -146,7 +146,7 @@ end
 D = [];
 stack_pos = get_stackposition(lines,ax);
 for i =1:length(lines)
-    D=[D;{lines(i).UserData.Name,lines(i).Tag,rgb2char(lines(i).Color),lines(i).LineStyle,lines(i).Visible,...
+    D=[D;{lines(i).UserData.Name,lines(i).Tag,rgb2char(lines(i).Color),lines(i).LineStyle,sprintf('%s',lines(i).Visible),...
         lines(i).LineWidth,stack_pos(i),f_samp(i),lines(i).UserData.Selected}];
 end
 okButton.UserData.InitialData = D;

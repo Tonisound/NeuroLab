@@ -42,8 +42,8 @@ else
 end
 
 % Plotting/Saving Data
-only_txt = false;
-tt_data = plot1(L,P,S);
+only_txt = true;
+% tt_data = plot1(L,P,S);
 tt_data = plot2(L,P,S,'Ymean','Mean',only_txt);
 % tt_data = plot2(L,P,S,'Ydata','Mean',only_txt);
 tt_data = plot2(L,P,S,'Ymean','Median',only_txt);
@@ -53,6 +53,8 @@ end
 
 function [S,P] = browse_data(L)
 
+global STR_SAVE;
+
 fName = L.fName;
 folder_save = L.folder_save;
 list_regions = L.list_regions;
@@ -60,10 +62,11 @@ list_group = L.list_group;
 list_files = L.list_files;
 
 % Location of source files
-container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[newest-regions-QW]';
-%container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-AW]';
-%container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[new-regions-mean]';
-%container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Statistics[bea-regions-QW]';
+container_short = 'fUS_Statistics[newest-regions-QW]';
+%container = 'fUS_Statistics[new-regions-AW]';
+%container = 'fUS_Statistics[new-regions-mean]';
+%container = 'fUS_Statistics[bea-regions-QW]';
+container = fullfile(STR_SAVE,'NLab_Statistics',container_short);
 
     
 % Buidling struct S
