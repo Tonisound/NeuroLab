@@ -1,7 +1,7 @@
 % Article REM 3d - Revised Figure 2
-% Vascular Surges Statistics
+% Vascular Surges Statistics Per Region
 
-function script_FigureRevision2(rec_list,reg_group)
+function script_FigureRevision2C(rec_list,reg_group)
 % rec_list = CORONAL|SAGITTAL|ALL
 % reg_group = GROUPS|RIGHT-GROUPS|LEFT-GROUPS|VESSEL-GROUPS
 
@@ -16,12 +16,11 @@ end
 
 % Generate Lists
 L = get_lists(rec_list,reg_group);
-fName = sprintf('RevisedFig2_%s-%s',rec_list,reg_group);
+fName = sprintf('RevisedFig2C_%s-%s',rec_list,reg_group);
 folder_save = fullfile(pwd,'RevisedFigure2');
 if ~exist(folder_save,'dir')
     mkdir(folder_save);
 end
-% list_group = {'QW';'AW';'NREM';'REM';};
 list_group = {'REM-TONIC';'REM-PHASIC';};
 
 % Storing
@@ -30,6 +29,9 @@ L.fName = fName;
 L.folder_save = folder_save;
 L.rec_list = rec_list;
 L.reg_group = reg_group;
+% list_location = {'anterior';'intermediate';'posterior';'medial';'lateral'};
+list_location = {'ANTERIOR';'INTERMEDIATE';'POSTERIOR';'MEDIAL';'LATERAL'};
+L.list_location = list_location;
 
 % Loading/Browsing data
 if exist(fullfile(folder_save,strcat(fName,'.mat')),'file')
@@ -44,8 +46,8 @@ end
 % Plotting/Saving Data
 only_txt = false;
 % tt_data = plot1(L,P,S);
-tt_data = plot2(L,P,S,'Mean',only_txt);
-tt_data = plot2(L,P,S,'Median',only_txt);
+tt_data = plot2(L,P,S,'Mean','Recording',only_txt);
+tt_data = plot2(L,P,S,'Mean','Episode',only_txt);
 
 end
 
@@ -58,19 +60,14 @@ folder_save = L.folder_save;
 list_regions = L.list_regions;
 list_group = L.list_group;
 list_files = L.list_files;
-    
+
 % Buidling struct S
 S = struct('mean_per_rec',[],'median_per_rec',[],...
     'mean_per_ep',[],'median_per_ep',[],...
-    'y_data',[],...
+    'y_data',[],'y_data_ep',[],...
     'group','','region','','recording','');
 S(length(list_group),length(list_regions)).recording = [];
-% save(fullfile(folder_name,'Time_Surges.mat'),'n_aw','thresh_surge','thresh_second',...
-%     'AW_images','IM_AW','STD_AW','REM_images','IM_REM','STD_REM',...
-%     'ind_surge','ind_tonic','n_phasic','n_tonic','S_surges',...
-%     'TimeTags','TimeTags_cell','TimeTags_strings','TimeTags_images',...
-%     'ratio_surge','intensity_surge','whole_mask','n_whole','Doppler_Surge','-v7.3');
-    
+
 counter = 0;
 
 % Browsing files
@@ -82,59 +79,77 @@ for index = 1:length(list_files)
     d = dir(fullfile(DIR_SAVE,cur_file,'Time_Surges.mat'));
     if isempty(d)
         warning('Absent file Time_Surges.mat [File: %s]',cur_file);
-        continue;  
+        continue;
     end
-    fprintf('Loading Time Surges [File: %s (%d/%d)] ...',cur_file,index,length(list_files));
-    data_surges = load(fullfile(DIR_SAVE,cur_file,'Time_Surges.mat'));
+    fprintf('Loading Time Surges [File: %s (%d/%d)] ... ',cur_file,index,length(list_files));
+    data_surges = load(fullfile(DIR_SAVE,cur_file,'Time_Surges.mat'),...
+        'Doppler_Surge','ind_surge','ind_tonic','REM_images','TimeTags');
+    
+%     % Loading Atlas
+%     dd = dir(fullfile(DIR_SAVE,cur_file,'Atlas.mat'));
+%     if isempty(dd)
+%         warning('Absent file Atlas.mat [File: %s]',cur_file);
+%         continue;
+%     end
+%     fprintf('Loading Atlas [File: %s] ...',cur_file);
+%     data_atlas = load(fullfile(DIR_SAVE,cur_file,'Atlas.mat'));
     fprintf(' done.\n');
-
-    % Loading Atlas
-    dd = dir(fullfile(DIR_SAVE,cur_file,'Atlas.mat'));
-    if isempty(dd)
-        warning('Absent file Atlas.mat [File: %s]',cur_file);
-        continue;  
-    end
-    fprintf('Loading Atlas [File: %s] ...',cur_file);
-    data_atlas = load(fullfile(DIR_SAVE,cur_file,'Atlas.mat'));
-    fprintf(' done.\n');
-
+    
     % Listing Regions
     ddd = dir(fullfile(DIR_SAVE,cur_file,'Sources_fUS','*.mat'));
     if isempty(ddd)
-        warning('No Regions found [File: %s]',cur_region,cur_file);
+        warning('No Regions found [File: %s]',cur_file);
         continue;
     end
     available_regions = strrep({ddd(:).name}','.mat','');
     
     % Counter
     counter = counter+1;
-%     REM_images = data_surges.REM_images;
-%     index_REM = find(REM_images==1);
-%     TimeTags = data_surges.TimeTags;
-%     intensity_surge = data_surges.intensity_surge;
-%     whole_mask = data_surges.whole_mask;
     Doppler_Surge = data_surges.Doppler_Surge;
     ind_surge = data_surges.ind_surge;
     ind_tonic = data_surges.ind_tonic;
+    ind_rem = data_surges.REM_images;
+    index_phasic = find(data_surges.ind_surge==1);
+    index_tonic = find(data_surges.ind_tonic==1);
+    index_rem = find(data_surges.REM_images==1);
     
-    % Compute 
-    Doppler_tonic = Doppler_Surge(:,:,ind_tonic==1);
-    Doppler_tonic(Doppler_tonic==-1)=0;
-    Doppler_tonic_mean_rec = mean(Doppler_tonic,3,'omitnan');
-    Doppler_tonic_median_rec = median(Doppler_tonic,3,'omitnan');
+    % Finding all REM episodes
+    TimeTags = data_surges.TimeTags;
+    if isempty(TimeTags(1).Tag)
+        warning('Empty TimeTags [File: %s]',cur_file);
+    else
+        TimeTags_REM = TimeTags(startsWith({TimeTags(:).Tag}','REM-')==1);
+        TimeTags_TONIC = TimeTags(startsWith({TimeTags(:).Tag}','REMTONIC-')==1);
+        TimeTags_PHASIC = TimeTags(startsWith({TimeTags(:).Tag}','REMPHASIC-')==1);
+    end
+    temp = find(diff(index_rem)>1);
+    index_start = [index_rem(1);index_rem(temp+1)];
+    index_end = [index_rem(temp);index_rem(end)];
     
-    Doppler_phasic = Doppler_Surge(:,:,ind_surge==1);
-    Doppler_phasic(Doppler_phasic==-1)=0;
-    Doppler_phasic_mean_rec = mean(Doppler_phasic,3,'omitnan');
-    Doppler_phasic_median_rec = median(Doppler_phasic,3,'omitnan');
-
-    % Collecting fUS data
+    % Setting zero-values
+    Doppler_Surge(Doppler_Surge==-1)=0;
+    
+    % Browsing groups
     for i=1:length(list_group)
-        cur_group = char(list_group(i));
-%         index_group = find(strcmp(data_fus.label_episodes,cur_group)==1);
         
-        for j=1:length(list_regions) 
+        cur_group = char(list_group(i));
+        if strcmp(cur_group,'REM-TONIC')
+            index_frames = index_tonic;
+            ind_frames = ind_tonic;
+        elseif strcmp(cur_group,'REM-PHASIC')
+            index_frames = index_phasic;
+            ind_frames = ind_surge;
+        elseif strcmp(cur_group,'REM')
+            index_frames = index_rem;
+            ind_frames = ind_rem;
+        end
+        
+        % Browsing regions
+        for j=1:length(list_regions)
+                
             cur_region = char(list_regions(j));
+%             fprintf('Collecting Data [Region: %s].\n',cur_region);
+            
             if sum(strcmp(cur_region,available_regions)>0)
                 data_mask = load(fullfile(DIR_SAVE,cur_file,'Sources_fUS',strcat(cur_region,'.mat')),'mask');
                 cur_mask = data_mask.mask;
@@ -142,57 +157,64 @@ for index = 1:length(list_files)
                 continue;
             end
             
+            % Setting zero values to NaN
             cur_mask(cur_mask==0)=NaN;
             
-            % Applying mask to Doppler Doppler_tonic Doppler_phasic
-            Doppler_tonic_masked = Doppler_tonic.*repmat(cur_mask,[1,1,size(Doppler_tonic,3)]);
-            Doppler_phasic_masked = Doppler_phasic.*repmat(cur_mask,[1,1,size(Doppler_phasic,3)]);
-            Doppler_tonic_reshaped = reshape(Doppler_tonic_masked,size(Doppler_tonic_masked,1)*size(Doppler_tonic_masked,2),1,size(Doppler_tonic_masked,3));
-            y_data_tonic = (mean(squeeze(Doppler_tonic_reshaped),1,'omitnan'))';
-            Doppler_phasic_reshaped = reshape(Doppler_phasic_masked,size(Doppler_phasic_masked,1)*size(Doppler_phasic_masked,2),1,size(Doppler_phasic_masked,3));
-            y_data_phasic = (mean(squeeze(Doppler_phasic_reshaped),1,'omitnan'))';
+            % Applying mask to Doppler_Surge
+            Doppler_masked = Doppler_Surge.*repmat(cur_mask,[1,1,size(Doppler_Surge,3)]);
+            Doppler_reshaped = reshape(Doppler_masked,size(Doppler_masked,1)*size(Doppler_masked,2),1,size(Doppler_masked,3));
+            y_data = (mean(squeeze(Doppler_reshaped),1,'omitnan'))';
             
-            temp_tonic = Doppler_phasic_mean_rec.*cur_mask;
-            mean_tonic = mean(temp_tonic(:),'omitnan');
-            temp_phasic = Doppler_phasic_mean_rec.*cur_mask;
-            mean_phasic = mean(temp_phasic(:),'omitnan');
-            
-            temp_tonic = Doppler_tonic_median_rec.*cur_mask;
-            median_tonic = mean(temp_tonic(:),'omitnan');
-            temp_phasic = Doppler_phasic_median_rec.*cur_mask;
-            median_phasic = mean(temp_phasic(:),'omitnan');
-            
-            if strcmp(cur_group,'REM-TONIC')
-                value1 = mean_tonic;
-                value2 = median_tonic;
-                y_data = y_data_tonic;
-            elseif strcmp(cur_group,'REM-PHASIC')
-                value1 = mean_phasic;
-                value2 = median_phasic;
-                y_data = y_data_phasic;
-            end
-            
+            % Full y_data
+            y_data_rec = y_data(index_frames);
+            mean_rec = mean(y_data_rec(:),'omitnan');
+            median_rec = median(y_data_rec(:),'omitnan');
             % Emit warning if NaN found
-            if isnan(value1)
+            if isnan(mean_rec)
                 warning('NaN value mean [File: %s, Region: %s].',cur_file,cur_region);
                 continue;
             end
-            if isnan(value2)
+            if isnan(median_rec)
                 warning('NaN value median [File: %s, Region: %s].',cur_file,cur_region);
                 continue;
             end
-%           index_region = find(strcmp(data_fus.label_channels,cur_region)==1);
-%             if length(index_region)>1
-%                 index_region = index_region(end);
-%             end
+            
+            % Browsing episodes
+            all_y_data_ep = [];
+            all_mean_ep = [];
+            all_median_ep = [];
+            for k=1:length(index_start)
+                
+                ind_episode = zeros(size(ind_rem));
+                ind_episode(index_start(k):index_end(k))=1;
+                index_restrict = find(ind_frames.*ind_episode==1);
+%                 if isempty(index_restrict)
+%                     warning('Empty restriction [File: %s, Group: %s, Region: %s, Episode: %d].',cur_file,cur_group,cur_region,k);
+%                 end
+                % Restrict y_data to episode
+                if ~isempty(index_restrict)
+                    y_data_ep = y_data(index_restrict);
+                    mean_ep = mean(y_data_ep(:),'omitnan');
+                    median_ep = median(y_data_ep(:),'omitnan');
+                    
+                    all_y_data_ep = [all_y_data_ep ; y_data_ep];
+                    all_mean_ep = [all_mean_ep ; mean_ep];
+                    all_median_ep = [all_median_ep ; median_ep];
+                
+                end
+            end
             
             % Getting data
             S(i,j).group = cur_group;
             S(i,j).region = cur_region;
             S(i,j).recording = [S(i,j).recording;{cur_file}];
-            S(i,j).mean_per_rec = [S(i,j).mean_per_rec;value1];
-            S(i,j).median_per_rec = [S(i,j).median_per_rec;value2];
-            S(i,j).y_data = [S(i,j).y_data;y_data];
+            S(i,j).y_data = [S(i,j).y_data;y_data_rec];
+            S(i,j).mean_per_rec = [S(i,j).mean_per_rec;mean_rec];
+            S(i,j).median_per_rec = [S(i,j).median_per_rec;median_rec];
+            S(i,j).y_data_ep = [S(i,j).y_data_ep;all_y_data_ep];
+            S(i,j).mean_per_ep = [S(i,j).mean_per_ep;all_mean_ep];
+            S(i,j).median_per_ep = [S(i,j).median_per_ep;all_median_ep];
+
         end
     end
 end
@@ -207,6 +229,7 @@ P.f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
 % % comment if list_regions is not ALL
 % ind_colors = [1,2,3,4,5,6,7,8,9,10,11,12,13,25,27,28,29,30,38,39,40,46,47,48,49,50,51,52,53,61,62,63,64];
 % P.f_colors = f.Colormap(ind_colors,:);
+% P.f_colors = f.Colormap;
 close(f);
 
 P.margin_w = .01;
@@ -272,12 +295,12 @@ n_recordings = NaN(length(list_group),length(list_regions));
 tt_data = NaN(m,length(list_regions),length(list_group));
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        temp = S(i,j).y_data; 
+        temp = S(i,j).y_data;
         n_samples(i,j)=sum(~isnan(temp))/1000;
-        n_recordings(i,j)=sum(~isnan(S(i,j).y_mean));
+        n_recordings(i,j)=sum(~isnan(S(i,j).mean_per_rec));
         tt_data(1:length(temp),j,i) = temp;
     end
-end        
+end
 
 dummy_data = rand(length(list_group),length(list_regions));
 xtick_labs = list_group;
@@ -311,8 +334,8 @@ hold(ax,'on');
 gpwidth = .85;
 for i=1:n_groups
     positions = i-gpwidth/2:gpwidth/(n_bars-1):i+gpwidth/2;
-%     ind_colors = 1:63/(n_bars-1):64;
-%     colors = cmap(round(ind_colors),:);
+    %     ind_colors = 1:63/(n_bars-1):64;
+    %     colors = cmap(round(ind_colors),:);
     boxplot(tt_data(:,:,i),...
         'MedianStyle','target',...
         'positions',positions,...
@@ -368,7 +391,7 @@ saveas(f,fullname);
 
 end
 
-function tt_data = plot2(L,P,S,str,only_txt)
+function tt_data = plot2(L,P,S,str1,str2,only_txt)
 
 fName = L.fName;
 folder_save = L.folder_save;
@@ -383,11 +406,21 @@ ax1 = axes('Parent',panel,'Position',[.15 .05 .2 .9]);
 ax2 = axes('Parent',panel,'Position',[.45 .05 .2 .9]);
 ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
 clrmenu(f);
-switch str
-    case 'Mean'
-        f.Name = strcat(fName,'-B-MeanPerRecording');
+switch str1
+   case 'Mean'
+        switch str2
+            case 'Recording'
+                f.Name = strcat(fName,'-MeanPerRecording');
+            case 'Episode'
+                f.Name = strcat(fName,'-MeanPerEpisode');
+        end       
     case 'Median'
-        f.Name = strcat(fName,'-B-MedianPerRecording');
+        switch str2
+            case 'Recording'
+                f.Name = strcat(fName,'-MedianPerRecording');
+            case 'Episode'
+                f.Name = strcat(fName,'-MedianPerEpisode');
+        end
 end
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
@@ -395,6 +428,7 @@ f.PaperPositionMode='manual';
 
 f.Colormap = P.Colormap;
 f_colors = P.f_colors;
+f_colors = P.Colormap;
 margin_w = P.margin_w;
 margin_h = P.margin_h;
 n_columns = P.n_columns;
@@ -406,6 +440,10 @@ thresh_average = P.thresh_average;
 all_markers = P.all_markers;
 all_linestyles = P.all_linestyles;
 patch_alpha = P.patch_alpha;
+dd_color = [.5 .5 .5];
+dd_color = 'none';
+bd_color = 'k';
+stats_color = 'r';
 
 
 % Getting data
@@ -413,11 +451,23 @@ patch_alpha = P.patch_alpha;
 m = 0;
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        switch str
+        
+        switch str1
             case 'Mean'
-                m = max(m,length(S(i,j).y_mean));  
+                switch str2
+                    case 'Recording'
+                        m = max(m,length(S(i,j).mean_per_rec));
+                    case 'Episode'
+                        m = max(m,length(S(i,j).mean_per_ep));
+                end
+                
             case 'Median'
-                m = max(m,length(S(i,j).y_median));
+                switch str2
+                    case 'Recording'
+                        m = max(m,length(S(i,j).median_per_rec));
+                    case 'Episode'
+                        m = max(m,length(S(i,j).median_per_rec));
+                end
         end
     end
 end
@@ -425,12 +475,23 @@ end
 dots_data = NaN(m,length(list_regions),length(list_group));
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        switch str
-            case 'Median'
-                temp = S(i,j).y_median;
+        switch str1
             case 'Mean'
-                temp = S(i,j).y_mean;
-        end 
+                switch str2
+                    case 'Recording'
+                        temp = S(i,j).mean_per_rec;
+                    case 'Episode'
+                        temp = S(i,j).mean_per_ep;
+                end
+                
+            case 'Median'
+                switch str2
+                    case 'Recording'
+                        temp = S(i,j).median_per_rec;
+                    case 'Episode'
+                        temp = S(i,j).median_per_ep;
+                end
+        end
         dots_data(1:length(temp),j,i) = temp;
     end
 end
@@ -438,18 +499,29 @@ end
 tt_data = NaN(length(list_group),length(list_regions));
 ebar_data = NaN(length(list_group),length(list_regions));
 n_samples = NaN(length(list_group),length(list_regions));
-% n_recordings = NaN(length(list_group),length(list_regions));
+n_recordings = NaN(length(list_group),length(list_regions));
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        switch str
+        switch str1
             case 'Mean'
-                temp = S(i,j).y_median;
+                switch str2
+                    case 'Recording'
+                        temp = S(i,j).mean_per_rec;
+                    case 'Episode'
+                        temp = S(i,j).mean_per_ep;
+                end
+                
             case 'Median'
-                temp = S(i,j).y_mean;
+                switch str2
+                    case 'Recording'
+                        temp = S(i,j).median_per_rec;
+                    case 'Episode'
+                        temp = S(i,j).median_per_ep;
+                end
         end
         tt_data(i,j) = mean(temp,'omitnan');
         n_samples(i,j)=sum(~isnan(temp));
-%         n_recordings(i,j)=sum(~isnan(S(i,j).y_mean));
+        n_recordings(i,j)=sum(~isnan(S(i,j).mean_per_rec));
         ebar_data(i,j) = std(temp,[],'omitnan')./sqrt(n_samples(i,j));
     end
 end
@@ -464,7 +536,7 @@ fwrite(fid,newline);
 for i =1:length(list_regions)
     fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
     for j =1:length(list_group)
-        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
+        fwrite(fid,sprintf('%.4f+/-%.4f \t ',tt_data(j,i),ebar_data(j,i)));
     end
     if i~=length(list_regions)
         fwrite(fid,newline);
@@ -502,12 +574,12 @@ for i=1:length(b1)
     temp(isnan(temp))=[];
     line('XData',temp,'YData',b1(i).XData(i)*ones(size(temp)),...
         'LineStyle','none','Marker','.','MarkerSize',8,...
-        'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5],'Parent',ax1);
+        'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax1);
     % errorbars
     e = errorbar(b1(i).YData(i),b1(i).XData(i),-ebar_data(1,i),ebar_data(1,i),...
-        'horizontal','Parent',ax1,'LineWidth',1,'Color','k');
+        'horizontal','Parent',ax1,'LineWidth',1,'Color',bd_color);
     %         e.Color='k';
-
+    
 end
 
 % Axis limits
@@ -526,7 +598,7 @@ hold(ax2,'on');
 b2 = barh(diag(tt_data(2,:)),'stacked','Parent',ax2);
 for i=1:length(b2)
     %bar color
-    b2(i).FaceColor = f_colors(i,:);
+    b2(i).FaceColor = f_colors(end-i+1,:);
     b2(i).EdgeColor = 'none';
     b2(i).LineWidth = .1;
     % Plot dots and ebar data for Mean per recording
@@ -535,12 +607,12 @@ for i=1:length(b2)
     temp(isnan(temp))=[];
     line('XData',temp,'YData',b2(i).XData(i)*ones(size(temp)),...
         'LineStyle','none','Marker','.','MarkerSize',8,...
-        'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5],'Parent',ax2);
+        'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax2);
     % errorbars
-    e = errorbar(b2(i).YData(i),b2(i).XData(i),-ebar_data(1,i),ebar_data(1,i),...
-        'horizontal','Parent',ax2,'LineWidth',1,'Color','k');
+    e = errorbar(b2(i).YData(i),b2(i).XData(i),-ebar_data(2,i),ebar_data(2,i),...
+        'horizontal','Parent',ax2,'LineWidth',1,'Color',bd_color);
     %         e.Color='k';
-
+    
 end
 
 % Axis limits
