@@ -42,7 +42,22 @@ end
 L.list_files = list_files;
 
 % list_regions
-if strcmp(reg_group,'GROUPS')
+if strcmp(reg_group,'AREAS')
+
+    list_regions = {'[SR]AnteriorCortex';'[SR]PosteriorCortex';'[SR]HippocampalFormation';'[SR]Midbrain';'[SR]Thalamus';'[SR]Amygdala';'[SR]Hypothalamus';'[SR]Other'};
+    label_regions = {'ACx';'PCx';'HF';'MB';'Th';'Am';'HyTh';'Oth'};
+    
+elseif strcmp(reg_group,'AREAS-L')
+
+    list_regions = {'[SR]AnteriorCortex-L';'[SR]PosteriorCortex-L';'[SR]HippocampalFormation-L';'[SR]Midbrain-L';'[SR]Thalamus-L';'[SR]Amygdala-L';'[SR]Hypothalamus-L';'[SR]Other-L'};
+    label_regions = {'ACx-L';'PCx-L';'HF-L';'MB-L';'Th-L';'Am-L';'HyTh-L';'Oth-L'};
+    
+elseif strcmp(reg_group,'AREAS-R')
+    
+    list_regions = {'[SR]AnteriorCortex-R';'[SR]PosteriorCortex-R';'[SR]HippocampalFormation-R';'[SR]Midbrain-R';'[SR]Thalamus-R';'[SR]Amygdala-R';'[SR]Hypothalamus-R';'[SR]Other-R'};
+    label_regions = {'ACx-R';'PCx-R';'HF-R';'MB-R';'Th-R';'Am-R';'HyTh-R';'Oth-R'};
+    
+elseif strcmp(reg_group,'GROUPS')
     
     list_regions = {'OrbitalCortex';'LimbicCortex';'CingulateCortex';'InsularCortex';'MotorCortex';'SomatosensoryCortex';...
         'PiriformCortex';'RetrosplenialCortex';'ParietalCortex';'EntorhinalCortex';'VisualCortex';'AuditoryCortex';'RhinalCortex';
