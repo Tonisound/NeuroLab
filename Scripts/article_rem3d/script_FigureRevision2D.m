@@ -21,7 +21,7 @@ folder_save = fullfile(pwd,'RevisedFigure2');
 if ~exist(folder_save,'dir')
     mkdir(folder_save);
 end
-list_group = {'REM-TONIC';'REM-PHASIC';'REM'};
+list_group = {'REM-TONIC';'REM-PHASIC'};
 
 % Storing
 L.list_group = list_group;
@@ -45,7 +45,7 @@ end
 
 % Plotting/Saving Data
 only_txt = false;
-tt_data = plot_whisker(L,P,Q,R,S);
+tt_data = plot_whisker(L,P,Q,R,S,only_txt);
 tt_data = plot_bar(L,P,Q,R,S,'Mean','Recording',only_txt);
 tt_data = plot_bar(L,P,Q,R,S,'Mean','Episode',only_txt);
 
@@ -307,7 +307,7 @@ fprintf('Data Saved [%s]\n',fullfile(folder_save,strcat(fName,'.pdf')));
 
 end
 
-function tt_data = plot_whisker(L,P,Q,R,S)
+function tt_data = plot_whisker(L,P,Q,R,S,only_txt)
 
 fName = L.fName;
 folder_save = L.folder_save;
@@ -382,6 +382,33 @@ for i =1:length(list_regions)
         char(list_regions(i)),n_recordings(1,i),n_episodes(1,i),...
         n_samples(1,i),...char(list_group(1)),
         n_samples(2,i))};...char(list_group(4)),
+end
+
+% Save in txt file
+fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
+fwrite(fid,sprintf('Region \t'));
+for j =1:length(list_group)
+    fwrite(fid,sprintf('%s \t ', char(list_group(j))));
+end
+fwrite(fid,newline);
+for i =1:length(list_regions)
+    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
+    for j =1:length(list_group)
+        m = median(tt_data(:,i,j),'omitnan');
+        s = std(tt_data(:,i,j),'omitnan')/sqrt(n_samples(j,i));
+        fwrite(fid,sprintf('%.4f+/-%.4f \t ',m,s));
+    end
+    if i~=length(list_regions)
+        fwrite(fid,newline);
+    end
+end
+fclose(fid);
+fprintf('Data Saved in txt file [%s].\n',fullfile(folder_save,strcat(f.Name,'.txt')));
+
+% Early Break
+if only_txt == true
+    warning('Early Break: Text File saved only.');
+    return;
 end
 
 % Box Plot

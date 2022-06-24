@@ -51,7 +51,7 @@ else
 end
 
 % Plotting/Saving Data
-only_txt = true;
+only_txt = false;
 % tt_data = plot1(L,P,S,'Rmax',only_txt);
 % tt_data = plot1(L,P,S,'Tmax',only_txt);
 % tt_data = plot1(L,P,S,'Xmax',only_txt);
@@ -68,7 +68,8 @@ list_regions = L.list_regions;
 list_ref = L.list_ref;
 list_files = L.list_files;
 
-container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Correlation';
+% container = 'F:\SHARED_DATASET\NEUROLAB\NLab_Statistics\fUS_Correlation';
+container = 'F:\Antoine\OneDrive - McGill University\Antoine-fUSDataset\NEUROLAB\NLab_Statistics\fUS_Correlation';
 time_group = 'CURRENT';
 list_files=strrep(list_files,'R_nlab','R');
 
@@ -80,6 +81,11 @@ S = struct('reference','','region','','recording','',...
     'ref_time',[],'RT_pattern',[]);...
     S(length(list_ref),length(list_regions)).r_max = [];
 ref_time = (-20:.1:20);
+
+% Buidling struct R
+R = struct('reference','','recording','',...
+    'Rmax_map',[],'Tmax_map',[],'RT_pattern',[]);...
+R(length(list_files),length(list_ref)).recording = [];
 
 counter = 0;
 for index = 1:length(list_files)
@@ -100,6 +106,13 @@ for index = 1:length(list_files)
         data_fus = load(fullfile(d.folder,d.name));
         fprintf('fUS Correlation loaded [File: %s, Ref: %s]\n',cur_file,cur_ref);
         counter = counter +1;
+        
+        % Collecting fUS data
+        R(index,i).reference = {cur_ref};
+        R(index,i).recording = {cur_file};
+        R(index,i).Rmax_map = data_fus.Rmax_map;
+        R(index,i).Tmax_map = data_fus.Tmax_map;
+%         R(index,i).RT_pattern = data_fus.RT_pattern;
         
         % Collecting fUS data
         % removing ref-index if needed
@@ -206,7 +219,7 @@ P.all_linestyles = {'--';':';'-'};
 P.patch_alpha = .1;
 
 % Saving Data
-save(fullfile(folder_save,strcat(fName,'.mat')),'L','S','P','-v7.3');
+save(fullfile(folder_save,strcat(fName,'.mat')),'L','R','S','P','-v7.3');
 fprintf('Synthesis Data Saved [%s]\n',fullfile(folder_save,strcat(fName,'.mat')));
 
 end
@@ -460,7 +473,7 @@ patch_alpha = P.patch_alpha;
 m = 0;
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
-        m = max(m,length(S(i,j).r_max))
+        m = max(m,length(S(i,j).r_max));
     end
 end
 dots_data = NaN(m,length(list_regions),length(list_ref));
@@ -573,22 +586,22 @@ ind_sorted_a=1:length(list_regions);
 ind_sorted_c=1:length(list_regions);
 ind_sorted_b=1:length(list_regions);
 
-% Manual sorting
-ind_sorted_a = fliplr([25 11 27 30 41 22 ...
-    38 52 31 32 1 39 ...
-    44 40 6 17 36 7 19 5 18 ...
-    45 43 ...
-    15 46 34 21 16 48 42 49 20 9 50 26 53 35 13 2 24 12 ...
-    47 33 23 28 3 14 37 29 4 ...
-    51 8 10]);
-
-ind_sorted_c = fliplr([11 25 27 30 41 22 ...
-    38 52 31 32 39 1 ...
-    6 44 17 36 40 7 19 5 18 ...
-    45 43 ...
-    15 34 46 16 21 48 20 53 26 49 50 42 9 35 2 13 12 24 ...
-    47 23 33 3 28 14 37 29 4 ...
-    51 8 10]);
+% % Manual sorting
+% ind_sorted_a = fliplr([25 11 27 30 41 22 ...
+%     38 52 31 32 1 39 ...
+%     44 40 6 17 36 7 19 5 18 ...
+%     45 43 ...
+%     15 46 34 21 16 48 42 49 20 9 50 26 53 35 13 2 24 12 ...
+%     47 33 23 28 3 14 37 29 4 ...
+%     51 8 10]);
+% 
+% ind_sorted_c = fliplr([11 25 27 30 41 22 ...
+%     38 52 31 32 39 1 ...
+%     6 44 17 36 40 7 19 5 18 ...
+%     45 43 ...
+%     15 34 46 16 21 48 20 53 26 49 50 42 9 35 2 13 12 24 ...
+%     47 23 33 3 28 14 37 29 4 ...
+%     51 8 10]);
 
 
 % Ax1 & Ax2: Display mode
