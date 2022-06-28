@@ -344,6 +344,7 @@ pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import Exter
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Locomotion Events|Detect Sleep Events|Detect Left-Right Runs|Detect Early-Mid-Late Runs');
 pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Generate Region Groups');
+pl_str = strcat(pl_str,'|Run GLM Analysis');
 pl_str = strcat(pl_str,'|Export Time Tags|Export Image Patches|Export Anatomical Regions|Export LFP Traces (.dat)');
 pl.String = pl_str;
 

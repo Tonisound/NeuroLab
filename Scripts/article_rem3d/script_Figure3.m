@@ -29,7 +29,9 @@ end
 % L.label_regions(ind_exclude)=[];
 
 % list of time groups
-list_ref = {'Ref-Index-REM';'Ref-Index-REM-PHASIC';'Ref-Index-REM-PHASIC-2'};
+
+% list_ref = {'Ref-Index-REM';'Ref-Index-REM-PHASIC';'Ref-Index-REM-PHASIC-2'};
+list_ref = {'Ref-Index-REM';'Ref-Index-REM-PHASIC';'Ref-Index-REM-TONIC'};
 % list_ref = {'Ref-Index-QW';'Ref-Index-AW';'Ref-Index-NREM'};
 % list_ref = {'Ref-Index-WAKE';'Ref-Index-SLEEP';'Ref-Index-REM-TONIC'};
 

@@ -62,6 +62,9 @@ switch strtrim(str(val,:))
     case 'Filter ACC/GYR/EMG channels - Extract Power Envelope'
         filter_accgyremg_extractenvelope(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Run GLM Analysis'
+        run_glm_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+        
     case 'Export Time Tags'
         export_time_tags(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
         

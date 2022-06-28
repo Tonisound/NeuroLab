@@ -63,8 +63,8 @@ elseif strcmp(reg_group,'GROUPS')
         'PiriformCortex';'RetrosplenialCortex';'ParietalCortex';'EntorhinalCortex';'VisualCortex';'AuditoryCortex';'RhinalCortex';
         'DentateGyrus';'CA1Region';'CA2Region';'CA3Region';'ResidualHippocampus';'Subiculum';'Fimbria';
         'Striatum';'BasalForebrain';'SubstantiaNigra';'Septum';
-        'StriataTerminalis';'SuperiorColliculus';'InferiorColliculus';'DPAG';'VPAG';'DThalamus';'VThalamus';'Habenulla';'ZonaIncerta';'PretectalNuclei';'GeniculateNuclei';'ReticularFormation';
-        'BasalAmygdala';'LateralAmygdala';'CentromedialAmygdala';'CorticalAmygdala';'ResidualAmygdala';
+        'StriaTerminalis';'SuperiorColliculus';'InferiorColliculus';'DPAG';'VPAG';'DThalamus';'VThalamus';'Habenulla';'ZonaIncerta';'PretectalNuclei';'GeniculateNuclei';'ReticularFormation';
+        'AnteriorAmygdala';'PosteriorAmygdala';...'BasalAmygdala';'LateralAmygdala';'CentromedialAmygdala';'CorticalAmygdala';'ResidualAmygdala';
         'DHypothalamus';'LHypothalamus';'VHypothalamus';'VTegmentalArea';'PreopticArea';'MammillaryNuclei';'OlfactoryNuclei';
         'Cerebellum';'BrainStem';'PinealGland';'OptChiasm';'Claustrum';'CCallosum';'Ventricles'};
     label_regions = {'OrCx';'LiCx';'CCx';'ICx';'MCx';'SSCx';...
@@ -72,7 +72,7 @@ elseif strcmp(reg_group,'GROUPS')
         'DG';'CA1';'CA2';'CA3';'RHip';'Sub';'Fim';
         'Stri';'BFb';'SNi';'Sep';
         'StrTer';'SC';'IC';'DPAG';'VPAG';'DThal';'VThal';'Hab';'ZI';'PN';'GN';'RF';
-        'BasAm';'LatAm';'CenAm';'CorAm';'ResAm';
+        'AnAm';'PoAm';...'BasAm';'LatAm';'CenAm';'CorAm';'ResAm';
         'DHthal';'LHthal';'VHthal';'VTA';'POA';'MN';'ON';
         'Cereb';'BS';'PG';'Opt';'Clau';'CC';'Ven'};
     
@@ -86,8 +86,8 @@ elseif strcmp(reg_group,'LEFT-GROUPS')
         'PiriformCortex-L';'RetrosplenialCortex-L';'ParietalCortex-L';'EntorhinalCortex-L';'VisualCortex-L';'AuditoryCortex-L';'RhinalCortex-L';
         'DentateGyrus-L';'CA1Region-L';'CA2Region-L';'CA3Region-L';'ResidualHippocampus-L';'Subiculum-L';'Fimbria-L';
         'Striatum-L';'BasalForebrain-L';'SubstantiaNigra-L';'Septum-L';
-        'StriataTerminalis-L';'SuperiorColliculus-L';'InferiorColliculus-L';'DPAG-L';'VPAG-L';'DThalamus-L';'VThalamus-L';'Habenulla-L';'ZonaIncerta-L';'PretectalNuclei-L';'GeniculateNuclei-L';'ReticularFormation-L';
-        'BasalAmygdala-L';'LateralAmygdala-L';'CentromedialAmygdala-L';'CorticalAmygdala-L';'ResidualAmygdala-L';
+        'StriaTerminalis-L';'SuperiorColliculus-L';'InferiorColliculus-L';'DPAG-L';'VPAG-L';'DThalamus-L';'VThalamus-L';'Habenulla-L';'ZonaIncerta-L';'PretectalNuclei-L';'GeniculateNuclei-L';'ReticularFormation-L';
+        'AnteriorAmygdala-L';'PosteriorAmygdala-L';...'BasalAmygdala-L';'LateralAmygdala-L';'CentromedialAmygdala-L';'CorticalAmygdala-L';'ResidualAmygdala-L';
         'DHypothalamus-L';'LHypothalamus-L';'VHypothalamus-L';'VTegmentalArea-L';'PreopticArea-L';'MammillaryNuclei-L';'OlfactoryNuclei-L';
         'Cerebellum-L';'BrainStem-L';'PinealGland-L';'OptChiasm-L';'Claustrum-L';'CCallosum-L';'Ventricles-L'};
     label_regions = {'OrCx-L';'LiCx-L';'CCx-L';'ICx-L';'MCx-L';'SSCx-L';...
@@ -95,7 +95,7 @@ elseif strcmp(reg_group,'LEFT-GROUPS')
         'DG-L';'CA1-L';'CA2-L';'CA3-L';'RHip-L';'Sub-L';'Fim-L';
         'Stri-L';'BFb-L';'SNi-L';'Sep-L';
         'StrTer-L';'SC-L';'IC-L';'DPAG-L';'VPAG-L';'DThal-L';'VThal-L';'Hab-L';'ZI-L';'PN-L';'GN-L';'RF-L';
-        'BasAm-L';'LatAm-L';'CenAm-L';'CorAm-L';'ResAm-L';
+        'AnAm-L';'PoAm-L';...'BasAm-L';'LatAm-L';'CenAm-L';'CorAm-L';'ResAm-L';
         'DHthal-L';'LHthal-L';'VHthal-L';'VTA-L';'POA-L';'MN-L';'ON-L';
         'Cereb-L';'BS-L';'PG-L';'Opt-L';'Clau-L';'CC-L';'Ven-L'};
     
@@ -105,8 +105,8 @@ elseif strcmp(reg_group,'RIGHT-GROUPS')
         'PiriformCortex-R';'RetrosplenialCortex-R';'ParietalCortex-R';'EntorhinalCortex-R';'VisualCortex-R';'AuditoryCortex-R';'RhinalCortex-R';
         'DentateGyrus-R';'CA1Region-R';'CA2Region-R';'CA3Region-R';'ResidualHippocampus-R';'Subiculum-R';'Fimbria-R';
         'Striatum-R';'BasalForebrain-R';'SubstantiaNigra-R';'Septum-R';
-        'StriataTerminalis-R';'SuperiorColliculus-R';'InferiorColliculus-R';'DPAG-R';'VPAG-R';'DThalamus-R';'VThalamus-R';'Habenulla-R';'ZonaIncerta-R';'PretectalNuclei-R';'GeniculateNuclei-R';'ReticularFormation-R';
-        'BasalAmygdala-R';'LateralAmygdala-R';'CentromedialAmygdala-R';'CorticalAmygdala-R';'ResidualAmygdala-R';
+        'StriaTerminalis-R';'SuperiorColliculus-R';'InferiorColliculus-R';'DPAG-R';'VPAG-R';'DThalamus-R';'VThalamus-R';'Habenulla-R';'ZonaIncerta-R';'PretectalNuclei-R';'GeniculateNuclei-R';'ReticularFormation-R';
+        'AnteriorAmygdala-R';'PosteriorAmygdala-R';...'BasalAmygdala-R';'LateralAmygdala-R';'CentromedialAmygdala-R';'CorticalAmygdala-R';'ResidualAmygdala-R';
         'DHypothalamus-R';'LHypothalamus-R';'VHypothalamus-R';'VTegmentalArea-R';'PreopticArea-R';'MammillaryNuclei-R';'OlfactoryNuclei-R';
         'Cerebellum-R';'BrainStem-R';'PinealGland-R';'OptChiasm-R';'Claustrum-R';'CCallosum-R';'Ventricles-R'};
     label_regions = {'OrCx-R';'LiCx-R';'CCx-R';'ICx-R';'MCx-R';'SSCx-R';...
@@ -114,7 +114,7 @@ elseif strcmp(reg_group,'RIGHT-GROUPS')
         'DG-R';'CA1-R';'CA2-R';'CA3-R';'RHip-R';'Sub-R';'Fim-R';
         'Stri-R';'BFb-R';'SNi-R';'Sep-R';
         'StrTer-R';'SC-R';'IC-R';'DPAG-R';'VPAG-R';'DThal-R';'VThal-R';'Hab-R';'ZI-R';'PN-R';'GN-R';'RF-R';
-        'BasAm-R';'LatAm-R';'CenAm-R';'CorAm-R';'ResAm-R';
+        'AnAm-R';'PoAm-R';...'BasAm-R';'LatAm-R';'CenAm-R';'CorAm-R';'ResAm-R';
         'DHthal-R';'LHthal-R';'VHthal-R';'VTA-R';'POA-R';'MN-R';'ON-R';
         'Cereb-R';'BS-R';'PG-R';'Opt-R';'Clau-R';'CC-R';'Ven-R'};
     
