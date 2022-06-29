@@ -651,7 +651,7 @@ for i = 1:length(ind_files)
                 success = generate_region_groups(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).recording,myhandles,0);
                     
             case 'Run GLM Analysis'
-                success = run_glm_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0,[str_regions;str_group_regions]);
+                success = run_glm_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0,str_group,[str_regions;str_group_regions]);
                 
             case 'Export Time Tags'
                 success = export_time_tags(FILES(ii).fullpath,fullfile(DIR_SAVE,FILES(ii).nlab));

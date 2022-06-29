@@ -1,4 +1,4 @@
-function success = run_glm_analysis(foldername,handles,val,str_regions)
+function success = run_glm_analysis(foldername,handles,val,str_group,str_regions)
 % Run GLM Analysis
 
 success = false;
@@ -35,10 +35,28 @@ else
     return;
 end
 
+% Selecting regressors;
+if val ==1
+    % user mode
+    [ind_regressors,ok] = listdlg('PromptString','Select Regions','SelectionMode','multiple',...
+        'ListString',TimeGroups_name,'ListSize',[300 500]);
+    if isempty(ind_regressors)
+        return;
+    else
+        all_regressors  = TimeGroups_name(ind_regressors);
+    end
+else
+    % batch mode
+    if isempty(str_group)
+        all_regressors  = TimeGroups_name;
+    else
+        all_regressors  = TimeGroups_name(contains(TimeGroups_name,str_group));
+    end
+end
+% all_regressors  = {'QW';'AW';'NREM';'REM-PHASIC';'REM-TONIC'};
+
 
 % Buidling predictor variables
-all_regressors  = {'QW';'AW';'NREM';'REM-PHASIC';'REM-TONIC'};
-% all_regressors  = {'QW';'AW';'NREM';'REM'};
 % X = NaN(length(time_ref.Y),size(all_regressors,1)+1);
 X = NaN(length(time_ref.Y),size(all_regressors,1));
 all_y_regressor = zeros(length(time_ref.Y),1);
@@ -74,7 +92,7 @@ if ~isempty(ind_conflicts)
         X(ind_conflicts(j),temp(2:end))=0;
     end 
 end
-% Sqnity Check
+% Sanity Check
 ind_conflicts = find(sum(X,2)>1);
 if ~isempty(ind_conflicts)
     errordlg(sprintf('Non-orthogonal regressors [File: %s].',cur_file));
@@ -105,7 +123,7 @@ if val ==1
     [ind_regions,ok] = listdlg('PromptString','Select Regions','SelectionMode','multiple',...
         'ListString',all_regions,'ListSize',[300 500]);
 else
-    % user mode
+    % batch mode
     ind_regions = [];
     for i =1:length(str_regions)
         cur_region = char(str_regions(i));
@@ -152,8 +170,8 @@ close(h);
 % Running GLM
 % fprintf('Running GLM Analysis on regions [File: %s, %d response variables, %d regressors]...',cur_file,length(ind_regions),size(all_regressors,1));
 h = waitbar(0,'Running GLM Analysis on pixels: 0.0 % completed.');
-pixels_b = NaN(size(IM,1),size(IM,1),size(X,2)+1);
-pixels_dev =  NaN(size(IM,1),size(IM,1),size(X,2)+1);
+pixels_b = NaN(size(IM,1),size(IM,2),size(X,2)+1);
+pixels_dev =  NaN(size(IM,1),size(IM,2),size(X,2)+1);
 pixels_stats = struct('beta',[],'dfe',[],'sfit',[],'s',[],'estdisp',[],'covb',[],...
     'se',[],'coeffcorr',[],'t',[],'p',[],'resid',[],'residp',[],'residd',[],'resida',[],'wts',[]);
 pixels_stats(size(IM,1),size(IM,2)).beta=[];
