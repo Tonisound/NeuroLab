@@ -1,6 +1,6 @@
 function f = interactive_plot_RevFig3C
 
-data = load('RevisedFigure3\RevisedFig3_ALL-GROUPS.mat','R','L');
+data = load('RevisedFigure3\RevisedFig3_ALL-GROUPS_REM.mat','R','L');
 R = data.R;
 L = data.L;
 f = figure;

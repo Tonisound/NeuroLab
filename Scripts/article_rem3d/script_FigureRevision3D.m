@@ -13,10 +13,13 @@ end
 if nargin <2
     reg_group = 'GROUPS';
 end
+if nargin <3
+    restrict_period = 'REM';
+end
 
 % Generate Lists
 L = get_lists(rec_list,reg_group);
-fName = sprintf('RevisedFig3_%s-%s',rec_list,reg_group);
+fName = sprintf('RevisedFig3_%s-%s_%s',rec_list,reg_group,restrict_period);
 folder_save = fullfile(pwd,'RevisedFigure3');
 if ~exist(folder_save,'dir')
     mkdir(folder_save);
@@ -29,7 +32,8 @@ end
 % L.label_regions(ind_exclude)=[];
 
 % list of time groups
-list_group = {'QW';'AW';'NREM';'REM-TONIC';'REM-PHASIC'};
+% list_group = {'QW';'AW';'NREM';'REM-TONIC';'REM-PHASIC'};
+list_group = {'REM-TONIC';'REM-PHASIC'};
 
 % Storing
 L.list_group = list_group;
@@ -37,6 +41,7 @@ L.fName = fName;
 L.folder_save = folder_save;
 L.rec_list = rec_list;
 L.reg_group = reg_group;
+L.restrict_period = restrict_period;
 
 % Loading/Browsing data
 if exist(fullfile(folder_save,strcat(fName,'.mat')),'file')
@@ -57,13 +62,14 @@ end
 
 function [R,S,P] = browse_data(L)
 
-global DIR_SAVE;
+global DIR_STATS;
 
 folder_save = L.folder_save;
 fName = L.fName;
 list_regions = L.list_regions;
 list_files = L.list_files;
 list_group = L.list_group;
+restrict_period = L.restrict_period;
 % list_files=strrep(list_files,'R_nlab','R');
 
 % Buidling struct S
@@ -82,7 +88,8 @@ for index = 1:length(list_files)
     cur_file = char(list_files(index));
     
     % Loading fUS_Statistics
-    container = fullfile(DIR_SAVE,cur_file);
+    container = fullfile(DIR_STATS,'GLM_Analysis',cur_file,restrict_period);
+
     d = dir(fullfile(container,'GLM_Analysis.mat'));
     if isempty(d)
         fprintf(' >>> Absent file GLM_Analysis [File: %s]\n',cur_file);
@@ -341,40 +348,10 @@ for k = 1:length(all_axes)
     ax.YTickLabel = label_regions;
     ax.Title.String = char(list_group(k));
     ax.TickLength = [0 0];
-    ax.XLim = [-10 30];
+    ax.XLim = [-5 60];
     grid(ax,'on');
     ax.YGrid='off';
 end
-
-
-% hold(ax1,'on');
-% b1 = barh(diag(tt_data(1,:)),'stacked','Parent',ax1);
-% for i=1:length(b1)
-%     %bar color
-%     b1(i).FaceColor = f_colors(i,:);
-%     b1(i).EdgeColor = 'none';
-%     b1(i).LineWidth = .1;
-%     % Plot dots and ebar data for Mean per recording
-%     % dots
-%     temp = dots_data(:,i,1);
-%     temp(isnan(temp))=[];
-%     line('XData',temp,'YData',b1(i).XData(i)*ones(size(temp)),...
-%         'LineStyle','none','Marker','.','MarkerSize',8,...
-%         'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax1);
-%     % errorbars
-%     errorbar(b1(i).YData(i),b1(i).XData(i),-ebar_data(1,i),ebar_data(1,i),...
-%         'horizontal','Parent',ax1,'LineWidth',1,'Color',bd_color);
-%     %         e.Color='k';
-% end
-% % Axis limits
-% ax1.YTick = 1:n_bars;
-% % ax1.YTickLabel = list_regions(ind_sorted_rem);
-% ax1.YTickLabel = label_regions;
-% ax1.Title.String = char(list_group(1));
-% ax1.TickLength = [0 0];
-% ax1.XLim = [-10 30];
-% grid(ax1,'on');
-% ax1.YGrid='off';
 
 
 f.Units = 'pixels';
