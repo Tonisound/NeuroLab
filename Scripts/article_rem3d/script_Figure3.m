@@ -650,13 +650,9 @@ else
             b.FaceColor = f_colors(ind_sorted_a(i),:);
             b.EdgeColor = [.5 .5 .5];
         else
-            try
-                line('XData',bdata(i)-1,'YData',i,...
+            line('XData',bdata(i)-1,'YData',i,...
                 'LineStyle','none','Marker','o','MarkerSize',10,'LineWidth',1,...
                 'MarkerFaceColor',f_colors(ind_sorted_a(i),:),'MarkerEdgeColor',[.5 .5 .5],'Parent',ax1);
-            catch
-                f_colors
-            end
         end
     end
     % Axis limits
@@ -767,6 +763,8 @@ for k =1:size(im.CData,1)
         'LineStyle','-','Marker','none','MarkerSize',2,...
         'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
 end
+ax3.YDir = 'reverse';
+ax3.CLim = [0 .8];
 
 % Ax3b
 hold(ax3b,'on');
@@ -793,6 +791,9 @@ for k =1:size(im.CData,1)
         'LineStyle','-','Marker','none','MarkerSize',2,...
         'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3b);
 end
+ax3b.YDir = 'reverse';
+ax3b.CLim = [0 .8];
+
 
 % Ax4
 hold(ax4,'on');
@@ -819,6 +820,8 @@ for k =1:size(im.CData,1)
         'LineStyle','-','Marker','none','MarkerSize',2,...
         'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
 end
+ax4.YDir = 'reverse';
+ax4.CLim = [0 .8];
 
 
 % dummy_data = rand(length(list_ref),length(list_regions));

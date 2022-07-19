@@ -71,6 +71,7 @@ R = struct('mean_per_ep',[],'median_per_ep',[],'y_data',[],...
 R(length(list_group),length(list_regions)).recording = [];
 
 S = struct('Doppler_rec',[],'Doppler_ep',[],'line_x',[],'line_z',[],...
+    'AtlasName','','AP_mm',[],'ML_mm',[],...
     'group','','recording','','episode','');
 S(length(list_files),length(list_group)).recording = [];
 
@@ -273,6 +274,9 @@ for index = 1:length(list_files)
         S(index,j).Doppler_ep = Doppler_ep;
         S(index,j).line_x = data_atlas.line_x;
         S(index,j).line_z = data_atlas.line_z;
+        S(index,j).AtlasName = data_atlas.AtlasName;
+        S(index,j).AP_mm = data_atlas.AP_mm;
+        S(index,j).ML_mm = data_atlas.ML_mm;
     end    
 end
 fprintf('Data Browsed [%d files, %d recordings].\n',counter_rec,counter_ep);

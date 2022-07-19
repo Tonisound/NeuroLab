@@ -62,7 +62,7 @@ list_group = L.list_group;
 list_files = L.list_files;
 
 % Location of source files
-container_short = 'fUS_Statistics';
+container_short = 'fUS_Statistics[AW]';
 %container_short = 'fUS_Statistics[newest-regions-QW]';
 %container = 'fUS_Statistics[new-regions-AW]';
 %container = 'fUS_Statistics[new-regions-mean]';
@@ -125,7 +125,7 @@ f = figure('Visible','off');
 colormap(f,'parula');
 P.Colormap = f.Colormap;
 %uncomment if list_regions is not ALL
-P.f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
+P.f_colors = f.Colormap(round(1:length(f.Colormap)/length(list_regions):length(f.Colormap)),:);
 % % comment if list_regions is not ALL
 % ind_colors = [1,2,3,4,5,6,7,8,9,10,11,12,13,25,27,28,29,30,38,39,40,46,47,48,49,50,51,52,53,61,62,63,64];
 % P.f_colors = f.Colormap(ind_colors,:);

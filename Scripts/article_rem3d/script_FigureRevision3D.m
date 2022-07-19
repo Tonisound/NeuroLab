@@ -14,7 +14,8 @@ if nargin <2
     reg_group = 'GROUPS';
 end
 if nargin <3
-    restrict_period = 'REM';
+%     restrict_period = 'REM';
+    restrict_period = 'WHOLE';
 end
 
 % Generate Lists
@@ -32,8 +33,8 @@ end
 % L.label_regions(ind_exclude)=[];
 
 % list of time groups
-% list_group = {'QW';'AW';'NREM';'REM-TONIC';'REM-PHASIC'};
-list_group = {'REM-TONIC';'REM-PHASIC'};
+list_group = {'QW';'AW';'NREM';'REM-TONIC';'REM-PHASIC'};
+% list_group = {'REM-TONIC';'REM-PHASIC'};
 
 % Storing
 L.list_group = list_group;

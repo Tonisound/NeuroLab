@@ -64,7 +64,7 @@ elseif strcmp(reg_group,'GROUPS')
         'DentateGyrus';'CA1Region';'CA2Region';'CA3Region';'ResidualHippocampus';'Subiculum';'Fimbria';
         'Striatum';'BasalForebrain';'SubstantiaNigra';'Septum';
         'StriaTerminalis';'SuperiorColliculus';'InferiorColliculus';'DPAG';'VPAG';'DThalamus';'VThalamus';'Habenulla';'ZonaIncerta';'PretectalNuclei';'GeniculateNuclei';'ReticularFormation';
-        'AnteriorAmygdala';'PosteriorAmygdala';...'BasalAmygdala';'LateralAmygdala';'CentromedialAmygdala';'CorticalAmygdala';'ResidualAmygdala';
+        'AnteriorAmygdala';'PosteriorAmygdala';...
         'DHypothalamus';'LHypothalamus';'VHypothalamus';'VTegmentalArea';'PreopticArea';'MammillaryNuclei';'OlfactoryNuclei';
         'Cerebellum';'BrainStem';'PinealGland';'OptChiasm';'Claustrum';'CCallosum';'Ventricles'};
     label_regions = {'OrCx';'LiCx';'CCx';'ICx';'MCx';'SSCx';...
@@ -75,6 +75,26 @@ elseif strcmp(reg_group,'GROUPS')
         'AnAm';'PoAm';...'BasAm';'LatAm';'CenAm';'CorAm';'ResAm';
         'DHthal';'LHthal';'VHthal';'VTA';'POA';'MN';'ON';
         'Cereb';'BS';'PG';'Opt';'Clau';'CC';'Ven'};
+    
+    list_regions = {'LimbicCortex';'CingulateCortex';'MotorCortex';'PiriformCortex';'OrbitalCortex';'SomatosensoryCortex';'InsularCortex';...
+        'RetrosplenialCortex';'VisualCortex';'ParietalCortex';'EntorhinalCortex';'AuditoryCortex';'RhinalCortex';
+        'Subiculum';...'CA2Region';
+        'DentateGyrus';'ResidualHippocampus';'CA3Region';'Fimbria';'CA1Region';
+        'InferiorColliculus';'SubstantiaNigra';'SuperiorColliculus';'Septum';'BasalForebrain';'StriaTerminalis';'Striatum';
+        'DPAG';'PretectalNuclei';'Habenulla';'DThalamus';'VPAG';'ReticularFormation';'GeniculateNuclei';'VThalamus';'ZonaIncerta';
+        'AnteriorAmygdala';'PosteriorAmygdala';...
+        'VHypothalamus';'PreopticArea';'LHypothalamus';'OlfactoryNuclei';'DHypothalamus';'VTegmentalArea';'MammillaryNuclei';
+        'OptChiasm';'Ventricles';'CCallosum';'Cerebellum';'Claustrum';'BrainStem';'PinealGland'};
+    label_regions = {'LiCx';'CCx';'MCx';'PiCx';'OCx';'SSCx';'ICx';...
+        'RSCx';'VCx';'PCx';'EnCx';'AuCx';'RhCx';
+        'Sub';...'CA2';
+        'DG';'ResHpc';'CA3';'Fim';'CA1';
+        'IC';'SNi';'SC';'Sep';'BasFor';'StrTer';'Str';
+        'DPAG';'PN';'Hab';'DThal';'VPAG';'RF';'GN';'VThal';'ZI';
+        'AAm';'PAm';...
+        'VHthal';'POA';'LHthal';'ON';'DHthal';'VTA';'MN';
+        'Opt';'Ven';'CC';'Cer';'Clau';'BS';'PG'};
+    
     
 %     list_regions = generate_lists('DisplayObj','groups','DisplayMode','bilateral');
 %     list_regions(strcmp(list_regions,'Vessels'))=[];

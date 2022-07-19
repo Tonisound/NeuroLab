@@ -71,6 +71,13 @@ fprintf('Loading Atlas [File: %s] ... ',cur_file);
 data_atlas = load(fullfile(dir_save,cur_file,'Atlas.mat'));
 fprintf('done.\n');
 
+% Loading alphamap
+data_mask = [];
+if exist(fullfile(dir_save,cur_file,'Sources_fUS','Whole-reg.mat'),'file')
+    data_mask = load(fullfile(dir_save,cur_file,'Sources_fUS','Whole-reg.mat'));
+    data_mask.mask(data_mask.mask==0)=NaN;
+end
+
 ref1 = char(strtrim(pu1.String(pu1.Value,:)));
 ref2 = char(strtrim(pu2.String(pu2.Value,:)));
 
@@ -89,7 +96,7 @@ else
 end
 
 cla(ax1);
-imagesc(R(index_rec,index_ref1).Rmax_map,'Parent',ax1);
+im1 = imagesc(R(index_rec,index_ref1).Rmax_map,'Parent',ax1);
 hold(ax1,'on');
 plot(data_atlas.line_x,data_atlas.line_z,'Linewidth',linewidth_atlas,'Color',color_atlas,'Parent',ax1,'Tag','Atlas','Visible',status);
 ax1.Title.String = ref1;
@@ -101,7 +108,7 @@ ax1.YTickLabel = '';
 colorbar(ax1);
 
 cla(ax2);
-imagesc(R(index_rec,index_ref2).Rmax_map,'Parent',ax2);
+im2 = imagesc(R(index_rec,index_ref2).Rmax_map,'Parent',ax2);
 hold(ax2,'on');
 plot(data_atlas.line_x,data_atlas.line_z,'Linewidth',linewidth_atlas,'Color',color_atlas,'Parent',ax2,'Tag','Atlas','Visible',status);
 ax2.Title.String = ref2;
@@ -113,16 +120,22 @@ ax2.YTickLabel = '';
 colorbar(ax2);
 
 cla(ax3);
-imagesc(R(index_rec,index_ref1).Rmax_map-R(index_rec,index_ref2).Rmax_map,'Parent',ax3);
+im3 = imagesc(R(index_rec,index_ref1).Rmax_map-R(index_rec,index_ref2).Rmax_map,'Parent',ax3);
 hold(ax3,'on');
 plot(data_atlas.line_x,data_atlas.line_z,'Linewidth',linewidth_atlas,'Color',color_atlas,'Parent',ax3,'Tag','Atlas','Visible',status);
 ax3.Title.String = sprintf('%s - %s',ref1,ref2);
-ax3.CLim = [-.25,.25];
+ax3.CLim = [-.4,.4];
 ax3.XTick = [];
 ax3.XTickLabel = '';
 ax3.YTick = [];
 ax3.YTickLabel = '';
 colorbar(ax3);
+
+if ~isempty(data_mask)
+    im1.CData = im1.CData .* data_mask.mask;
+    im2.CData = im2.CData .* data_mask.mask;
+    im3.CData = im3.CData .* data_mask.mask;
+end
 
 drawnow;
 
