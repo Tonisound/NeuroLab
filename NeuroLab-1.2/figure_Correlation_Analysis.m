@@ -1,4 +1,4 @@
-function f2 = figure_Correlation_Analysis(myhandles,val,str_group,str_regions,str_traces)
+function f2 = figure_Correlation_Analysis(myhandles,val,str_group,str_tag,str_regions,str_traces)
 % Perform Seed-based Correlation Analysis
 % Time Tags are available in user mode
 % If no Time Tags selected the coomputation is done for all frames
@@ -9,6 +9,7 @@ function f2 = figure_Correlation_Analysis(myhandles,val,str_group,str_regions,st
 global DIR_SAVE CUR_IM START_IM END_IM FILES CUR_FILE;
 
 if nargin<3
+    str_tag = [];
     str_group = [];
     str_regions = [];
     str_traces = [];
@@ -69,7 +70,8 @@ f2.UserData.success = false;
 % Parameters
 % Lag Intervals for batch mode
 f2.UserData.slider_values.lag1 = [-10;10];
-f2.UserData.slider_values.lag2 = [-50;50];
+% f2.UserData.slider_values.lag2 = [-50;50];
+f2.UserData.slider_values.lag2 = [-10;20];
 f2.UserData.slider_values.lag_step =1;
 %f2.UserData.slider_values.lag2 = [-100;500];
 
@@ -641,7 +643,7 @@ set(handles2.ButtonClear,'Callback',{@clear_Callback,handles2});
 set(handles2.ButtonSaveImage,'Callback',{@saveimage_Callback,handles2,val});
 set(handles2.ButtonSaveStats,'Callback',{@savestats_Callback,handles2,val});
 set(handles2.ButtonReset,'Callback',{@reset_Callback,handles2});
-set(handles2.ButtonBatch,'Callback',{@batch_Correlation_Callback,handles2,val,str_group,[str_regions;str_traces]});
+set(handles2.ButtonBatch,'Callback',{@batch_Correlation_Callback,handles2,val,str_group,str_tag,[str_regions;str_traces]});
 set(handles2.TextBox,'Callback',{@textbox_Callback,handles2});
 set(handles2.Edit1,'Callback',{@edit_Callback,handles2});
 set(handles2.Edit2,'Callback',{@edit_Callback,handles2});
@@ -658,7 +660,7 @@ tabgp.SelectedTab = tab6;
 % str_group contains group names
 % str_traces contains traces names 
 if val==0
-    batch_Correlation_Callback(handles2.ButtonBatch,[],handles2,val,str_group,[str_regions;str_traces]);
+    batch_Correlation_Callback(handles2.ButtonBatch,[],handles2,val,str_group,str_tag,[str_regions;str_traces]);
 end
 
 end
@@ -1746,7 +1748,7 @@ drawnow;
 
 end
 
-function batch_Correlation_Callback(hObj,~,handles,val,str_group,str_ref)
+function batch_Correlation_Callback(hObj,~,handles,val,str_group,str_tag,str_ref)
 
 data_config = handles.MainFigure.UserData.data_config;
 data_tg = handles.MainFigure.UserData.data_tg;
@@ -1810,10 +1812,10 @@ for i=1:length(ind_group)
         p1.Value = ind_pu(k);
         compute_Callback(bc,[],handles,val);
         savestats_Callback([],[],handles,val);
-%         if ~handles.Checkbox1.Value
-%             % Skip if needed
-%             saveimage_Callback([],[],handles,val);
-%         end
+        if ~handles.Checkbox1.Value
+            % Skip if needed
+            saveimage_Callback([],[],handles,val);
+        end
     end
     hObj.UserData = [];
 end
@@ -1835,11 +1837,11 @@ if isempty(ind_group)
         p1.Value = ind_pu(k);
         compute_Callback(bc,[],handles,val);
         savestats_Callback([],[],handles,val);
-%         % uncomment to save images in batch mode
-%         if ~handles.Checkbox1.Value
-%             % Skip if needed
-%             saveimage_Callback([],[],handles,val);
-%         end
+        % uncomment to save images in batch mode
+        if ~handles.Checkbox1.Value
+            % Skip if needed
+            saveimage_Callback([],[],handles,val);
+        end
     end
     hObj.UserData = [];
 end

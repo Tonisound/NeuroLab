@@ -38,6 +38,7 @@ tab2 = uitab(tabgp,'Title','Traces');
 tab3 = uitab(tabgp,'Title','Filtering');
 tab4 = uitab(tabgp,'Title','Display');
 tab5 = uitab(tabgp,'Title','Colors');
+% tab6 = uitab(tabgp,'Title','Events');
 
 % Find selected tab
 ind_tab = findobj(tabgp,'Title',selected_tab);

@@ -7,8 +7,9 @@ if src.Value
     for i=1:length(labels)
         val = str2double(char(labels(i,:)));
         str = handles.TimeDisplay.UserData(val,:);
-        A = (datenum(str)-floor(datenum(str)))*24*3600;
-        new_labels = [new_labels;{sprintf('%.1f',A)}];
+%         A = (datenum(str)-floor(datenum(str)))*24*3600;
+%         new_labels = [new_labels;{sprintf('%.1f',A)}];
+        new_labels = [new_labels;str];
     end
     handles.RightAxes.XTickLabel = new_labels;
     handles.RightAxes.XLabel.String = 'Time (s)';

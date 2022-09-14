@@ -588,6 +588,9 @@ for i = 1:length(ind_files)
             case 'Import Time Tags'
                 success = import_time_tags(FILES(ii).fullpath,fullfile(DIR_SAVE,FILES(ii).nlab));
                 
+            case 'Import NLab Events'
+                success = import_nlab_events(FILES(ii).fullpath,fullfile(DIR_SAVE,FILES(ii).nlab),myhandles);
+                
             case 'Import - Crop Video'
                 success = import_crop_video(FILES(ii),myhandles,1);
                 
@@ -672,7 +675,7 @@ for i = 1:length(ind_files)
                 f2 = figure_GlobalDisplay(myhandles,0,str_tag);
                 
             case '(Figure) Correlation Analysis'
-                f2 = figure_Correlation_Analysis(myhandles,0,str_group,str_regions,str_traces);
+                f2 = figure_Correlation_Analysis(myhandles,0,str_group,str_tag,[str_regions;str_group_regions],str_traces);
                 
             case '(Figure) LFP Wavelet Analysis'
                 f2 = figure_Wavelet_Analysis(myhandles,0,str_tag);

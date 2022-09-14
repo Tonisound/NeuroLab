@@ -62,7 +62,7 @@ list_group = L.list_group;
 list_files = L.list_files;
 
 % Location of source files
-container_short = 'fUS_Statistics[AW]';
+container_short = 'fUS_Statistics';
 %container_short = 'fUS_Statistics[newest-regions-QW]';
 %container = 'fUS_Statistics[new-regions-AW]';
 %container = 'fUS_Statistics[new-regions-mean]';
@@ -371,6 +371,7 @@ tt_data = NaN(length(list_group),length(list_regions));
 ebar_data = NaN(length(list_group),length(list_regions));
 n_samples = NaN(length(list_group),length(list_regions));
 n_recordings = NaN(length(list_group),length(list_regions));
+
 for i =1:length(list_group)
     for j = 1:length(list_regions)
         switch str1
@@ -390,6 +391,7 @@ for i =1:length(list_group)
         ebar_data(i,j) = std(temp,[],'omitnan')./sqrt(n_samples(i,j));
     end
 end
+n_max_recordings = max(n_recordings);
 
 % Save in txt file
 fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
@@ -399,9 +401,9 @@ for j =1:length(list_group)
 end
 fwrite(fid,newline);
 for i =1:length(list_regions)
-    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
+    fwrite(fid,sprintf('%s [%d] \t ',char(list_regions(i)),n_max_recordings(i)));
     for j =1:length(list_group)
-        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
+        fwrite(fid,sprintf('%.2f+/-%.2f\t ',tt_data(j,i),ebar_data(j,i)));
     end
     if i~=length(list_regions)
         fwrite(fid,newline);
@@ -463,11 +465,11 @@ for i=1:length(b1)
         temp = dots_data(:,ind_sorted_rem(i),index_rem);
         temp(isnan(temp))=[];
         line('XData',temp,'YData',b1(i).XData(i)*ones(size(temp)),...
-            'LineStyle','none','Marker','.','MarkerSize',8,...
+            'LineStyle','none','Marker','.','MarkerSize',4,...
             'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5],'Parent',ax1);
         % errorbars
         e = errorbar(b1(i).YData(i),b1(i).XData(i),-ebar_data_sorted(index_rem,i),ebar_data_sorted(index_rem,i),...
-            'horizontal','Parent',ax1,'LineWidth',1,'Color','k');
+            'horizontal','Parent',ax1,'LineWidth',.5,'CapSize',4,'Color','k');
 %         e.Color='k';
     end
 end
@@ -478,9 +480,10 @@ ax1.YTick = 1:n_bars;
 ax1.YTickLabel = label_regions(ind_sorted_rem);
 ax1.Title.String = 'REM sorted';
 ax1.TickLength = [0 0];
-ax1.XLim = [-10 60];
+ax1.XLim = [-10 120];
 grid(ax1,'on');
 ax1.YGrid='off';
+ax1.FontSize = 4;
 
 
 % Ax2
@@ -509,6 +512,7 @@ end
 ax2.YTick = 1:n_bars;
 ax2.YTickLabel = list_regions(ind_sorted_aw);
 ax2.Title.String = 'REM-QW/AW-QW sorted';
+ax2.FontSize = 4;
 %grid(ax2,'on');
 
 
@@ -539,9 +543,11 @@ pos = panel.Position;
 leg.Position = [.7 .05 .25 .9];
 panel.Units = 'normalized';
 leg.Units = 'normalized';
+leg.FontSize = 3;
 
 f.Units = 'pixels';
 f.Position = [195          59        1045         719];
+f.Position = [0          100        1000         800];
 
 fullname = fullfile(folder_save,strcat(f.Name,'.pdf'));
 saveas(f,fullname);

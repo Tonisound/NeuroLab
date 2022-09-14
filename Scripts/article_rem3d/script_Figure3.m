@@ -488,6 +488,7 @@ end
 dots_data2 = NaN(m,length(list_regions),length(list_ref));
 std_data = NaN(length(list_regions),length(list_ref));
 sem_data = NaN(length(list_regions),length(list_ref));
+
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
         temp = S(i,j).x_max;
@@ -499,6 +500,8 @@ end
 
 tt_data = NaN(length(list_ref),length(list_regions));
 ebar_data = NaN(length(list_ref),length(list_regions));
+n_recordings = NaN(length(list_ref),length(list_regions));
+
 for i =1:length(list_ref)
     for j = 1:length(list_regions)
         temp = S(i,j).r_max;
@@ -509,9 +512,12 @@ for i =1:length(list_ref)
                 tt_data(i,j) = median(temp,'omitnan');
         end
         %tt_data(i,j) = mean(temp,'omitnan');
-        ebar_data(i,j) = std(temp,[],'omitnan');
+        %ebar_data(i,j) = std(temp,[],'omitnan');
+        n_recordings(i,j) = length(temp);
+        ebar_data(i,j) = std(temp,[],'omitnan')./sqrt(n_recordings(i,j));
     end
 end
+n_max_recordings = max(n_recordings);
 
 % Save in txt file
 fid = fopen(fullfile(folder_save,strcat(f.Name,'.txt')),'w');
@@ -521,9 +527,9 @@ for j =1:length(list_ref)
 end
 fwrite(fid,newline);
 for i =1:length(list_regions)
-    fwrite(fid,sprintf('%s \t ', char(list_regions(i))));
+    fwrite(fid,sprintf('%s[%d] \t ', char(list_regions(i)), n_max_recordings(i)));
     for j =1:length(list_ref)
-        fwrite(fid,sprintf('%.4f \t ', tt_data(j,i)));
+        fwrite(fid,sprintf('%.3f+/-%.3f \t ',tt_data(j,i),ebar_data(j,i)));
     end
     if i~=length(list_regions)
         fwrite(fid,newline);

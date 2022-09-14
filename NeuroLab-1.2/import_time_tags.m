@@ -1,4 +1,4 @@
- function success = import_time_tags(dir_tags,dir_save)
+function success = import_time_tags(dir_tags,dir_save)
 
 success = false;
 dir_time = dir(fullfile(dir_tags,'*tags.txt'));

@@ -163,12 +163,12 @@ end
 
 % Restrict GLM Analysis to a given time period
 % Searching Time Tags matching restrict patterns
-restrict_period = 'WHOLE';
-pattern_include = {'Whole-LFP'};
-pattern_exclude = [];
-% restrict_period = 'REM';
-% pattern_include = {'REM-'};
-% pattern_exclude = {'NREM-'};
+% restrict_period = 'WHOLE';
+% pattern_include = {'Whole-LFP'};
+% pattern_exclude = [];
+restrict_period = 'REM';
+pattern_include = {'REM-'};
+pattern_exclude = {'NREM-'};
 ind_include = contains({TimeTags(:).Tag}',pattern_include);
 if ~isempty(pattern_exclude)
     ind_exclude = contains({TimeTags(:).Tag}',pattern_exclude);
@@ -205,10 +205,18 @@ regions_dev = [];
 % regions_stats = [];
 for j = 1:size(Y,2)
     y = Y(:,j);
-%     [b,dev,stats] = glmfit(X,y,distr,'Constant','off');
+
+    % Standard approach
+    % [b,dev,stats] = glmfit(X,y,distr,'Constant','off');
     [b1,dev1,~] = glmfit(X,y,distr,'Constant','on');
     b = b1(2:end);
     dev = dev1;
+    
+%     % Removing first regressor
+%     [b2,dev2,~] = glmfit(X(:,2:end),y,distr,'Constant','on');
+%     dev = dev2;
+%     b = b2;
+    
     regions_b = cat(1,regions_b,b');
     regions_dev = cat(1,regions_dev,dev);
 %     regions_stats = cat(1,regions_stats,stats);
@@ -234,10 +242,17 @@ for i = 1:size(Z,1)
             continue;
         else
             y = squeeze(Z(i,j,:));
-            %[b,dev,stats] = glmfit(X,y,distr,'Constant','off');
+            % Standard approach
+            % [b,dev,stats] = glmfit(X,y,distr,'Constant','off');
             [b1,dev1,~] = glmfit(X,y,distr,'Constant','on');
             b = b1(2:end);
             dev = dev1;
+            
+%             % Removing first regressor
+%             [b2,dev2,~] = glmfit(X(:,2:end),y,distr,'Constant','on');
+%             dev = dev2;
+%             b = b2;
+            
             pixels_b(i,j,:) = permute(b,[3 2 1]);
             pixels_dev(i,j) = dev;
 %             pixels_stats(i,j) = stats;

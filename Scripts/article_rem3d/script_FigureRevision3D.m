@@ -14,8 +14,8 @@ if nargin <2
     reg_group = 'GROUPS';
 end
 if nargin <3
-%     restrict_period = 'REM';
-    restrict_period = 'WHOLE';
+    restrict_period = 'REM';
+%     restrict_period = 'WHOLE';
 end
 
 % Generate Lists
@@ -33,8 +33,8 @@ end
 % L.label_regions(ind_exclude)=[];
 
 % list of time groups
-list_group = {'QW';'AW';'NREM';'REM-TONIC';'REM-PHASIC'};
-% list_group = {'REM-TONIC';'REM-PHASIC'};
+% list_group = {'QW';'AW';'NREM';'REM-TONIC';'REM-PHASIC'};
+list_group = {'REM-TONIC';'REM-PHASIC'};
 
 % Storing
 L.list_group = list_group;
@@ -145,7 +145,7 @@ fprintf('Data Browsed [%d files loaded].\n',counter);
 
 % Setting Parameters
 f = figure('Visible','off');
-colormap(f,'jet');
+colormap(f,'parula');
 P.Colormap = f.Colormap;
 P.f_colors = f.Colormap(round(1:64/length(list_regions):64),:);
 P.f_colors = f.Colormap(round(1:length(f.Colormap)/length(list_regions):length(f.Colormap)),:);
@@ -265,7 +265,8 @@ dots_data = NaN(m,length(list_regions),length(list_group));
 n_recordings = NaN(length(list_group),length(list_regions));
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        temp = S(i,j).regions_b;
+%         temp = S(i,j).regions_b;
+        temp = log(abs(S(i,j).regions_b)./abs(S(1,j).regions_b));
         dots_data(1:length(temp),j,i) = temp;
         n_recordings(i,j) = length(temp);
     end
@@ -275,14 +276,16 @@ tt_data = NaN(length(list_group),length(list_regions));
 ebar_data = NaN(length(list_group),length(list_regions));
 for i =1:length(list_group)
     for j = 1:length(list_regions)
-        temp = S(i,j).regions_b;
+%         temp = S(i,j).regions_b;
+        temp = log(abs(S(i,j).regions_b)./abs(S(1,j).regions_b));
         switch str
             case 'Mean'
                 tt_data(i,j) = mean(temp,'omitnan');
             case 'Median'
                 tt_data(i,j) = median(temp,'omitnan');
         end
-        ebar_data(i,j) = std(temp,[],'omitnan')/sqrt(n_recordings(i,j));
+        ebar_data(i,j) = std(temp,[],'omitnan')/sqrt(sqrt(n_recordings(i,j)));
+%         ebar_data(i,j) = std(temp,[],'omitnan')/10;
     end
 end
 
@@ -341,7 +344,7 @@ for k = 1:length(all_axes)
             'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax);
         % errorbars
         errorbar(b1(i).YData(i),b1(i).XData(i),-ebar_data(k,i),ebar_data(k,i),...
-            'horizontal','Parent',ax,'LineWidth',1,'Color',bd_color);
+            'horizontal','Parent',ax,'LineWidth',.5,'CapSize',4,'Color',bd_color);
     end
     % Axis limits
     ax.YTick = 1:n_bars;
@@ -349,9 +352,12 @@ for k = 1:length(all_axes)
     ax.YTickLabel = label_regions;
     ax.Title.String = char(list_group(k));
     ax.TickLength = [0 0];
-    ax.XLim = [-5 60];
+    ax.XLim = [1 3];
     grid(ax,'on');
     ax.YGrid='off';
+    ax.YDir = 'reverse';
+    ax.FontSize = 6;
+%     ax.XScale = 'log';
 end
 
 

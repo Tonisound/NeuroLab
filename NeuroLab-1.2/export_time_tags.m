@@ -21,7 +21,9 @@ end
 
 
 % file export
-fid_w = fopen(file_txt,'w');
+% fid_w = fopen(file_txt,'w');
+% uncomment to solve bug
+fid_w = fopen(filename,'w');
 fwrite(fid_w,sprintf('<Tag> \t <start> \t <end>'));
 fwrite(fid_w,newline);
 for i=1:size(tdata.TimeTags,1)

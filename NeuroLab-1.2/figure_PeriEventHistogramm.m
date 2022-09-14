@@ -606,18 +606,24 @@ function initialize_eventPanel(handles)
 
 global SEED DIR_SAVE FILES CUR_FILE;
 
-if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Episodes.mat'),'file') && ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'file')
-    import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
+% if ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Episodes.mat'),'file') && ~exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'file')
+%     import_episodes(fullfile(SEED,FILES(CUR_FILE).parent,FILES(CUR_FILE).spiko),fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
+% end
+% 
+% if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Episodes.mat'),'file') 
+%     load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Episodes.mat'),'episodes');
+% elseif exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'file')
+%     load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'episodes');
+% end
+
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Events.mat'),'file') 
+    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Events.mat'),'events');
 end
 
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Episodes.mat'),'file') 
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'NeuroLab_Episodes.mat'),'episodes');
-elseif exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'file')
-    load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Spikoscope_Episodes.mat'),'episodes');
-end
-
-handles.EventPanel.UserData = episodes;
-handles.PopupEpisodeList.String = unique({episodes(:).parent});
+% handles.EventPanel.UserData = episodes;
+% handles.PopupEpisodeList.String = unique({episodes(:).parent});
+handles.EventPanel.UserData = events;
+handles.PopupEpisodeList.String = unique({events(:).parent});
 handles.PopupEpisodeList.Value = 1;
 update_episode_list(handles.PopupEpisodeList,[],handles);
 

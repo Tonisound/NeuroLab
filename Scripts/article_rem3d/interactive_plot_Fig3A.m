@@ -25,12 +25,15 @@ pu3 = uicontrol('Units','normalized','Parent',f,'Style','popup','Value',2,'Strin
 pu3.Position = [.75 .95 .2 .05];
 cb1 = uicontrol('Units','normalized','Parent',f,'Style','checkbox','ToolTipString','Atlas on/off','Tag','Checkbox1','Value',0);
 cb1.Position = [0 .95 .05 .05];
+cb2 = uicontrol('Units','normalized','Parent',f,'Style','checkbox','ToolTipString','AlphaMap on/off','Tag','Checkbox2','Value',0);
+cb2.Position = [.02 .95 .05 .05];
 
 handles = guihandles(f);
 pu1.Callback = {@pu1_Callback,handles,R,L};
 pu2.Callback = {@pu1_Callback,handles,R,L};
 pu3.Callback = {@pu1_Callback,handles,R,L};
 cb1.Callback = {@cb1_Callback,handles};
+cb2.Callback = {@cb2_Callback,handles};
 
 f.Units = 'normalized';
 f.Position = [0.0380    0.5065    0.8662    0.3981];
@@ -50,6 +53,19 @@ else
 end
 for i = 1:length(all_atlas)
     all_atlas(i).Visible = status;
+end
+
+end
+
+function cb2_Callback(hObj,~,handles)
+
+im3 = findobj(handles.Ax3,'Type','Image');
+    
+if hObj.Value
+    im3.AlphaData= abs(im3.CData)>.15;
+    im3.AlphaData(isnan(im3.CData))=0;
+else
+    im3.AlphaData= 1;
 end
 
 end
@@ -121,6 +137,7 @@ colorbar(ax2);
 
 cla(ax3);
 im3 = imagesc(R(index_rec,index_ref1).Rmax_map-R(index_rec,index_ref2).Rmax_map,'Parent',ax3);
+
 hold(ax3,'on');
 plot(data_atlas.line_x,data_atlas.line_z,'Linewidth',linewidth_atlas,'Color',color_atlas,'Parent',ax3,'Tag','Atlas','Visible',status);
 ax3.Title.String = sprintf('%s - %s',ref1,ref2);
@@ -137,6 +154,8 @@ if ~isempty(data_mask)
     im3.CData = im3.CData .* data_mask.mask;
 end
 
+cb1_Callback(handles.Checkbox1,[],handles);
+cb2_Callback(handles.Checkbox2,[],handles);
 drawnow;
 
 end
