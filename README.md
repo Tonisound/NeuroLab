@@ -7,6 +7,24 @@ This software allows to synchronize and visualize simultaneously ultrasound data
 It offers a variety of analysis and processing tools embedded in a user-friendly and compact graphical interface in MATLAB.
 
 ---------------------------------------------------------------------------
+NeuroLab Bugs to solve (September 2022)
+
+- long wait in Batch recording selection
+- Index REM/WAKE etc not correctly saved
+- Detect Vascular Surges (below-threshold surges still detected)
+- Export Time Tags (problem in folder name save)
+- long time to save images in Correlation Analysis
+
+---------------------------------------------------------------------------
+Steps to follow for correct file Importation
+
+1. Import Doppler film - Crop Video
+2. Compute Normalized Movie
+3. Import LFP Config - Import LFP traces - Export LFP traces (.dat)
+4. Register Atlas - Import Anatomical Regions - Generate Region Groups - Export Anatomical Regions
+5. Filter LFP traces - Filter ACC/EMG traces - Compute Spectrogramm - Sleep Score
+
+---------------------------------------------------------------------------
 NeuroLab Version 1.2 (May 2022)
 
 - Nlab_files changed to NLab_files

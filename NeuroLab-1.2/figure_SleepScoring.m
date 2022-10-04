@@ -8,6 +8,12 @@ global DIR_STATS;
 % Loading Config.mat
 data_config = load(fullfile(savedir,'Config.mat'));
 
+if exist(fullfile(savedir,'Nconfig.mat'),'file')
+    data_nconfig = load(fullfile(savedir,'Nconfig.mat'));
+else
+    data_nconfig = [];
+end
+
 % Loading Time Reference
 if (exist(fullfile(savedir,'Time_Reference.mat'),'file'))
     data_tr = load(fullfile(savedir,'Time_Reference.mat'),...
@@ -96,7 +102,16 @@ iP.Position = [0 0 1 .15];
 
 % Popup LFP
 d_lfp = dir(fullfile(savedir,'Sources_LFP','LFP_*.mat'));
-lfp_str = regexprep({d_lfp(:).name}','.mat','');
+
+% If NConfig file exists, keep electrode order
+if ~isempty(data_nconfig)
+    lfp_ordered = data_nconfig.channel_list(contains(data_nconfig.channel_list,'LFP'));
+    lfp_str = regexprep(lfp_ordered,'/','_');
+else
+    lfp_str = regexprep({d_lfp(:).name}','.mat','');
+end
+% lfp_str = regexprep({d_lfp(:).name}','.mat','');
+
 pu_lfp = uicontrol('Units','normalized',...
     'Style','popupmenu',...
     'Parent',iP,...
@@ -147,7 +162,7 @@ if ~isempty(data_ss)
     ind_mainemg = find(strcmp(emg_str,strrep(data_ss.channel_emg,'.mat',''))==1);
     pu_emg.UserData.thresh_init = data_ss.thresh_emg;
 else
-    ind_mainemg = find(strcmp(emg_str,strcat('LFP_',data_config.File.mainemg))==1);
+    ind_mainemg = find(strcmp(emg_str,strcat('EMG_',data_config.File.mainemg))==1);
     pu_emg.UserData.thresh_init = [];
 end
 if ~isempty(ind_mainemg)

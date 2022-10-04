@@ -1812,10 +1812,10 @@ for i=1:length(ind_group)
         p1.Value = ind_pu(k);
         compute_Callback(bc,[],handles,val);
         savestats_Callback([],[],handles,val);
-        if ~handles.Checkbox1.Value
-            % Skip if needed
-            saveimage_Callback([],[],handles,val);
-        end
+%         if ~handles.Checkbox1.Value
+%             % Skip if needed
+%             saveimage_Callback([],[],handles,val);
+%         end
     end
     hObj.UserData = [];
 end

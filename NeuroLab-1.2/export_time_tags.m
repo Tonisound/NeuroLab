@@ -2,9 +2,8 @@
  
 success = false;
 temp = regexp(dir_save,filesep,'split');
-filename = char(temp(end));
-file_txt = fullfile(dir_tags,strcat(filename,sprintf('(%s)',datetime),'_tags.txt')); 
-
+filename = strrep(char(temp(end)),'_nlab','_TimeTags');
+file_txt = fullfile(dir_tags,strcat(filename,strrep(sprintf('[%s]',datetime),':','-'),'.csv')); 
 
 % Loading Time Tags
 if exist(fullfile(dir_save,'Time_Tags.mat'),'file')
@@ -21,13 +20,13 @@ end
 
 
 % file export
-% fid_w = fopen(file_txt,'w');
-% uncomment to solve bug
-fid_w = fopen(filename,'w');
-fwrite(fid_w,sprintf('<Tag> \t <start> \t <end>'));
+fid_w = fopen(file_txt,'w');
+% fwrite(fid_w,sprintf('<Tag> \t <start> \t <end>'));
+fwrite(fid_w,sprintf('<Tag>,<start>,<end>'));
 fwrite(fid_w,newline);
 for i=1:size(tdata.TimeTags,1)
-    fwrite(fid_w,sprintf('%s \t %.3f \t %.3f ',tdata.TimeTags(i).Tag,t_start(i),t_end(i)));
+%     fwrite(fid_w,sprintf('%s \t %.3f \t %.3f ',tdata.TimeTags(i).Tag,t_start(i),t_end(i)));
+    fwrite(fid_w,sprintf('%s,%.3f,%.3f ',tdata.TimeTags(i).Tag,t_start(i),t_end(i)));
     fwrite(fid_w,newline);
 end
 fclose(fid_w);

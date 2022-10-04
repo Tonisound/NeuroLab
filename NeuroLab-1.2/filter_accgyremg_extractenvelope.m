@@ -42,13 +42,16 @@ else
     channel_list = {dir_t(:).name}';
 end
 
-% % Initial selection
+% Initial selection
 ind_emg = find(strcmp(channel_list,strcat('EMG_',data_config.File.mainemg,'.mat'))==1);
 ind_acc = find(strcmp(channel_list,strcat('ACC_',data_config.File.mainacc,'.mat'))==1);
 ind_selected = [ind_emg;ind_acc];
 if isempty(ind_selected)
         ind_selected = 1:length(channel_list);
 end
+% Comment if keeping only main channels
+ind_selected = find(contains(channel_list,{'ACC_';'EMG_'}));
+
 % asks for user input if val == 1
 if val == 1
     % user mode
