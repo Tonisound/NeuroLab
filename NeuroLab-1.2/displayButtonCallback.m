@@ -76,6 +76,9 @@ switch strtrim(str(val,:))
         
     case '(Figure) Cross-Correlation LFP-fUS'
         figure_CrossCorrelation(handles,1);
+            
+    case '(Figure) Auto-Correlation fUS'
+        figure_AutoCorrelation(handles,1);
         
 end
 

@@ -571,8 +571,16 @@ for i = 1:length(ind_files)
                 success=true;
                 
             case 'Delete Region Group Traces'
-                delete(findobj(myhandles.RightAxes,'Tag','Trace_RegionGroup'));
-                success=true;
+                all_region_groups = findobj(myhandles.RightAxes,'Tag','Trace_RegionGroup');
+                delete(all_region_groups);
+%                 all_to_be_removed=[];
+%                 for k=1:length(all_region_groups)
+%                     if startsWith(all_region_groups(k).UserData.Name,'[SR]')
+%                         all_to_be_removed=[all_to_be_removed;all_region_groups(k)];
+%                     end
+%                 end                
+%                 delete(all_to_be_removed);
+%                 success=true;
                 
             case 'Import Doppler film'
                 Doppler_film = import_DopplerFilm(FILES(ii),myhandles,1);
@@ -695,6 +703,9 @@ for i = 1:length(ind_files)
             case '(Figure) Peri-Event Time Histogram'
                 f2 = figure_PeriEventHistogramm(myhandles,0,str_group,str_regions,str_traces);
                 
+            case '(Figure) Auto-Correlation fUS'
+                f2 = figure_AutoCorrelation(myhandles,0,str_tag);
+                            
             case '(Figure) Cross-Correlation LFP-fUS'
                 f2 = figure_CrossCorrelation(myhandles,0,str_tag);
                 

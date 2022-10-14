@@ -481,18 +481,32 @@ t4.UserData.all_str = all_str;
 ax_im = axes('Parent',f,...
     'CLimMode',handles.CenterAxes.CLimMode,...
     'CLim',handles.CenterAxes.CLim,...
-    'TickLength',[0 0]);
+    'TickLength',[0 0],'FontSize',8);
 ax_im2 = axes('Parent',f,...
     'CLimMode','manual',...
     'CLim',handles.CenterAxes.CLim,...
-    'TickLength',[0 0]);
+    'TickLength',[0 0],'FontSize',8);
 colormap(ax_im2,'gray');
+
+ax_im3 = copyobj(handles.RightAxes,f);
+ax_im3.XLim = [START_IM END_IM];
+set(ax_im3,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+
+delete(findobj(ax_im3.Children,'Type','Line','-not','Tag','Trace_Mean','-not','Tag','Cursor'));
+l_mean = findobj(ax_im3,'Tag','Trace_Mean');
+l_mean.Visible = 'on';
+l_cursor = findobj(ax_im3,'Tag','Cursor');
+l_cursor.Color = 'r';
+% l_cursor.LineWidth = 2;
+uistack(l_cursor,'top');
+l_cursor.Visible = 'on';
+
 % First Image
 im = imagesc(IM(:,:,START_IM),'Parent',ax_im,'Tag','MainImage');
 boxCrop_Callback(handles.CropBox,[],ax_im,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
 set(ax_im,'XTickLabel','','XTick','','YTick','','YTickLabel','');
 colormap(ax_im,'hot');
-cbar = colorbar(ax_im,'Parent',f);
+cbar = colorbar(ax_im,'Parent',f,'FontSize',8);
 % Second Image
 % im2 = imagesc(Doppler_Surge(:,:,START_IM),'Parent',ax_im2);
 % set(ax_im2,'XTickLabel','','XTick','','YTick','','YTickLabel','');
@@ -502,6 +516,7 @@ cbar = colorbar(ax_im,'Parent',f);
 % image(rgb_video(:,:,:,1),'Parent',ax_im2);
 image(bw_video(:,:,1),'Parent',ax_im2);
 ax_im2.Visible = 'off';
+colormap(ax_im2,'gray');
 
 % adding Atlas
 am = findobj(handles.CenterAxes,'Tag','AtlasMask');
@@ -559,7 +574,7 @@ end
 
 % Axes Traces
 for i=1:l1
-    ax = axes('Position',[.4 .1+(i-1)*.8/L+margin .5 .8/L-2*margin],'Parent',f,'XTickLabel','');
+    ax = axes('Position',[.4 .025+(i-1)*.95/L+margin .5 .95/L-2*margin],'Parent',f,'XTickLabel','','FontSize',8);
     grid(ax,'on');
     scale = uicontrol(f,'Units','normalized','Style','text','TooltipString','Scale',...
         'String','','BackgroundColor','k','Position',[.905 .1+(i-1)*.8/L+margin .001 .8/L-margin]);
@@ -623,7 +638,7 @@ for i=1:l1
 end
 % Spectrograms
 for i=l1+1:L
-    ax = axes('Position',[.4 .1+(i-1)*.8/L+margin .5 .8/L-2*margin],'Parent',f,'XTickLabel','');
+    ax = axes('Position',[.4 .1+(i-1)*.8/L+margin .5 .8/L-2*margin],'Parent',f,'XTickLabel','','FontSize',8);
     ii = i-l1;
     ax.Tag = sprintf('Ax%d',i);
     ax.XAxis.Visible = 'off';
@@ -677,9 +692,10 @@ end
 
 % Figure Position
 f.Position = [.1 .1 .6 .6];
-ax_im.Position = [.05 .525 .25 .375];
-ax_im2.Position = [.05 .1 .25 .375];
-cbar.Position = [.31 .525 .02 .375];
+ax_im.Position = [.05 .425 .3 .425];
+ax_im2.Position = [.05 .025 .3 .375];
+ax_im3.Position = [.05 .875 .3 .075];
+cbar.Position = [.03 .425 .015 .425];
 
 e0.Position = [.91 .925 .08 .05];
 t1.Position = [.91 .85 .08 .05];
@@ -700,19 +716,19 @@ ttg(6).Position = [.91 .2 .08 .04];
 ttg(7).Position = [.91 .15 .08 .04];
 ttg(8).Position = [.91 .1 .08 .04];
 
-t100.Position = [.55 .05 .45 .005];
-t101.Position = [.55 .055 .4 .045];
+% t100.Position = [.55 .05 .45 .005];
+% t101.Position = [.55 .055 .4 .045];
 cb1.Position = [.01 .01 .1 .05];
-e1.Position = [.005 .06 .04 .05];
-e2.Position = [.005 .11 .04 .05];
+e1.Position = [.005 .025 .04 .05];
+e2.Position = [.005 .075 .04 .05];
 cb2.Position = [.92 .01 .08 .05];
 e3.Position = [.955 .06 .04 .05];
 cb3.Position = [.01 .9 .1 .05];
 cb_atlas.Position = [.01 .95 .1 .05];
-e4.Position = [.005 .8 .04 .05];
-e5.Position = [.005 .85 .04 .05];
-t100.Position = [.9-(.45*t_factor)/(2*f.UserData.t_lfp) .05 (.45*t_factor)/(2*f.UserData.t_lfp) .005];
-t101.Position = [.9-(.45*t_factor)/(2*f.UserData.t_lfp) .055 (.45*t_factor)/(2*f.UserData.t_lfp) .045];
+e4.Position = [.005 .85 .04 .05];
+e5.Position = [.005 .9 .04 .05];
+t100.Position = [.9-(.45*t_factor)/(2*f.UserData.t_lfp) 0 (.45*t_factor)/(2*f.UserData.t_lfp) .005];
+t101.Position = [.9-(.45*t_factor)/(2*f.UserData.t_lfp) .005 (.45*t_factor)/(2*f.UserData.t_lfp) .02];
 
 % Visible status
 cb1.Visible = button_visible;
@@ -725,6 +741,7 @@ f.UserData.controls = [cb1;cb2;cb3;t3;t4];
 
 % Movie
 i = START_IM;
+
 while i>=START_IM && i<=END_IM
     if ishandle(f)
         tic
@@ -742,8 +759,14 @@ while i>=START_IM && i<=END_IM
         im.CData = IM(:,:,i);
         % image(bw_video(:,:,:,i+1-START_IM),'Parent',ax_im2);
         imagesc(bw_video(:,:,i),'Parent',ax_im2);
+        colormap(ax_im2,'gray');
         axis(ax_im2,'equal');
         ax_im2.Visible = 'off';
+        
+        % Cursor
+        l_cursor.XData = [i i];
+        l_cursor.YData = [ax_im3.YLim(1) ax_im3.YLim(2)];
+        
         
         % Plotting traces
         for j=1:length(all_axes)
@@ -828,8 +851,8 @@ while i>=START_IM && i<=END_IM
         
         % Only on event
         % Scale Position
-        t100.Position = [.9-(.45*t_factor)/(2*t_lfp) .05 (.45*t_factor)/(2*t_lfp) .005];
-        t101.Position = [.9-(.45*t_factor)/(2*t_lfp) .055 (.45*t_factor)/(2*t_lfp) .045];
+        t100.Position = [.9-(.45*t_factor)/(2*t_lfp) 0 (.45*t_factor)/(2*t_lfp) .005];
+        t101.Position = [.9-(.45*t_factor)/(2*t_lfp) .005 (.45*t_factor)/(2*t_lfp) .02];
         % CLimMode
         if cb1.Value
             ax_im.CLimMode = 'auto';

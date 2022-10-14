@@ -368,7 +368,7 @@ fl = uicontrol(f,'Style','popup',...
 fl_str = '(Movie) Normalized Movie|(Movie) Deformation Field|(Movie) Data Reconstruction';
 fl_str = strcat(fl_str,'|(Figure) Correlation Analysis|(Figure) LFP Wavelet Analysis|(Figure) Sleep Scoring|(Figure) fUS Episode Statistics|(Figure) fUS Fourier Analysis');
 fl_str = strcat(fl_str,'|(Figure) Principal and Independent Component Analysis|(Figure) Global Episode Display|(Figure) Peri-Event Time Histogram');
-fl_str = strcat(fl_str,'|(Figure) Peak Detection|(Figure) Cross-Correlation LFP-fUS|(Figure) Vascular Potentiation');
+fl_str = strcat(fl_str,'|(Figure) Peak Detection|(Figure) Auto-Correlation fUS|(Figure) Cross-Correlation LFP-fUS|(Figure) Vascular Potentiation');
 fl.String = fl_str;    
 % Process Button
 % handles.DisplayButton

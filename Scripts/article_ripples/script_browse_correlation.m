@@ -81,6 +81,7 @@ handles = guihandles(f);
 pu1.Callback = {@pu1_Callback,handles};
 pu2.Callback = {@pu2_Callback,handles};
 pu3.Callback = {@pu3_Callback,handles};
+pu3.KeyPressFcn = {@pu3_key_pressFcn,handles};
 
 b1.Callback = {@b1_Callback,handles};
 b2.Callback = {@display_Callback,handles};
@@ -384,6 +385,35 @@ display_Callback([],[],handles);
 
 end
 
+function pu3_key_pressFcn(hObj,evnt,handles)
+
+previous_state = strtrim(char(hObj.String(hObj.Value,:)));
+last_state = strtrim(char(hObj.String(end,:)));
+first_state = strtrim(char(hObj.String(1,:)));
+pu1 = handles.Popup1;
+pu3 = handles.Popup3;
+
+switch evnt.Key
+
+    case 'downarrow'
+        if strcmp(previous_state,last_state) && pu1.Value<size(pu1.String,1)
+            disp('go next');
+            pu1.Value = pu1.Value+1;
+            pu1_Callback(pu1,[],handles);
+        end
+        
+    case 'uparrow'
+        if strcmp(previous_state,first_state) && pu1.Value>1
+            disp('go previous');
+            pu1.Value = pu1.Value-1;
+            pu1_Callback(pu1,[],handles);
+            % display last
+            pu3.Value = size(pu3.String,1);
+            pu3_Callback(pu3,[],handles);
+        end
+end
+end
+
 function cb1_Callback(hObj,~,handles)
 
 all_axes = [handles.Ax1; handles.Ax2];
@@ -461,6 +491,8 @@ ax1.XTick = [];
 ax1.XTickLabel = '';
 ax1.YTick = [];
 ax1.YTickLabel = '';
+ax1.XLim  = [.5 size(im1.CData,2)+.5];
+ax1.YLim  = [.5 size(im1.CData,1)+.5];
 colorbar(ax1);
 
 cla(ax2);
@@ -473,6 +505,8 @@ ax2.XTick = [];
 ax2.XTickLabel = '';
 ax2.YTick = [];
 ax2.YTickLabel = '';
+ax2.XLim  = [.5 size(im2.CData,2)+.5];
+ax2.YLim  = [.5 size(im2.CData,1)+.5];
 colorbar(ax2);
 
 cla(ax3);
