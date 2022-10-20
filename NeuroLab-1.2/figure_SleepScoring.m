@@ -1060,6 +1060,8 @@ end
 
 function buttonAutoScale_Callback(~,~,all_axes)
 
+epsilon = 1e-3;
+
 for i =1:length(all_axes)
     ax = all_axes(i);
     xlim1 = ax.XLim(1);
@@ -1091,7 +1093,7 @@ for i =1:length(all_axes)
         ylim1 = min(l_main.YData(ind1:ind2),[],'omitnan');
         ylim2 = max(l_main.YData(ind1:ind2),[],'omitnan');
         if ~isnan(ylim1)&&~isnan(ylim2)
-            ax.YLim = [ylim1,ylim2];
+            ax.YLim = [ylim1-epsilon,ylim2+epsilon];
         end
     end
     % Secondary lines

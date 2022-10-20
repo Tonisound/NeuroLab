@@ -7,6 +7,7 @@ for k=1:length(all_axes)
     
     for i =1:length(all_patches)
         cur_patch = all_patches(i);
+        cur_patch.PickableParts = 'none';
         ind_group = find(strcmp({GColors.TimeGroups(:).Name}',cur_patch.UserData.Name)==1);
         if hObj.Value
             if ~isempty(ind_group)

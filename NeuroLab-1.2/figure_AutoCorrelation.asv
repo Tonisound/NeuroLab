@@ -543,7 +543,7 @@ t_end = handles.Popup1.UserData.t_end;
 tts_start = handles.Popup1.UserData.tts_start;
 tts_end = handles.Popup1.UserData.tts_end;
 
-handles.Text1.String = sprintf('Tag:%s\n[Start:%.2f s - End:%.2f s]\n[%s - %s]',cur_tag,t_start,t_end,tts_start,tts_end);
+handles.Text1.String = sprintf('Tag:%s\n[Start:%.2f s - End:%.2f s]\n[Start:%s - End:%s]',cur_tag,t_start,t_end,tts_start,tts_end);
 
 % Compute auto-correlations
 fprintf('Computing auto-correlation fus ...');
@@ -654,7 +654,6 @@ ax1d.XLim =[.5 size(IM_restricted,2)+.5];
 ax1d.YLim =[.5 size(IM_restricted,1)+.5];
 ax1d.Title.String = 'First Peak Value'; 
 colorbar(ax1d);
-ax1d.Tag = 'Ax1d';
 
 ax1e = findobj(handles.PixelTab,'Tag','Ax1e');
 cla(ax1e);
@@ -663,17 +662,14 @@ ax1e.XLim =[.5 size(IM_restricted,2)+.5];
 ax1e.YLim =[.5 size(IM_restricted,1)+.5];
 ax1e.Title.String = 'First Peak Time';
 colorbar(ax1e);
-ax1e.Tag = 'Ax1e';
 
 ax1f = findobj(handles.PixelTab,'Tag','Ax1f');
 cla(ax1f);
-im1f = imagesc(IM_all_locs,'Parent',ax1f);
+imagesc(IM_all_locs,'Parent',ax1f);
 ax1f.XLim =[.5 size(IM_restricted,2)+.5];
 ax1f.YLim =[.5 size(IM_restricted,1)+.5];
 ax1f.Title.String = 'First Peak Thresholded';
-im1f.AlphaData = ((abs(IM_all_locs))>5).*((abs(IM_all_pks))>.5);
 colorbar(ax1f);
-ax1f.Tag = 'Ax1f';
 
 handles.MainFigure.Pointer = 'arrow';
 handles.MainFigure.UserData.success = true;

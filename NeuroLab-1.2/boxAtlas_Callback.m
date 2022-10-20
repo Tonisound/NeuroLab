@@ -3,6 +3,9 @@ function boxAtlas_Callback(src,~,ax)
 
 load('Preferences.mat','GColors');
 atlasmask = findobj(ax,'Tag','AtlasMask');
+if ~isempty(atlasmask)
+    atlasmask.PickableParts = 'none';
+end
 
 % update line aspect
 

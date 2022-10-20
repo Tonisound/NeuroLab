@@ -358,8 +358,13 @@ t101 = uicontrol(f,'Units','normalized','Style','text',...
 % Display Controls
 cb1 = uicontrol(f,'Units','normalized',...
     'Style','Checkbox','TooltipString','CLimMode Movies');
-cb_atlas = uicontrol(f,'Units','normalized','Value',handles.AtlasBox.Value,...
-    'Style','Checkbox','String','Atlas','TooltipString','Atlas Display');
+if val ==0
+    cb_atlas_value=1;
+else
+    cb_atlas_value=handles.AtlasBox.Value;
+end
+cb_atlas = uicontrol(f,'Units','normalized','Value',cb_atlas_value,...
+    'Style','Checkbox','TooltipString','Atlas Display');
 e1 = uicontrol(f,'Units','normalized','Style','edit',...
     'String',sprintf('%.1f',handles.CenterAxes.CLim(1)),...
     'Visible','off','TooltipString','CLim min');
@@ -497,7 +502,7 @@ l_mean = findobj(ax_im3,'Tag','Trace_Mean');
 l_mean.Visible = 'on';
 l_cursor = findobj(ax_im3,'Tag','Cursor');
 l_cursor.Color = 'r';
-% l_cursor.LineWidth = 2;
+l_cursor.LineWidth = 2;
 uistack(l_cursor,'top');
 l_cursor.Visible = 'on';
 
@@ -522,6 +527,7 @@ colormap(ax_im2,'gray');
 am = findobj(handles.CenterAxes,'Tag','AtlasMask');
 copyobj(am,ax_im);
 cb_atlas.Callback = {@boxAtlas_Callback,ax_im};
+boxAtlas_Callback(cb_atlas,[],ax_im);
 
 % Color tag patches
 default_color = [.5 .5 .5];
@@ -691,7 +697,8 @@ end
 
 
 % Figure Position
-f.Position = [.1 .1 .6 .6];
+% f.Position = [.1 .1 .6 .6];
+f.OuterPosition =[0 0 1 1];
 ax_im.Position = [.05 .425 .3 .425];
 ax_im2.Position = [.05 .025 .3 .375];
 ax_im3.Position = [.05 .875 .3 .075];
@@ -724,7 +731,7 @@ e2.Position = [.005 .075 .04 .05];
 cb2.Position = [.92 .01 .08 .05];
 e3.Position = [.955 .06 .04 .05];
 cb3.Position = [.01 .9 .1 .05];
-cb_atlas.Position = [.01 .95 .1 .05];
+cb_atlas.Position = [.01 .95 .05 .05];
 e4.Position = [.005 .85 .04 .05];
 e5.Position = [.005 .9 .04 .05];
 t100.Position = [.9-(.45*t_factor)/(2*f.UserData.t_lfp) 0 (.45*t_factor)/(2*f.UserData.t_lfp) .005];
@@ -767,6 +774,13 @@ while i>=START_IM && i<=END_IM
         l_cursor.XData = [i i];
         l_cursor.YData = [ax_im3.YLim(1) ax_im3.YLim(2)];
         
+%         % Atlas
+%         if (val==0) && (i<=START_IM+100)
+%             cb_atlas.Value = 1;
+%         else
+%             cb_atlas.Value = handles.AtlasBox.Value;
+%         end
+%         boxAtlas_Callback(cb_atlas,[],ax_im);
         
         % Plotting traces
         for j=1:length(all_axes)

@@ -5,6 +5,7 @@ function click_PatchFcn(hObj,evnt,handles)
 seltype = get(handles.MainFigure,'SelectionType');
 
 if strcmp(seltype,'normal')
+    % left-click
     handles.MainFigure.Pointer = 'hand';
     hObj.Tag = 'Movable_Box';
     hObj.UserData.Tag = 'Movable_Trace_Box';
@@ -15,13 +16,24 @@ if strcmp(seltype,'normal')
         actualize_line_aspect(hObj.UserData);
     end
     
-else
+    set(handles.MainFigure,'WindowButtonMotionFcn', {@centerPanel_motionFcn,handles});
+    set(handles.MainFigure,'WindowButtonUpFcn',{@centerPanel_unclickFcn,handles});
+
+elseif strcmp(seltype,'extend')
+    % middle-click
+    box_color = uisetcolor(hObj.MarkerFaceColor);
+    hObj.MarkerFaceColor = box_color;
+    hObj.UserData.Color = box_color;
+    handles.MainFigure.Pointer = 'arrow';
+
+elseif strcmp(seltype,'alt')
+    % right-click
     delete(hObj.UserData);
     delete(hObj);
     restore_colors(handles);
     return;
 end
-set(handles.MainFigure,'WindowButtonMotionFcn', {@centerPanel_motionFcn,handles});
-set(handles.MainFigure,'WindowButtonUpFcn',{@centerPanel_unclickFcn,handles});
+% set(handles.MainFigure,'WindowButtonMotionFcn', {@centerPanel_motionFcn,handles});
+% set(handles.MainFigure,'WindowButtonUpFcn',{@centerPanel_unclickFcn,handles});
 
 end
