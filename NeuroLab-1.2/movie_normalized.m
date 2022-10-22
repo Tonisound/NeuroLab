@@ -949,7 +949,7 @@ while i>=START_IM && i<=END_IM
             t_elapsed = toc;
             if t_video-t_elapsed>0
                 if strcmp(display_mode,'disp')
-                    pause(t_video-t_elapsed);
+                    %pause(t_video-t_elapsed);
                 else
                     % Saving
                     pic_name = strcat(sprintf('%s_Frame%05d',FILES(CUR_FILE).nlab,i),GTraces.ImageSaveExtension);

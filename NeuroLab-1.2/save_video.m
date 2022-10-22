@@ -28,6 +28,7 @@ imageNames = {new_folder.name}';
 
 outputVideo = VideoWriter(fullfile(savedir,strcat(video_name,extension)),GTraces.CompressionFormat);
 outputVideo.FrameRate = GTraces.FrameRate;
+% outputVideo.Quality = 10;
 open(outputVideo);
 
 for ii = 1:length(imageNames)

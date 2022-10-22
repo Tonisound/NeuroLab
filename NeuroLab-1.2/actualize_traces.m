@@ -1,9 +1,15 @@
-function success = actualize_traces(handles)
+function success = actualize_traces(handles,flag)
 % Actualize Right Panel Traces when user modifies IM
 
 global DIR_SAVE FILES CUR_FILE IM ;
 load('Preferences.mat','GTraces');
 success = false;
+
+% flag = 1 actualize_traces from interactive menu
+% flag = 0 any other case
+if nargin < 2
+    flag = 0;
+end
 
 indexes  = isinf(1./IM);
 if size(IM,1)*size(IM,2)*(size(IM,3)-1) == sum(indexes(:))
@@ -73,6 +79,16 @@ end
 
 % Update YData for Mean, Lines and Boxes
 graphics = findobj(handles.CenterAxes,'Type','Patch','-or','Type','Line','-not','Tag','AtlasMask');
+% restricting to visble traces when flag equals one ()
+if flag == 1
+    ind_keep = [];
+    for i = 1:length(graphics)
+        if strcmp(graphics(i).Visible,'on')
+            ind_keep = [ind_keep;i];
+        end
+    end
+    graphics=graphics(ind_keep);
+end
 
 for idx =1:length(graphics)
     fprintf('Actualizing trace %d (%s)... ',idx,graphics(idx).UserData.UserData.Name);
@@ -129,8 +145,7 @@ for idx =1:length(graphics)
         graphics(idx).UserData.YData(1:end-1)= y;
     end
     
-    fprintf('done.\n');
-    
+    fprintf('done.\n');    
 end
 
 end

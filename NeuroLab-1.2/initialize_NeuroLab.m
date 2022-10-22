@@ -18,6 +18,7 @@ W = GDisp.W;
 H = GDisp.H;
 w0 = GDisp.w0;
 h0 = GDisp.h0;
+ax_ftsize = 8;
 
 % Setting fonts
 fontsize = 12;
@@ -234,12 +235,12 @@ rightPanel.Position =   [w0 h0 1-w0 1-2*h0];
 a = axes('Parent',centerPanel,'NextPlot','replace');
 imagesc(IM(:,:,CUR_IM),'Tag','MainImage','HitTest','off','Parent',a);
 set(a,'Tag','CenterAxes')
-%a.Title.String = 'fUS Image';
+a.FontSize = ax_ftsize;
 a.XLabel.String = 'MesioLateral';
 a.YLabel.String = 'DorsoVentral';
 
 % handles.RightAxes
-b = axes('Parent',rightPanel,'Xlim',[START_IM END_IM],'Tag','RightAxes');
+b = axes('Parent',rightPanel,'Xlim',[START_IM END_IM],'Tag','RightAxes','FontSize',ax_ftsize);
 b.XLabel.String = '# Image';
 %b.Title.String = 'Hemodynamics';
 %b.YLabel.String = 'Amplitude Response';
@@ -642,7 +643,7 @@ myhandles.VideoFigure=f2;
 %myhandles.VideoImage = image(zeros(10,10,3),'Parent',myhandles.VideoAxes);
 myhandles.VideoAxes = axes('Parent',f2,'Tag','VideoAxes',...
     'XTick',[],'YTick',[],'XTickLabel',[],'YTickLabel',[],...
-    'Position',[.05 .05 .9 .9],'Box','on');
+    'Position',[.05 .05 .9 .9],'Box','on','FontSize',ax_ftsize);
 colormap(myhandles.VideoAxes,'gray');
 
 
@@ -681,7 +682,7 @@ set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_
 set(myhandles.ImportMenu_ReloadDoppler,'Callback','load_global_image(FILES(CUR_FILE),myhandles.CenterPanelPopup.String(myhandles.CenterPanelPopup.Value,:));actualize_plot(myhandles);');
 set(myhandles.ImportMenu_ReloadVideo,'Callback','load_video(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 set(myhandles.ImportMenu_ReloadGraphic,'Callback','load_graphicdata(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
-set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles);');
+set(myhandles.ImportMenu_ActualizeTraces,'Callback','actualize_traces(myhandles,1);');
 
 % handles.EditMenu
 set(myhandles.EditMenu_Edition,'Callback',{@menuEdit_TracesEdition_Callback,myhandles.RightAxes,myhandles});

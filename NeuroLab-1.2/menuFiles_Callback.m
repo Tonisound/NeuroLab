@@ -15,7 +15,7 @@ global FILES CUR_FILE;
 files_temp = FILES;
 
 % Display Parameters
-W = 130;
+W = 160;
 H = 60;
 ftsize = 10;
 panelColor = get(0,'DefaultUicontrolBackgroundColor');
@@ -43,7 +43,7 @@ tab0 = uitab(tabgp,'Title','Files');
 
 
 % Files Selection Table
-file_uitable = uitable('ColumnName',{'Session','nlab','fUS','Video'},...
+file_uitable = uitable('ColumnName',{'nlab','ns2','fUS','Video'},...{'Session','nlab','fUS','Video'},...
     'ColumnFormat',{'char','char','char','char'},...
     'ColumnEditable',[false,false,false,false],...
     'ColumnWidth',{180 180 180 180},...
@@ -54,8 +54,8 @@ file_uitable = uitable('ColumnName',{'Session','nlab','fUS','Video'},...
 %file_uitable.CellSelectionCallback = {@(src,evnt)set(src,'UserData',evnt.Indices)};
 
 if ~isempty(files_temp)
-    file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',...
-        {files_temp.dir_fus}',{files_temp.video}'];
+%     file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+    file_uitable.Data = [{files_temp.nlab}',{files_temp.ns2}',{files_temp.dir_fus}',{files_temp.video}'];
 end
 
 loadfileButton = uicontrol('Style','pushbutton',...
@@ -176,14 +176,16 @@ end
             % Sorting files
             % files_temp = sortstruct(F,files_temp);
             files_temp = [F;files_temp];
-            file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+%             file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+            file_uitable.Data = [{files_temp.nlab}',{files_temp.ns2}',{files_temp.dir_fus}',{files_temp.video}'];
         end
     end
 
     function rmfileButton_callback(~,~)
         selection = get(file_uitable,'UserData');
         files_temp(unique(selection(:,1)))=[];
-        file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+%         file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+        file_uitable.Data = [{files_temp.nlab}',{files_temp.ns2}',{files_temp.dir_fus}',{files_temp.video}'];
     end
 
     function fileInfoButton_callback(hObj,evnt)  
@@ -204,7 +206,8 @@ end
             % Sorting files
             % files_temp = sortstruct(F,files_temp);
             files_temp = [F;files_temp];
-            file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+%             file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
+            file_uitable.Data = [{files_temp.nlab}',{files_temp.ns2}',{files_temp.dir_fus}',{files_temp.video}'];
         end
     end
 

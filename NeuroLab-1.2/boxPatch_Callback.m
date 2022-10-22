@@ -33,6 +33,8 @@ for i=1:length(hm)
             p.FaceAlpha = GColors.patch_transparency;
             p.EdgeColor = GColors.patch_color;
             p.LineWidth = GColors.patch_width;
+        elseif strcmp(p.Tag,'Pixel')
+            p.MarkerSize = 5;
         end
     else
         %hm(i).Visible = 'off';
