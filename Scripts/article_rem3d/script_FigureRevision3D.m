@@ -232,7 +232,7 @@ f.PaperPositionMode = 'manual';
 f.Colormap = P.Colormap;
 f_colors = P.f_colors;
 dd_color = [.5 .5 .5];
-dd_color = 'none';
+amp_noise = .2;
 bd_color = 'k';
 margin_w = P.margin_w;
 margin_h = P.margin_h;
@@ -339,7 +339,8 @@ for k = 1:length(all_axes)
         % dots
         temp = dots_data(:,i,k);
         temp(isnan(temp))=[];
-        line('XData',temp,'YData',b1(i).XData(i)*ones(size(temp)),...
+        noise = amp_noise*(-.5+rand(size(temp)));
+        line('XData',temp,'YData',b1(i).XData(i)*ones(size(temp))+noise,...
             'LineStyle','none','Marker','.','MarkerSize',8,...
             'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax);
         % errorbars

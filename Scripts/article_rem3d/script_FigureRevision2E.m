@@ -127,7 +127,7 @@ for index = 1:length(list_files)
             end
             cur_atlas = sprintf('%s[%.2f mm]',data_atlas.AtlasName,data_atlas.ML_mm);
     end
-    index_location = find(strcmp(list_location,cur_location)==1);
+    index_location = find(strcmpi(list_location,cur_location)==1);
     
 %     Doppler_Surge = data_surges.Doppler_Surge;
 %     ind_surge = data_surges.ind_surge;
@@ -733,7 +733,7 @@ all_markers = P.all_markers;
 all_linestyles = P.all_linestyles;
 patch_alpha = P.patch_alpha;
 dd_color = [.5 .5 .5];
-dd_color = 'none';
+amp_noise = .2;
 bd_color = 'k';
 stats_color = 'r';
 
@@ -952,7 +952,8 @@ for i=1:length(b1)
     % Plot dots and ebar data
     temp = dots_data_r(:,i,1);
     temp(isnan(temp))=[];
-    line('XData',b1(i).XData(i)*ones(size(temp)),'YData',temp,...
+    noise = amp_noise*(-.5+rand(size(temp)));
+    line('XData',b1(i).XData(i)*ones(size(temp))+noise,'YData',temp,...'XData',b1(i).XData(i)*ones(size(temp)),'YData',temp,...
         'LineStyle','none','Marker','.','MarkerSize',8,...
         'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax1);
     % errorbars
@@ -990,7 +991,8 @@ for i=1:length(b2)
     % Plot dots and ebar data
     temp = dots_data_r(:,i,2);
     temp(isnan(temp))=[];
-    line('XData',b2(i).XData(i)*ones(size(temp)),'YData',temp,...
+    noise = amp_noise*(-.5+rand(size(temp)));
+    line('XData',b2(i).XData(i)*ones(size(temp))+noise,'YData',temp,...
         'LineStyle','none','Marker','.','MarkerSize',8,...
         'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax2);
     % errorbars
@@ -1029,7 +1031,8 @@ for i=1:length(b3)
     % Plot dots and ebar data
     temp = dots_data_s(:,i,1);
     temp(isnan(temp))=[];
-    line('XData',b3(i).XData(i)*ones(size(temp)),'YData',temp,...
+    noise = amp_noise*(-.5+rand(size(temp)));
+    line('XData',b3(i).XData(i)*ones(size(temp))+noise,'YData',temp,...
         'LineStyle','none','Marker','.','MarkerSize',8,...
         'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax3);
     % errorbars
@@ -1067,7 +1070,8 @@ for i=1:length(b4)
     % Plot dots and ebar data
     temp = dots_data_s(:,i,2);
     temp(isnan(temp))=[];
-    line('XData',b4(i).XData(i)*ones(size(temp)),'YData',temp,...
+    noise = amp_noise*(-.5+rand(size(temp)));
+    line('XData',b4(i).XData(i)*ones(size(temp))+noise,'YData',temp,...
         'LineStyle','none','Marker','.','MarkerSize',8,...
         'MarkerFaceColor',dd_color,'MarkerEdgeColor',dd_color,'Parent',ax4);
     % errorbars
