@@ -34,7 +34,7 @@ for i=1:length(hm)
             p.EdgeColor = GColors.patch_color;
             p.LineWidth = GColors.patch_width;
         elseif strcmp(p.Tag,'Pixel')
-            p.MarkerSize = 5;
+            p.MarkerSize = 8;
         end
     else
         %hm(i).Visible = 'off';

@@ -225,10 +225,15 @@ botPanel = uipanel('BorderType','etchedin',...
     'Tag','BottomPanel',...
     'Parent',f);
 % Resizing
-topPanel.Position =     [0 1-h0 1 h0];
-botPanel.Position =     [0 0 1 h0];
-centerPanel.Position =  [0 h0 w0 1-2*h0];
-rightPanel.Position =   [w0 h0 1-w0 1-2*h0];
+% topPanel.Position =     [0 1-h0 1 h0];
+% botPanel.Position =     [0 0 1 h0];
+% centerPanel.Position =  [0 h0 w0 1-2*h0];
+% rightPanel.Position =   [w0 h0 1-w0 1-2*h0];
+
+topPanel.Position =     [0 .9 1 .1];
+botPanel.Position =     [0 0 1 .1];
+centerPanel.Position =  [0 .1 .3 .8];
+rightPanel.Position =   [.3 .1 .7 .8];
 
 % handles.CenterAxes
 %load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Config.mat'),'CurrentImage');
@@ -331,6 +336,7 @@ h13 = uicontrol(f,'Style','popup',...
 h11.Position = [0 .55 1 .4];
 h12.Position = [0 .05 w0 .4];
 h13.Position = [w0 .05 1-w0 .4];
+
 
 % Processing Options
 % handles.ProcessListPopup

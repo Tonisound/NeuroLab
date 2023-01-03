@@ -50,29 +50,29 @@ f2.UserData.TimeTags_images = data_tt.TimeTags_images;
 f2.UserData.TimeTags_cell = data_tt.TimeTags_cell;
 %f2.UserData.g_colors = get(groot,'DefaultAxesColorOrder');
 f2.UserData.g_colors = [0         0    0.5625;
-         0         0    0.6250;
-         0         0    0.6875;
-         0         0    0.7500;
-         0         0    0.8125;
-         0         0    0.8750;
-         0         0    0.9375;
-         0         0    1.0000;
-         0    0.0625    1.0000;
-         0    0.1250    1.0000;
-         0    0.1875    1.0000;
-         0    0.2500    1.0000;
-         0    0.3125    1.0000;
-         0    0.3750    1.0000;
-         0    0.4375    1.0000;
-         0    0.5000    1.0000;
-         0    0.5625    1.0000;
-         0    0.6250    1.0000;
-         0    0.6875    1.0000;
-         0    0.7500    1.0000;
-         0    0.8125    1.0000;
-         0    0.8750    1.0000;
-         0    0.9375    1.0000;
-         0    1.0000    1.0000;
+    0         0    0.6250;
+    0         0    0.6875;
+    0         0    0.7500;
+    0         0    0.8125;
+    0         0    0.8750;
+    0         0    0.9375;
+    0         0    1.0000;
+    0    0.0625    1.0000;
+    0    0.1250    1.0000;
+    0    0.1875    1.0000;
+    0    0.2500    1.0000;
+    0    0.3125    1.0000;
+    0    0.3750    1.0000;
+    0    0.4375    1.0000;
+    0    0.5000    1.0000;
+    0    0.5625    1.0000;
+    0    0.6250    1.0000;
+    0    0.6875    1.0000;
+    0    0.7500    1.0000;
+    0    0.8125    1.0000;
+    0    0.8750    1.0000;
+    0    0.9375    1.0000;
+    0    1.0000    1.0000;
     0.0625    1.0000    0.9375;
     0.1250    1.0000    0.8750;
     0.1875    1.0000    0.8125;
@@ -119,16 +119,16 @@ f2.UserData.folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
 L = 10;                      % Height top panels
 l = 1;                       % Height info panel
 ftsize = 8;                 % Ax fontsize
-e1_def = '20';
+e1_def = '200';
 e1_tip = 'Max Delay (s)';
-e2_def = '.5';
+e2_def = '2';
 e2_tip = 'Step Delay (s)';
-e3_def = '1';
-e3_tip = 'Time Smoothing (s)';
-% e4_def = '1';
-% e4_tip = 'LFP smoothing (s)';
-% e5_def = '1';
-% e5_tip = 'CBV smoothing (s)';
+% e3_def = '1';
+% e3_tip = 'Time Smoothing (s)';
+e4_def = '10';
+e4_tip = 'Data smoothing (s)';
+e5_def = '0';
+e5_tip = 'Correlogramm smoothing (s)';
 % e6_def = '20';
 % e6_tip = 'Thresh_sup (s)';
 
@@ -183,27 +183,27 @@ e2 = uicontrol('Units','normalized',...
     'String',e2_def,...
     'Tag','Edit2',...
     'Tooltipstring',e2_tip);
-e3 = uicontrol('Units','normalized',...
+% e3 = uicontrol('Units','normalized',...
+%     'Style','edit',...
+%     'HorizontalAlignment','center',...
+%     'Parent',iP,...
+%     'String',e3_def,...
+%     'Tag','Edit3',...
+%     'Tooltipstring',e3_tip);
+e4 = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
     'Parent',iP,...
-    'String',e3_def,...
-    'Tag','Edit3',...
-    'Tooltipstring',e3_tip);
-% e4 = uicontrol('Units','normalized',...
-%     'Style','edit',...
-%     'HorizontalAlignment','center',...
-%     'Parent',iP,...
-%     'String',e4_def,...
-%     'Tag','Edit4',...
-%     'Tooltipstring',e4_tip);
-% e5 = uicontrol('Units','normalized',...
-%     'Style','edit',...
-%     'HorizontalAlignment','center',...
-%     'Parent',iP,...
-%     'String',e5_def,...
-%     'Tag','Edit5',...
-%     'Tooltipstring',e5_tip);
+    'String',e4_def,...
+    'Tag','Edit4',...
+    'Tooltipstring',e4_tip);
+e5 = uicontrol('Units','normalized',...
+    'Style','edit',...
+    'HorizontalAlignment','center',...
+    'Parent',iP,...
+    'String',e5_def,...
+    'Tag','Edit5',...
+    'Tooltipstring',e5_tip);
 % e6 = uicontrol('Units','normalized',...
 %     'Style','edit',...
 %     'HorizontalAlignment','center',...
@@ -268,9 +268,9 @@ e_start.Position =  [5*ipos(3)/10     2.75*ipos(4)/5   ipos(3)/12   3.5*ipos(4)/
 e_end.Position = [5*ipos(3)/10     ipos(4)/10           ipos(3)/12   3.5*ipos(4)/10];
 e1.Position = [6*ipos(3)/10      2.75*ipos(4)/5           ipos(3)/20   3.5*ipos(4)/10];
 e2.Position = [6.5*ipos(3)/10      2.75*ipos(4)/5           ipos(3)/20   3.5*ipos(4)/10];
-e3.Position = [7*ipos(3)/10      2.75*ipos(4)/5           ipos(3)/20   3.5*ipos(4)/10];
-% e4.Position = [6*ipos(3)/10     ipos(4)/10           ipos(3)/20   3.5*ipos(4)/10];
-% e5.Position = [6.5*ipos(3)/10     ipos(4)/10           ipos(3)/20   3.5*ipos(4)/10];
+% e3.Position = [7*ipos(3)/10      2.75*ipos(4)/5           ipos(3)/20   3.5*ipos(4)/10];
+e4.Position = [6*ipos(3)/10     ipos(4)/10           ipos(3)/20   3.5*ipos(4)/10];
+e5.Position = [6.5*ipos(3)/10     ipos(4)/10           ipos(3)/20   3.5*ipos(4)/10];
 % e6.Position = [7*ipos(3)/10     ipos(4)/10           ipos(3)/20   3.5*ipos(4)/10];
 
 br.Position = [7.6*ipos(3)/10     ipos(4)/2     .8*ipos(3)/10   4.5*ipos(4)/10];
@@ -309,6 +309,10 @@ tab2 = uitab('Parent',tabgp,...
 
 ax1a = copyobj(myhandles.CenterAxes,tab1);
 set(ax1a,'Tag','Ax1a','Position',[.025 .6 .3 .35],'FontSize',ftsize);
+all_pixels = findobj(ax1a,'Tag','Pixel');
+for i =1:length(all_pixels)
+    all_pixels(i).Visible = 'on';
+end
 
 % Copying MainImage & Atlas
 all_children = ax1a.Children;
@@ -336,7 +340,7 @@ for i=1:length(l_pixel)
     l_temp.XData = data_tr.time_ref.Y';
     l_temp.YData = l_temp.YData(1:end-1);
     l_temp.Visible = 'on';
-    
+
     pixel = copyobj(l_temp.UserData.Graphic,ax1a);
     l_temp.UserData.Graphic = pixel;
     l_temp.UserData.AutoCorr=[];
@@ -363,7 +367,7 @@ colormap(f2,'jet');
 
 % If nargin > 3 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
-% str_tag contains group names 
+% str_tag contains group names
 if val==0
     batchsave_Callback([],[],handles2,str_tag,1);
 end
@@ -447,7 +451,7 @@ elseif strcmp(seltype,'extend')
     pixel_color = uisetcolor(hObj.MarkerFaceColor);
     hObj.MarkerFaceColor = pixel_color;
     hObj.UserData.Color = pixel_color;
-    
+
 elseif strcmp(seltype,'alt')
     % right-click
     if f.UserData.flag_compute
@@ -530,15 +534,15 @@ pu1.UserData.t_end = [];
 
 % template_buttonRescale_Callback(handles.RescaleButton,[],handles.CenterAxes,edits);
 if ~isempty(handles.TagButton.UserData)&&length(handles.TagButton.UserData.Selected)==1
-%     pu1.Value=handles.TagButton.UserData.Selected;
-     pu1.Value = find(strcmp(pu1.String,handles.TagButton.UserData.Name)==1);
+    %     pu1.Value=handles.TagButton.UserData.Selected;
+    pu1.Value = find(strcmp(pu1.String,handles.TagButton.UserData.Name)==1);
 end
 update_popup_Callback(pu1,[],handles);
 
 end
 
 function edit_Callback(hObj,~,ax)
-% Time edition 
+% Time edition
 
 if length(hObj)>1
     A = datenum(hObj(1).String);
@@ -552,7 +556,7 @@ else
     A = datenum(hObj.String);
     B = (A - floor(A))*24*3600;
     hObj.String = datestr(B/(24*3600),'HH:MM:SS.FFF');
-    
+
     switch hObj.Tag
         case 'EditStart'
             for i =1:length(ax)
@@ -594,7 +598,7 @@ if isempty(ind_tag)
 else
     im_start = TimeTags_images(ind_tag,1);
     im_end = TimeTags_images(ind_tag,2);
-    
+
     temp = datenum(TimeTags_strings(ind_tag,1));
     t_start = (temp-floor(temp))*24*3600+.1;
     temp = datenum(TimeTags_strings(ind_tag,2));
@@ -628,7 +632,6 @@ global IM;
 
 handles.MainFigure.Pointer = 'watch';
 handles.MainFigure.UserData.success = false;
-tic;
 drawnow;
 
 % g_colors = handles.MainFigure.UserData.g_colors;
@@ -638,10 +641,11 @@ t_step = handles.MainFigure.UserData.t_step;
 % TimeTags = handles.MainFigure.UserData.TimeTags;
 % TimeTags_strings = handles.MainFigure.UserData.TimeTags_strings;
 % rec_mode = handles.MainFigure.UserData.rec_mode;
- 
+
 max_delay = str2double(handles.Edit1.String);
 step_delay = str2double(handles.Edit2.String);
-t_gauss = str2double(handles.Edit3.String);
+t_gauss_data = str2double(handles.Edit4.String);
+t_gauss_corr = str2double(handles.Edit5.String);
 % marker_type = {'o','*','diamond','.'};
 % markersize = str2double(handles.Edit3.String);
 ftsize = 8;
@@ -655,36 +659,73 @@ t_end = handles.Popup1.UserData.t_end;
 tts_start = handles.Popup1.UserData.tts_start;
 tts_end = handles.Popup1.UserData.tts_end;
 
-handles.Text1.String = sprintf('Tag:%s\n[Start:%.2f s - End:%.2f s]\n[%s - %s]',cur_tag,t_start,t_end,tts_start,tts_end);
+% Sanity Check Time Tag Duration
+if (t_end-t_start) < (3*max_delay)
+    errordlg(sprintf('Current Time Tag must be 3 times longer than max delay.\n[Time Tag Duration %.1f, Max Delay %.1f]',t_end-t_start,max_delay));
+    handles.MainFigure.Pointer = 'arrow';
+    return;
+end
 
+handles.Text1.String = sprintf('Recording:%s\nTag:%s\n[Start:%.2f s - End:%.2f s]\n[%s - %s]',cur_file,cur_tag,t_start,t_end,tts_start,tts_end);
 
 % Compute auto-correlations
 % fprintf('Computing Auto-Correlation fUS [File:%s].\n',cur_file);
 IM_restricted = IM(:,:,im_start:im_end);
 all_pixels_aligned = reshape(IM_restricted,[size(IM_restricted,1)*size(IM_restricted,2),size(IM_restricted,3)]);
 
-% Gaussian Smoothing
-fprintf('Smoothing Data [File:%s] ...',cur_file);
-step = max(round(t_gauss/t_step),1);
-all_pixels_smoothed = imgaussfilt(all_pixels_aligned,[1 step]);
+% Gaussian Smoothing Data
+fprintf('Smoothing Data [File:%s, t=%.1f s] ...',cur_file,t_gauss_data);
+step_data = max(round(t_gauss_data/t_step),1);
+all_pixels_smoothed = imgaussfilt(all_pixels_aligned,[1 step_data]);
 all_pixels_aligned = all_pixels_smoothed;
 fprintf(' done.\n');
 
-h = waitbar(0,'Please wait');
+% Building parameters
 maxlag = ceil(max_delay/t_step);
+step_corr = max(round(t_gauss_corr/t_step),1);
+
+h = waitbar(0,'Please wait');
 all_r = NaN(size(all_pixels_aligned,1),2*maxlag+1);
 for k = 1:size(all_pixels_aligned,1)
     prop = k/size(all_pixels_aligned,1);
     waitbar(prop,h,sprintf('Computing Auto-Correlation %.1f %% completed',100*prop));
 
-    X = squeeze(all_pixels_aligned(k,:));
-    [r,lags] = xcorr(X,maxlag,'coeff');
-%     r = rescale(r,-1,1);
+    % Using matlab corr
+    A = squeeze(all_pixels_aligned(k,:))';
+    B = NaN(size(A,1),2*maxlag+1);
+    for kk = -maxlag:1:maxlag
+        index_kk=kk+maxlag+1;
+        if kk<0
+            temp = A(abs(kk)+1:end);
+            B(1:length(temp),index_kk) = temp;
+        elseif k>0
+            temp = A(1:end-kk);
+            B(kk+1:end,index_kk) = temp;
+        else
+            B(:,:,index_kk) = A;
+        end
+    end
+    r = corr(B,A,'rows','complete');
+
+    %     % Using matlab xcorr (problem of normalization)
+    %     X = squeeze(all_pixels_aligned(k,:));
+    %     [r,lags] = xcorr(X,maxlag,'coeff');
+
     all_r(k,:) = r;
+
+    % Gaussian Smoothing Correlogram
+    r_smoothed = imgaussfilt(r,step_corr);
+    all_r(k,:) = rescale(r_smoothed,min(r),max(r));
 end
 % resizing lags
-lags = lags*t_step;
+lags = (-maxlag:1:maxlag)*t_step;
 close(h);
+
+% % Gaussian Smoothing Correlogram
+% fprintf('Smoothing Correlogram [File:%s] ...',cur_file);
+% all_r_smoothed = imgaussfilt(all_r,[1 step_corr]);
+% all_r = all_r_smoothed;
+% fprintf(' done.\n');
 
 % Interpolating Correlogram
 fprintf('Interpolating Data [File:%s] ...',cur_file);
@@ -706,22 +747,38 @@ all_r = Vq;
 h = waitbar(0,'Please wait');
 all_pks = ones(size(all_pixels_aligned,1),1);
 all_locs = zeros(size(all_pixels_aligned,1),1);
+index_0=find(lags==0);
+    
 for k = 1:size(all_r,1)
     prop = k/size(all_r,1);
     waitbar(prop,h,sprintf('Finding peaks %.1f %% completed',100*prop));
 
-    r = all_r(k,:);
+%     r = all_r(k,:);
+%     [pks,locs] = findpeaks(r);
+%     if length(pks)>1
+%         pks_ = pks(pks<1);
+%         locs_= locs(pks<1);
+%         [pk_max,i_max] = max(pks_);
+%         loc_max = locs_(i_max);
+%         all_pks(k)=pk_max;
+%         all_locs(k)=lags(loc_max);
+%     end
+
+    r = all_r(k,index_0:end);
     [pks,locs] = findpeaks(r);
     if length(pks)>1
-        pks_ = pks(pks<1);
-        locs_= locs(pks<1);
-        [pk_max,i_max] = max(pks_);
-        loc_max = locs_(i_max);
-%         ind_pks = find(pks==1);
-%         pk_max = pks(ind_pks+1);
-%         loc_max = locs(ind_pks+1);
+        [pk_max,i_max] = max(pks);
+        loc_max = locs(i_max)+(index_0-1);
         all_pks(k)=pk_max;
-        all_locs(k)=lags(loc_max);
+        all_locs(k) = lags(loc_max);
+    elseif length(pks)==1
+        pk_max = pks;
+        loc_max = locs+(index_0-1);
+        all_pks(k)=pk_max;
+        all_locs(k) = lags(loc_max);
+    else
+        all_pks(k) = NaN;
+        all_locs(k) = NaN;
     end
 end
 close(h);
@@ -741,7 +798,7 @@ line('XData',all_locs,'YData',1:length(all_locs),'Parent',ax1c,'Tag','FirstPeak'
     'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
 ax1c.XLim =[lags(1) lags(end)];
 ax1c.YLim =[.5 size(all_r,1)+.5];
-ax1c.Title.String = 'Auto-Correlation'; 
+ax1c.Title.String = 'Auto-Correlation';
 ax1c.CLim = [-1 1];
 colorbar(ax1c);
 
@@ -757,13 +814,13 @@ for i =1:length(all_pixels)
     cur_r = squeeze(IM_all_r(cur_pixel.YData,cur_pixel.XData,:));
     cur_pks = IM_all_pks(cur_pixel.YData,cur_pixel.XData);
     cur_loc = IM_all_locs(cur_pixel.YData,cur_pixel.XData);
-    
+
     l_r=line('XData',lags,'YData',cur_r,'Parent',ax1b,'Tag','AutoCorr_Pixel',...
         'LineStyle','-','Color',color,'Linewidth',cur_pixel.UserData.LineWidth);
     l_p=line('XData',cur_loc,'YData',cur_pks,'Parent',ax1b,'Tag','AutoCorr_Max',...
         'LineStyle','none','Color','k','Linewidth',1,...
         'MarkerSize',3,'Marker','square','MarkerFaceColor',color,'MarkerEdgeColor',color_edge);
-    
+
     % Storing
 
     cur_pixel.UserData.UserData.AutoCorr=l_r;
@@ -772,13 +829,12 @@ end
 ax1b.XLim = [lags(1) lags(end)];
 hold(ax1b,'off');
 
-
 ax1d = findobj(handles.PixelTab,'Tag','Ax1d');
 cla(ax1d);
 imagesc(IM_all_pks,'Parent',ax1d);
 ax1d.XLim =[.5 size(IM_restricted,2)+.5];
 ax1d.YLim =[.5 size(IM_restricted,1)+.5];
-ax1d.Title.String = 'First Peak Value'; 
+ax1d.Title.String = 'First Peak Value';
 colorbar(ax1d);
 ax1d.FontSize = ftsize;
 ax1d.Tag = 'Ax1d';
@@ -799,7 +855,7 @@ im1f = imagesc(IM_all_locs,'Parent',ax1f);
 ax1f.XLim =[.5 size(IM_restricted,2)+.5];
 ax1f.YLim =[.5 size(IM_restricted,1)+.5];
 ax1f.Title.String = 'First Peak Thresholded';
-im1f.AlphaData = ((abs(IM_all_locs))>5).*((abs(IM_all_pks))>.5);
+im1f.AlphaData = (((abs(IM_all_locs))<150).*((abs(IM_all_locs))>50)).*((abs(IM_all_pks))>.25);
 colorbar(ax1f);
 ax1f.FontSize = ftsize;
 ax1f.Tag = 'Ax1f';
@@ -807,15 +863,30 @@ ax1f.Tag = 'Ax1f';
 handles.MainFigure.Pointer = 'arrow';
 handles.MainFigure.UserData.success = true;
 
+% Signaling flag_compute
+handles.MainFigure.UserData.flag_compute = true;
 
 % Storing parameters
-handles.MainFigure.UserData.flag_compute = true;
-handles.MainFigure.UserData.max_delay = max_delay;
-handles.MainFigure.UserData.step_delay = step_delay;
+Params.cur_file = cur_file;
+Params.cur_tag = cur_tag;
+Params.max_delay = max_delay;
+Params.step_delay = step_delay;
+Params.t_gauss_data = t_gauss_data;
+Params.t_gauss_corr = t_gauss_corr;
+Params.t_step = t_step;
+Params.im_start = im_start;
+Params.im_end = im_end;
+Params.t_start = t_start;
+Params.t_end = t_end;
+Params.tts_start = tts_start;
+Params.tts_end = tts_end;
+Params.lags = lags;
+handles.ButtonCompute.UserData.Params = Params;
+
 % Storing data
-handles.MainFigure.UserData.IM_all_r = IM_all_r;
-handles.MainFigure.UserData.IM_all_pks = IM_all_pks;
-handles.MainFigure.UserData.IM_all_locs = IM_all_locs;
+handles.ButtonCompute.UserData.IM_all_r = IM_all_r;
+handles.ButtonCompute.UserData.IM_all_pks = IM_all_pks;
+handles.ButtonCompute.UserData.IM_all_locs = IM_all_locs;
 
 end
 
@@ -835,8 +906,8 @@ for i =1:length(all_axes)
         y = l.YData;
         [~,ind_1] = min((x-x_start).^2);
         [~,ind_2] = min((x-x_end).^2);
-%         factor = max(y(ind_1:ind_2));
-%         l.YData = l.YData/factor;
+        %         factor = max(y(ind_1:ind_2));
+        %         l.YData = l.YData/factor;
         M = max(max(y(ind_1:ind_2)),M);
         m = min(min(y(ind_1:ind_2)),m);
     end
@@ -847,125 +918,112 @@ end
 
 function saveimage_Callback(~,~,handles)
 
-global FILES CUR_FILE DIR_FIG;
+global DIR_FIG;
 load('Preferences.mat','GTraces');
 
-%Loading data
-tag = char(handles.MainFigure.UserData.Tag_Selection(1));
-channel = handles.MainFigure.UserData.channel;
-% Creating Save Directory
-save_dir = fullfile(DIR_FIG,'Cross_Correlation',FILES(CUR_FILE).recording,tag);
-if ~isdir(save_dir)
+Params = handles.ButtonCompute.UserData.Params;
+tag = Params.cur_tag;
+recording = Params.cur_file;
+
+% Creating Fig Directory
+save_dir = fullfile(DIR_FIG,'Auto_Correlation',recording);
+if ~isfolder(save_dir)
     mkdir(save_dir);
 end
 
 % Saving Image
 cur_tab = handles.TabGroup.SelectedTab;
 handles.TabGroup.SelectedTab = handles.PixelTab;
-pic_name = sprintf('%s_Cross_Correlation_traces_%s%s',FILES(CUR_FILE).recording,channel,GTraces.ImageSaveExtension);
+pic_name = sprintf('%s_Auto_Correlation_Pixels_%s%s',recording,tag,GTraces.ImageSaveExtension);
 saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
 fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
-handles.TabGroup.SelectedTab = handles.SecondTab;
-pic_name = sprintf('%s_Cross_Correlation_Full_%s%s',FILES(CUR_FILE).recording,channel,GTraces.ImageSaveExtension);
-saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
-fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+% handles.TabGroup.SelectedTab = handles.SecondTab;
+% pic_name = sprintf('%s_Cross_Correlation_Synthesis_%s%s',recording,tag,GTraces.ImageSaveExtension);
+% saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+% fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
 handles.TabGroup.SelectedTab = cur_tab;
+
 end
 
 function savestats_Callback(~,~,handles)
 
-global FILES CUR_FILE DIR_STATS;
-load('Preferences.mat','GTraces');
+global DIR_STATS;
 
-tag = char(handles.MainFigure.UserData.Tag_Selection(1));
-channel = handles.MainFigure.UserData.channel;
-recording = FILES(CUR_FILE).recording;
-% Storing parameters
-label_fus = handles.MainFigure.UserData.label_fus;
-label_lfp = handles.MainFigure.UserData.label_lfp;
+Params = handles.ButtonCompute.UserData.Params;
+tag = Params.cur_tag;
+recording = Params.cur_file;
 
-Tag_Selection = handles.MainFigure.UserData.Tag_Selection;
-thresh_inf = handles.MainFigure.UserData.thresh_inf;
-thresh_sup = handles.MainFigure.UserData.thresh_sup;
-thresh_step = handles.MainFigure.UserData.thresh_step;
-t_gauss_lfp = handles.MainFigure.UserData.t_gauss_lfp;
-t_gauss_cbv = handles.MainFigure.UserData.t_gauss_cbv;
-% Storing data
-R_peak = handles.MainFigure.UserData.R_peak;
-T_peak = handles.MainFigure.UserData.T_peak;
-X_corr = handles.MainFigure.UserData.X_corr;
-S_lfp = handles.MainFigure.UserData.S_lfp;
-S_fus = handles.MainFigure.UserData.S_fus;
-
+% Retrieving data
+IM_all_r = handles.ButtonCompute.UserData.IM_all_r;
+IM_all_pks = handles.ButtonCompute.UserData.IM_all_pks;
+IM_all_locs = handles.ButtonCompute.UserData.IM_all_locs;
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'Cross_Correlation',FILES(CUR_FILE).recording,tag);
-if ~isdir(data_dir)
+data_dir = fullfile(DIR_STATS,'Auto_Correlation',recording);
+if ~isfolder(data_dir)
     mkdir(data_dir);
 end
 
 % Saving data
-filename = sprintf('%s_Cross_Correlation_%s.mat',FILES(CUR_FILE).recording,channel);
-save(fullfile(data_dir,filename),'recording','tag','channel','label_lfp','label_fus','Tag_Selection',...
-    'thresh_inf','thresh_sup','thresh_step','t_gauss_lfp','t_gauss_cbv',...
-    'S_lfp','S_fus','R_peak','T_peak','X_corr','-v7.3');
+filename = sprintf('%s_Auto_Correlation_%s.mat',recording,tag);
+save(fullfile(data_dir,filename),'recording','tag', ...
+    'IM_all_r','IM_all_pks','IM_all_locs',...
+    'Params','-v7.3');
 fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
 
 end
 
 function batchsave_Callback(~,~,handles,str_tag,v)
 
-%TimeTags = handles.MainFigure.UserData.TimeTags;
-%TimeTags_strings = handles.MainFigure.UserData.TimeTags_strings;
+time_ref = handles.MainFigure.UserData.time_ref;
+x_start = handles.MainFigure.UserData.x_start;
+x_end = handles.MainFigure.UserData.x_end;
+t_step = handles.MainFigure.UserData.t_step;
+TimeTags = handles.MainFigure.UserData.TimeTags;
+TimeTags_strings = handles.MainFigure.UserData.TimeTags_strings;
+TimeTags_images = handles.MainFigure.UserData.TimeTags_images;
 TimeTags_cell = handles.MainFigure.UserData.TimeTags_cell;
 
 if nargin == 3
     % If Manual Callback open inputdlg
-    str_tag = arrayfun(@(i) strjoin(TimeTags_cell(i,2:4),' - '), 2:size(TimeTags_cell,1), 'unif', 0)';
+    str_tag = strcat({TimeTags(:).Tag}',' - ',{TimeTags(:).Onset}',' - ',{TimeTags(:).Duration}');
     [ind_tag,v] = listdlg('Name','Tag Selection','PromptString','Select Time Tags',...
         'SelectionMode','multiple','ListString',str_tag,'InitialValue','','ListSize',[300 500]);
-   if isempty(ind_tag)||v==0
-       return
-   end
+    if isempty(ind_tag)||v==0
+        return
+    end
 else
-    % If batch mode, keep only elements in str_tag    
+    % If batch mode, keep only elements matching str_tag
     ind_tag = [];
-    temp = TimeTags_cell(2:end,2);
+    temp = {TimeTags(:).Tag}';
     for i=1:length(temp)
         ind_keep = ~(cellfun('isempty',strfind(str_tag,temp(i))));
         if sum(ind_keep)>0
             ind_tag=[ind_tag,i];
         end
     end
-    
-    % Restricts to episodes longer than 120 seconds
-    tts1 = datenum(handles.MainFigure.UserData.TimeTags_strings(ind_tag,1));
-    tts2 = datenum(handles.MainFigure.UserData.TimeTags_strings(ind_tag,2));
-    TimeTags_seconds = [(tts1-floor(tts1)),(tts2-floor(tts2))]*24*3600;
-    TimeTags_dur = TimeTags_seconds(:,2)-TimeTags_seconds(:,1);
-    ind_tag = ind_tag(TimeTags_dur>120);
-
 end
 
-% Compute for whole recording
-edits = [handles.EditStart,handles.EditEnd];
+% % Restricts to time tags longer than 120 seconds
+% temp=datenum({TimeTags(:).Duration}');
+% TimeTags_dur = (temp-floor(temp))*24*3600;
+% ind_tag = ind_tag(TimeTags_dur>600);
 
 % Compute for designated time tags
+% val = handles.Popup1.Value;
 for i = 1:length(ind_tag)%size(TimeTags_strings,1)
-    val = handles.Popup1.Value;
-    for j =1:size(handles.Popup1.String,1)
-        handles.Popup1.Value = j;
-        update_popup_Callback(handles.Popup1,[],handles);
-        template_button_TagSelection_Callback(handles.TagButton,[],handles.CenterAxes,edits,'single',ind_tag(i),v)
-        buttonAutoScale_Callback([],[],handles);
-        compute_autocorr_Callback([],[],handles);
-        savestats_Callback([],[],handles);
-        saveimage_Callback([],[],handles);
-    end
-    handles.Popup1.Value = val;
+    
+    handles.Popup1.Value = ind_tag(i);
     update_popup_Callback(handles.Popup1,[],handles);
+    buttonAutoScale_Callback([],[],handles);
+    compute_autocorr_Callback([],[],handles);
+    savestats_Callback([],[],handles);
+    saveimage_Callback([],[],handles);
+ 
 end
+% handles.Popup1.Value = val;
+% update_popup_Callback(handles.Popup1,[],handles);
 
 end

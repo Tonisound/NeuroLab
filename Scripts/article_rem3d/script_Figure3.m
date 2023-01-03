@@ -759,16 +759,29 @@ ax3.YTick = 1:length(list_regions);
 ax3.CLim = [min(min(rt_data(:,:,1),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,1),[],'omitnan'),[],'omitnan')];
 colorbar(ax3,'southoutside');
 ax3.Title.String = char(list_ref(1));
-% half-width
+
+% % half-width
+% for k =1:size(im.CData,1)
+%     [~,ind_max]=max(im.CData(k,:));
+%     line('XData',im.XData(ind_max),'YData',k,...
+%         'LineStyle','none','Marker','o','MarkerSize',2,...
+%         'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
+%     line('XData',[im.XData(ind_max)-std_data(ind_sorted_a(k),1) im.XData(ind_max)+std_data(ind_sorted_a(k),1)],'YData',[k k],...
+%         'LineStyle','-','Marker','none','MarkerSize',2,...
+%         'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
+% end
+% dots_to_display
+dots_to_display = dots_data2(:,ind_sorted_a,1);
+amp_noise = .25;
+mf_color = [.5 .5 .5];
+mf_size = 1;
 for k =1:size(im.CData,1)
-    [~,ind_max]=max(im.CData(k,:));
-    line('XData',im.XData(ind_max),'YData',k,...
-        'LineStyle','none','Marker','o','MarkerSize',2,...
-        'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
-    line('XData',[im.XData(ind_max)-std_data(ind_sorted_a(k),1) im.XData(ind_max)+std_data(ind_sorted_a(k),1)],'YData',[k k],...
-        'LineStyle','-','Marker','none','MarkerSize',2,...
-        'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3);
-end
+    noise = amp_noise*(-.5+rand(size(dots_to_display(:,k))));
+    line('XData',dots_to_display(:,k),'YData',k*(ones(size(dots_to_display(:,k))))+noise,...
+        'LineStyle','none','Marker','o','MarkerSize',mf_size,...
+        'MarkerFaceColor',mf_color,'MarkeredgeColor',mf_color,'Parent',ax3);
+end 
+
 ax3.YDir = 'reverse';
 ax3.CLim = [0 .8];
 
@@ -787,16 +800,25 @@ ax3b.YTick = 1:length(list_regions);
 ax3b.CLim = [min(min(rt_data(:,:,2),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,2),[],'omitnan'),[],'omitnan')];
 colorbar(ax3b,'southoutside');
 ax3b.Title.String = char(list_ref(2));
-% half-width
+% % half-width
+% for k =1:size(im.CData,1)
+%     [~,ind_max]=max(im.CData(k,:));
+%     line('XData',im.XData(ind_max),'YData',k,...
+%         'LineStyle','none','Marker','o','MarkerSize',2,...
+%         'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3b);
+%     line('XData',[im.XData(ind_max)-std_data(ind_sorted_b(k),1) im.XData(ind_max)+std_data(ind_sorted_b(k),1)],'YData',[k k],...
+%         'LineStyle','-','Marker','none','MarkerSize',2,...
+%         'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3b);
+% end
+% dots_to_display
+dots_to_display = dots_data2(:,ind_sorted_b,2);
 for k =1:size(im.CData,1)
-    [~,ind_max]=max(im.CData(k,:));
-    line('XData',im.XData(ind_max),'YData',k,...
-        'LineStyle','none','Marker','o','MarkerSize',2,...
-        'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3b);
-    line('XData',[im.XData(ind_max)-std_data(ind_sorted_b(k),1) im.XData(ind_max)+std_data(ind_sorted_b(k),1)],'YData',[k k],...
-        'LineStyle','-','Marker','none','MarkerSize',2,...
-        'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax3b);
-end
+    noise = amp_noise*(-.5+rand(size(dots_to_display(:,k))));
+    line('XData',dots_to_display(:,k),'YData',k*(ones(size(dots_to_display(:,k))))+noise,...
+        'LineStyle','none','Marker','o','MarkerSize',mf_size,...
+        'MarkerFaceColor',mf_color,'MarkeredgeColor',mf_color,'Parent',ax3b);
+end 
+
 ax3b.YDir = 'reverse';
 ax3b.CLim = [0 .8];
 
@@ -816,16 +838,26 @@ ax4.YTick = 1:length(list_regions);
 ax4.CLim = [min(min(rt_data(:,:,3),[],'omitnan'),[],'omitnan') max(max(rt_data(:,:,3),[],'omitnan'),[],'omitnan')];
 colorbar(ax4,'southoutside');
 ax4.Title.String = char(list_ref(3));
-% half-width
+% % half-width
+% for k =1:size(im.CData,1)
+%     [~,ind_max]=max(im.CData(k,:));
+%     line('XData',im.XData(ind_max),'YData',k,...
+%         'LineStyle','none','Marker','o','MarkerSize',2,...
+%         'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
+%     line('XData',[im.XData(ind_max)-std_data(ind_sorted_c(k),3) im.XData(ind_max)+std_data(ind_sorted_c(k),3)],'YData',[k k],...
+%         'LineStyle','-','Marker','none','MarkerSize',2,...
+%         'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
+% end
+% dots_to_display
+dots_to_display = dots_data2(:,ind_sorted_c,3);
 for k =1:size(im.CData,1)
-    [~,ind_max]=max(im.CData(k,:));
-    line('XData',im.XData(ind_max),'YData',k,...
-        'LineStyle','none','Marker','o','MarkerSize',2,...
-        'MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
-    line('XData',[im.XData(ind_max)-std_data(ind_sorted_c(k),3) im.XData(ind_max)+std_data(ind_sorted_c(k),3)],'YData',[k k],...
-        'LineStyle','-','Marker','none','MarkerSize',2,...
-        'Color','k','MarkerFaceColor','k','MarkeredgeColor','k','Parent',ax4);
-end
+    noise = amp_noise*(-.5+rand(size(dots_to_display(:,k))));
+    line('XData',dots_to_display(:,k),'YData',k*(ones(size(dots_to_display(:,k))))+noise,...
+        'LineStyle','none','Marker','o','MarkerSize',mf_size,...
+        'MarkerFaceColor',mf_color,'MarkeredgeColor',mf_color,'Parent',ax4);
+end 
+
+
 ax4.YDir = 'reverse';
 ax4.CLim = [0 .8];
 

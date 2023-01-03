@@ -7,6 +7,7 @@ if strcmp(hObj.Checked,'on')
     %hide video
     hObj.Checked = 'off';
     handles.VideoFigure.Visible = 'off';
+    handles.CenterAxes.Position = [];
 
 else
     %show video;
@@ -24,6 +25,7 @@ else
     t_str2 = datestr(handles.VideoAxes.UserData.t_video(CUR_IM)/(24*3600),'HH:MM:SS.FFF');
     handles.VideoAxes.UserData.Text.String(1) = {sprintf('LFP Time: %s',t_str1)};
     handles.VideoAxes.UserData.Text.String(2) = {sprintf('Video Time: %s',t_str2)};
+    
 end
 
 end 
