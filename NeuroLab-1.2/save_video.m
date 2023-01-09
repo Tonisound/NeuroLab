@@ -20,7 +20,10 @@ switch GTraces.CompressionFormat
         return;
 end
 
-yourfolder= dir(fullfile(workingDir,strcat('*',GTraces.ImageSaveExtension))); 
+yourfolder = dir(fullfile(workingDir,strcat('*',GTraces.ImageSaveExtension)));
+% Removing hidden files
+yourfolder = yourfolder(arrayfun(@(x) ~strcmp(x.name(1),'.'),yourfolder));
+
 xlsfiles = {yourfolder.name}; 
 [~,idx] = sort(xlsfiles);
 new_folder = yourfolder(idx);
@@ -31,10 +34,14 @@ outputVideo.FrameRate = GTraces.FrameRate;
 % outputVideo.Quality = 10;
 open(outputVideo);
 
+% Writing Video + waitbar
+h = waitbar(0,'Writing video file: 0.0 % completed.');
 for ii = 1:length(imageNames)
-   img = imread(fullfile(workingDir,imageNames{ii}));
-   writeVideo(outputVideo,img)
+    img = imread(fullfile(workingDir,imageNames{ii}));
+    writeVideo(outputVideo,img);
+    waitbar(ii/length(imageNames),h,sprintf('Writing video file: %.1f %% completed.',100*ii/length(imageNames)));        
 end
+close(h);
 
 fprintf('Video Saved at %s\n',fullfile(savedir,strcat(video_name,extension)));
 fprintf('[Working Directory: %s]\n',workingDir);
