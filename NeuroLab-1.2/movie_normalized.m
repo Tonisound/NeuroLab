@@ -511,7 +511,10 @@ im = imagesc(IM(:,:,START_IM),'Parent',ax_im,'Tag','MainImage');
 boxCrop_Callback(handles.CropBox,[],ax_im,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
 set(ax_im,'XTickLabel','','XTick','','YTick','','YTickLabel','');
 colormap(ax_im,'hot');
-cbar = colorbar(ax_im,'Parent',f,'FontSize',8);
+% Ubuntu bug fix
+% cbar = colorbar(ax_im,'Parent',f,'FontSize',8);
+cbar = colorbar(ax_im,'Parent',f);
+cbar.FontSize=8;
 % Second Image
 % im2 = imagesc(Doppler_Surge(:,:,START_IM),'Parent',ax_im2);
 % set(ax_im2,'XTickLabel','','XTick','','YTick','','YTickLabel','');

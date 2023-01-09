@@ -23,7 +23,6 @@ function save_graphicdata(savedir,handles)
     UiValues.CLimBox = handles.CLimBox.Value;
     UiValues.CropBox = handles.CropBox.Value;
     UiValues.video_status = handles.DisplayMenu_Video.Checked;
-    handles.DisplayMenu_Video.Checked;
     Current_Image = IM(:,:,CUR_IM);
     
     if isdir(savedir)

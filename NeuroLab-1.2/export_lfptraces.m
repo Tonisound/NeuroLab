@@ -118,7 +118,12 @@ fprintf('LFP data exported [%s].\n',dat_filename);
 
 % Writing metadata
 fid_info = fopen(fullfile(F.fullpath,F.dir_lfp,meta_filename),'w');
-fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeID));
+% Ubuntu bug fix
+try
+    fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeID));
+catch
+    fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeIDMetaData));
+end
 fwrite(fid_info,sprintf('SamplingLabel : %s \n',MetaData.SamplingLabel));
 fwrite(fid_info,sprintf('ChannelCount : %d \n',MetaData.ChannelCount));
 fwrite(fid_info,sprintf('SamplingFreq : %.2f \n',MetaData.SamplingFreq));
