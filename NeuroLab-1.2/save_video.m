@@ -1,4 +1,12 @@
-function save_video(workingDir,savedir,video_name)
+function save_video(workingDir,savedir,video_name,video_quality)
+
+% if nargin < 5
+%     video_compression = 'true';
+% end
+
+if nargin < 4
+    video_quality = 100;
+end
 
 load('Preferences.mat','GTraces');
 switch GTraces.CompressionFormat
@@ -31,7 +39,8 @@ imageNames = {new_folder.name}';
 
 outputVideo = VideoWriter(fullfile(savedir,strcat(video_name,extension)),GTraces.CompressionFormat);
 outputVideo.FrameRate = GTraces.FrameRate;
-% outputVideo.Quality = 10;
+outputVideo.Quality = video_quality;
+% outputVideo.LosslessCompression = video_compression;
 open(outputVideo);
 
 % Writing Video + waitbar

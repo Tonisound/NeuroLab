@@ -1,10 +1,21 @@
-function f = script_browse_correlation
+function f = script_browse_correlation(str_save)
+
+global STR_SAVE;
+if nargin < 1
+    if exist(STR_SAVE)
+        str_save = STR_SAVE;
+    else
+        errordlg('Please provide path to NEUROLAB folder. \n[/media/hobbes/DataMOBs171/Antoine-fUSDataset/NEUROLAB].');
+        return;
+    end
+end
 
 f = figure('Tag','MainFigure');
-data_dir = 'F:\Antoine\OneDrive - McGill University\Antoine-fUSDataset\NEUROLAB\NLab_Statistics\fUS_Correlation';
+data_dir = fullfile(str_save,'NLab_Statistics','fUS_Correlation');
 
 % Storing data
 f.UserData.data_dir = data_dir;
+f.UserData.str_save = str_save;
 data_dir = f.UserData.data_dir;
 f.UserData.recording = '';
 f.UserData.timeframe = '';
@@ -393,16 +404,20 @@ first_state = strtrim(char(hObj.String(1,:)));
 pu1 = handles.Popup1;
 pu3 = handles.Popup3;
 
+% evnt.Key
+
 switch evnt.Key
 
-    case 'downarrow'
+    case 'rightarrow'
+%         disp(1)
         if strcmp(previous_state,last_state) && pu1.Value<size(pu1.String,1)
             disp('go next');
             pu1.Value = pu1.Value+1;
             pu1_Callback(pu1,[],handles);
         end
         
-    case 'uparrow'
+    case 'leftarrow'
+%         disp(2)
         if strcmp(previous_state,first_state) && pu1.Value>1
             disp('go previous');
             pu1.Value = pu1.Value-1;
@@ -449,7 +464,10 @@ f =  handles.MainFigure;
 ax1 = handles.Ax1;
 ax2 = handles.Ax2;
 ax3 = handles.Ax3;
-dir_save = 'F:\Antoine\OneDrive - McGill University\Antoine-fUSDataset\NEUROLAB\NLab_DATA';
+
+str_save = f.UserData.str_save;
+dir_save = fullfile(str_save,'NLab_DATA');
+
 color_atlas = 'k';
 linewidth_atlas = .5;
 

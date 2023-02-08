@@ -4,7 +4,7 @@ function f = movie_normalized(handles,val,str_regions,str_traces)
 % save_video(fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab,'CURRENT_Frames'),fullfile(DIR_FIG,'Movie_Normalized',FILES(CUR_FILE).nlab),'test');
 
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
-if nargin < 2 
+if nargin < 2
     val = 0;
     str_regions = [];
     str_traces = [];
@@ -31,14 +31,14 @@ if val == 1
 else
     % batch mode
     t_start_0 = 0;
-    t_lfp_0 = 10;
+    t_lfp_0 = 5;
     flag_video = 'true';
     display_mode = 'video';
 end
 
-
 % Loading Time Reference
 load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'time_ref','length_burst','n_burst');
+
 % Loading Time Tags
 if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file')
     tt_data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),...
@@ -94,6 +94,30 @@ else
     tg_data.TimeGroups_S = [];
 end
 
+% Loading Sleep Scoring
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sleep_Scoring.mat'),'file')
+    ss_data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sleep_Scoring.mat'),...
+        'channel_lfp','channel_acc','channel_emg');
+else
+    ss_data = [];
+end
+f.UserData.ss_data = ss_data;
+
+% Loading Atlas
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Atlas.mat'),'file')
+    atlas_data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Atlas.mat'),...
+        'AP_mm','ML_mm','AtlasName','AtlasType','Mask');
+    if ~isempty(atlas_data.AP_mm)
+        atlas_name = sprintf('Coronal-AP%.2fmm',atlas_data.AP_mm);
+    elseif ~isempty(atlas_data.ML_mm)
+        atlas_name = sprintf('Coronal-AP%.2fmm',atlas_data.ML_mm);
+    else
+        atlas_name = 'Unregistered';
+    end
+else
+    atlas_data = [];
+    atlas_name = 'Unregistered';
+end
 
 % Trace Selection
 l = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Region','-or','Tag','Trace_Mean'));
@@ -130,7 +154,7 @@ if ~isempty(l)
     else
         % user mode
         [ind_lfp,v] = listdlg('Name','LFP Selection','PromptString','Select traces to display',...
-            'SelectionMode','multiple','ListString',str_lfp,'InitialValue',initvalues,'ListSize',[300 500]);      
+            'SelectionMode','multiple','ListString',str_lfp,'InitialValue',initvalues,'ListSize',[300 500]);
     end
     
     if v==0
@@ -219,56 +243,62 @@ t = (b-floor(b))*24*3600;
 
 % Loading video
 if strcmp(flag_video,'true')
-
-%     % Check if Video_Axes contains video reader
-%     if isempty(handles.VideoAxes.UserData)
-%         % Check video loading option
-%         load('Preferences.mat','GImport');
-%         if strcmp(GImport.Video_loading,'skip')
-%             GImport.Video_loading = 'full';
-%         end
-%         save('Preferences.mat','GImport','-append');
-%         warning('Preferences.mat Video loading Option updated');
-%         
-%         % Import Video
-%         import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
-%     end
-%     
-%     % Conversion to rgb movie
-%     if ~isempty(handles.VideoAxes.UserData.rgb_video) && handles.VideoAxes.UserData.start_im==START_IM && handles.VideoAxes.UserData.end_im==END_IM
-%         rgb_video = handles.VideoAxes.UserData.rgb_video;
-%     else
-%         fprintf('Converting video to rgb movie frames...');
-%         v = handles.VideoAxes.UserData.VideoReader;
-%         im = handles.VideoAxes.UserData.Image.CData;
-%         %rgb_video = [];
-%         rgb_video = zeros(size(im,1),size(im,2),size(im,3),END_IM-START_IM+1,'uint8');
-%         
-%         h = waitbar(0,'Loading video file. Please wait.');
-%         for i = 1:END_IM-START_IM+1
-%             v.CurrentTime = t(i+START_IM-1);
-%             vidFrame = readFrame(v);
-%             %rgb_video = cat(4,rgb_video,vidFrame);
-%             rgb_video(:,:,:,i) = vidFrame;
-%             x = i/(END_IM-START_IM+1);
-%             waitbar(x,h,sprintf('%.1f %% converted to RGB movie.',100*x))
-%         end
-%         close(h);
-%         fprintf(' done.\n');
-%         
-%         % Storing video
-%         handles.VideoAxes.UserData.rgb_video=rgb_video;
-%         handles.VideoAxes.UserData.start_im=START_IM;
-%         handles.VideoAxes.UserData.end_im=END_IM;
-%     end
+    
+    %     % Check if Video_Axes contains video reader
+    %     if isempty(handles.VideoAxes.UserData)
+    %         % Check video loading option
+    %         load('Preferences.mat','GImport');
+    %         if strcmp(GImport.Video_loading,'skip')
+    %             GImport.Video_loading = 'full';
+    %         end
+    %         save('Preferences.mat','GImport','-append');
+    %         warning('Preferences.mat Video loading Option updated');
+    %
+    %         % Import Video
+    %         import_video(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).video),handles);
+    %     end
+    %
+    %     % Conversion to rgb movie
+    %     if ~isempty(handles.VideoAxes.UserData.rgb_video) && handles.VideoAxes.UserData.start_im==START_IM && handles.VideoAxes.UserData.end_im==END_IM
+    %         rgb_video = handles.VideoAxes.UserData.rgb_video;
+    %     else
+    %         fprintf('Converting video to rgb movie frames...');
+    %         v = handles.VideoAxes.UserData.VideoReader;
+    %         im = handles.VideoAxes.UserData.Image.CData;
+    %         %rgb_video = [];
+    %         rgb_video = zeros(size(im,1),size(im,2),size(im,3),END_IM-START_IM+1,'uint8');
+    %
+    %         h = waitbar(0,'Loading video file. Please wait.');
+    %         for i = 1:END_IM-START_IM+1
+    %             v.CurrentTime = t(i+START_IM-1);
+    %             vidFrame = readFrame(v);
+    %             %rgb_video = cat(4,rgb_video,vidFrame);
+    %             rgb_video(:,:,:,i) = vidFrame;
+    %             x = i/(END_IM-START_IM+1);
+    %             waitbar(x,h,sprintf('%.1f %% converted to RGB movie.',100*x))
+    %         end
+    %         close(h);
+    %         fprintf(' done.\n');
+    %
+    %         % Storing video
+    %         handles.VideoAxes.UserData.rgb_video=rgb_video;
+    %         handles.VideoAxes.UserData.start_im=START_IM;
+    %         handles.VideoAxes.UserData.end_im=END_IM;
+    %     end
     if isempty(handles.VideoAxes.UserData)
         bw_video = ones(1,1,END_IM-START_IM+1);
+        t_str1 = [];
+        t_str2 = [];
     else
         bw_video = handles.VideoAxes.UserData.all_frames;
+        t_str1 = datestr(handles.VideoAxes.UserData.t_ref/(24*3600),'HH:MM:SS.FFF');
+        t_str2 = datestr(handles.VideoAxes.UserData.t_video/(24*3600),'HH:MM:SS.FFF');
     end
     
 else
     bw_video = ones(1,1,END_IM-START_IM+1);
+    t_str1 = [];
+    t_str2 = [];
 end
 
 % Saving Video frame
@@ -311,6 +341,8 @@ f = figure('Name',sprintf('fUS-EEG Recording - %s (%s)',FILES(CUR_FILE).nlab,str
     'KeyPressFcn',{@f_keypress_fcn},...
     'Toolbar','none');
 f.UserData.success = false;
+f.UserData.atlas_data = atlas_data;
+f.UserData.atlas_name = atlas_name;
 
 e0 = uicontrol(f,'Units','normalized','Style','edit','Tag','Edit0',...
     'String','','TooltipString','pause between frame (s)');
@@ -354,7 +386,7 @@ t_factor = 1;
 t100 = uicontrol(f,'Units','normalized','Style','text',...
     'TooltipString','Scale','String','','BackgroundColor','k');
 t101 = uicontrol(f,'Units','normalized','Style','text',...
-    'String',sprintf('%d s',t_factor));
+    'String',sprintf('%d s',t_factor),'FontSize',6);
 % Display Controls
 cb1 = uicontrol(f,'Units','normalized',...
     'Style','Checkbox','TooltipString','CLimMode Movies');
@@ -383,7 +415,8 @@ e5 = uicontrol(f,'Units','normalized','Style','edit',...
     'Visible','off','TooltipString','CLim max');
 
 %Parameters
-margin = .01;
+%margin = .01;
+margin = .001;
 all_axes = [];
 all_spectraxes = [];
 all_images = [];
@@ -496,6 +529,13 @@ colormap(ax_im2,'gray');
 ax_im3 = copyobj(handles.RightAxes,f);
 ax_im3.XLim = [START_IM END_IM];
 set(ax_im3,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+ax_im3.XLabel.String = [];
+
+% Making time patches Visible
+all_tp = findobj(ax_im3,'Tag','TimePatch');
+for k=1:length(all_tp)
+    all_tp(k).Visible = 'on';
+end
 
 delete(findobj(ax_im3.Children,'Type','Line','-not','Tag','Trace_Mean','-not','Tag','Cursor'));
 l_mean = findobj(ax_im3,'Tag','Trace_Mean');
@@ -506,11 +546,20 @@ l_cursor.LineWidth = 2;
 uistack(l_cursor,'top');
 l_cursor.Visible = 'on';
 
+% Scaling axes
+c1 = min(l_mean.YData,[],'omitnan');
+c2 = max(l_mean.YData,[],'omitnan');
+ax_im3.YLim = [c1 c2];
+
 % First Image
 im = imagesc(IM(:,:,START_IM),'Parent',ax_im,'Tag','MainImage');
 boxCrop_Callback(handles.CropBox,[],ax_im,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
 set(ax_im,'XTickLabel','','XTick','','YTick','','YTickLabel','');
 colormap(ax_im,'hot');
+
+e1.String = c1;
+e2.String = c2;
+ax_im.CLim = [c1 c2];
 % Ubuntu bug fix
 % cbar = colorbar(ax_im,'Parent',f,'FontSize',8);
 cbar = colorbar(ax_im,'Parent',f);
@@ -522,15 +571,19 @@ cbar.FontSize=8;
 % colormap(ax_im2,'parula');
 
 % image(rgb_video(:,:,:,1),'Parent',ax_im2);
-image(bw_video(:,:,1),'Parent',ax_im2);
+im2 = image(bw_video(:,:,1),'Parent',ax_im2);
 ax_im2.Visible = 'off';
 colormap(ax_im2,'gray');
+axis(ax_im2,'equal');
 
 % adding Atlas
 am = findobj(handles.CenterAxes,'Tag','AtlasMask');
-copyobj(am,ax_im);
+am = copyobj(am,ax_im);
 cb_atlas.Callback = {@boxAtlas_Callback,ax_im};
 boxAtlas_Callback(cb_atlas,[],ax_im);
+% am.Color = [.5 .5 .5];
+am.Color = 'w';
+am.Color(4) = .4;
 
 % Color tag patches
 default_color = [.5 .5 .5];
@@ -575,7 +628,7 @@ for i=1:length(g_list)
             continue;
         else
             patch_colors(ind_tags,:) = repmat(GColors.TimeGroups(ind_group).Color,[length(ind_tags),1]);
-            face_alpha(ind_tags) = GColors.TimeGroups(ind_group).Transparency;    
+            face_alpha(ind_tags) = GColors.TimeGroups(ind_group).Transparency;
         end
     end
 end
@@ -583,7 +636,7 @@ end
 
 % Axes Traces
 for i=1:l1
-    ax = axes('Position',[.4 .025+(i-1)*.95/L+margin .5 .95/L-2*margin],'Parent',f,'XTickLabel','','FontSize',8);
+    ax = axes('Position',[.38 .025+(i-1)*.95/L+margin .5 .95/L-2*margin],'Parent',f,'FontSize',8);
     grid(ax,'on');
     scale = uicontrol(f,'Units','normalized','Style','text','TooltipString','Scale',...
         'String','','BackgroundColor','k','Position',[.905 .1+(i-1)*.8/L+margin .001 .8/L-margin]);
@@ -591,6 +644,28 @@ for i=1:l1
     ax.Tag = sprintf('Ax%d',i);
     ax.XAxis.Visible = 'off';
     ax.YLabel.String = char(str_lfp(i));
+    
+    % Bold if channel used for sleep scoring
+    if strcmp(char(strrep(str_lfp(i),'/','_')),char(ss_data.channel_lfp)) || strcmp(char(strrep(str_lfp(i),'\','_')),char(ss_data.channel_lfp))
+        ax.YLabel.FontWeight = 'bold';
+        ax.YLabel.String = sprintf('%s\n(Scoring)', ax.YLabel.String);
+    end
+    
+    set(ax,'XTickLabel','','XTick','');
+    %     ax.YAxis.Visible = 'off';
+    %     set(ax,'YTick','');
+    set(ax,'YTickLabel','');
+    ax.TickLength(1)=0;
+    
+    %Y-Scale
+    t200 = uicontrol(f,'Units','normalized','Style','text',...
+        'TooltipString','Scale','String','','BackgroundColor','k');
+    t201 = uicontrol(f,'Units','normalized','Style','text',...
+        'String','','FontSize',6,'HorizontalAlignment','left');
+%     t201 = text(.888,ax.Position(2),'x');
+    t200.Position = [.884 ax.Position(2) .001 ax.Position(4)];
+    t201.Position = [.886 ax.Position(2) .02 ax.Position(4)];
+            
     
     %Plotting tag patches
     for j=1:size(TimeTags_seconds,1)
@@ -614,7 +689,7 @@ for i=1:l1
         X = t(~isnan(l(i).XData))';
         Y = l(i).YData(~isnan(l(i).XData))';
     end
-    delta = X(2)-X(1);
+    delta_x = X(2)-X(1);
     line('XData',X,'YData',Y,'Parent',ax,'Color',l(i).Color);
     
     ax.XLim = [t(START_IM);t(END_IM)];
@@ -628,22 +703,24 @@ for i=1:l1
     all_axes = [all_axes;ax];
     % ax.UserData.X = X;
     % Adding NaN values to fit Y if not starting at 0
-    X_sup = (flip(X(1)-delta:-delta:0))';
+    X_sup = (flip(X(1)-delta_x:-delta_x:0))';
     Y_sup = NaN(size(X_sup));
     Y = [Y_sup;Y(:);NaN(1e6,1)];
     
     ax.UserData.Y = Y;
     ax.UserData.Tag = l(i).Tag;
-    X_post = X(end)+(delta:delta:delta*1e6)';
+    X_post = X(end)+(delta_x:delta_x:delta_x*1e6)';
     ax.UserData.X = [X_sup;X(:);X_post];
     
-    s = Y(floor(t(START_IM)/delta):floor(t(END_IM)/delta),1);
+    s = Y(floor(t(START_IM)/delta_x):floor(t(END_IM)/delta_x),1);
     ax.UserData.series = s;
-    ax.UserData.delta = delta;
+    ax.UserData.delta_x = delta_x;
     ax.UserData.mean = mean(s);
     ax.UserData.stdev = std(s);
     ax.UserData.scale = scale;
     ax.UserData.color = l(i).Color;
+    ax.UserData.t200 = t200;
+    ax.UserData.t201 = t201;
 end
 % Spectrograms
 for i=l1+1:L
@@ -657,11 +734,11 @@ for i=l1+1:L
     X = data_spectrogram(ii).Xdata;
     Y = data_spectrogram(ii).freqdom;
     Z = data_spectrogram(ii).Cdata;
-    delta = X(2)-X(1);
+    delta_x = X(2)-X(1);
     %Gaussian smoothing
     exp_cor = .25;
     t_smooth = 1;
-    step = t_smooth/delta;
+    step = t_smooth/delta_x;
     % Correction
     correction = repmat((data_spectrogram(ii).freqdom(:).^exp_cor),1,size(Z,2));
     correction = correction/correction(end,1);
@@ -670,9 +747,9 @@ for i=l1+1:L
     e5.String = sprintf('%.1f',max(Z(:)));
     
     % Adding NaN values to fit Y if not starting at 0
-    X_sup = (flip(X(1)-delta:-delta:0))';
+    X_sup = (flip(X(1)-delta_x:-delta_x:0))';
     Z_sup = NaN(length(Y),length(X_sup));
-    X_end = (X(end)+delta:delta:t(end))';
+    X_end = (X(end)+delta_x:delta_x:t(end))';
     Z_end = NaN(length(Y),length(X_end));
     Z = cat(2,Z_sup,Z,Z_end);
     X = [X_sup(:);X(:);X_end(:)];
@@ -693,7 +770,7 @@ for i=l1+1:L
     all_images = [all_images;im3];
     %ax.UserData.X = [X_sup;X];
     ax.UserData.Z = Z;
-    ax.UserData.delta = delta;
+    ax.UserData.delta_x = delta_x;
     ax.UserData.cursor = cursor;
     ax.UserData.spectro = spectro;
 end
@@ -737,8 +814,8 @@ cb3.Position = [.01 .9 .1 .05];
 cb_atlas.Position = [.01 .95 .05 .05];
 e4.Position = [.005 .85 .04 .05];
 e5.Position = [.005 .9 .04 .05];
-t100.Position = [.9-(.45*t_factor)/(2*f.UserData.t_lfp) 0 (.45*t_factor)/(2*f.UserData.t_lfp) .005];
-t101.Position = [.9-(.45*t_factor)/(2*f.UserData.t_lfp) .005 (.45*t_factor)/(2*f.UserData.t_lfp) .02];
+t100.Position = [.88-(.45*t_factor)/(2*f.UserData.t_lfp) .0025 (.45*t_factor)/(2*f.UserData.t_lfp) .0025];
+t101.Position = [.88-(.45*t_factor)/(2*f.UserData.t_lfp) .005 (.45*t_factor)/(2*f.UserData.t_lfp) .015];
 
 % Visible status
 cb1.Visible = button_visible;
@@ -747,7 +824,6 @@ cb3.Visible = button_visible;
 t3.Visible = button_visible;
 t4.Visible = button_visible;
 f.UserData.controls = [cb1;cb2;cb3;t3;t4];
-
 
 % Movie
 i = START_IM;
@@ -765,10 +841,16 @@ while i>=START_IM && i<=END_IM
         %Update timing
         t1.String = sprintf('%s',datestr(t(i)/(24*3600),'HH:MM:SS.FFF'));
         t2.String = sprintf('%d/%d',i,END_IM);
-        %Update movie
+        % Update movie
         im.CData = IM(:,:,i);
         % image(bw_video(:,:,:,i+1-START_IM),'Parent',ax_im2);
-        imagesc(bw_video(:,:,i),'Parent',ax_im2);
+        % imagesc(bw_video(:,:,i),'Parent',ax_im2);
+        
+        t7.String = sprintf('LFP time:\n%s',t_str1(i,:));
+        t8.String = sprintf('Video time:\n%s',t_str2(i,:));
+        
+        % Update video
+        im2.CData = bw_video(:,:,i);
         colormap(ax_im2,'gray');
         axis(ax_im2,'equal');
         ax_im2.Visible = 'off';
@@ -777,25 +859,25 @@ while i>=START_IM && i<=END_IM
         l_cursor.XData = [i i];
         l_cursor.YData = [ax_im3.YLim(1) ax_im3.YLim(2)];
         
-%         % Atlas
-%         if (val==0) && (i<=START_IM+100)
-%             cb_atlas.Value = 1;
-%         else
-%             cb_atlas.Value = handles.AtlasBox.Value;
-%         end
-%         boxAtlas_Callback(cb_atlas,[],ax_im);
+        %         % Atlas
+        %         if (val==0) && (i<=START_IM+100)
+        %             cb_atlas.Value = 1;
+        %         else
+        %             cb_atlas.Value = handles.AtlasBox.Value;
+        %         end
+        %         boxAtlas_Callback(cb_atlas,[],ax_im);
         
         % Plotting traces
         for j=1:length(all_axes)
             ax = all_axes(j);
             X = ax.UserData.X;
             Y = ax.UserData.Y;
-            delta = ax.UserData.delta;
+            delta_x = ax.UserData.delta_x;
             cla(ax);
             
             %Data
-            %ind_0 = floor(t(i)/delta);
-            %Y0 = Y(floor(ind_0-t_lfp/delta):floor(ind_0+t_lfp/delta));
+            %ind_0 = floor(t(i)/delta_x);
+            %Y0 = Y(floor(ind_0-t_lfp/delta_x):floor(ind_0+t_lfp/delta_x));
             
             % Bug correction : Select Y by indexing X
             [~,ind_1] = min((X-(t(i)-t_lfp)).^2);
@@ -822,7 +904,8 @@ while i>=START_IM && i<=END_IM
             end
             %Trace
             line(1:length(Y0),Y0,'Parent',ax,'Tag','Trace',...
-                'LineWidth',1,'Color',ax.UserData.color);
+                'LineWidth',.5,'Color',ax.UserData.color);
+            
             %Cursor
             line([.5+.5*length(Y0) .5+.5*length(Y0)],[-1e6  1e6],...
                 'Parent',ax,'LineWidth',1,'Color',[.5 .5 .5]);
@@ -835,10 +918,10 @@ while i>=START_IM && i<=END_IM
             im3 = all_images(j);
             ax = all_spectraxes(j);
             Z = ax.UserData.Z;
-            delta = ax.UserData.delta;
+            delta_x = ax.UserData.delta_x;
             
-            ind_0 = floor(t(i)/delta);
-            X0 = floor(ind_0-t_lfp/delta):floor(ind_0+t_lfp/delta);
+            ind_0 = floor(t(i)/delta_x);
+            X0 = floor(ind_0-t_lfp/delta_x):floor(ind_0+t_lfp/delta_x);
             im3.CData = Z(:,X0);
             
             im3.XData = 1:length(X0);
@@ -868,8 +951,8 @@ while i>=START_IM && i<=END_IM
         
         % Only on event
         % Scale Position
-        t100.Position = [.9-(.45*t_factor)/(2*t_lfp) 0 (.45*t_factor)/(2*t_lfp) .005];
-        t101.Position = [.9-(.45*t_factor)/(2*t_lfp) .005 (.45*t_factor)/(2*t_lfp) .02];
+        t100.Position = [.88-(.45*t_factor)/(2*t_lfp) .0025 (.45*t_factor)/(2*t_lfp) .0025];
+        t101.Position = [.88-(.45*t_factor)/(2*t_lfp) .005 (.45*t_factor)/(2*t_lfp) .015];
         % CLimMode
         if cb1.Value
             ax_im.CLimMode = 'auto';
@@ -882,10 +965,14 @@ while i>=START_IM && i<=END_IM
             ax_im.CLim = [str2double(e1.String),str2double(e2.String)];
             e1.Visible = f.UserData.button_visible;
             e2.Visible = f.UserData.button_visible;
+            
         end
         % YLimMode
+        all_lfp_lims = [];
+        all_lfp_axes = [];
         for j=1:length(all_axes)
             ax = all_axes(j);
+            cur_label = char(str_lfp(j));
             if ~cb2.Value
                 cb2.String = 'auto';
                 ax.YLimMode = 'auto';
@@ -897,19 +984,37 @@ while i>=START_IM && i<=END_IM
                 ax.YLimMode = 'manual';
                 e3.Visible = f.UserData.button_visible;
                 
-                as_factor = str2double(e3.String);
+                %                 as_factor = str2double(e3.String);
                 switch ax.UserData.Tag
                     case 'Trace_Cerep'
-                        lim_inf = ax.UserData.mean-as_factor*ax.UserData.stdev;
-                        lim_sup = ax.UserData.mean+as_factor*ax.UserData.stdev;
+                        % new scaling (IQ range)
+                        temp = prctile(ax.UserData.series(:),[5 95]);
+                        iq_r = temp(2)-temp(1);
+                        lim_inf = temp(1)-.5*iq_r;
+                        lim_sup = temp(2)+.5*iq_r;
+%                         % old scaling (std-based)
+%                         lim_inf = ax.UserData.mean-as_factor*ax.UserData.stdev;
+%                         lim_sup = ax.UserData.mean+as_factor*ax.UserData.stdev;
+
+                        if startsWith(cur_label,'LFP')
+                            all_lfp_axes = [all_lfp_axes;ax];
+                            all_lfp_lims = [all_lfp_lims;lim_inf,lim_sup];
+                        end
                         
                     case {'Trace_Mean';'Trace_Pixel';'Trace_Region';'Trace_Box'}
-                        lim_inf = min(ax.UserData.series(:));
-                        lim_sup = max(ax.UserData.series(:));
-                        % lim_inf = lim_inf - .1*(lim_sup-lim_inf);
-                        % lim_sup = lim_sup + .1*(lim_sup-lim_inf);
+                        
+                        % new scaling (IQ range)
+                        temp = prctile(ax.UserData.series(:),[0 99]);
+                        iq_r = temp(2)-temp(1);
+                        lim_inf = temp(1);
+                        lim_sup = temp(2)+.5*iq_r;
+%                         % old scaling (min-max)
+%                         lim_inf = min(ax.UserData.series(:));
+%                         lim_sup = max(ax.UserData.series(:));
+%                         % lim_inf = lim_inf - .1*(lim_sup-lim_inf);
+%                         % lim_sup = lim_sup + .1*(lim_sup-lim_inf);
                 end
-
+                
             end
             % YLim
             if lim_inf<lim_sup
@@ -917,7 +1022,36 @@ while i>=START_IM && i<=END_IM
             else
                 ax.YLim = [0,1];
             end
+            % Y-Scale
+            delta_y=lim_sup-lim_inf;
+            exp_scale = floor(log(delta_y)/log(10));
+            floor_scale = 10^exp_scale;
+            ax.UserData.t200.Position(4) = ax.Position(4)*floor_scale/delta_y;
+            ax.UserData.t201.Position(4) = ax.Position(4)*floor_scale/(1.5*delta_y);
+%             ax.UserData.t201.String = sprintf('10^%d',exp_scale);
+            ax.UserData.t201.String = sprintf('%.0f',floor_scale);
+%             set(ax.UserData.t201,'Rotate',90);
         end
+        
+        % Rescaling LFP axes
+        if ~isempty(all_lfp_lims)
+            lim_inf = min(all_lfp_lims(:,1));
+            lim_sup = max(all_lfp_lims(:,2));
+            delta_y=lim_sup-lim_inf;
+            exp_scale = floor(log(delta_y)/log(10));
+            floor_scale = 10^exp_scale;
+        end
+        for j=1:size(all_lfp_axes,1)
+            ax_lfp = all_lfp_axes(j);
+            ax_lfp.YLim = [lim_inf, lim_sup];
+            % Y-Scale
+            ax_lfp.UserData.t200.Position(4) = ax_lfp.Position(4)*floor_scale/delta_y;
+            ax_lfp.UserData.t201.Position(4) = ax_lfp.Position(4)*floor_scale/(1.5*delta_y);
+%             ax_lfp.UserData.t201.String = sprintf('10^%d',exp_scale);
+            ax_lfp.UserData.t201.String = sprintf('%.0f',floor_scale);
+%             set(ax_lfp.UserData.t201,'Rotate',90);
+        end
+        
         % CLimMode
         if cb3.Value
             cb3.String = 'auto';
@@ -964,7 +1098,8 @@ while i>=START_IM && i<=END_IM
                     if i == END_IM
                         %close(f);
                         if strcmp(display_mode,'video')
-                            save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).nlab,tag));
+%                             save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).nlab,tag));
+                            save_video(work_dir,save_dir,sprintf('[%s]%s-%s',f.UserData.atlas_name,FILES(CUR_FILE).nlab,tag),25);
                         end
                         f.UserData.success = true;
                         return;
