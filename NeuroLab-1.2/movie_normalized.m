@@ -662,10 +662,10 @@ for i=1:l1
         'TooltipString','Scale','String','','BackgroundColor','k');
     t201 = uicontrol(f,'Units','normalized','Style','text',...
         'String','','FontSize',6,'HorizontalAlignment','left');
-%     t201 = text(.888,ax.Position(2),'x');
+    %     t201 = text(.888,ax.Position(2),'x');
     t200.Position = [.884 ax.Position(2) .001 ax.Position(4)];
     t201.Position = [.886 ax.Position(2) .02 ax.Position(4)];
-            
+    
     
     %Plotting tag patches
     for j=1:size(TimeTags_seconds,1)
@@ -992,10 +992,10 @@ while i>=START_IM && i<=END_IM
                         iq_r = temp(2)-temp(1);
                         lim_inf = temp(1)-.5*iq_r;
                         lim_sup = temp(2)+.5*iq_r;
-%                         % old scaling (std-based)
-%                         lim_inf = ax.UserData.mean-as_factor*ax.UserData.stdev;
-%                         lim_sup = ax.UserData.mean+as_factor*ax.UserData.stdev;
-
+                        %                         % old scaling (std-based)
+                        %                         lim_inf = ax.UserData.mean-as_factor*ax.UserData.stdev;
+                        %                         lim_sup = ax.UserData.mean+as_factor*ax.UserData.stdev;
+                        
                         if startsWith(cur_label,'LFP')
                             all_lfp_axes = [all_lfp_axes;ax];
                             all_lfp_lims = [all_lfp_lims;lim_inf,lim_sup];
@@ -1008,11 +1008,11 @@ while i>=START_IM && i<=END_IM
                         iq_r = temp(2)-temp(1);
                         lim_inf = temp(1);
                         lim_sup = temp(2)+.5*iq_r;
-%                         % old scaling (min-max)
-%                         lim_inf = min(ax.UserData.series(:));
-%                         lim_sup = max(ax.UserData.series(:));
-%                         % lim_inf = lim_inf - .1*(lim_sup-lim_inf);
-%                         % lim_sup = lim_sup + .1*(lim_sup-lim_inf);
+                        %                         % old scaling (min-max)
+                        %                         lim_inf = min(ax.UserData.series(:));
+                        %                         lim_sup = max(ax.UserData.series(:));
+                        %                         % lim_inf = lim_inf - .1*(lim_sup-lim_inf);
+                        %                         % lim_sup = lim_sup + .1*(lim_sup-lim_inf);
                 end
                 
             end
@@ -1026,11 +1026,13 @@ while i>=START_IM && i<=END_IM
             delta_y=lim_sup-lim_inf;
             exp_scale = floor(log(delta_y)/log(10));
             floor_scale = 10^exp_scale;
-            ax.UserData.t200.Position(4) = ax.Position(4)*floor_scale/delta_y;
-            ax.UserData.t201.Position(4) = ax.Position(4)*floor_scale/(1.5*delta_y);
-%             ax.UserData.t201.String = sprintf('10^%d',exp_scale);
+            if delta_y>0
+                ax.UserData.t200.Position(4) = ax.Position(4)*floor_scale/delta_y;
+                ax.UserData.t201.Position(4) = ax.Position(4)*floor_scale/(1.5*delta_y);
+            end
+            %             ax.UserData.t201.String = sprintf('10^%d',exp_scale);
             ax.UserData.t201.String = sprintf('%.0f',floor_scale);
-%             set(ax.UserData.t201,'Rotate',90);
+            %             set(ax.UserData.t201,'Rotate',90);
         end
         
         % Rescaling LFP axes
@@ -1043,13 +1045,17 @@ while i>=START_IM && i<=END_IM
         end
         for j=1:size(all_lfp_axes,1)
             ax_lfp = all_lfp_axes(j);
-            ax_lfp.YLim = [lim_inf, lim_sup];
+            try
+                ax_lfp.YLim = [lim_inf, lim_sup];
+            catch
+                ax_lfp.YLim = [lim_inf, lim_sup];
+            end
             % Y-Scale
             ax_lfp.UserData.t200.Position(4) = ax_lfp.Position(4)*floor_scale/delta_y;
             ax_lfp.UserData.t201.Position(4) = ax_lfp.Position(4)*floor_scale/(1.5*delta_y);
-%             ax_lfp.UserData.t201.String = sprintf('10^%d',exp_scale);
+            %             ax_lfp.UserData.t201.String = sprintf('10^%d',exp_scale);
             ax_lfp.UserData.t201.String = sprintf('%.0f',floor_scale);
-%             set(ax_lfp.UserData.t201,'Rotate',90);
+            %             set(ax_lfp.UserData.t201,'Rotate',90);
         end
         
         % CLimMode
@@ -1098,7 +1104,7 @@ while i>=START_IM && i<=END_IM
                     if i == END_IM
                         %close(f);
                         if strcmp(display_mode,'video')
-%                             save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).nlab,tag));
+                            %                             save_video(work_dir,save_dir,sprintf('%s_EEG-fUS-VIDEO_%s',FILES(CUR_FILE).nlab,tag));
                             save_video(work_dir,save_dir,sprintf('[%s]%s-%s',f.UserData.atlas_name,FILES(CUR_FILE).nlab,tag),25);
                         end
                         f.UserData.success = true;
