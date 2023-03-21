@@ -129,7 +129,7 @@ b11.String = sprintf('%d/%d',sum(b11.UserData.selected),length(b11.UserData.sele
 b21 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','Batch','ToolTipString','Show selected options in batch mode','Tag','Button21','Value',0);
 b21.Position = [.85 .95 .05 .04];
 b21.UserData.popup = pu1;
-b31 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','All','ToolTipString','Show all options in batch mode','Tag','Button31','Value',0);
+b31 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','All','ToolTipString','Show all options in batch mode','Tag','Button31','Value',0,'Enable','off');
 b31.Position = [.91 .95 .05 .04];
 b31.UserData.popup = pu1;
 
@@ -145,7 +145,7 @@ b12.String = sprintf('%d/%d',sum(b12.UserData.selected),length(b12.UserData.sele
 b22 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','Batch','ToolTipString','Show selected options in batch mode','Tag','Button22','Value',0);
 b22.Position = [.85 .9 .05 .04];
 b22.UserData.popup = pu2;
-b32 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','All','ToolTipString','Show all options in batch mode','Tag','Button32','Value',0);
+b32 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','All','ToolTipString','Show all options in batch mode','Tag','Button32','Value',0,'Enable','off');
 b32.Position = [.91 .9 .05 .04];
 b32.UserData.popup = pu2;
 
@@ -161,7 +161,7 @@ b13.String = sprintf('%d/%d',sum(b13.UserData.selected),length(b13.UserData.sele
 b23 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','Batch','ToolTipString','Show selected options in batch mode','Tag','Button23','Value',0);
 b23.Position = [.85 .85 .05 .04];
 b23.UserData.popup = pu3;
-b33 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','All','ToolTipString','Show all options in batch mode','Tag','Button33','Value',0);
+b33 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','All','ToolTipString','Show all options in batch mode','Tag','Button33','Value',0,'Enable','off');
 b33.Position = [.91 .85 .05 .04];
 b33.UserData.popup = pu3;
 
@@ -170,9 +170,11 @@ b1.Position = [.05 .8 .1 .04];
 e1 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','ToolTipString','Info Panel','String','','Tag','Edit1','BackgroundColor','w');
 e1.Position = [.155 .8 .625 .04];
 pu0 = uicontrol('Units','normalized','Parent',f,'Style','popupmenu','String','Rmax|Tmax|RT_pattern','Tag','Popup0');
-pu0.Position = [.79 .8 .08 .04];
-b2 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','Display','Tag','Button2');
-b2.Position = [.88 .8 .08 .04];
+pu0.Position = [.79 .8 .05 .04];
+b2 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','Display','Tag','Button2','Enable','off');
+b2.Position = [.85 .8 .05 .04];
+b3 = uicontrol('Units','normalized','Parent',f,'Style','pushbutton','String','Save','Tag','Button3');
+b3.Position = [.91 .8 .05 .04];
 
 ax1 = subplot(131,'Parent',f,'Tag','Ax1','XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
 ax2 = subplot(132,'Parent',f,'Tag','Ax2','XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
@@ -195,6 +197,7 @@ pu3.KeyPressFcn = {@pu3_key_pressFcn,handles};
 
 b1.Callback = {@b1_Callback,handles};
 b2.Callback = {@display_Callback,handles};
+b3.Callback = {@save_Callback,handles};
 e1.Callback = {@e1_Callback};
 cb1.Callback = {@cb1_Callback,[handles.Ax1;handles.Ax2]};
 cb2.Callback = {@cb2_Callback,handles.Ax1};
@@ -207,13 +210,39 @@ b21.Callback = {@batch_Callback,handles};
 b22.Callback = {@batch_Callback,handles};
 b23.Callback = {@batch_Callback,handles};
 
-b31.Callback = {@all_Callback,handles};
-b32.Callback = {@all_Callback,handles};
-b33.Callback = {@all_Callback,handles};
+% b31.Callback = {@all_Callback,handles};
+% b32.Callback = {@all_Callback,handles};
+% b33.Callback = {@all_Callback,handles};
 
 f.Units = 'normalized';
 f.Position = [0.0380    0.3065    0.8662    0.4981];
 pu1_Callback(pu1,[],handles);
+
+end
+
+function save_Callback(~,~,handles)
+% Batch saving
+
+pu1 = handles.Popup1;
+b23 = handles.Button23;
+
+h = waitbar(0,'Please wait');
+
+for i = 1:length(pu1.String)
+    pu1.Value = i;
+    pu1_Callback(pu1,[],handles);
+    for j=1:3
+        handles.Popup0.Value =j;
+        f2 = batch_Callback(b23,[],handles);
+        b11 = findobj(f2,'Tag','Button11');
+        b11_Callback(b11,[],handles);
+    end
+
+    prop = i/length(pu1.String);
+    waitbar(prop,h,sprintf('Saving Synthesis fUS-Correlation %.1f %% completed',100*prop));
+end
+
+close(h);
 
 end
 
@@ -494,7 +523,6 @@ if exist(fullfile(dir_save,strcat(recording,'_nlab'),'NConfig.mat'),'file')
     list_refs_sorted = [list_refs_sorted;list_refs(all_indexes(:,k+1)==1)];
 end
 
-
 list_refs = list_refs_sorted;
 
 % Sorting list_refs by bands
@@ -720,7 +748,7 @@ drawnow;
 
 end
 
-function batch_Callback(hObj,~,handles)
+function f2 = batch_Callback(hObj,~,handles)
 
 f =  handles.MainFigure;
 ax1 = handles.Ax1;
@@ -785,7 +813,9 @@ e2 = uicontrol('Units','normalized','Parent',f2,'Style','edit','String',.5,'Tool
 e2.Position = [.26 .01 .04 .03];
 cb3.UserData.Edit1=e1;
 cb3.UserData.Edit2=e2;
-b11 = uicontrol('Units','normalized','Parent',f2,'Style','pushbutton','String','Save','TooltipString','Save Image','Tag','Button1');
+t1 = uicontrol('Units','normalized','Parent',f2,'FontWeight','bold','FontSize',12,'Style','text','Tag','Text1');%,'BackgroundColor','w'
+t1.Position = [.4 .01 .4 .03];
+b11 = uicontrol('Units','normalized','Parent',f2,'Style','pushbutton','String','Save','TooltipString','Save Image','Tag','Button11');
 b11.Position = [.9 .01 .08 .03];
 
 N = ceil(sqrt(length(all_options)));
@@ -851,7 +881,8 @@ for i=1:length(all_recordings)
             
             ax.FontSize = 8;
             ax.Title.String = strrep(cur_option,'_','-');
-            all_end_titles = [all_end_titles;{cur_option(end-2:end)}];
+            temp = strrep(cur_option,'-extra','');
+            all_end_titles = [all_end_titles;{temp(end-2:end)}];
             all_axes = [all_axes;ax];
         end
     end
@@ -893,6 +924,7 @@ else
     f2.Name = sprintf('%s[%d recordings-%s]',str_batch,counter,cur_param);
 end
 f2.OuterPosition = [0 0 1 1];
+t1.String = f2.Name;
 
 b11.Callback = {@b11_Callback,handles};
 cb1.Callback = {@cb1_Callback,all_axes};
@@ -918,261 +950,264 @@ if ~exist(data_dir,'dir')
 end
 save_name = strcat(strrep(strrep(f.Name,filesep,'-'),'*','-'),'.jpg');
 saveas(f,fullfile(data_dir,save_name),'jpeg');
+data_dir2 = '/media/hobbes/DataMOBs171/Synthesis-fUS-Correlation';
+saveas(f,fullfile(data_dir2,save_name),'jpeg');
 fprintf('File Saved [%s].\n',fullfile(data_dir,save_name));
+close(f);
 
 end
 
-function all_Callback(hObj,~,handles)
-
-f =  handles.MainFigure;
-str_save = f.UserData.str_save;
-dir_save = fullfile(str_save,'NLab_DATA');
-data_dir = f.UserData.data_dir;
-recording = f.UserData.recording;
-timeframe = f.UserData.timeframe;
-reference = f.UserData.reference;
-
-color_atlas = 'k';
-linewidth_atlas = .5;
-
-% all_params={'Rmax';'Tmax';'RT_pattern'};
-% [ind_param,v] = listdlg('Name','List Selection','PromptString','Select parameter to display',...
-%     'SelectionMode','single','ListString',all_params,'InitialValue','','ListSize',[300 500]);
-% if isempty(ind_param)||v==0
-%     return;
-% else
-%     cur_param = char(all_params(ind_param));
+% function f2 = all_Callback(hObj,~,handles)
+% 
+% f =  handles.MainFigure;
+% str_save = f.UserData.str_save;
+% dir_save = fullfile(str_save,'NLab_DATA');
+% data_dir = f.UserData.data_dir;
+% recording = f.UserData.recording;
+% timeframe = f.UserData.timeframe;
+% reference = f.UserData.reference;
+% 
+% color_atlas = 'k';
+% linewidth_atlas = .5;
+% 
+% % all_params={'Rmax';'Tmax';'RT_pattern'};
+% % [ind_param,v] = listdlg('Name','List Selection','PromptString','Select parameter to display',...
+% %     'SelectionMode','single','ListString',all_params,'InitialValue','','ListSize',[300 500]);
+% % if isempty(ind_param)||v==0
+% %     return;
+% % else
+% %     cur_param = char(all_params(ind_param));
+% % end
+% cur_param = strtrim(handles.Popup0.String(handles.Popup0.Value,:));
+% 
+% % Listing all files
+% d = dir(fullfile(data_dir,'*','*','*','Correlation_pattern.mat'));
+% all_folders = {d(:).folder}';
+% all_recordings = handles.Popup1.String;
+% all_timeframes = handles.Popup2.String;
+% all_references = handles.Popup3.String;
+% % Restricting to selection
+% ind_restrict = (contains(all_folders,all_recordings).* contains(all_folders,all_timeframes)).* contains(all_folders,all_references);
+% d = d(ind_restrict==1);
+% all_folders = {d.folder}';
+% 
+% list_options = hObj.UserData.popup.String;
+% 
+% switch hObj.Tag
+%     case 'Button31'
+%         str_batch = [];
+%         for j = 1:length(all_timeframes)
+%             for k = 1:length(all_references)
+%                 str_batch = [str_batch; fullfile('*',all_timeframes(j),all_references(k))];
+%             end
+%         end
+%         
+%     case 'Button32'
+%         str_batch = [];
+%         for i = 1:length(all_recordings)
+%             for k = 1:length(all_references)
+%                 str_batch = [str_batch; fullfile(all_recordings(i),'*',all_references(k))];
+%             end
+%         end
+%         
+%     case 'Button33'
+%         str_batch = [];
+%         for i = 1:length(all_recordings)
+%             for j = 1:length(all_timeframes)
+%                 str_batch = [str_batch; fullfile(all_recordings(i),all_timeframes(j),'*')];
+%             end
+%         end
 % end
-cur_param = strtrim(handles.Popup0.String(handles.Popup0.Value,:));
-
-% Listing all files
-d = dir(fullfile(data_dir,'*','*','*','Correlation_pattern.mat'));
-all_folders = {d(:).folder}';
-all_recordings = handles.Popup1.String;
-all_timeframes = handles.Popup2.String;
-all_references = handles.Popup3.String;
-% Restricting to selection
-ind_restrict = (contains(all_folders,all_recordings).* contains(all_folders,all_timeframes)).* contains(all_folders,all_references);
-d = d(ind_restrict==1);
-all_folders = {d.folder}';
-
-list_options = hObj.UserData.popup.String;
-
-switch hObj.Tag
-    case 'Button31'
-        str_batch = [];
-        for j = 1:length(all_timeframes)
-            for k = 1:length(all_references)
-                str_batch = [str_batch; fullfile('*',all_timeframes(j),all_references(k))];
-            end
-        end
-        
-    case 'Button32'
-        str_batch = [];
-        for i = 1:length(all_recordings)
-            for k = 1:length(all_references)
-                str_batch = [str_batch; fullfile(all_recordings(i),'*',all_references(k))];
-            end
-        end
-        
-    case 'Button33'
-        str_batch = [];
-        for i = 1:length(all_recordings)
-            for j = 1:length(all_timeframes)
-                str_batch = [str_batch; fullfile(all_recordings(i),all_timeframes(j),'*')];
-            end
-        end
-end
-
-f2 = figure('Units','normalized','Tag','All','Name',sprintf('Birds Eye View [%s]',data_dir));
-f2.UserData.cur_param = cur_param;
-clrmenu(f2);
-colormap(f2,'jet');
-cb1_status = 'on';
-cb1 = uicontrol('Units','normalized','Parent',f2,'Style','checkbox','String','Atlas on/off','Tag','Checkbox1','Value',0);
-cb1.Position = [.01 .01 .1 .02];
-cb3 = uicontrol('Units','normalized','Parent',f2,'Style','checkbox','String','CLimMode auto','Tag','Checkbox3','Value',0);
-cb3.Position = [.11 .01 .1 .02];
-e1 = uicontrol('Units','normalized','Parent',f2,'Style','edit','String',-.25,'TooltipString','CLim(1)','Tag','Edit1','Enable','off');
-e1.Position = [.21 .01 .04 .03];
-e2 = uicontrol('Units','normalized','Parent',f2,'Style','edit','String',.5,'TooltipString','CLim(2)','Tag','Edit2','Enable','off');
-e2.Position = [.26 .01 .04 .03];
-cb3.UserData.Edit1=e1;
-cb3.UserData.Edit2=e2;
-b21 = uicontrol('Units','normalized','Parent',f2,'Style','pushbutton','String','Save','TooltipString','Save Image','Tag','Button1');
-b21.Position = [.9 .01 .08 .03];
-
-% Creating uitabgroup
-mP = uipanel('FontSize',8,'Units','normalized','Position',[0 .05 1 .95],'Parent',f2);
-tabgp = uitabgroup('Units','normalized','Position',[0 0 1 1],'Parent',mP,'Tag','TabGroup');
-all_axes_2 = [];
-
-h = waitbar(0,'Please wait');
-counter = 0;
-for i=1:5%length(str_batch)
-    
-    all_labels = [];
-    all_end_titles = [];
-    cur_batch = char(str_batch(i));
-    cur_options = strrep(cur_batch,'*',list_options);
-        
-    tab = uitab('Parent',tabgp,'Title',sprintf('%02d',i),'Units','normalized','Tag',sprintf('Tab%d',i));
-    tab.TooltipString=cur_batch;
-%     tab.UserData.cur_batch = cur_batch;
-    all_axes = [];
-    
-    d_restricted = d(contains(all_folders,cur_options)==1);
-    N = length(d_restricted);
-    n = ceil(sqrt(N));
-        
-    prop = ((i-1)/length(str_batch));
-    waitbar(prop,h,sprintf('Loading [%s]\n %.1f %% completed',cur_batch,100*prop));
-    
-    for j=1:N
-        
-        counter = counter+1 ;
-        temp = regexp(d_restricted(j).folder,filesep,'split');
-        cur_recording = char(temp(end-2));
-        cur_timeframe = char(temp(end-1));
-        cur_reference = char(temp(end));
-        
-        switch hObj.Tag
-            case 'Button31'
-                cur_option=cur_recording;
-                tab_title=fullfile(cur_timeframe,cur_reference);
-            case 'Button32'
-                cur_option=cur_timeframe;
-                tab_title=fullfile(cur_recording,cur_reference);
-            case 'Button33'
-                cur_option=cur_reference;
-                tab_title=fullfile(cur_recording,cur_timeframe);
-        end
-    
-        fprintf('Loading Correlation Pattern [%d/%d] [%s] ... ',j,N,d_restricted(j).folder);
-        data_corr = load(fullfile(d_restricted(j).folder,d_restricted(j).name));
-        fprintf('done.\n');
-        
-        cur_file = strcat(cur_recording,'_nlab');
-        if exist(fullfile(dir_save,cur_file,'Atlas.mat'),'file')
-            fprintf('Loading Atlas [File: %s] ... ',cur_file);
-            data_atlas = load(fullfile(dir_save,cur_file,'Atlas.mat'));
-            fprintf('done.\n');
-        end
-        
-        ax = subplot(n,n,j,'Parent',tab);
-        
-        %imagesc(data_corr.Rmax_map,'Parent',ax);
-        switch cur_param
-            case {'Rmax'}
-                imagesc(data_corr.Rmax_map,'Parent',ax);
-            case {'Tmax'}
-                imagesc(data_corr.Tmax_map,'Parent',ax);
-                e1.String = -2;
-                e2.String = 6;
-            case {'RT_pattern'}
-                imagesc(data_corr.RT_pattern,'Parent',ax,'XData',data_corr.x_);
-        end
-        
-        hold(ax,'on');
-        plot(data_atlas.line_x,data_atlas.line_z,'Linewidth',linewidth_atlas,'Color',color_atlas,'Parent',ax,'Tag','Atlas','Visible',cb1_status);
-        
-        switch data_atlas.AtlasName
-            case 'Rat Coronal Paxinos'
-                ylabel = sprintf('AP=%.2fmm',data_atlas.AP_mm);
-            case 'Rat Sagittal Paxinos'
-                ylabel = sprintf('ML=%.2fmm',data_atlas.ML_mm);
-        end
-        ax.YLabel.String = ylabel;
-        all_labels = [all_labels;{ylabel}];
-        
-        if strcmp(cur_param,'RT_pattern') %&& j==1
-            set(ax,'YTick',[],'YTickLabel',[]);
-        else%if counter>1
-            set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
-        end
-        
-        ax.FontSize = 6;
-        ax.Title.String = strrep(cur_option,'_','-');
-        all_axes = [all_axes;ax];
-        all_end_titles = [all_end_titles;{cur_option(end-2:end)}];
-    end
-    
-    % Addding colorbar to last axis
-    cbar = colorbar(ax,'westoutside');
-    
-    eps1 =.01;
-    eps2 =.015;
-    
-    if strcmp(hObj.Tag,'Button33')
-%         %indexing by column
-%         n_col = length(unique(all_end_titles));
-%         n_rows = ceil(N/n_rows);
-        %indexing by line
-        n_rows = length(unique(all_end_titles));
-        n_col = ceil(N/n_rows);
-    else
-        n_rows = ceil(sqrt(N));
-        n_col = ceil(sqrt(N));
-    end
-
-    for k=1:N
-        ax=all_axes(k);
-        % ax.Position = [mod(j-1,n)/n+eps 1-ceil(j/n)/n+eps 1/n-2*eps 1/n-2*eps];
-        % indexing by line
-        % ax.Position = [mod(i-1,n_col)/n_col+eps1 1-(ceil(i/n_col)/n_rows)+eps2 1/n_col-2*eps1 1/n_rows-2*eps2];
-        % indexing by column
-        ax.Position = [ (floor((k-1)/n_rows)/n_col)+eps1 1-((mod(k-1,n_rows)+1)/n_rows)+eps2 1/n_col-2*eps1 1/n_rows-2*eps2];
-    end
-    cbar.Position = [ax.Position(1)-0.75*eps1 ax.Position(2) eps1/2 ax.Position(4)];
-
-    if length(unique(all_labels))==1
-        tab.Title=strcat('[',char(unique(all_labels)),']',tab_title);
-    else
-        tab.Title=tab_title;
-    end
-    tab.UserData.all_axes = all_axes;
-    all_axes_2 = [all_axes_2;all_axes];
-
-end
-
-close(h);
-f2.Name = sprintf('Birds-Eye-View[%drecordings-%s]',counter,cur_param);
-f2.OuterPosition = [0 0 1 1];
-
-b21.Callback = {@b21_Callback,handles};
-cb1.Callback = {@cb1_Callback,all_axes_2};
-cb3.Callback = {@cb3_Callback,cb3,all_axes_2};
-e1.Callback = {@cb3_Callback,cb3,all_axes_2};
-e2.Callback = {@cb3_Callback,cb3,all_axes_2};
-
-cb1_Callback(cb1,[],all_axes_2);
-cb3_Callback([],[],cb3,all_axes_2);
-
-end
-
-function b21_Callback(hObj,~,handles)
-
-% Save pic
-f_main =  handles.MainFigure;
-f = hObj.Parent;
-cur_param = f.UserData.cur_param;
-data_dir = fullfile(f_main.UserData.fig_dir,'Synthesis',cur_param);
-tabgp = findobj(f,'Tag','TabGroup');
-all_tabs = tabgp.Children;
-
-if ~exist(data_dir,'dir')
-    mkdir(data_dir);
-end
-
-for i =1:length(all_tabs)
-    cur_tab = all_tabs(i);
-    tabgp.SelectedTab = cur_tab;
-    save_name = strcat(strrep(cur_tab.Title,filesep,'-'),'.jpg');
-    saveas(f,fullfile(data_dir,save_name),'jpeg');
-%     save_name = strcat(strrep(cur_tab.Title,filesep,'-'),'.pdf');
-%     saveas(f,fullfile(data_dir,save_name),'pdf');
-
-    fprintf('File Saved %d/%d [%s].\n',i,length(all_tabs),fullfile(data_dir,save_name));
-end
-
-end
+% 
+% f2 = figure('Units','normalized','Tag','All','Name',sprintf('Birds Eye View [%s]',data_dir));
+% f2.UserData.cur_param = cur_param;
+% clrmenu(f2);
+% colormap(f2,'jet');
+% cb1_status = 'on';
+% cb1 = uicontrol('Units','normalized','Parent',f2,'Style','checkbox','String','Atlas on/off','Tag','Checkbox1','Value',0);
+% cb1.Position = [.01 .01 .1 .02];
+% cb3 = uicontrol('Units','normalized','Parent',f2,'Style','checkbox','String','CLimMode auto','Tag','Checkbox3','Value',0);
+% cb3.Position = [.11 .01 .1 .02];
+% e1 = uicontrol('Units','normalized','Parent',f2,'Style','edit','String',-.25,'TooltipString','CLim(1)','Tag','Edit1','Enable','off');
+% e1.Position = [.21 .01 .04 .03];
+% e2 = uicontrol('Units','normalized','Parent',f2,'Style','edit','String',.5,'TooltipString','CLim(2)','Tag','Edit2','Enable','off');
+% e2.Position = [.26 .01 .04 .03];
+% cb3.UserData.Edit1=e1;
+% cb3.UserData.Edit2=e2;
+% b21 = uicontrol('Units','normalized','Parent',f2,'Style','pushbutton','String','Save','TooltipString','Save Image','Tag','Button21');
+% b21.Position = [.9 .01 .08 .03];
+% 
+% % Creating uitabgroup
+% mP = uipanel('FontSize',8,'Units','normalized','Position',[0 .05 1 .95],'Parent',f2);
+% tabgp = uitabgroup('Units','normalized','Position',[0 0 1 1],'Parent',mP,'Tag','TabGroup');
+% all_axes_2 = [];
+% 
+% h = waitbar(0,'Please wait');
+% counter = 0;
+% for i=1:5%length(str_batch)
+%     
+%     all_labels = [];
+%     all_end_titles = [];
+%     cur_batch = char(str_batch(i));
+%     cur_options = strrep(cur_batch,'*',list_options);
+%         
+%     tab = uitab('Parent',tabgp,'Title',sprintf('%02d',i),'Units','normalized','Tag',sprintf('Tab%d',i));
+%     tab.TooltipString=cur_batch;
+% %     tab.UserData.cur_batch = cur_batch;
+%     all_axes = [];
+%     
+%     d_restricted = d(contains(all_folders,cur_options)==1);
+%     N = length(d_restricted);
+%     n = ceil(sqrt(N));
+%         
+%     prop = ((i-1)/length(str_batch));
+%     waitbar(prop,h,sprintf('Loading [%s]\n %.1f %% completed',cur_batch,100*prop));
+%     
+%     for j=1:N
+%         
+%         counter = counter+1 ;
+%         temp = regexp(d_restricted(j).folder,filesep,'split');
+%         cur_recording = char(temp(end-2));
+%         cur_timeframe = char(temp(end-1));
+%         cur_reference = char(temp(end));
+%         
+%         switch hObj.Tag
+%             case 'Button31'
+%                 cur_option=cur_recording;
+%                 tab_title=fullfile(cur_timeframe,cur_reference);
+%             case 'Button32'
+%                 cur_option=cur_timeframe;
+%                 tab_title=fullfile(cur_recording,cur_reference);
+%             case 'Button33'
+%                 cur_option=cur_reference;
+%                 tab_title=fullfile(cur_recording,cur_timeframe);
+%         end
+%     
+%         fprintf('Loading Correlation Pattern [%d/%d] [%s] ... ',j,N,d_restricted(j).folder);
+%         data_corr = load(fullfile(d_restricted(j).folder,d_restricted(j).name));
+%         fprintf('done.\n');
+%         
+%         cur_file = strcat(cur_recording,'_nlab');
+%         if exist(fullfile(dir_save,cur_file,'Atlas.mat'),'file')
+%             fprintf('Loading Atlas [File: %s] ... ',cur_file);
+%             data_atlas = load(fullfile(dir_save,cur_file,'Atlas.mat'));
+%             fprintf('done.\n');
+%         end
+%         
+%         ax = subplot(n,n,j,'Parent',tab);
+%         
+%         %imagesc(data_corr.Rmax_map,'Parent',ax);
+%         switch cur_param
+%             case {'Rmax'}
+%                 imagesc(data_corr.Rmax_map,'Parent',ax);
+%             case {'Tmax'}
+%                 imagesc(data_corr.Tmax_map,'Parent',ax);
+%                 e1.String = -2;
+%                 e2.String = 6;
+%             case {'RT_pattern'}
+%                 imagesc(data_corr.RT_pattern,'Parent',ax,'XData',data_corr.x_);
+%         end
+%         
+%         hold(ax,'on');
+%         plot(data_atlas.line_x,data_atlas.line_z,'Linewidth',linewidth_atlas,'Color',color_atlas,'Parent',ax,'Tag','Atlas','Visible',cb1_status);
+%         
+%         switch data_atlas.AtlasName
+%             case 'Rat Coronal Paxinos'
+%                 ylabel = sprintf('AP=%.2fmm',data_atlas.AP_mm);
+%             case 'Rat Sagittal Paxinos'
+%                 ylabel = sprintf('ML=%.2fmm',data_atlas.ML_mm);
+%         end
+%         ax.YLabel.String = ylabel;
+%         all_labels = [all_labels;{ylabel}];
+%         
+%         if strcmp(cur_param,'RT_pattern') %&& j==1
+%             set(ax,'YTick',[],'YTickLabel',[]);
+%         else%if counter>1
+%             set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+%         end
+%         
+%         ax.FontSize = 6;
+%         ax.Title.String = strrep(cur_option,'_','-');
+%         all_axes = [all_axes;ax];
+%         all_end_titles = [all_end_titles;{cur_option(end-2:end)}];
+%     end
+%     
+%     % Addding colorbar to last axis
+%     cbar = colorbar(ax,'westoutside');
+%     
+%     eps1 =.01;
+%     eps2 =.015;
+%     
+%     if strcmp(hObj.Tag,'Button33')
+% %         %indexing by column
+% %         n_col = length(unique(all_end_titles));
+% %         n_rows = ceil(N/n_rows);
+%         %indexing by line
+%         n_rows = length(unique(all_end_titles));
+%         n_col = ceil(N/n_rows);
+%     else
+%         n_rows = ceil(sqrt(N));
+%         n_col = ceil(sqrt(N));
+%     end
+% 
+%     for k=1:N
+%         ax=all_axes(k);
+%         % ax.Position = [mod(j-1,n)/n+eps 1-ceil(j/n)/n+eps 1/n-2*eps 1/n-2*eps];
+%         % indexing by line
+%         % ax.Position = [mod(i-1,n_col)/n_col+eps1 1-(ceil(i/n_col)/n_rows)+eps2 1/n_col-2*eps1 1/n_rows-2*eps2];
+%         % indexing by column
+%         ax.Position = [ (floor((k-1)/n_rows)/n_col)+eps1 1-((mod(k-1,n_rows)+1)/n_rows)+eps2 1/n_col-2*eps1 1/n_rows-2*eps2];
+%     end
+%     cbar.Position = [ax.Position(1)-0.75*eps1 ax.Position(2) eps1/2 ax.Position(4)];
+% 
+%     if length(unique(all_labels))==1
+%         tab.Title=strcat('[',char(unique(all_labels)),']',tab_title);
+%     else
+%         tab.Title=tab_title;
+%     end
+%     tab.UserData.all_axes = all_axes;
+%     all_axes_2 = [all_axes_2;all_axes];
+% 
+% end
+% 
+% close(h);
+% f2.Name = sprintf('Birds-Eye-View[%drecordings-%s]',counter,cur_param);
+% f2.OuterPosition = [0 0 1 1];
+% 
+% b21.Callback = {@b21_Callback,handles};
+% cb1.Callback = {@cb1_Callback,all_axes_2};
+% cb3.Callback = {@cb3_Callback,cb3,all_axes_2};
+% e1.Callback = {@cb3_Callback,cb3,all_axes_2};
+% e2.Callback = {@cb3_Callback,cb3,all_axes_2};
+% 
+% cb1_Callback(cb1,[],all_axes_2);
+% cb3_Callback([],[],cb3,all_axes_2);
+% 
+% end
+% 
+% function b21_Callback(hObj,~,handles)
+% 
+% % Save pic
+% f_main =  handles.MainFigure;
+% f = hObj.Parent;
+% cur_param = f.UserData.cur_param;
+% data_dir = fullfile(f_main.UserData.fig_dir,'Synthesis',cur_param);
+% tabgp = findobj(f,'Tag','TabGroup');
+% all_tabs = tabgp.Children;
+% 
+% if ~exist(data_dir,'dir')
+%     mkdir(data_dir);
+% end
+% 
+% for i =1:length(all_tabs)
+%     cur_tab = all_tabs(i);
+%     tabgp.SelectedTab = cur_tab;
+%     save_name = strcat(strrep(cur_tab.Title,filesep,'-'),'.jpg');
+%     saveas(f,fullfile(data_dir,save_name),'jpeg');
+% %     save_name = strcat(strrep(cur_tab.Title,filesep,'-'),'.pdf');
+% %     saveas(f,fullfile(data_dir,save_name),'pdf');
+% 
+%     fprintf('File Saved %d/%d [%s].\n',i,length(all_tabs),fullfile(data_dir,save_name));
+% end
+% 
+% end

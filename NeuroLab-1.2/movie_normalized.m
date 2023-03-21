@@ -846,9 +846,13 @@ while i>=START_IM && i<=END_IM
         % image(bw_video(:,:,:,i+1-START_IM),'Parent',ax_im2);
         % imagesc(bw_video(:,:,i),'Parent',ax_im2);
         
-        t7.String = sprintf('LFP time:\n%s',t_str1(i,:));
-        t8.String = sprintf('Video time:\n%s',t_str2(i,:));
-        
+        try
+            t7.String = sprintf('LFP time:\n%s',t_str1(i,:));
+            t8.String = sprintf('Video time:\n%s',t_str2(i,:));
+        catch
+            t7.String = 'No Video';
+            t8.String = 'No Video';
+        end
         % Update video
         im2.CData = bw_video(:,:,i);
         colormap(ax_im2,'gray');

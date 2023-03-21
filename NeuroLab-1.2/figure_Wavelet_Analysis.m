@@ -2322,17 +2322,17 @@ end
 
 % Compute for whole recording
 edits = [handles.Edit1,handles.Edit2];
-template_buttonRescale_Callback(handles.RescaleButton,[],handles.CenterAxes,edits);
-compute_wavelet_Callback(handles.ButtonCompute,[],handles);
-savestats_Callback([],[],handles);
-saveimage_Callback([],[],handles);
+% template_buttonRescale_Callback(handles.RescaleButton,[],handles.CenterAxes,edits);
+% compute_wavelet_Callback(handles.ButtonCompute,[],handles);
+% savestats_Callback([],[],handles);
+% saveimage_Callback([],[],handles);
 
-% % Compute for designated time tags
-% for i = 1:length(ind_tag)%size(TimeTags_strings,1)
-%     template_button_TagSelection_Callback(handles.TagButton,[],handles.CenterAxes,edits,'single',ind_tag(i),v)
-%     compute_wavelet_Callback(handles.ButtonCompute,[],handles);
-%     savestats_Callback([],[],handles);
-%     saveimage_Callback([],[],handles);
-% end
+% Compute for designated time tags
+for i = 1:length(ind_tag)%size(TimeTags_strings,1)
+    template_button_TagSelection_Callback(handles.TagButton,[],handles.CenterAxes,edits,'single',ind_tag(i),v)
+    compute_wavelet_Callback(handles.ButtonCompute,[],handles);
+    savestats_Callback([],[],handles);
+    saveimage_Callback([],[],handles);
+end
 
 end
