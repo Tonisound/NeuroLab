@@ -652,6 +652,13 @@ for i = 1:length(ind_files)
             case 'Detect Early-Mid-Late Runs'
                 success = detect_earlymidlate_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
+            case 'Detect Hippocampal Ripples'
+                  success = detect_ripples_abs(FILES(ii).nlab,0);
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'006','025','NREM');
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'005','025','NREM');
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'016','025','NREM');
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'015','025','NREM');
+                
             case 'Generate Time Indexes'
                 success = generate_time_indexes(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
@@ -708,6 +715,9 @@ for i = 1:length(ind_files)
                             
             case '(Figure) Cross-Correlation LFP-fUS'
                 f2 = figure_CrossCorrelation(myhandles,0,str_tag);
+                
+            case '(Figure) Ripple Imaging'
+                f2 = figure_Ripple_Imaging(myhandles,0,str_regions);
                 
             case 'Edit Traces'
                 success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);

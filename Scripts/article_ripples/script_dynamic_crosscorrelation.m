@@ -1,12 +1,11 @@
-function script_dynamic_crosscorrelation(recording_name,channel_id,band_name)
+function script_dynamic_crosscorrelation(myhandles)%(recording_name,channel_id,band_name)
 
 global DIR_SAVE DIR_STATS FILES;
 close all;
 
-% recording_name = '20190416_SD032_P301_R_nlab'; 
-% %recording_name = FILES(6).nlab;
-% channel_id = '016';
-% band_name = 'gammamid';
+recording_name = '20190416_SD032_P301_R_nlab'; 
+channel_id = '005';
+band_name = 'ripple';
 
 channel_raw = strcat('LFP_',channel_id);
 channel1 = strcat('Power-',band_name,'_',channel_id);
@@ -34,7 +33,7 @@ markersize = 3;
 face_color = [0.9300    0.6900    0.1900];
 face_alpha = .5 ;
 % g_colors = get(groot,'DefaultAxesColorOrder');
-f_colors =    [0.2422    0.1504    0.6603;
+f_colors =    flipud([0.2422    0.1504    0.6603;
     0.2504    0.1650    0.7076;
     0.2578    0.1818    0.7511;
     0.2647    0.1978    0.7952;
@@ -97,7 +96,7 @@ f_colors =    [0.2422    0.1504    0.6603;
     0.9597    0.9135    0.1423;
     0.9628    0.9373    0.1265;
     0.9691    0.9606    0.1064;
-    0.9769    0.9839    0.0805];
+    0.9769    0.9839    0.0805]);
 ind_colors = round(rescale((1:n_channels+1)',1,length(f_colors)));
 g_colors = f_colors(ind_colors,:);
 % g_colors = f_colors;
@@ -125,6 +124,8 @@ temp = datenum(S.TimeTags_strings(:,1));
 t_start = (temp-floor(temp))*24*3600;
 temp = datenum(S.TimeTags_strings(:,2));
 t_end = (temp-floor(temp))*24*3600;
+
+
 
 % Loading channels
 d_raw = dir(fullfile(DIR_SAVE,recording_name,'*',strcat(channel_raw,'.mat')));
@@ -229,6 +230,17 @@ for i = 1:n_channels
 %     all_Z1_max = [all_Z1_max,Z1_max];
 end
 
+% Detecting ripples
+channel_ripple = '005';
+channel_non_ripple = '025';
+[ripples_abs,LFPrip meanVal, stdVal] = detect_ripples_abs(recording_name,channel_ripple,channel_non_ripple,timegroup);
+
+durations = 100;
+cleaning = 0;
+PlotFigure = 1;
+newfig = 0;
+[M,T] = PlotRipRaw(LFPrip, ripples_abs(:,2), durations, cleaning, PlotFigure, newfig);
+
 % Dynamic Cross-Correlation
 % thresh = 2;
 % temp = Z1_max.*Z2_max;
@@ -266,8 +278,8 @@ ax1.YLim = [median(Yraw(:))-n_iqr1*iqr(Yraw(:)),median(Yraw(:))+n_iqr1*iqr(Yraw(
 ax2 = subplot(412,'parent',f1);
 
 % Correction
-exp_cor = .35;
-t_gauss = 1;
+exp_cor = .5;
+t_gauss = .1;
 n_iqr2 = 1.5;
 correction = repmat((data_spectro.freqdom(:).^exp_cor),1,size(data_spectro.Cdata_sub,2));
 correction = correction/correction(end,1);
@@ -280,6 +292,7 @@ Cdata = Cdata_smooth;
 hold(ax2,'on');
 im = imagesc('XData',data_spectro.Xdata_sub,'YData',data_spectro.freqdom,'CData',Cdata,'HitTest','off','Parent',ax2);
 ax2.CLim = [median(Cdata(:))-n_iqr2*iqr(Cdata(:)),median(Cdata(:))+n_iqr2*iqr(Cdata(:))];
+ax2.YLim = [data_spectro.freqdom(1),data_spectro.freqdom(end)];
 
 ax3 = subplot(413,'parent',f1);
 % plot(X1,Y1,'b','Parent',ax3);
@@ -304,6 +317,20 @@ leg = legend(ax4,cat(1,label1,all_labels_2));
 f1_axes=[ax1;ax2;ax3;ax4];
 linkaxes(f1_axes,'x');
 ax1.XLim = [X(1) X(end)];
+
+% Displaying ripples
+for i=1:size(ripples_abs,1)
+%     for j=1:length(f1_axes)
+        ax = f1_axes(1);
+        l1 = line('XData',[ripples_abs(i,1) ripples_abs(i,1)],'YData',[ax.YLim(1) ax.YLim(2)],'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
+        l2 = line('XData',[ripples_abs(i,2) ripples_abs(i,2)],'YData',[ax.YLim(1) ax.YLim(2)],'LineStyle','-','Color','b','Parent',ax,'Tag','EventLine','HitTest','off');
+        l3 = line('XData',[ripples_abs(i,3) ripples_abs(i,3)],'YData',[ax.YLim(1) ax.YLim(2)],'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
+        l1.Color(4) = .5;
+        l2.Color(4) = .5;
+        l3.Color(4) = .5;
+%     end
+% i
+end
 
 f1b=figure;
 f1b.Name = sprintf(strcat('[%s]%s[%s-%s-dynamics-detailed]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id);
@@ -414,6 +441,38 @@ end
 e1 = uicontrol('Units','normalized','Parent',f1,'Style','edit','ToolTipString','Patch Length (s)','Tag','Edit1','String',xpatch);
 e1.Position = [.01 .01 .04 .04];
 e1.Callback = {@e1_Callback,all_axes_control};
+
+
+
+sb = copyobj(myhandles.ScaleButton,f1);
+mb =copyobj(myhandles.MinusButton,f1);
+pb = copyobj(myhandles.PlusButton,f1);
+rb = copyobj(myhandles.RescaleButton,f1);
+bb = copyobj(myhandles.BackButton,f1);
+skb = copyobj(myhandles.SkipButton,f1);
+tb = copyobj(myhandles.TagButton,f1);
+ptb = copyobj(myhandles.prevTagButton,f1);
+ntb = copyobj(myhandles.nextTagButton,f1);
+
+e2 = uicontrol('Units','normalized','Parent',f1,'Style','edit','ToolTipString','Start Time','Tag','Edit2','String',xpatch);
+e2.Position = [sb.Position(1) sb.Position(2)+sb.Position(4) sb.Position(3) sb.Position(4)];
+% e2.Callback = {@e1_Callback,all_axes_control};
+e3 = uicontrol('Units','normalized','Parent',f1,'Style','edit','ToolTipString','End Time','Tag','Edit3','String',xpatch);
+e3.Position = [e2.Position(1) e2.Position(2)+e2.Position(4) e2.Position(3) e2.Position(4)];
+% e3.Callback = {@e1_Callback,all_axes_control};
+
+
+edits = [e2;e3];
+ax_control = f1_axes(1);
+set(sb,'Callback',{@template_buttonScale_Callback,ax_control});
+set(ptb,'Callback',{@template_prevTag_Callback,tb,ax_control,edits});
+set(ntb,'Callback',{@template_nextTag_Callback,tb,ax_control,edits});
+set(pb,'Callback',{@template_buttonPlus_Callback,ax_control,edits});
+set(mb,'Callback',{@template_buttonMinus_Callback,ax_control,edits});
+set(rb,'Callback',{@template_buttonRescale_Callback,ax_control,edits});
+set(skb,'Callback',{@template_buttonSkip_Callback,ax_control,edits});
+set(bb,'Callback',{@template_buttonBack_Callback,ax_control,edits});
+set(tb,'Callback',{@template_button_TagSelection_Callback,ax_control,edits,'single'});
 
 end
 
@@ -550,3 +609,4 @@ function quick_axes_unclickFcn(hObj,~)
 set(hObj,'WindowButtonUp','');
 set(hObj,'WindowButtonMotionFcn','');
 end
+

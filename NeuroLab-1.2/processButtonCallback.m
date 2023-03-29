@@ -47,6 +47,9 @@ switch strtrim(str(val,:))
     case 'Detect Left-Right Runs'
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Detect Hippocampal Ripples'
+        detect_ripples_abs(FILES(CUR_FILE).nlab,1);
+        
     case 'Detect Early-Mid-Late Runs'
         detect_earlymidlate_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         

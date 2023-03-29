@@ -350,7 +350,7 @@ pl = uicontrol(f,'Style','popup',...
 pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Convert Neuroshop Masks|';
 pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import External Files|Import NEV Tracking');
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope');
-pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Locomotion Events|Detect Sleep Events|Detect Left-Right Runs|Detect Early-Mid-Late Runs');
+pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Locomotion Events|Detect Sleep Events|Detect Left-Right Runs|Detect Early-Mid-Late Runs|Detect Hippocampal Ripples');
 pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Generate Region Groups');
 pl_str = strcat(pl_str,'|Run GLM Analysis');
 pl_str = strcat(pl_str,'|Export Time Tags|Export Image Patches|Export Anatomical Regions|Export LFP Traces (.dat)');
@@ -374,7 +374,7 @@ fl = uicontrol(f,'Style','popup',...
     'Parent',botPanel);
 fl_str = '(Movie) Normalized Movie|(Movie) Deformation Field|(Movie) Data Reconstruction';
 fl_str = strcat(fl_str,'|(Figure) Correlation Analysis|(Figure) LFP Wavelet Analysis|(Figure) Sleep Scoring|(Figure) fUS Episode Statistics|(Figure) fUS Fourier Analysis');
-fl_str = strcat(fl_str,'|(Figure) Principal and Independent Component Analysis|(Figure) Global Episode Display|(Figure) Peri-Event Time Histogram');
+fl_str = strcat(fl_str,'|(Figure) Principal and Independent Component Analysis|(Figure) Global Episode Display|(Figure) Peri-Event Time Histogram|(Figure) Ripple Imaging');
 fl_str = strcat(fl_str,'|(Figure) Peak Detection|(Figure) Auto-Correlation fUS|(Figure) Cross-Correlation LFP-fUS|(Figure) Vascular Potentiation');
 fl.String = fl_str;    
 % Process Button

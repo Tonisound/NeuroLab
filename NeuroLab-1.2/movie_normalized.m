@@ -110,7 +110,7 @@ if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Atlas.mat'),'file')
     if ~isempty(atlas_data.AP_mm)
         atlas_name = sprintf('Coronal-AP%.2fmm',atlas_data.AP_mm);
     elseif ~isempty(atlas_data.ML_mm)
-        atlas_name = sprintf('Coronal-AP%.2fmm',atlas_data.ML_mm);
+        atlas_name = sprintf('Sagittal-ML%.2fmm',atlas_data.ML_mm);
     else
         atlas_name = 'Unregistered';
     end
