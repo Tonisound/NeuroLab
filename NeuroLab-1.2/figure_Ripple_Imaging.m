@@ -10,25 +10,6 @@ global FILES CUR_FILE DIR_SAVE DIR_FIG DIR_STATS IM;
 %     str_traces = [];
 % end
 
-% % Reading Ripples from file
-% ripple_txt='/media/hobbes/DataMOBs171/Antoine-fUSDataset/Ephys/Rat-SD32/Data/20190416_SD032_008[ns2]/Ripple_Event[channel=4,thresh=2.000]_events.txt';
-% if exist(ripple_txt,'file')
-%     fileID = fopen(ripple_txt);
-%     t_rip_start = [];
-%     t_rip_end = [];
-%     hline = fgetl(fileID);
-%     while ~feof(fileID)
-%         hline = fgetl(fileID);
-%         cline = regexp(hline,'\t','split');
-%         c1 = strtrim(cline(1));
-%         c2 = strtrim(cline(2));
-%         t_rip_start = [t_rip_start;eval(char(c1))];
-%         t_rip_end = [t_rip_end;eval(char(c2))];
-%     end
-%     fclose(fileID);
-% end
-% ripples_abs = [t_rip_start,(t_rip_start+t_rip_end)/2,t_rip_end];
-
 recording_name = FILES(CUR_FILE).nlab;
 
 if exist(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),'file')
@@ -36,6 +17,9 @@ if exist(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),'file')
     channel_id = data_ripples.channel_ripple;
     band_name = 'ripple';
     ripples_abs = data_ripples.ripples_abs;
+    mean_dur = mean(ripples_abs(:,4),1,'omitnan');
+    mean_freq = mean(ripples_abs(:,5),1,'omitnan');
+    mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
     fprintf('File Loaded [%s].\n',fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
 else
     errordlg('Missing File [%s].',fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
@@ -70,74 +54,7 @@ t_step = .1;
 markersize = 3;
 face_color = [0.9300    0.6900    0.1900];
 face_alpha = .5 ;
-% g_colors = get(groot,'DefaultAxesColorOrder');
-f_colors =    flipud([0.2422    0.1504    0.6603;
-    0.2504    0.1650    0.7076;
-    0.2578    0.1818    0.7511;
-    0.2647    0.1978    0.7952;
-    0.2706    0.2147    0.8364;
-    0.2751    0.2342    0.8710;
-    0.2783    0.2559    0.8991;
-    0.2803    0.2782    0.9221;
-    0.2813    0.3006    0.9414;
-    0.2810    0.3228    0.9579;
-    0.2795    0.3447    0.9717;
-    0.2760    0.3667    0.9829;
-    0.2699    0.3892    0.9906;
-    0.2602    0.4123    0.9952;
-    0.2440    0.4358    0.9988
-    0.2206    0.4603    0.9973;
-    0.1963    0.4847    0.9892;
-    0.1834    0.5074    0.9798;
-    0.1786    0.5289    0.9682;
-    0.1764    0.5499    0.9520;
-    0.1687    0.5703    0.9359;
-    0.1540    0.5902    0.9218;
-    0.1460    0.6091    0.9079;
-    0.1380    0.6276    0.8973;
-    0.1248    0.6459    0.8883;
-    0.1113    0.6635    0.8763;
-    0.0952    0.6798    0.8598;
-    0.0689    0.6948    0.8394;
-    0.0297    0.7082    0.8163;
-    0.0036    0.7203    0.7917;
-    0.0067    0.7312    0.7660;
-    0.0433    0.7411    0.7394;
-    0.0964    0.7500    0.7120;
-    0.1408    0.7584    0.6842;
-    0.1717    0.7670    0.6554;
-    0.1938    0.7758    0.6251;
-    0.2161    0.7843    0.5923;
-    0.2470    0.7918    0.5567;
-    0.2906    0.7973    0.5188;
-    0.3406    0.8008    0.4789;
-    0.3909    0.8029    0.4354;
-    0.4456    0.8024    0.3909;
-    0.5044    0.7993    0.3480;
-    0.5616    0.7942    0.3045;
-    0.6174    0.7876    0.2612;
-    0.6720    0.7793    0.2227;
-    0.7242    0.7698    0.1910;
-    0.7738    0.7598    0.1646;
-    0.8203    0.7498    0.1535;
-    0.8634    0.7406    0.1596;
-    0.9035    0.7330    0.1774;
-    0.9393    0.7288    0.2100;
-    0.9728    0.7298    0.2394;
-    0.9956    0.7434    0.2371;
-    0.9970    0.7659    0.2199;
-    0.9952    0.7893    0.2028;
-    0.9892    0.8136    0.1885;
-    0.9786    0.8386    0.1766;
-    0.9676    0.8639    0.1643;
-    0.9610    0.8890    0.1537;
-    0.9597    0.9135    0.1423;
-    0.9628    0.9373    0.1265;
-    0.9691    0.9606    0.1064;
-    0.9769    0.9839    0.0805]);
-ind_colors = round(rescale((1:n_channels+1)',1,length(f_colors)));
-g_colors = f_colors(ind_colors,:);
-% g_colors = f_colors;
+g_colors = get_colors(n_channels+1,'jet');
 
 % Loading time reference
 data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
@@ -239,10 +156,23 @@ Y2q(X_restrict==0,:) = NaN;
 Y3q(X_restrict==0,:) = NaN;
 
 
+% Restricting ripples
+column_sort = 6; % 4 duration, 5 frequency, 6 p2p amplitude;
+ratio_keep = .1;
+[~,ind_sorted] = sort(ripples_abs(:,column_sort),'descend');
+ripples_abs_sorted = ripples_abs(ind_sorted,:);
+index_keep = 1:round(ratio_keep*size(ripples_abs,1));
+% index_keep = round(ratio_keep*size(ripples_abs,1)):size(ripples_abs,1);
+ripples_abs = ripples_abs_sorted(index_keep,:);
+mean_dur = mean(ripples_abs(:,4),1,'omitnan');
+mean_freq = mean(ripples_abs(:,5),1,'omitnan');
+mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
+
+
 % Plotting
 f1=figure;
 f1.UserData.success = false;
-f1.Name = sprintf(strcat('[%s]%s[%s-%s]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id);
+f1.Name = sprintf(strcat('[%s]%s[%s-%s][Ripples Means:%.1fsec-%1.fHz-%1.f]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id,mean_dur,mean_freq,mean_p2p);
 colormap(f1,'jet');
 
 
@@ -508,9 +438,9 @@ for i=1:n_channels
     YData = squeeze(Y2q_rip_normalized(i,:,:));
     for j=1:n_events
         try
-            l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',f_colors(i,:),'LineWidth',.1,'Parent',ax);
+            l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(i,:),'LineWidth',.1,'Parent',ax);
         catch
-            l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',f_colors(end,:),'LineWidth',.1,'Parent',ax);
+            l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(end,:),'LineWidth',.1,'Parent',ax);
         end
         l.Color(4)=.5;
     end
@@ -574,8 +504,6 @@ fprintf('>> Process 4/5 done [%s].\n',tab4.Title);
 % f5.Name = sprintf(strcat('[%s]%s[%s-%s-sequence]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id);
 % set(f5,'Units','normalized','OuterPosition',[0 0 1 1]);
 % colormap(f5,'jet');
-n_col = 10 ;
-n_rows = ceil(length(t_bins_fus)/n_col);
 
 f5_axes=[];
 n_iqr= 3;
@@ -584,12 +512,10 @@ data_iqr = Y3q_rip_reshaped(~isnan(Y3q_rip_reshaped));
 temp=1:length(t_bins_fus);
 index_t_bins_fus = temp(1:end-1);%(1:2:end-1);
 
-eps1=.01;
-eps2=.01;
-
 for i=index_t_bins_fus
     
-    ax = subplot(n_rows,n_col,i,'parent',tab5);
+    n=ceil(sqrt(length(index_t_bins_fus)));
+    ax = subplot(n,n,i,'parent',tab5);
     hold(ax,'on');
     imagesc(Y3q_rip_reshaped(:,:,i),'Parent',ax);
     ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
@@ -603,11 +529,20 @@ for i=index_t_bins_fus
     ax.YDir = 'reverse';
     if i == index_t_bins_fus(end)
         cbar = colorbar(ax,'eastoutside');
+        cbar.Position = [.94 .01 .01 .15];
     end
-%     ax.Position = [mod(i-1,n_col)/n_col+eps1 1-(ceil(i/n_col)/n_rows)+eps2 1/n_col-2*eps1 1/n_rows-2*eps2];
-    cbar.Position = [.95 .25 .01 .5];
     f5_axes=[f5_axes;ax];
 end
+
+n_col = 10 ;
+n_rows = ceil(length(f5_axes)/n_col);
+eps1=.01;
+eps2=.01;
+
+for i=1:length(f5_axes)
+    f5_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
+end
+
 fprintf('>> Process 5/5 done [%s].\n',tab5.Title);
 
 

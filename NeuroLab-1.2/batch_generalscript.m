@@ -654,6 +654,15 @@ for i = 1:length(ind_files)
                 
             case 'Detect Hippocampal Ripples'
                   success = detect_ripples_abs(FILES(ii).nlab,0);
+%                 % SD025 - reversed
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'017','009','NREM');
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'008','009','NREM');
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'010','009','NREM');
+%                 % SD025
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'016','024','NREM');
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'025','024','NREM');
+%                 success = detect_ripples_abs(FILES(ii).nlab,0,'023','024','NREM');
+%                 % SD032
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'006','025','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'005','025','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'016','025','NREM');
