@@ -624,7 +624,7 @@ end
 function initialize_botPanel(handles)
 
 fmin = 1;
-fmax = 150;
+fmax = 250;
 bands = str2double(handles.Edit4.String);
 bot_axes = findobj(handles.BotPanel,'Type','axes');
 l = length(bot_axes);
@@ -1688,7 +1688,7 @@ for k=1:bands
         gmid_descend = NaN(1,size(C_descend,2));    
     end
     val_inf = max(freqdom(1),100);
-    val_sup = min(freqdom(end),150);
+    val_sup = min(freqdom(end),250);
     if val_inf<=val_sup
         [~,i_1] = min((freqdom-val_inf).^2);
         [~,i_2] = min((freqdom-val_sup).^2);

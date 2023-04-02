@@ -156,14 +156,14 @@ Y2q(X_restrict==0,:) = NaN;
 Y3q(X_restrict==0,:) = NaN;
 
 
-% Restricting ripples
-column_sort = 6; % 4 duration, 5 frequency, 6 p2p amplitude;
-ratio_keep = .1;
-[~,ind_sorted] = sort(ripples_abs(:,column_sort),'descend');
-ripples_abs_sorted = ripples_abs(ind_sorted,:);
-index_keep = 1:round(ratio_keep*size(ripples_abs,1));
-% index_keep = round(ratio_keep*size(ripples_abs,1)):size(ripples_abs,1);
-ripples_abs = ripples_abs_sorted(index_keep,:);
+% % Restricting ripples
+% column_sort = 6; % 4 duration, 5 frequency, 6 p2p amplitude;
+% ratio_keep = .1;
+% [~,ind_sorted] = sort(ripples_abs(:,column_sort),'descend');
+% ripples_abs_sorted = ripples_abs(ind_sorted,:);
+% index_keep = 1:round(ratio_keep*size(ripples_abs,1));
+% % index_keep = round(ratio_keep*size(ripples_abs,1)):size(ripples_abs,1);
+% ripples_abs = ripples_abs_sorted(index_keep,:);
 mean_dur = mean(ripples_abs(:,4),1,'omitnan');
 mean_freq = mean(ripples_abs(:,5),1,'omitnan');
 mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
@@ -518,6 +518,7 @@ for i=index_t_bins_fus
     ax = subplot(n,n,i,'parent',tab5);
     hold(ax,'on');
     imagesc(Y3q_rip_reshaped(:,:,i),'Parent',ax);
+    
     ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
     
 %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
@@ -545,6 +546,7 @@ end
 
 fprintf('>> Process 5/5 done [%s].\n',tab5.Title);
 
+load('Preferences.mat','GTraces');
 
 % Saving Stats
 flag_save_stats = false;
@@ -568,7 +570,6 @@ end
 % Saving Tabs
 flag_save_figs = false;
 if flag_save_figs
-    load('Preferences.mat','GTraces');
     save_dir = fullfile(DIR_FIG,'Ripple_Imaging',recording_name);
     if ~isfolder(save_dir)
         mkdir(save_dir);
@@ -593,6 +594,41 @@ if flag_save_figs
     tabgp.SelectedTab = tab5;
     saveas(f1,fullfile(save_dir,strcat(f1.Name,tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab5.Title,save_dir);
+end
+
+
+% Saving Movie
+flag_save_movie = true;
+if flag_save_movie
+    
+    save_dir = fullfile(DIR_FIG,'Ripple_Imaging',recording_name);
+    if ~isfolder(save_dir)
+        mkdir(save_dir);
+    end
+    work_dir = fullfile(DIR_FIG,'Ripple_Imaging',recording_name,'Frames');
+    if isfolder(work_dir)
+        rmdir(work_dir,'s');
+    end
+    mkdir(work_dir);
+    
+    f2 = figure();
+    for i = 1:length(f5_axes)
+        ax = f5_axes(i);
+        ax2 = copyobj(ax,f2);
+        ax2.Title.String = strrep(ax2.Title.String,'t','Time from Ripple Peak');
+        colorbar(ax2,'eastoutside');
+        ax2.Position = [.05 .05 .85 .9];
+        pic_name = sprintf(strcat('%s_Ripple-Imaging_%03d.mat'),recording_name,i);
+        l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+            'LineWidth',1,'Color','r','Parent',ax2);
+        l.Color(4) = .25;
+        saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+        delete(ax2);
+    end
+    
+    close(f2);
+    video_name = sprintf(strcat('%s_Ripple-Imaging'),recording_name);
+    save_video(work_dir,save_dir,video_name)
 end
 
 f1.UserData.success = true;

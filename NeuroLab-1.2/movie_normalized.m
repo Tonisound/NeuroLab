@@ -119,6 +119,14 @@ else
     atlas_name = 'Unregistered';
 end
 
+% Loading Ripple Events
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Atlas.mat'),'file')
+    data_ripples = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'));
+    ripples_abs = data_ripples.ripples_abs;
+else
+    ripples_abs = [];
+end
+
 % Trace Selection
 l = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Region','-or','Tag','Trace_Mean'));
 %l = findobj(handles.RightAxes,'Tag','Trace_Cerep');
@@ -909,6 +917,29 @@ while i>=START_IM && i<=END_IM
             %Trace
             line(1:length(Y0),Y0,'Parent',ax,'Tag','Trace',...
                 'LineWidth',.5,'Color',ax.UserData.color);
+            
+            % Ripple Events
+            t_ripples = ripples_abs(:,2);
+            t_ripples_start = ripples_abs(:,1);
+            t_ripples_end = ripples_abs(:,3);
+            ind_keep = find(sign((t_ripples-(t(i)-t_lfp)).*(t_ripples-(t(i)+t_lfp)))<=0);
+            if ~isempty(ind_keep)
+                for k=1:length(ind_keep)
+                    t_rip = t_ripples(ind_keep(k));
+                    x_rip = (t_rip-(t(i)-t_lfp))/(2*t_lfp);
+                    t_rip_start = t_ripples_start(ind_keep(k));
+                    x_rip_start = (t_rip_start-(t(i)-t_lfp))/(2*t_lfp);
+                    t_rip_end = t_ripples_end(ind_keep(k));
+                    x_rip_end = (t_rip_end-(t(i)-t_lfp))/(2*t_lfp);
+                    
+                    patch('XData',[.5+x_rip_start*length(Y0) .5+x_rip_start*length(Y0) .5+x_rip_end*length(Y0) .5+x_rip_end*length(Y0)],...
+                        'YData',[ax.YLim(1) ax.YLim(2) ax.YLim(2) ax.YLim(1)],...
+                        'FaceColor',[.5 .5 .5],'EdgeColor',[.5 .5 .5],'FaceAlpha',.5,'Parent',ax);
+                    line('XData',[.5+x_rip*length(Y0) .5+x_rip*length(Y0)],'YData',[ax.YLim(1) ax.YLim(2)],...
+                        'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
+                end
+            end
+            
             
             %Cursor
             line([.5+.5*length(Y0) .5+.5*length(Y0)],[-1e6  1e6],...
