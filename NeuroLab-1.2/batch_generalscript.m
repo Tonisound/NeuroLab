@@ -728,6 +728,9 @@ for i = 1:length(ind_files)
             case '(Figure) Ripple Imaging'
                 f2 = figure_Ripple_Imaging(myhandles,0,str_regions);
                 
+            case '(Figure) Timed Frames'
+                f2 = figure_Timed_Frames(myhandles,0,str_regions);
+            
             case 'Edit Traces'
                 success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);
                 
