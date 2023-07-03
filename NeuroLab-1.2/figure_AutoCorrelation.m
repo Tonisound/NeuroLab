@@ -1,6 +1,14 @@
-function f2 = figure_AutoCorrelation(myhandles,val,str_tag)
+function f2 = figure_AutoCorrelation(myhandles,val,str_tag,str_regions,str_group_regions)
 
 global DIR_SAVE FILES CUR_FILE START_IM END_IM;
+
+if nargin<3
+    str_regions = [];
+    str_group_regions = [];
+    str_tag = [];
+    %     str_group = [];
+    %     str_traces = [];
+end
 
 % Loading Time Reference
 if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Reference.mat'),'file'))
@@ -17,6 +25,62 @@ if (exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Time_Tags.mat'),'file'))
 else
     warning('Missing Time Tags File (%s)\n',fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));
     return;
+end
+
+% Copying MainImage & Atlas
+atlas_mask = findobj(myhandles.CenterAxes,'Tag','AtlasMask');
+
+% Copying Trace_Region
+l_reg = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+if val==0 && ~isempty(l_reg)
+    % Restricting to selected regions in batch mode
+    ind_keep = zeros(length(l_reg),1);
+    for i =1:length(l_reg)
+        if sum(strcmp(str_regions,l_reg(i).UserData.Name))>0
+            ind_keep(i)=1;
+        end
+    end
+    l_reg = l_reg(ind_keep==1);
+end
+
+IM_region = [];
+mask_regions = [];
+label_regions = [];
+color_regions = [];
+n_regions = length(l_reg);
+for i=1:length(l_reg)
+    temp=permute(l_reg(i).YData(1:end-1),[1 3 2]);
+    IM_region = cat(1,IM_region,temp);
+    mask_regions = cat(3,mask_regions,l_reg(i).UserData.Mask);
+    color_regions = cat(1,color_regions,l_reg(i).Color);
+    label_regions = [label_regions;{l_reg(i).UserData.Name}];
+end
+
+
+% Copying Trace_RegionGroup
+l_group = flipud(findobj(myhandles.RightAxes,'Tag','Trace_RegionGroup'));
+if val==0 && ~isempty(l_group)
+    % Restricting to selected groups in batch mode
+    ind_keep = zeros(length(l_group),1);
+    for i =1:length(l_group)
+        if sum(strcmp(str_group_regions,l_group(i).UserData.Name))>0
+            ind_keep(i)=1;
+        end
+    end
+    l_group = l_group(ind_keep==1);
+end
+
+IM_group = [];
+mask_groups = [];
+label_groups = [];
+color_groups = [];
+n_groups = length(l_group);
+for i=1:length(l_group)
+    temp=permute(l_group(i).YData(1:end-1),[1 3 2]);
+    IM_group = cat(1,IM_group,temp);
+    mask_groups = cat(3,mask_groups,l_group(i).UserData.Mask);
+    color_groups = cat(1,color_groups,l_group(i).Color);
+    label_groups = [label_groups;{l_group(i).UserData.Name}];
 end
 
 f2 = figure('Units','normalized',...
@@ -43,6 +107,9 @@ f2.UserData.t_step = median(diff(data_tr.time_ref.Y));
 % f2.UserData.n_burst = data_tr.n_burst;
 % f2.UserData.length_burst = data_tr.length_burst;
 % f2.UserData.rec_mode = data_tr.rec_mode;
+
+f2.UserData.n_regions = n_regions;
+f2.UserData.n_groups = n_groups;
 
 f2.UserData.TimeTags = data_tt.TimeTags;
 f2.UserData.TimeTags_strings = data_tt.TimeTags_strings;
@@ -119,18 +186,18 @@ f2.UserData.folder_name = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab);
 L = 5;                      % Height top panels
 l = 1;                       % Height info panel
 ftsize = 8;                 % Ax fontsize
-e1_def = '30';
+e1_def = '300';
 e1_tip = 'Max Delay (s)';
 e2_def = '2';
 e2_tip = 'Step Delay (s)';
-% e3_def = '1';
-% e3_tip = 'Time Smoothing (s)';
+e3_def = '1200';
+e3_tip = 'Dynamic Bin Length (s)';
 e4_def = '3';
 e4_tip = 'Data smoothing (s)';
 e5_def = '0';
 e5_tip = 'Correlogramm smoothing (s)';
-% e6_def = '20';
-% e6_tip = 'Thresh_sup (s)';
+e6_def = '120';
+e6_tip = 'Dynamic Bin Size (s)';
 
 % Information Panel
 iP = uipanel('Units','normalized',...
@@ -183,13 +250,13 @@ e2 = uicontrol('Units','normalized',...
     'String',e2_def,...
     'Tag','Edit2',...
     'Tooltipstring',e2_tip);
-% e3 = uicontrol('Units','normalized',...
-%     'Style','edit',...
-%     'HorizontalAlignment','center',...
-%     'Parent',iP,...
-%     'String',e3_def,...
-%     'Tag','Edit3',...
-%     'Tooltipstring',e3_tip);
+e3 = uicontrol('Units','normalized',...
+    'Style','edit',...
+    'HorizontalAlignment','center',...
+    'Parent',iP,...
+    'String',e3_def,...
+    'Tag','Edit3',...
+    'Tooltipstring',e3_tip);
 e4 = uicontrol('Units','normalized',...
     'Style','edit',...
     'HorizontalAlignment','center',...
@@ -204,13 +271,13 @@ e5 = uicontrol('Units','normalized',...
     'String',e5_def,...
     'Tag','Edit5',...
     'Tooltipstring',e5_tip);
-% e6 = uicontrol('Units','normalized',...
-%     'Style','edit',...
-%     'HorizontalAlignment','center',...
-%     'Parent',iP,...
-%     'String',e6_def,...
-%     'Tag','Edit6',...
-%     'Tooltipstring',e6_tip);
+e6 = uicontrol('Units','normalized',...
+    'Style','edit',...
+    'HorizontalAlignment','center',...
+    'Parent',iP,...
+    'String',e6_def,...
+    'Tag','Edit6',...
+    'Tooltipstring',e6_tip);
 
 br = uicontrol('Units','normalized',...
     'Style','pushbutton',...
@@ -276,10 +343,10 @@ e_start.Position =  [5*ipos(3)/10     2.75*ipos(4)/10   ipos(3)/12   3.5*ipos(4)
 e_end.Position = [5*ipos(3)/10     ipos(4)/20           ipos(3)/12   3.5*ipos(4)/20];
 e1.Position = [6*ipos(3)/10      2.75*ipos(4)/10           ipos(3)/20   3.5*ipos(4)/20];
 e2.Position = [6.5*ipos(3)/10      2.75*ipos(4)/10           ipos(3)/20   3.5*ipos(4)/20];
-% e3.Position = [7*ipos(3)/10      2.75*ipos(4)/10           ipos(3)/20   3.5*ipos(4)/20];
+e3.Position = [7*ipos(3)/10      2.75*ipos(4)/10           ipos(3)/20   3.5*ipos(4)/20];
 e4.Position = [6*ipos(3)/10     ipos(4)/20           ipos(3)/20   3.5*ipos(4)/20];
 e5.Position = [6.5*ipos(3)/10     ipos(4)/20           ipos(3)/20   3.5*ipos(4)/20];
-% e6.Position = [7*ipos(3)/10     ipos(4)/20           ipos(3)/20   3.5*ipos(4)/20];
+e6.Position = [7*ipos(3)/10     ipos(4)/20           ipos(3)/20   3.5*ipos(4)/20];
 
 br.Position = [7.6*ipos(3)/10     ipos(4)/4     .8*ipos(3)/10   4.5*ipos(4)/20];
 bc.Position = [8.4*ipos(3)/10     ipos(4)/4     .8*ipos(3)/10   4.5*ipos(4)/20];
@@ -312,43 +379,24 @@ tab1 = uitab('Parent',tabgp,...
     'Title','Pixels',...
     'Tag','FirstTab');
 tab2 = uitab('Parent',tabgp,...
-    'Title','Regions',...
+    'Title','Regions & Groups',...
     'Tag','SecondTab');
-
-
-% Copying MainImage & Atlas
-atlas_mask = findobj(myhandles.CenterAxes,'Tag','AtlasMask');
-
-% Copying Trace_Region
-l_reg = findobj(myhandles.RightAxes,'Tag','Trace_Region');
-IM_region = [];
-mask_regions = [];
-label_regions = [];
-for i=1:length(l_reg)
-    temp=permute(l_reg(i).YData(1:end-1),[1 3 2]);
-    IM_region = cat(1,IM_region,temp);
-    mask_regions = cat(3,mask_regions,l_reg(i).UserData.Mask);
-    label_regions = [label_regions;{l_reg(i).UserData.Name}];
-end
-% Copying Trace_RegionGroup
-l_group = findobj(myhandles.RightAxes,'Tag','Trace_RegionGroup');
-IM_group = [];
-mask_groups = [];
-label_groups = [];
-for i=1:length(l_group)
-    temp=permute(l_group(i).YData(1:end-1),[1 3 2]);
-    IM_group = cat(1,IM_group,temp);
-    mask_groups = cat(3,mask_groups,l_group(i).UserData.Mask);
-    label_groups = [label_groups;{l_group(i).UserData.Name}];
-end
+tab3 = uitab('Parent',tabgp,...
+    'Title','Region Dynamics',...
+    'Tag','ThirdTab');
+tab4 = uitab('Parent',tabgp,...
+    'Title','Group Dynamics',...
+    'Tag','FourthTab');
 
 f2.UserData.atlas_mask = atlas_mask;
 f2.UserData.IM_region = IM_region;
 f2.UserData.mask_regions = mask_regions;
 f2.UserData.label_regions = label_regions;
+f2.UserData.color_regions = color_regions;
 f2.UserData.IM_group = IM_group;
 f2.UserData.mask_groups = mask_groups;
 f2.UserData.label_groups = label_groups;
+f2.UserData.color_groups = color_groups;
 
 
 handles2 = guihandles(f2) ;
@@ -376,8 +424,12 @@ handles = guihandles(handles.MainFigure);
 handles.CenterAxes = handles.Ax_Info;
 tab1 = handles.FirstTab;
 tab2 = handles.SecondTab;
+tab3 = handles.ThirdTab;
+tab4 = handles.FourthTab;
 ftsize = 8;
 handles.MainFigure.UserData.flag_compute = false;
+n_regions = handles.MainFigure.UserData.n_regions;
+n_groups = handles.MainFigure.UserData.n_groups;
 
 % Callback function Attribution
 pu1 = handles.Popup1;
@@ -432,30 +484,39 @@ ax1cb.YLim=[-.5 1];
 ax1cc=axes('Parent',tab1,'Tag','Ax1cc','Position',[.525 .04 .2 .25],'FontSize',ftsize);
 ax1cd=axes('Parent',tab1,'Tag','Ax1cd','Position',[.775 .04 .2 .25],'FontSize',ftsize);
 
-
 % Display Axes Tab 2
-all_display_axes2 = findobj(tab2,'Tag','Ax2aa','-or','Tag','Ax2ab','-or','Tag','Ax2ac','-or','Tag','Ax2ad',...
-    '-or','Tag','Ax2ba','-or','Tag','Ax2bb','-or','Tag','Ax2bc','-or','Tag','Ax2bd',...
-    '-or','Tag','Ax2ca','-or','Tag','Ax2cb','-or','Tag','Ax2cc','-or','Tag','Ax2cd');
-delete(all_display_axes1);
+all_display_axes2 = findobj(tab2,'Tag','Ax2aa','-or','Tag','Ax2ab',...
+    '-or','Tag','Ax2ba','-or','Tag','Ax2bb');
+delete(all_display_axes2);
 
-ax2aa=axes('Parent',tab2,'Tag','Ax2aa','Position',[.025 .7 .2 .25],'FontSize',ftsize);
-ax2ab=axes('Parent',tab2,'Tag','Ax2ab','Position',[.275 .7 .2 .25],'FontSize',ftsize);
+ax2aa=axes('Parent',tab2,'Tag','Ax2aa','Position',[.05 .55 .4 .4],'FontSize',ftsize);
+ax2ab=axes('Parent',tab2,'Tag','Ax2ab','Position',[.55 .55 .4 .4],'FontSize',ftsize);
 ax2ab.YLim=[-.5 1];
-ax2ac=axes('Parent',tab2,'Tag','Ax2ac','Position',[.525 .7 .2 .25],'FontSize',ftsize);
-ax2ad=axes('Parent',tab2,'Tag','Ax2ad','Position',[.775 .7 .2 .25],'FontSize',ftsize);
 
-ax2ba=axes('Parent',tab2,'Tag','Ax2ba','Position',[.025 .37 .2 .25],'FontSize',ftsize);
-ax2bb=axes('Parent',tab2,'Tag','Ax2bb','Position',[.275 .37 .2 .25],'FontSize',ftsize);
+ax2ba=axes('Parent',tab2,'Tag','Ax2ba','Position',[.05 .05 .4 .4],'FontSize',ftsize);
+ax2bb=axes('Parent',tab2,'Tag','Ax2bb','Position',[.55 .05 .4 .4],'FontSize',ftsize);
 ax2bb.YLim=[-.5 1];
-ax2bc=axes('Parent',tab2,'Tag','Ax2bc','Position',[.525 .37 .2 .25],'FontSize',ftsize);
-ax2bd=axes('Parent',tab2,'Tag','Ax2bd','Position',[.775 .37 .2 .25],'FontSize',ftsize);
 
-ax2ca=axes('Parent',tab2,'Tag','Ax2ca','Position',[.025 .04 .2 .25],'FontSize',ftsize);
-ax2cb=axes('Parent',tab2,'Tag','Ax2cb','Position',[.275 .04 .2 .25],'FontSize',ftsize);
-ax2cb.YLim=[-.5 1];
-ax2cc=axes('Parent',tab2,'Tag','Ax2cc','Position',[.525 .04 .2 .25],'FontSize',ftsize);
-ax2cd=axes('Parent',tab2,'Tag','Ax2cd','Position',[.775 .04 .2 .25],'FontSize',ftsize);
+% Display Axes Tab 3
+all_display_axes3 = findobj(tab3,'Type','Axes');
+delete(all_display_axes3);
+
+eps = .03;
+for i=1:n_regions
+    ax2aa=axes('Parent',tab3,'Tag',sprintf('Ax%da',i),'Position',[(i-1)/n_regions+eps .525 1/n_regions-2*eps .45],'FontSize',ftsize);
+    ax2ab=axes('Parent',tab3,'Tag',sprintf('Ax%db',i),'Position',[(i-1)/n_regions+eps .025 1/n_regions-2*eps .45],'FontSize',ftsize);
+end
+
+% Display Axes Tab 4
+all_display_axes4 = findobj(tab4,'Type','Axes');
+delete(all_display_axes4);
+
+eps = .03;
+for i=1:n_groups
+    ax2aa=axes('Parent',tab4,'Tag',sprintf('Ax%da',i),'Position',[(i-1)/n_groups+eps .525 1/n_groups-2*eps .45],'FontSize',ftsize);
+    ax2ab=axes('Parent',tab4,'Tag',sprintf('Ax%db',i),'Position',[(i-1)/n_groups+eps .025 1/n_groups-2*eps .45],'FontSize',ftsize);
+end
+
 
 
 % Execute popup Callback
@@ -556,9 +617,21 @@ hObj.UserData.tts_end = datestr(t_end/(24*3600),'HH:MM:SS.FFF');
 
 end
 
-function compute_autocorr_Callback(~,~,handles,val)
+function compute_autocorr_Callback(~,~,handles,val,flags)
 
-global IM;
+if nargin <5
+    flag_pixels = false;
+    flag_regions = false;
+    flag_groups = false;
+    flag_dynamics = true;
+    flag_dynamics_groups = true;
+else
+    flag_pixels = flags(1);
+    flag_regions = flags(2);
+    flag_groups = flags(3);
+    flag_dynamics = flags(4);
+    flag_dynamics_groups = flags(5);
+end
 
 handles.MainFigure.Pointer = 'watch';
 handles.MainFigure.UserData.success = false;
@@ -567,7 +640,7 @@ drawnow;
 % g_colors = handles.MainFigure.UserData.g_colors;
 cur_file = handles.MainFigure.UserData.nlab;
 t_step = handles.MainFigure.UserData.t_step;
-% time_ref = handles.MainFigure.UserData.time_ref;
+time_ref = handles.MainFigure.UserData.time_ref;
 % TimeTags = handles.MainFigure.UserData.TimeTags;
 % TimeTags_strings = handles.MainFigure.UserData.TimeTags_strings;
 % rec_mode = handles.MainFigure.UserData.rec_mode;
@@ -576,6 +649,8 @@ max_delay = str2double(handles.Edit1.String);
 step_delay = str2double(handles.Edit2.String);
 t_gauss_data = str2double(handles.Edit4.String);
 t_gauss_corr = str2double(handles.Edit5.String);
+bin_length = str2double(handles.Edit3.String);
+bin_size = str2double(handles.Edit6.String);
 % marker_type = {'o','*','diamond','.'};
 % markersize = str2double(handles.Edit3.String);
 ftsize = 8;
@@ -588,6 +663,17 @@ t_start = handles.Popup1.UserData.t_start;
 t_end = handles.Popup1.UserData.t_end;
 tts_start = handles.Popup1.UserData.tts_start;
 tts_end = handles.Popup1.UserData.tts_end;
+
+% Retrieving regions and region groups
+label_regions = handles.MainFigure.UserData.label_regions;
+% mask_regions = handles.MainFigure.UserData.mask_regions;
+color_regions = handles.MainFigure.UserData.color_regions;
+IM_region = handles.MainFigure.UserData.IM_region;
+label_groups = handles.MainFigure.UserData.label_groups;
+% mask_groups = handles.MainFigure.UserData.mask_groups;
+IM_group = handles.MainFigure.UserData.IM_group;
+color_groups = handles.MainFigure.UserData.color_groups;
+
 
 % Sanity Check Time Tag Duration
 if (t_end-t_start) < (2*max_delay)
@@ -612,186 +698,530 @@ Params.t_gauss_data = t_gauss_data;
 Params.t_gauss_corr = t_gauss_corr;
 Params.str='1x1';
 
-% Compute auto-correlations
-% No subsampling
-IM_restricted = IM(:,:,im_start:im_end);
-[all_r,all_pks,all_locs,lags] = main_autocorr(IM_restricted,Params);
-IM_all_r = reshape(all_r,[size(IM_restricted,1),size(IM_restricted,2),size(all_r,2)]);
-IM_all_pks = reshape(all_pks,[size(IM_restricted,1),size(IM_restricted,2)]);
-IM_all_locs = reshape(all_locs,[size(IM_restricted,1),size(IM_restricted,2)]);
+lags = [];
+IM_all_r=[];
+IM_all_pks=[];
+IM_all_locs=[];
+IM_all_r_2x2=[];
+IM_all_pks_2x2=[];
+IM_all_locs_2x2=[];
+IM_all_r_3x3=[];
+IM_all_pks_3x3=[];
+IM_all_locs_3x3=[];
+all_r_regions =[];
+all_pks_regions =[];
+all_locs_regions =[];
+all_pks_regions_min =[];
+all_locs_regions_min =[];
+all_r_groups =[];
+all_pks_groups =[];
+all_locs_groups =[];
+all_pks_groups_min =[];
+all_locs_groups_min =[];
 
-% Display results
-ax1aa = findobj(handles.FirstTab,'Tag','Ax1aa');
-cla(ax1aa);
-imagesc('XData',lags,'CData',all_r,'Parent',ax1aa);
-hold(ax1aa,'on');
-line('XData',all_locs,'YData',1:length(all_locs),'Parent',ax1aa,'Tag','FirstPeak',...
-    'LineStyle','none','Color','k','Linewidth',1,...
-    'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
-ax1aa.XLim =[lags(1) lags(end)];
-ax1aa.YLim =[.5 size(all_r,1)+.5];
-ax1aa.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
-ax1aa.CLim = [-1 1];
-colorbar(ax1aa);
-ax1aa.Tag = 'Ax1aa';
+IM_all_r_dynamic = [];
+IM_all_pks_dynamic = [];
+IM_all_locs_dynamic = [];
+IM_all_pks_dynamic_min = [];
+IM_all_locs_dynamic_min = [];
+IM_all_r_dynamic_groups = [];
+IM_all_pks_dynamic_groups = [];
+IM_all_locs_dynamic_groups = [];
+IM_all_pks_dynamic_groups_min = [];
+IM_all_locs_dynamic_groups_min = [];
 
-ax1ab = findobj(handles.FirstTab,'Tag','Ax1ab');
-cla(ax1ab);
-hold(ax1ab,'on');
-% for i=1:size(all_r,1)
-%     line('XData',lags,'YData',all_r(i,:),'Parent',ax1ab,'Tag','Line_R',...
-%         'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
-% end
-line('XData',lags,'YData',mean(all_r,1,'omitnan'),'Parent',ax1ab,'Tag','Mean_R',...
-    'LineStyle','-','Color','r','Linewidth',1);
-hold(ax1ab,'off');
-ax1ab.XLim =[lags(1) lags(end)];
-ax1ab.YLim =[-1 1];
-ax1ab.Title.String = sprintf('Auto-Correlation 2 [%s]',Params.str);
-ax1ab.Tag = 'Ax1ab';
+if flag_pixels
+    % Compute auto-correlations
+    % No subsampling
+    global IM;
+    IM_restricted = IM(:,:,im_start:im_end);
+    [all_r,all_pks,all_locs,lags] = main_autocorr(IM_restricted,Params);
+    IM_all_r = reshape(all_r,[size(IM_restricted,1),size(IM_restricted,2),size(all_r,2)]);
+    IM_all_pks = reshape(all_pks,[size(IM_restricted,1),size(IM_restricted,2)]);
+    IM_all_locs = reshape(all_locs,[size(IM_restricted,1),size(IM_restricted,2)]);
 
-ax1ac = findobj(handles.FirstTab,'Tag','Ax1ac');
-cla(ax1ac);
-imagesc(IM_all_pks,'Parent',ax1ac);
-ax1ac.XLim =[.5 size(IM_restricted,2)+.5];
-ax1ac.YLim =[.5 size(IM_restricted,1)+.5];
-ax1ac.Title.String = sprintf('First Peak Value [%s]',Params.str);
-colorbar(ax1ac);
-ax1ac.FontSize = ftsize;
-ax1ac.Tag = 'Ax1ac';
+    % Display results
+    ax1aa = findobj(handles.FirstTab,'Tag','Ax1aa');
+    cla(ax1aa);
+    imagesc('XData',lags,'CData',all_r,'Parent',ax1aa);
+    hold(ax1aa,'on');
+    line('XData',all_locs,'YData',1:length(all_locs),'Parent',ax1aa,'Tag','MaxPeak',...
+        'LineStyle','none','Color','k','Linewidth',1,...
+        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
+    ax1aa.XLim =[lags(1) lags(end)];
+    ax1aa.YLim =[.5 size(all_r,1)+.5];
+    ax1aa.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
+    ax1aa.CLim = [-.5 1];
+    colorbar(ax1aa);
+    ax1aa.Tag = 'Ax1aa';
 
-ax1ad = findobj(handles.FirstTab,'Tag','Ax1ad');
-cla(ax1ad);
-imagesc(IM_all_locs,'Parent',ax1ad);
-ax1ad.XLim =[.5 size(IM_restricted,2)+.5];
-ax1ad.YLim =[.5 size(IM_restricted,1)+.5];
-ax1ad.Title.String = sprintf('First Peak Time [%s]',Params.str);
-colorbar(ax1ad);
-ax1ad.FontSize = ftsize;
-ax1ad.Tag = 'Ax1ad';
+    ax1ab = findobj(handles.FirstTab,'Tag','Ax1ab');
+    cla(ax1ab);
+    hold(ax1ab,'on');
+    % for i=1:size(all_r,1)
+    %     line('XData',lags,'YData',all_r(i,:),'Parent',ax1ab,'Tag','Line_R',...
+    %         'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
+    % end
+    line('XData',lags,'YData',mean(all_r,1,'omitnan'),'Parent',ax1ab,'Tag','Mean_R',...
+        'LineStyle','-','Color','r','Linewidth',1);
+    hold(ax1ab,'off');
+    ax1ab.XLim =[lags(1) lags(end)];
+    ax1ab.YLim =[-.5 1];
+    ax1ab.Title.String = sprintf('Auto-Correlation 2 [%s]',Params.str);
+    ax1ab.Tag = 'Ax1ab';
+
+    ax1ac = findobj(handles.FirstTab,'Tag','Ax1ac');
+    cla(ax1ac);
+    imagesc(IM_all_pks,'Parent',ax1ac);
+    ax1ac.XLim =[.5 size(IM_restricted,2)+.5];
+    ax1ac.YLim =[.5 size(IM_restricted,1)+.5];
+    ax1ac.Title.String = sprintf('First Peak Value [%s]',Params.str);
+    colorbar(ax1ac);
+    ax1ac.FontSize = ftsize;
+    ax1ac.Tag = 'Ax1ac';
+
+    ax1ad = findobj(handles.FirstTab,'Tag','Ax1ad');
+    cla(ax1ad);
+    imagesc(IM_all_locs,'Parent',ax1ad);
+    ax1ad.XLim =[.5 size(IM_restricted,2)+.5];
+    ax1ad.YLim =[.5 size(IM_restricted,1)+.5];
+    ax1ad.Title.String = sprintf('First Peak Time [%s]',Params.str);
+    colorbar(ax1ad);
+    ax1ad.FontSize = ftsize;
+    ax1ad.Tag = 'Ax1ad';
 
 
-% Compute auto-correlations
-% Subsampling 2x2
-Params.str='2x2';
-temp = convn(IM_restricted,ones(2,2,1),'same');
-IM_restricted_2x2 = temp(1:2:end,1:2:end,:);
-[all_r_2x2,all_pks_2x2,all_locs_2x2,lags] = main_autocorr(IM_restricted_2x2,Params);
-IM_all_r_2x2 = reshape(all_r_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2),size(all_r_2x2,2)]);
-IM_all_pks_2x2 = reshape(all_pks_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2)]);
-IM_all_locs_2x2 = reshape(all_locs_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2)]);
+    % Compute auto-correlations
+    % Subsampling 2x2
+    Params.str='2x2';
+    temp = convn(IM_restricted,ones(2,2,1),'same');
+    IM_restricted_2x2 = temp(1:2:end,1:2:end,:);
+    [all_r_2x2,all_pks_2x2,all_locs_2x2,lags] = main_autocorr(IM_restricted_2x2,Params);
+    IM_all_r_2x2 = reshape(all_r_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2),size(all_r_2x2,2)]);
+    IM_all_pks_2x2 = reshape(all_pks_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2)]);
+    IM_all_locs_2x2 = reshape(all_locs_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2)]);
 
-% Display results
-ax1ba = findobj(handles.FirstTab,'Tag','Ax1ba');
-cla(ax1ba);
-imagesc('XData',lags,'CData',all_r_2x2,'Parent',ax1ba);
-hold(ax1ba,'on');
-line('XData',all_locs_2x2,'YData',1:length(all_locs_2x2),'Parent',ax1ba,'Tag','FirstPeak',...
-    'LineStyle','none','Color','k','Linewidth',1,...
-    'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
-ax1ba.XLim =[lags(1) lags(end)];
-ax1ba.YLim =[.5 size(all_r_2x2,1)+.5];
-ax1ba.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
-ax1ba.CLim = [-1 1];
-colorbar(ax1ba);
-ax1ba.Tag = 'Ax1ba';
+    % Display results
+    ax1ba = findobj(handles.FirstTab,'Tag','Ax1ba');
+    cla(ax1ba);
+    imagesc('XData',lags,'CData',all_r_2x2,'Parent',ax1ba);
+    hold(ax1ba,'on');
+    line('XData',all_locs_2x2,'YData',1:length(all_locs_2x2),'Parent',ax1ba,'Tag','MaxPeak',...
+        'LineStyle','none','Color','k','Linewidth',1,...
+        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
+    ax1ba.XLim =[lags(1) lags(end)];
+    ax1ba.YLim =[.5 size(all_r_2x2,1)+.5];
+    ax1ba.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
+    ax1ba.CLim = [-.5 1];
+    colorbar(ax1ba);
+    ax1ba.Tag = 'Ax1ba';
 
-ax1bb = findobj(handles.FirstTab,'Tag','Ax1bb');
-cla(ax1bb);
-hold(ax1bb,'on');
-for i=1:size(all_r_2x2,1)
-    line('XData',lags,'YData',all_r_2x2(i,:),'Parent',ax1bb,'Tag','Line_R',...
-        'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
+    ax1bb = findobj(handles.FirstTab,'Tag','Ax1bb');
+    cla(ax1bb);
+    hold(ax1bb,'on');
+    for i=1:size(all_r_2x2,1)
+        line('XData',lags,'YData',all_r_2x2(i,:),'Parent',ax1bb,'Tag','Line_R',...
+            'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
+    end
+    line('XData',lags,'YData',mean(all_r_2x2,1,'omitnan'),'Parent',ax1bb,'Tag','Mean_R',...
+        'LineStyle','-','Color','r','Linewidth',1);
+    hold(ax1bb,'off');
+    ax1bb.XLim =[lags(1) lags(end)];
+    ax1bb.YLim =[-.5 1];
+    ax1bb.Title.String = sprintf('Auto-Correlation 2 [%s]',Params.str);
+    ax1bb.Tag = 'Ax1bb';
+
+    ax1bc = findobj(handles.FirstTab,'Tag','Ax1bc');
+    cla(ax1bc);
+    imagesc(IM_all_pks_2x2,'Parent',ax1bc);
+    ax1bc.XLim =[.5 size(IM_restricted_2x2,2)+.5];
+    ax1bc.YLim =[.5 size(IM_restricted_2x2,1)+.5];
+    ax1bc.Title.String = sprintf('First Peak Value [%s]',Params.str);
+    colorbar(ax1bc);
+    ax1bc.FontSize = ftsize;
+    ax1bc.Tag = 'Ax1bc';
+
+    ax1bd = findobj(handles.FirstTab,'Tag','Ax1bd');
+    cla(ax1bd);
+    imagesc(IM_all_locs_2x2,'Parent',ax1bd);
+    ax1bd.XLim =[.5 size(IM_restricted_2x2,2)+.5];
+    ax1bd.YLim =[.5 size(IM_restricted_2x2,1)+.5];
+    ax1bd.Title.String = sprintf('First Peak Time [%s]',Params.str);
+    colorbar(ax1bd);
+    ax1bd.FontSize = ftsize;
+    ax1bd.Tag = 'Ax1bd';
+
+
+    % Compute auto-correlations
+    % Subsampling 3x3
+    Params.str='3x3';
+    temp = convn(IM_restricted,ones(3,3,1),'same');
+    IM_restricted_3x3 = temp(1:3:end,1:3:end,:);
+    [all_r_3x3,all_pks_3x3,all_locs_3x3,lags] = main_autocorr(IM_restricted_3x3,Params);
+    IM_all_r_3x3 = reshape(all_r_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2),size(all_r_3x3,2)]);
+    IM_all_pks_3x3 = reshape(all_pks_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2)]);
+    IM_all_locs_3x3 = reshape(all_locs_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2)]);
+
+    % Display results
+    ax1ca = findobj(handles.FirstTab,'Tag','Ax1ca');
+    cla(ax1ca);
+    imagesc('XData',lags,'CData',all_r_3x3,'Parent',ax1ca);
+    hold(ax1ca,'on');
+    line('XData',all_locs_3x3,'YData',1:length(all_locs_3x3),'Parent',ax1ca,'Tag','MaxPeak',...
+        'LineStyle','none','Color','k','Linewidth',1,...
+        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
+    ax1ca.XLim =[lags(1) lags(end)];
+    ax1ca.YLim =[.5 size(all_r_3x3,1)+.5];
+    ax1ca.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
+    ax1ca.CLim = [-.5 1];
+    colorbar(ax1ca);
+    ax1ca.Tag = 'Ax1ca';
+
+    ax1cb = findobj(handles.FirstTab,'Tag','Ax1cb');
+    cla(ax1cb);
+    hold(ax1cb,'on');
+    for i=1:size(all_r_3x3,1)
+        line('XData',lags,'YData',all_r_3x3(i,:),'Parent',ax1cb,'Tag','Line_R',...
+            'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
+    end
+    line('XData',lags,'YData',mean(all_r_3x3,1,'omitnan'),'Parent',ax1cb,'Tag','Mean_R',...
+        'LineStyle','-','Color','r','Linewidth',1);
+    hold(ax1cb,'off');
+    ax1cb.XLim =[lags(1) lags(end)];
+    ax1cb.YLim =[-.5 1];
+    ax1cb.Title.String = sprintf('Auto-Correlation 2 [%s]',Params.str);
+    ax1cb.Tag = 'Ax1cb';
+
+    ax1cc = findobj(handles.FirstTab,'Tag','Ax1cc');
+    cla(ax1cc);
+    imagesc(IM_all_pks_3x3,'Parent',ax1cc);
+    ax1cc.XLim =[.5 size(IM_restricted_3x3,2)+.5];
+    ax1cc.YLim =[.5 size(IM_restricted_3x3,1)+.5];
+    ax1cc.Title.String = sprintf('First Peak Value [%s]',Params.str);
+    colorbar(ax1cc);
+    ax1cc.FontSize = ftsize;
+    ax1cc.Tag = 'Ax1cc';
+
+    ax1cd = findobj(handles.FirstTab,'Tag','Ax1cd');
+    cla(ax1cd);
+    imagesc(IM_all_locs_3x3,'Parent',ax1cd);
+    ax1cd.XLim =[.5 size(IM_restricted_3x3,2)+.5];
+    ax1cd.YLim =[.5 size(IM_restricted_3x3,1)+.5];
+    ax1cd.Title.String = sprintf('First Peak Time [%s]',Params.str);
+    colorbar(ax1cd);
+    ax1cd.FontSize = ftsize;
+    ax1cd.Tag = 'Ax1cd';
 end
-line('XData',lags,'YData',mean(all_r_2x2,1,'omitnan'),'Parent',ax1bb,'Tag','Mean_R',...
-    'LineStyle','-','Color','r','Linewidth',1);
-hold(ax1bb,'off');
-ax1bb.XLim =[lags(1) lags(end)];
-ax1bb.YLim =[-1 1];
-ax1bb.Title.String = sprintf('Auto-Correlation 2 [%s]',Params.str);
-ax1bb.Tag = 'Ax1bb';
 
-ax1bc = findobj(handles.FirstTab,'Tag','Ax1bc');
-cla(ax1bc);
-imagesc(IM_all_pks_2x2,'Parent',ax1bc);
-ax1bc.XLim =[.5 size(IM_restricted_2x2,2)+.5];
-ax1bc.YLim =[.5 size(IM_restricted_2x2,1)+.5];
-ax1bc.Title.String = sprintf('First Peak Value [%s]',Params.str);
-colorbar(ax1bc);
-ax1bc.FontSize = ftsize;
-ax1bc.Tag = 'Ax1bc';
+if flag_regions && ~isempty(IM_region)
+    % Compute auto-correlations
+    % Regions
+    Params.str='Regions';
+    IM_restricted = IM_region(:,:,im_start:im_end);
+    [all_r_regions,all_pks_regions,all_locs_regions,lags,all_pks_regions_min,all_locs_regions_min] = main_autocorr(IM_restricted,Params);
 
-ax1bd = findobj(handles.FirstTab,'Tag','Ax1bd');
-cla(ax1bd);
-imagesc(IM_all_locs_2x2,'Parent',ax1bd);
-ax1bd.XLim =[.5 size(IM_restricted_2x2,2)+.5];
-ax1bd.YLim =[.5 size(IM_restricted_2x2,1)+.5];
-ax1bd.Title.String = sprintf('First Peak Time [%s]',Params.str);
-colorbar(ax1bd);
-ax1bd.FontSize = ftsize;
-ax1bd.Tag = 'Ax1bd';
+    % Display results
+    ax2aa = findobj(handles.SecondTab,'Tag','Ax2aa');
+    cla(ax2aa);
+    imagesc('XData',lags,'CData',all_r_regions,'Parent',ax2aa);
+    hold(ax2aa,'on');
+    line('XData',all_locs_regions,'YData',1:length(all_locs_regions),'Parent',ax2aa,'Tag','MaxPeak',...
+        'LineStyle','none','Color','k','Linewidth',1,...
+        'MarkerSize',3,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+    line('XData',all_locs_regions_min,'YData',1:length(all_locs_regions_min),'Parent',ax2aa,'Tag','MinPeak',...
+        'LineStyle','none','Color','k','Linewidth',1,...
+        'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',[.5 .5 .5]);
+    ax2aa.XLim =[lags(1) lags(end)];
+    ax2aa.YLim =[.5 size(all_r_regions,1)+.5];
+    ax2aa.YTick = 1:size(all_r_regions,1);
+    ax2aa.YTickLabel = label_regions;
+    ax2aa.Title.String = 'Auto-Correlation Regions';
+    ax2aa.CLim = [-.5 1];
+    colorbar(ax2aa);
+    ax2aa.Tag = 'Ax2aa';
 
+    ax2ab = findobj(handles.SecondTab,'Tag','Ax2ab');
+    cla(ax2ab);
+    hold(ax2ab,'on');
+    all_lines = [];
+    for i=1:size(all_r_regions,1)
+        l=line('XData',lags,'YData',all_r_regions(i,:),'Parent',ax2ab,'Tag','Line_R',...
+            'LineStyle','-','Color',color_regions(i,:),'Linewidth',.5);
+        all_lines = [all_lines;l];
+        % Peak Max
+        line('XData',all_locs_regions(i),'YData',all_pks_regions(i),'Parent',ax2ab,'Tag','MaxPeak',...
+            'LineStyle','none','Color','k','Linewidth',1,...
+            'MarkerSize',5,'Marker','o','MarkerFaceColor',color_regions(i,:),'MarkerEdgeColor',color_regions(i,:));
+        % Peak Min
+        line('XData',all_locs_regions_min(i),'YData',all_pks_regions_min(i),'Parent',ax2ab,'Tag','MinPeak',...
+            'LineStyle','none','Color','k','Linewidth',1,...
+            'MarkerSize',5,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',color_regions(i,:));
+    end
+    %     line('XData',lags,'YData',mean(all_r_regions,1,'omitnan'),'Parent',ax2ab,'Tag','Mean_R',...
+    %         'LineStyle','-','Color','r','Linewidth',1);
+%     legend(ax2ab,label_regions);
+    legend(ax2ab,all_lines,label_regions);
+    hold(ax2ab,'off');
+    ax2ab.XLim =[lags(1) lags(end)];
+    ax2ab.YLim =[-.5 1];
+    ax2ab.Title.String = 'Auto-Correlation Regions';
+    ax2ab.Tag = 'Ax2ab';
 
-% Compute auto-correlations
-% Subsampling 3x3
-Params.str='3x3';
-temp = convn(IM_restricted,ones(3,3,1),'same');
-IM_restricted_3x3 = temp(1:3:end,1:3:end,:);
-[all_r_3x3,all_pks_3x3,all_locs_3x3,lags] = main_autocorr(IM_restricted_3x3,Params);
-IM_all_r_3x3 = reshape(all_r_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2),size(all_r_3x3,2)]);
-IM_all_pks_3x3 = reshape(all_pks_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2)]);
-IM_all_locs_3x3 = reshape(all_locs_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2)]);
-
-% Display results
-ax1ca = findobj(handles.FirstTab,'Tag','Ax1ca');
-cla(ax1ca);
-imagesc('XData',lags,'CData',all_r_3x3,'Parent',ax1ca);
-hold(ax1ca,'on');
-line('XData',all_locs_3x3,'YData',1:length(all_locs_3x3),'Parent',ax1ca,'Tag','FirstPeak',...
-    'LineStyle','none','Color','k','Linewidth',1,...
-    'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
-ax1ca.XLim =[lags(1) lags(end)];
-ax1ca.YLim =[.5 size(all_r_3x3,1)+.5];
-ax1ca.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
-ax1ca.CLim = [-1 1];
-colorbar(ax1ca);
-ax1ca.Tag = 'Ax1ca';
-
-ax1cb = findobj(handles.FirstTab,'Tag','Ax1cb');
-cla(ax1cb);
-hold(ax1cb,'on');
-for i=1:size(all_r_3x3,1)
-    line('XData',lags,'YData',all_r_3x3(i,:),'Parent',ax1cb,'Tag','Line_R',...
-        'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
 end
-line('XData',lags,'YData',mean(all_r_3x3,1,'omitnan'),'Parent',ax1cb,'Tag','Mean_R',...
-    'LineStyle','-','Color','r','Linewidth',1);
-hold(ax1cb,'off');
-ax1cb.XLim =[lags(1) lags(end)];
-ax1cb.YLim =[-1 1];
-ax1cb.Title.String = sprintf('Auto-Correlation 2 [%s]',Params.str);
-ax1cb.Tag = 'Ax1cb';
 
-ax1cc = findobj(handles.FirstTab,'Tag','Ax1cc');
-cla(ax1cc);
-imagesc(IM_all_pks_3x3,'Parent',ax1cc);
-ax1cc.XLim =[.5 size(IM_restricted_3x3,2)+.5];
-ax1cc.YLim =[.5 size(IM_restricted_3x3,1)+.5];
-ax1cc.Title.String = sprintf('First Peak Value [%s]',Params.str);
-colorbar(ax1cc);
-ax1cc.FontSize = ftsize;
-ax1cc.Tag = 'Ax1cc';
+if flag_groups && ~isempty(IM_group)
+    % Compute auto-correlations
+    % Region Groups
+    Params.str='Region Groups';
+    IM_restricted = IM_group(:,:,im_start:im_end);
+    [all_r_groups,all_pks_groups,all_locs_groups,lags,all_pks_groups_min,all_locs_groups_min] = main_autocorr(IM_restricted,Params);
 
-ax1cd = findobj(handles.FirstTab,'Tag','Ax1cd');
-cla(ax1cd);
-imagesc(IM_all_locs_3x3,'Parent',ax1cd);
-ax1cd.XLim =[.5 size(IM_restricted_3x3,2)+.5];
-ax1cd.YLim =[.5 size(IM_restricted_3x3,1)+.5];
-ax1cd.Title.String = sprintf('First Peak Time [%s]',Params.str);
-colorbar(ax1cd);
-ax1cd.FontSize = ftsize;
-ax1cd.Tag = 'Ax1cd';
+    % Display results
+    ax2ba = findobj(handles.SecondTab,'Tag','Ax2ba');
+    cla(ax2ba);
+    imagesc('XData',lags,'CData',all_r_groups,'Parent',ax2ba);
+    hold(ax2ba,'on');
+    line('XData',all_locs_groups,'YData',1:length(all_locs_groups),'Parent',ax2ba,'Tag','MaxPeak',...
+        'LineStyle','none','Color','k','Linewidth',1,...
+        'MarkerSize',3,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+    line('XData',all_locs_groups_min,'YData',1:length(all_locs_groups_min),'Parent',ax2ba,'Tag','MinPeak',...
+        'LineStyle','none','Color','k','Linewidth',1,...
+        'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',[.5 .5 .5]);
+    ax2ba.XLim =[lags(1) lags(end)];
+    ax2ba.YLim =[.5 size(all_r_groups,1)+.5];
+    ax2ba.YTick = 1:size(all_r_groups,1);
+    ax2ba.YTickLabel = label_groups;
+    ax2ba.Title.String = 'Auto-Correlation Region Groups';
+    ax2ba.CLim = [-.5 1];
+    colorbar(ax2ba);
+    ax2ba.Tag = 'Ax2ba';
 
+    ax2bb = findobj(handles.SecondTab,'Tag','Ax2bb');
+    cla(ax2bb);
+    hold(ax2bb,'on');
+    all_lines = [];
+    for i=1:size(all_r_groups,1)
+        l = line('XData',lags,'YData',all_r_groups(i,:),'Parent',ax2bb,'Tag','Line_R',...
+            'LineStyle','-','Color',color_groups(i,:),'Linewidth',.5);
+        all_lines = [all_lines;l];
+        % Peak Max
+        line('XData',all_locs_groups(i),'YData',all_pks_groups(i),'Parent',ax2bb,'Tag','MaxPeak',...
+            'LineStyle','none','Color','k','Linewidth',1,...
+            'MarkerSize',5,'Marker','o','MarkerFaceColor',color_groups(i,:),'MarkerEdgeColor',color_groups(i,:));
+        % Peak Min
+        line('XData',all_locs_groups_min(i),'YData',all_pks_groups_min(i),'Parent',ax2bb,'Tag','MaxPeak',...
+            'LineStyle','none','Color','k','Linewidth',1,...
+            'MarkerSize',5,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',color_groups(i,:));
+    end
+    %     line('XData',lags,'YData',mean(all_r_groups,1,'omitnan'),'Parent',ax2bb,'Tag','Mean_R',...
+    %         'LineStyle','-','Color','r','Linewidth',1);
+    legend(ax2bb,label_groups);
+    legend(ax2bb,all_lines,label_groups);
+    hold(ax2bb,'off');
+    ax2bb.XLim =[lags(1) lags(end)];
+    ax2bb.YLim =[-.5 1];
+    ax2bb.Title.String = 'Auto-Correlation Region Groups';
+    ax2bb.Tag = 'Ax2bb';
+
+end
+
+if flag_dynamics && ~isempty(IM_region)
+
+    % Compute auto-correlations dynamics
+    % Regions
+    Params.str = 'Region Dynamics';
+    IM_dynamic=[];
+    im_start = 1:bin_size:size(IM_region,3)-bin_length+1;
+    im_end = im_start+bin_length-1;
+    im_mid = (im_start+im_end)/2;
+%     label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS.FFF');
+    label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS');
+
+    for j=1:length(im_start)
+        IM_dynamic=cat(2,IM_dynamic,IM_region(:,:,im_start(j):im_end(j)));
+    end
+    [all_r_dynamic,all_pks_dynamic,all_locs_dynamic,lags,all_pks_dynamic_min,all_locs_dynamic_min] = main_autocorr(IM_dynamic,Params);
+    IM_all_r_dynamic = reshape(all_r_dynamic,[size(IM_dynamic,1),size(IM_dynamic,2),size(all_r_dynamic,2)]);
+    IM_all_pks_dynamic = reshape(all_pks_dynamic,[size(IM_dynamic,1),size(IM_dynamic,2)]);
+    IM_all_locs_dynamic = reshape(all_locs_dynamic,[size(IM_dynamic,1),size(IM_dynamic,2)]);
+    IM_all_pks_dynamic_min = reshape(all_pks_dynamic_min,[size(IM_dynamic,1),size(IM_dynamic,2)]);
+    IM_all_locs_dynamic_min = reshape(all_locs_dynamic_min,[size(IM_dynamic,1),size(IM_dynamic,2)]);
+
+    for i = 1:length(label_regions)
+        all_r_dynamic=squeeze(IM_all_r_dynamic(i,:,:));
+        all_locs_dynamic=squeeze(IM_all_locs_dynamic(i,:));
+        all_pks_dynamic=squeeze(IM_all_pks_dynamic(i,:));
+        all_locs_dynamic_min=squeeze(IM_all_locs_dynamic_min(i,:));
+        all_pks_dynamic_min=squeeze(IM_all_pks_dynamic_min(i,:));
+
+        % Building colors
+        color1=[255, 255, 150]/255;
+        color2=[108, 108, 43]/255;
+        colors_p = [linspace(color1(1),color2(1),size(all_r_dynamic,1))',...
+            linspace(color1(2),color2(2),size(all_r_dynamic,1))',...
+            linspace(color1(3),color2(3),size(all_r_dynamic,1))'];
+
+        % Display results
+        ax1a = findobj(handles.ThirdTab,'Tag',sprintf('Ax%da',i));
+        cla(ax1a);
+
+        imagesc('XData',lags,'YData',im_mid,'CData',all_r_dynamic,'Parent',ax1a);
+        hold(ax1a,'on');
+        line('XData',all_locs_dynamic,'YData',im_mid,'Parent',ax1a,'Tag','MaxPeak',...
+            'LineStyle','none','Color','k','Linewidth',1,...
+            'MarkerSize',3,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+         line('XData',all_locs_dynamic_min,'YData',im_mid,'Parent',ax1a,'Tag','MinPeak',...
+            'LineStyle','none','Color','k','Linewidth',1,...
+            'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',[.5 .5 .5]);
+        ax1a.XLim =[lags(1) lags(end)];
+        ax1a.YDir ='reverse';
+        ax1a.YLim =[im_mid(1) im_mid(end)];
+        
+        ax1a.YTick = im_mid(1:10:end);
+        ax1a.Title.String = label_regions(i);
+        ax1a.CLim = [-.5 1];
+        ax1a.Tag = sprintf('Ax%da',i);
+
+        % buidling offset
+        offset_bound = 20;
+        offset_vec = rescale(flipud(1:size(all_r_dynamic,1)),0,offset_bound)';
+        offset_mat = repmat(offset_vec,[1,size(all_r_dynamic,2)]);
+        all_r_dynamic_offset=-all_r_dynamic+offset_mat;
+        ax1b = findobj(handles.ThirdTab,'Tag',sprintf('Ax%db',i));
+        cla(ax1b);
+        hold(ax1b,'on');
+        for j=1:size(all_r_dynamic,1)
+            line('XData',lags,'YData',all_r_dynamic_offset(j,:),'Parent',ax1b,'Tag','Line_R',...
+                'LineStyle','-','Color',colors_p(j,:),'Linewidth',.5);%[.5 .5 .5]
+            line('XData',all_locs_dynamic(j),'YData',all_r_dynamic(j)+offset_vec(j),'Parent',ax1b,'Tag','MaxPeak',...
+                'LineStyle','none','Color','k','Linewidth',1,...
+                'MarkerSize',3,'Marker','o','MarkerFaceColor',colors_p(j,:),'MarkerEdgeColor',colors_p(j,:));
+            line('XData',all_locs_dynamic_min(j),'YData',all_r_dynamic(j)+offset_vec(j),'Parent',ax1b,'Tag','MinPeak',...
+                'LineStyle','none','Color','k','Linewidth',1,...
+                'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',colors_p(j,:));
+        end
+        %     line('XData',lags,'YData',mean(all_r_regions,1,'omitnan'),'Parent',ax1b,'Tag','Mean_R',...
+        %         'LineStyle','-','Color','r','Linewidth',1);
+        hold(ax1b,'off');
+        ax1b.YDir = 'reverse';
+        ax1b.XLim =[lags(1) lags(end)];
+        ax1b.YLim =[-1 .5+offset_bound];
+        ax1b.YTick = rescale(im_mid(1:10:end),0,offset_bound);
+        ax1b.Title.String = label_regions(i);
+        ax1b.Tag = sprintf('Ax%db',i);
+
+        % Colorbars and labels
+        if i==1
+            ax1a.YTickLabel = label_mid;
+            ax1b.YTickLabel = label_mid;
+        else
+            ax1a.YTickLabel = [];
+            ax1b.YTickLabel = [];
+%             if i==length(label_regions)
+%                 colorbar(ax1a,"north");
+%             end
+        end
+    end
+
+end
+
+if flag_dynamics_groups && ~isempty(IM_group)
+
+    % Compute auto-correlations dynamics
+    % Groups
+    Params.str = 'Group Dynamics';
+    IM_dynamic_groups=[];
+    im_start = 1:bin_size:size(IM_group,3)-bin_length+1;
+    im_end = im_start+bin_length-1;
+    im_mid = (im_start+im_end)/2;
+%     label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS.FFF');
+    label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS');
+
+    for j=1:length(im_start)
+        IM_dynamic_groups=cat(2,IM_dynamic_groups,IM_group(:,:,im_start(j):im_end(j)));
+    end
+    [all_r_dynamic_groups,all_pks_dynamic_groups,all_locs_dynamic_groups,lags,all_pks_dynamic_groups_min,all_locs_dynamic_groups_min] = main_autocorr(IM_dynamic_groups,Params);
+    IM_all_r_dynamic_groups = reshape(all_r_dynamic_groups,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2),size(all_r_dynamic_groups,2)]);
+    IM_all_pks_dynamic_groups = reshape(all_pks_dynamic_groups,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
+    IM_all_locs_dynamic_groups = reshape(all_locs_dynamic_groups,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
+    IM_all_pks_dynamic_groups_min = reshape(all_pks_dynamic_groups_min,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
+    IM_all_locs_dynamic_groups_min = reshape(all_locs_dynamic_groups_min,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
+   
+    for i = 1:length(label_groups)
+        all_r_dynamic_groups=squeeze(IM_all_r_dynamic_groups(i,:,:));
+        all_locs_dynamic_groups=squeeze(IM_all_locs_dynamic_groups(i,:));
+        all_pks_dynamic_groups=squeeze(IM_all_pks_dynamic_groups(i,:));
+        all_locs_dynamic_groups_min=squeeze(IM_all_locs_dynamic_groups_min(i,:));
+        all_pks_dynamic_groups_min=squeeze(IM_all_pks_dynamic_groups_min(i,:));
+
+        % Building colors
+        color1=[255, 255, 150]/255;
+        color2=[108, 108, 43]/255;
+        colors_p = [linspace(color1(1),color2(1),size(all_r_dynamic_groups,1))',...
+            linspace(color1(2),color2(2),size(all_r_dynamic_groups,1))',...
+            linspace(color1(3),color2(3),size(all_r_dynamic_groups,1))'];
+
+        % Display results
+        ax1a = findobj(handles.FourthTab,'Tag',sprintf('Ax%da',i));
+        cla(ax1a);
+        imagesc('XData',lags,'YData',im_mid,'CData',all_r_dynamic_groups,'Parent',ax1a);
+        hold(ax1a,'on');
+        line('XData',all_locs_dynamic_groups,'YData',im_mid,'Parent',ax1a,'Tag','MaxPeak',...
+            'LineStyle','none','Color','k','Linewidth',1,...
+            'MarkerSize',3,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+        line('XData',all_locs_dynamic_groups_min,'YData',im_mid,'Parent',ax1a,'Tag','MinPeak',...
+            'LineStyle','none','Color','k','Linewidth',1,...
+            'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',[.5 .5 .5]);
+        ax1a.XLim =[lags(1) lags(end)];
+        ax1a.YDir ='reverse';
+        ax1a.YLim =[im_mid(1) im_mid(end)];
+        ax1a.YTick = im_mid(1:10:end);
+        ax1a.Title.String = label_groups(i);
+        ax1a.CLim = [-.5 1];
+        ax1a.Tag = sprintf('Ax%da',i);
+
+        % buidling offset
+        offset_bound = 20;
+        offset_vec = rescale(flipud(1:size(all_r_dynamic_groups,1)),0,offset_bound)';
+        offset_mat = repmat(offset_vec,[1,size(all_r_dynamic_groups,2)]);
+        all_r_dynamic_groups_offset=-all_r_dynamic_groups+offset_mat;
+        ax1b = findobj(handles.FourthTab,'Tag',sprintf('Ax%db',i));
+        cla(ax1b);
+        hold(ax1b,'on');
+        for j=1:size(all_r_dynamic,1)
+            line('XData',lags,'YData',all_r_dynamic_groups_offset(j,:),'Parent',ax1b,'Tag','Line_R',...
+                'LineStyle','-','Color',colors_p(j,:),'Linewidth',.5); % [.5 .5 .5]
+            line('XData',all_locs_dynamic_groups(j),'YData',all_r_dynamic_groups(j)+offset_vec(j),'Parent',ax1b,'Tag','MaxPeak',...
+                'LineStyle','none','Color','k','Linewidth',1,...
+                'MarkerSize',3,'Marker','o','MarkerFaceColor',colors_p(j,:),'MarkerEdgeColor',colors_p(j,:));
+            line('XData',all_locs_dynamic_groups_min(j),'YData',all_r_dynamic_groups(j)+offset_vec(j),'Parent',ax1b,'Tag','MinPeak',...
+                'LineStyle','none','Color','k','Linewidth',1,...
+                'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',colors_p(j,:));
+        end
+        %     line('XData',lags,'YData',mean(all_r_dynamic_groups,1,'omitnan'),'Parent',ax1b,'Tag','Mean_R',...
+        %         'LineStyle','-','Color','r','Linewidth',1);
+        hold(ax1b,'off');
+        ax1b.YDir = 'reverse';
+        ax1b.XLim =[lags(1) lags(end)];
+        ax1b.YLim =[-1 .5+offset_bound];
+        ax1b.YTick = rescale(im_mid(1:10:end),0,offset_bound);
+        ax1b.YTickLabel = label_mid;
+        ax1b.Title.String = label_groups(i);
+        ax1b.Tag = sprintf('Ax%db',i);
+
+        % Colorbars and labels
+        if i==1
+            ax1a.YTickLabel = label_mid;
+            ax1b.YTickLabel = label_mid;
+        else
+            ax1a.YTickLabel = [];
+            ax1b.YTickLabel = [];
+%             if i==length(label_groups)
+%                 colorbar(ax1a,"north");
+%             end
+        end
+    end
+end
 
 handles.MainFigure.Pointer = 'arrow';
 handles.MainFigure.UserData.success = true;
@@ -820,16 +1250,42 @@ handles.ButtonCompute.UserData.Params = Params;
 handles.ButtonCompute.UserData.IM_all_r = IM_all_r;
 handles.ButtonCompute.UserData.IM_all_pks = IM_all_pks;
 handles.ButtonCompute.UserData.IM_all_locs = IM_all_locs;
-handles.ButtonCompute.UserData.IM_all_r_3x3 = IM_all_r_3x3;
-handles.ButtonCompute.UserData.IM_all_pks_3x3 = IM_all_pks_3x3;
-handles.ButtonCompute.UserData.IM_all_locs_3x3 = IM_all_locs_3x3;
 handles.ButtonCompute.UserData.IM_all_r_2x2 = IM_all_r_2x2;
 handles.ButtonCompute.UserData.IM_all_pks_2x2 = IM_all_pks_2x2;
 handles.ButtonCompute.UserData.IM_all_locs_2x2 = IM_all_locs_2x2;
+handles.ButtonCompute.UserData.IM_all_r_3x3 = IM_all_r_3x3;
+handles.ButtonCompute.UserData.IM_all_pks_3x3 = IM_all_pks_3x3;
+handles.ButtonCompute.UserData.IM_all_locs_3x3 = IM_all_locs_3x3;
+
+handles.ButtonCompute.UserData.label_regions = label_regions;
+handles.ButtonCompute.UserData.label_groups = label_groups;
+handles.ButtonCompute.UserData.all_r_regions = all_r_regions;
+handles.ButtonCompute.UserData.all_pks_regions = all_pks_regions;
+handles.ButtonCompute.UserData.all_locs_regions = all_locs_regions;
+handles.ButtonCompute.UserData.all_pks_regions_min = all_pks_regions_min;
+handles.ButtonCompute.UserData.all_locs_regions_min = all_locs_regions_min;
+
+handles.ButtonCompute.UserData.all_r_groups = all_r_groups;
+handles.ButtonCompute.UserData.all_pks_groups = all_pks_groups;
+handles.ButtonCompute.UserData.all_locs_groups = all_locs_groups;
+handles.ButtonCompute.UserData.all_pks_groups_min = all_pks_groups_min;
+handles.ButtonCompute.UserData.all_locs_groups_min = all_locs_groups_min;
+
+handles.ButtonCompute.UserData.IM_all_r_dynamic = IM_all_r_dynamic;
+handles.ButtonCompute.UserData.IM_all_pks_dynamic = IM_all_pks_dynamic;
+handles.ButtonCompute.UserData.IM_all_locs_dynamic = IM_all_locs_dynamic;
+handles.ButtonCompute.UserData.IM_all_pks_dynamic_min = IM_all_pks_dynamic_min;
+handles.ButtonCompute.UserData.IM_all_locs_dynamic_min = IM_all_locs_dynamic_min;
+
+handles.ButtonCompute.UserData.IM_all_r_dynamic_groups = IM_all_r_dynamic_groups;
+handles.ButtonCompute.UserData.IM_all_pks_dynamic_groups = IM_all_pks_dynamic_groups;
+handles.ButtonCompute.UserData.IM_all_locs_dynamic_groups = IM_all_locs_dynamic_groups;
+handles.ButtonCompute.UserData.IM_all_pks_dynamic_groups_min = IM_all_pks_dynamic_groups_min;
+handles.ButtonCompute.UserData.IM_all_locs_dynamic_groups_min = IM_all_locs_dynamic_groups_min;
 
 end
 
-function [all_r,all_pks,all_locs,lags] = main_autocorr(IM_restricted,Params)
+function [all_r,all_pks,all_locs,lags,all_pks_min,all_locs_min] = main_autocorr(IM_restricted,Params)
 
 cur_file = Params.cur_file;
 t_step = Params.t_step;
@@ -908,6 +1364,8 @@ all_r = Vq;
 h = waitbar(0,'Please wait');
 all_pks = ones(size(all_pixels_aligned,1),1);
 all_locs = zeros(size(all_pixels_aligned,1),1);
+all_pks_min = ones(size(all_pixels_aligned,1),1);
+all_locs_min = zeros(size(all_pixels_aligned,1),1);
 index_0=find(lags==0);
 
 for k = 1:size(all_r,1)
@@ -926,6 +1384,7 @@ for k = 1:size(all_r,1)
     %     end
 
     r = all_r(k,index_0:end);
+    % Positive peaks
     [pks,locs] = findpeaks(r);
     if length(pks)>1
         [pk_max,i_max] = max(pks);
@@ -940,6 +1399,22 @@ for k = 1:size(all_r,1)
     else
         all_pks(k) = NaN;
         all_locs(k) = NaN;
+    end
+    % Negative peaks
+    [pks,locs] = findpeaks(-r);
+    if length(pks)>1
+        [pk_min,i_min] = max(pks);
+        loc_min = locs(i_min)+(index_0-1);
+        all_pks_min(k)=-pk_min;
+        all_locs_min(k) = lags(loc_min);
+    elseif length(pks)==1
+        pk_min = pks;
+        loc_min = locs+(index_0-1);
+        all_pks_min(k)=-pk_min;
+        all_locs_min(k) = lags(loc_min);
+    else
+        all_pks_min(k) = NaN;
+        all_locs_min(k) = NaN;
     end
 end
 close(h);
@@ -969,7 +1444,17 @@ ax_info.YLim = [m M];
 
 end
 
-function saveimage_Callback(~,~,handles)
+function saveimage_Callback(~,~,handles,flags)
+
+if nargin < 4
+    flags = [1,1,1,1,1];
+end 
+flag_pixels = flags(1);
+flag_regions = flags(2);
+flag_groups = flags(3);
+flag_dynamics = flags(4);
+flag_dynamics_groups = flags(5);
+
 
 global DIR_FIG;
 load('Preferences.mat','GTraces');
@@ -979,28 +1464,56 @@ tag = Params.cur_tag;
 recording = Params.cur_file;
 
 % Creating Fig Directory
-save_dir = fullfile(DIR_FIG,'Auto_Correlation',recording);
+save_dir = fullfile(DIR_FIG,'Auto-Correlation',recording);
 if ~isfolder(save_dir)
     mkdir(save_dir);
 end
 
 % Saving Image
 cur_tab = handles.TabGroup.SelectedTab;
-handles.TabGroup.SelectedTab = handles.FirstTab;
-pic_name = sprintf('%s_Auto_Correlation_Pixels_%s%s',recording,tag,GTraces.ImageSaveExtension);
-saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
-fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
 
-% handles.TabGroup.SelectedTab = handles.SecondTab;
-% pic_name = sprintf('%s_Cross_Correlation_Synthesis_%s%s',recording,tag,GTraces.ImageSaveExtension);
-% saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
-% fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+if flag_pixels==1
+    handles.TabGroup.SelectedTab = handles.FirstTab;
+    pic_name = sprintf('%s_Auto-Correlation-Pixels_%s%s',recording,tag,GTraces.ImageSaveExtension);
+    saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+    fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+end
+
+if flag_regions==1 || flag_groups==1
+    handles.TabGroup.SelectedTab = handles.SecondTab;
+    pic_name = sprintf('%s_Auto-Correlation-Regions_%s%s',recording,tag,GTraces.ImageSaveExtension);
+    saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+    fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+end
+
+if flag_dynamics==1
+    handles.TabGroup.SelectedTab = handles.ThirdTab;
+    pic_name = sprintf('%s_Auto-Correlation-RegionsDynamics%s',recording,GTraces.ImageSaveExtension);
+    saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+    fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+end
+
+if flag_dynamics_groups==1
+    handles.TabGroup.SelectedTab = handles.FourthTab;
+    pic_name = sprintf('%s_Auto-Correlation-GroupDynamics%s',recording,GTraces.ImageSaveExtension);
+    saveas(handles.MainFigure,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+    fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+end
 
 handles.TabGroup.SelectedTab = cur_tab;
 
 end
 
-function savestats_Callback(~,~,handles)
+function savestats_Callback(~,~,handles,flags)
+
+if nargin < 4
+    flags = [1,1,1,1,1];
+end 
+flag_pixels = flags(1);
+flag_regions = flags(2);
+flag_groups = flags(3);
+flag_dynamics = flags(4);
+flag_dynamics_groups = flags(5);
 
 global DIR_STATS;
 
@@ -1012,19 +1525,70 @@ recording = Params.cur_file;
 IM_all_r = handles.ButtonCompute.UserData.IM_all_r;
 IM_all_pks = handles.ButtonCompute.UserData.IM_all_pks;
 IM_all_locs = handles.ButtonCompute.UserData.IM_all_locs;
+IM_all_r_2x2 = handles.ButtonCompute.UserData.IM_all_r_2x2;
+IM_all_pks_2x2 = handles.ButtonCompute.UserData.IM_all_pks_2x2;
+IM_all_locs_2x2 = handles.ButtonCompute.UserData.IM_all_locs_2x2;
+IM_all_r_3x3 = handles.ButtonCompute.UserData.IM_all_r_3x3;
+IM_all_pks_3x3 = handles.ButtonCompute.UserData.IM_all_pks_3x3;
+IM_all_locs_3x3 = handles.ButtonCompute.UserData.IM_all_locs_3x3;
+
+label_regions = handles.ButtonCompute.UserData.label_regions;
+label_groups = handles.ButtonCompute.UserData.label_groups;
+all_r_regions = handles.ButtonCompute.UserData.all_r_regions;
+all_pks_regions = handles.ButtonCompute.UserData.all_pks_regions;
+all_locs_regions = handles.ButtonCompute.UserData.all_locs_regions;
+all_r_groups = handles.ButtonCompute.UserData.all_r_groups;
+all_pks_groups = handles.ButtonCompute.UserData.all_pks_groups;
+all_locs_groups = handles.ButtonCompute.UserData.all_locs_groups;
+
+IM_all_r_dynamic = handles.ButtonCompute.UserData.IM_all_r_dynamic;
+IM_all_pks_dynamic = handles.ButtonCompute.UserData.IM_all_pks_dynamic;
+IM_all_locs_dynamic = handles.ButtonCompute.UserData.IM_all_locs_dynamic;
+IM_all_r_dynamic_groups = handles.ButtonCompute.UserData.IM_all_r_dynamic_groups;
+IM_all_pks_dynamic_groups = handles.ButtonCompute.UserData.IM_all_pks_dynamic_groups;
+IM_all_locs_dynamic_groups = handles.ButtonCompute.UserData.IM_all_locs_dynamic_groups;
+
+all_pks_regions_min = handles.ButtonCompute.UserData.all_pks_regions_min;
+all_locs_regions_min = handles.ButtonCompute.UserData.all_locs_regions_min;
+
+all_pks_groups_min = handles.ButtonCompute.UserData.all_pks_groups_min;
+all_locs_groups_min = handles.ButtonCompute.UserData.all_locs_groups_min;
+
+IM_all_pks_dynamic_min = handles.ButtonCompute.UserData.IM_all_pks_dynamic_min;
+IM_all_locs_dynamic_min = handles.ButtonCompute.UserData.IM_all_locs_dynamic_min;
+
+IM_all_pks_dynamic_groups_min = handles.ButtonCompute.UserData.IM_all_pks_dynamic_groups_min;
+IM_all_locs_dynamic_groups_min = handles.ButtonCompute.UserData.IM_all_locs_dynamic_groups_min;
+
 
 % Creating Stats Directory
-data_dir = fullfile(DIR_STATS,'Auto_Correlation',recording);
+data_dir = fullfile(DIR_STATS,'Auto-Correlation',recording);
 if ~isfolder(data_dir)
     mkdir(data_dir);
 end
 
-% Saving data
-filename = sprintf('%s_Auto_Correlation_%s.mat',recording,tag);
-save(fullfile(data_dir,filename),'recording','tag', ...
-    'IM_all_r','IM_all_pks','IM_all_locs',...
-    'Params','-v7.3');
-fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
+if flag_pixels==1 || flag_regions==1 || flag_groups==1
+    % Saving data by tag
+    filename = sprintf('%s_Auto-Correlation_%s.mat',recording,tag);
+    save(fullfile(data_dir,filename),'recording','tag', ...
+        'IM_all_r','IM_all_pks','IM_all_locs',...
+        'label_regions','all_r_regions','all_pks_regions','all_locs_regions','all_pks_regions_min','all_locs_regions_min',...
+        'label_groups','all_r_groups','all_pks_groups','all_locs_groups','all_pks_groups_min','all_locs_groups_min',...
+        'Params','-v7.3');
+    fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
+end
+
+if flag_dynamics==1 || flag_dynamics_groups==1
+    % Saving data dynamic
+    filename = sprintf('%s_Auto-Correlation-Dynamics.mat',recording);
+    save(fullfile(data_dir,filename),'recording', ...
+        'label_regions',...
+        'label_groups',...
+        'IM_all_r_dynamic','IM_all_pks_dynamic','IM_all_locs_dynamic','IM_all_pks_dynamic_min','IM_all_locs_dynamic_min',...
+        'IM_all_r_dynamic_groups','IM_all_pks_dynamic_groups','IM_all_locs_dynamic_groups','IM_all_pks_dynamic_groups_min','IM_all_locs_dynamic_groups_min',...
+        'Params','-v7.3');
+    fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
+end
 
 end
 
@@ -1067,16 +1631,23 @@ end
 % Compute for designated time tags
 % val = handles.Popup1.Value;
 for i = 1:length(ind_tag)%size(TimeTags_strings,1)
-
+    
     handles.Popup1.Value = ind_tag(i);
     update_popup_Callback(handles.Popup1,[],handles);
     buttonAutoScale_Callback([],[],handles);
-    compute_autocorr_Callback([],[],handles,val);
-    savestats_Callback([],[],handles);
-    saveimage_Callback([],[],handles);
+    
+    flags = [0,1,1,0,0];
+    compute_autocorr_Callback([],[],handles,val,flags);
+    savestats_Callback([],[],handles,flags);
+    saveimage_Callback([],[],handles,flags);
 
 end
 % handles.Popup1.Value = val;
 % update_popup_Callback(handles.Popup1,[],handles);
+
+flags = [0,0,0,1,1];
+compute_autocorr_Callback([],[],handles,val,flags);
+savestats_Callback([],[],handles,flags);
+saveimage_Callback([],[],handles,flags);
 
 end

@@ -29,7 +29,7 @@ f2 = figure('Units','normalized',...
     'PaperPositionMode','auto',...
     'Name','Timed Frames Analysis');
 f2.OuterPosition = [0 0 1 1];
-colormap(f2,'parula');
+colormap(f2,'gray');
 
 f2.UserData.success = false;
 
@@ -78,11 +78,11 @@ for k=1:n_hours
 
     t_start = (k-1)*60*60+data_tr.time_ref.Y(1);
     t_end = t_start+60*60-1;
-    t_step = 30; %seconds
+    t_step = 60; %seconds
     n_im_step = round(t_step/(data_tr.time_ref.Y(2)-data_tr.time_ref.Y(1)));
 
     time_vec = t_start:t_step:t_end;
-    n_col = 20;
+    n_col = 10;
     n_rows = ceil(length(time_vec)/n_col);
     n_max = n_col*n_rows;
 
@@ -101,19 +101,24 @@ for k=1:n_hours
         ax2 = copyobj(ax,tab);
 
         % Displaying single image
-        % im=imagesc(IM_NN(:,:,index_im),'Parent',ax);
-        % im.AlphaData = .5;
-        % Displaying mean values
+        flag_single=1;
         im_start=max(1,round(index_im-n_im_step/2));
         im_end= min(LAST_IM,round(index_im+n_im_step/2));
-        IM_mean = mean(IM_NN(:,:,im_start:im_end),3,'omitnan');
-        imagesc(IM_mean,'Parent',ax);
+        if flag_single
+            imagesc(IM_NN(:,:,index_im),'Parent',ax);
+            % im.AlphaData = .5;
+            % Displaying mean values
+        else
+            IM_mean = mean(IM_NN(:,:,im_start:im_end),3,'omitnan');
+            imagesc(IM_mean,'Parent',ax);
+        end
 
         % Getting XLim
-        % ax.XLim = [1 64];
+        ax.XLim = [40 120];
 
         % Getting CLim
         ax.CLim = [clim1,clim2];
+        ax.CLim = [-20,100];
 
         ax.Title.String = data_tr.time_str(index_im);
         set(ax,'XTick','','YTick','','XTickLabel','','YTickLabel','');
@@ -122,12 +127,15 @@ for k=1:n_hours
         % ax2.Position(4)=.02;
         % ax2.Position(2)=ax.Position(2)-ax2.Position(4);
         set(ax2,'XTick','','YTick','','XTickLabel','','YTickLabel','');
-        for i=1:length(all_lines)
-            l_new = copyobj(all_lines(i),ax2);
-            l_new.LineWidth=2;
-            l_new.Visible='on';
-            if length(all_lines)==1
-                l_new.Color='r';
+        flag_lines=0;
+        if flag_lines
+            for i=1:length(all_lines)
+                l_new = copyobj(all_lines(i),ax2);
+                l_new.LineWidth=2;
+                l_new.Visible='on';
+                if length(all_lines)==1
+                    l_new.Color='r';
+                end
             end
         end
         ax2.XLim = [index_im-n_im_step/2,index_im+n_im_step/2];

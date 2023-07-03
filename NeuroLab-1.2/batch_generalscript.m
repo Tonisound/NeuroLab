@@ -720,7 +720,7 @@ for i = 1:length(ind_files)
                 f2 = figure_PeriEventHistogramm(myhandles,0,str_group,str_regions,str_traces);
                 
             case '(Figure) Auto-Correlation fUS'
-                f2 = figure_AutoCorrelation(myhandles,0,str_tag);
+                f2 = figure_AutoCorrelation(myhandles,0,str_tag,str_regions,str_group_regions);
                             
             case '(Figure) Cross-Correlation LFP-fUS'
                 f2 = figure_CrossCorrelation(myhandles,0,str_tag);
