@@ -192,9 +192,9 @@ e2_def = '2';
 e2_tip = 'Step Delay (s)';
 e3_def = '1200';
 e3_tip = 'Dynamic Bin Length (s)';
-e4_def = '3';
+e4_def = '5';
 e4_tip = 'Data smoothing (s)';
-e5_def = '0';
+e5_def = '5';
 e5_tip = 'Correlogramm smoothing (s)';
 e6_def = '120';
 e6_tip = 'Dynamic Bin Size (s)';
@@ -621,8 +621,8 @@ function compute_autocorr_Callback(~,~,handles,val,flags)
 
 if nargin <5
     flag_pixels = false;
-    flag_regions = false;
-    flag_groups = false;
+    flag_regions = true;
+    flag_groups = true;
     flag_dynamics = true;
     flag_dynamics_groups = true;
 else
@@ -711,24 +711,16 @@ IM_all_locs_3x3=[];
 all_r_regions =[];
 all_pks_regions =[];
 all_locs_regions =[];
-all_pks_regions_min =[];
-all_locs_regions_min =[];
 all_r_groups =[];
 all_pks_groups =[];
 all_locs_groups =[];
-all_pks_groups_min =[];
-all_locs_groups_min =[];
 
 IM_all_r_dynamic = [];
 IM_all_pks_dynamic = [];
 IM_all_locs_dynamic = [];
-IM_all_pks_dynamic_min = [];
-IM_all_locs_dynamic_min = [];
 IM_all_r_dynamic_groups = [];
 IM_all_pks_dynamic_groups = [];
 IM_all_locs_dynamic_groups = [];
-IM_all_pks_dynamic_groups_min = [];
-IM_all_locs_dynamic_groups_min = [];
 
 if flag_pixels
     % Compute auto-correlations
@@ -737,17 +729,22 @@ if flag_pixels
     IM_restricted = IM(:,:,im_start:im_end);
     [all_r,all_pks,all_locs,lags] = main_autocorr(IM_restricted,Params);
     IM_all_r = reshape(all_r,[size(IM_restricted,1),size(IM_restricted,2),size(all_r,2)]);
-    IM_all_pks = reshape(all_pks,[size(IM_restricted,1),size(IM_restricted,2)]);
-    IM_all_locs = reshape(all_locs,[size(IM_restricted,1),size(IM_restricted,2)]);
+    for k=1:4
+        IM_all_pks(:,:,k) = reshape(all_pks(:,k),[size(IM_restricted,1),size(IM_restricted,2)]);
+        IM_all_locs(:,:,k) = reshape(all_locs(:,k),[size(IM_restricted,1),size(IM_restricted,2)]);
+    end
 
     % Display results
     ax1aa = findobj(handles.FirstTab,'Tag','Ax1aa');
     cla(ax1aa);
     imagesc('XData',lags,'CData',all_r,'Parent',ax1aa);
     hold(ax1aa,'on');
-    line('XData',all_locs,'YData',1:length(all_locs),'Parent',ax1aa,'Tag','MaxPeak',...
+    %     line('XData',all_locs(:,2),'YData',1:length(all_locs(:,2)),'Parent',ax1aa,'Tag','MaxPeak',...
+    %         'LineStyle','none','Color','k','Linewidth',1,...
+    %         'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+    line('XData',all_locs(:,1),'YData',1:length(all_locs(:,1)),'Parent',ax1aa,'Tag','FirstPeak',...
         'LineStyle','none','Color','k','Linewidth',1,...
-        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
+        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
     ax1aa.XLim =[lags(1) lags(end)];
     ax1aa.YLim =[.5 size(all_r,1)+.5];
     ax1aa.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
@@ -764,6 +761,10 @@ if flag_pixels
     % end
     line('XData',lags,'YData',mean(all_r,1,'omitnan'),'Parent',ax1ab,'Tag','Mean_R',...
         'LineStyle','-','Color','r','Linewidth',1);
+    line('XData',lags,'YData',mean(all_r,1,'omitnan')+sem(all_r,1,'omitnan'),'Parent',ax1ab,'Tag','Mean_R',...
+        'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.5);
+    line('XData',lags,'YData',mean(all_r,1,'omitnan')-sem(all_r,1,'omitnan'),'Parent',ax1ab,'Tag','Mean_R',...
+        'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.5);
     hold(ax1ab,'off');
     ax1ab.XLim =[lags(1) lags(end)];
     ax1ab.YLim =[-.5 1];
@@ -772,17 +773,17 @@ if flag_pixels
 
     ax1ac = findobj(handles.FirstTab,'Tag','Ax1ac');
     cla(ax1ac);
-    imagesc(IM_all_pks,'Parent',ax1ac);
+    imagesc(IM_all_locs(:,:,2),'Parent',ax1ac);
     ax1ac.XLim =[.5 size(IM_restricted,2)+.5];
     ax1ac.YLim =[.5 size(IM_restricted,1)+.5];
-    ax1ac.Title.String = sprintf('First Peak Value [%s]',Params.str);
+    ax1ac.Title.String = sprintf('Max Peak Time [%s]',Params.str);
     colorbar(ax1ac);
     ax1ac.FontSize = ftsize;
     ax1ac.Tag = 'Ax1ac';
 
     ax1ad = findobj(handles.FirstTab,'Tag','Ax1ad');
     cla(ax1ad);
-    imagesc(IM_all_locs,'Parent',ax1ad);
+    imagesc(IM_all_locs(:,:,1),'Parent',ax1ad);
     ax1ad.XLim =[.5 size(IM_restricted,2)+.5];
     ax1ad.YLim =[.5 size(IM_restricted,1)+.5];
     ax1ad.Title.String = sprintf('First Peak Time [%s]',Params.str);
@@ -798,17 +799,22 @@ if flag_pixels
     IM_restricted_2x2 = temp(1:2:end,1:2:end,:);
     [all_r_2x2,all_pks_2x2,all_locs_2x2,lags] = main_autocorr(IM_restricted_2x2,Params);
     IM_all_r_2x2 = reshape(all_r_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2),size(all_r_2x2,2)]);
-    IM_all_pks_2x2 = reshape(all_pks_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2)]);
-    IM_all_locs_2x2 = reshape(all_locs_2x2,[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2)]);
+    for k=1:4
+        IM_all_pks_2x2(:,:,k) = reshape(all_pks_2x2(:,k),[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2)]);
+        IM_all_locs_2x2(:,:,k) = reshape(all_locs_2x2(:,k),[size(IM_restricted_2x2,1),size(IM_restricted_2x2,2)]);
+    end
 
     % Display results
     ax1ba = findobj(handles.FirstTab,'Tag','Ax1ba');
     cla(ax1ba);
     imagesc('XData',lags,'CData',all_r_2x2,'Parent',ax1ba);
     hold(ax1ba,'on');
-    line('XData',all_locs_2x2,'YData',1:length(all_locs_2x2),'Parent',ax1ba,'Tag','MaxPeak',...
+    %     line('XData',all_locs_2x2(:,2),'YData',1:length(all_locs_2x2(:,2)),'Parent',ax1ba,'Tag','MaxPeak',...
+    %         'LineStyle','none','Color','k','Linewidth',1,...
+    %         'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
+    line('XData',all_locs_2x2(:,1),'YData',1:length(all_locs_2x2(:,1)),'Parent',ax1ba,'Tag','FirstPeak',...
         'LineStyle','none','Color','k','Linewidth',1,...
-        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
+        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
     ax1ba.XLim =[lags(1) lags(end)];
     ax1ba.YLim =[.5 size(all_r_2x2,1)+.5];
     ax1ba.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
@@ -819,12 +825,17 @@ if flag_pixels
     ax1bb = findobj(handles.FirstTab,'Tag','Ax1bb');
     cla(ax1bb);
     hold(ax1bb,'on');
-    for i=1:size(all_r_2x2,1)
-        line('XData',lags,'YData',all_r_2x2(i,:),'Parent',ax1bb,'Tag','Line_R',...
-            'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
-    end
+    %     for i=1:size(all_r_2x2,1)
+    %         line('XData',lags,'YData',all_r_2x2(i,:),'Parent',ax1bb,'Tag','Line_R',...
+    %             'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
+    %     end
     line('XData',lags,'YData',mean(all_r_2x2,1,'omitnan'),'Parent',ax1bb,'Tag','Mean_R',...
         'LineStyle','-','Color','r','Linewidth',1);
+    line('XData',lags,'YData',mean(all_r_2x2,1,'omitnan')+sem(all_r_2x2,1,'omitnan'),'Parent',ax1bb,'Tag','Mean_R',...
+        'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.5);
+    line('XData',lags,'YData',mean(all_r_2x2,1,'omitnan')-sem(all_r_2x2,1,'omitnan'),'Parent',ax1bb,'Tag','Mean_R',...
+        'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.5);
+
     hold(ax1bb,'off');
     ax1bb.XLim =[lags(1) lags(end)];
     ax1bb.YLim =[-.5 1];
@@ -833,17 +844,17 @@ if flag_pixels
 
     ax1bc = findobj(handles.FirstTab,'Tag','Ax1bc');
     cla(ax1bc);
-    imagesc(IM_all_pks_2x2,'Parent',ax1bc);
+    imagesc(IM_all_locs_2x2(:,:,1),'Parent',ax1bc);
     ax1bc.XLim =[.5 size(IM_restricted_2x2,2)+.5];
     ax1bc.YLim =[.5 size(IM_restricted_2x2,1)+.5];
-    ax1bc.Title.String = sprintf('First Peak Value [%s]',Params.str);
+    ax1bc.Title.String = sprintf('Max Peak Time [%s]',Params.str);
     colorbar(ax1bc);
     ax1bc.FontSize = ftsize;
     ax1bc.Tag = 'Ax1bc';
 
     ax1bd = findobj(handles.FirstTab,'Tag','Ax1bd');
     cla(ax1bd);
-    imagesc(IM_all_locs_2x2,'Parent',ax1bd);
+    imagesc(IM_all_locs_2x2(:,:,1),'Parent',ax1bd);
     ax1bd.XLim =[.5 size(IM_restricted_2x2,2)+.5];
     ax1bd.YLim =[.5 size(IM_restricted_2x2,1)+.5];
     ax1bd.Title.String = sprintf('First Peak Time [%s]',Params.str);
@@ -859,17 +870,22 @@ if flag_pixels
     IM_restricted_3x3 = temp(1:3:end,1:3:end,:);
     [all_r_3x3,all_pks_3x3,all_locs_3x3,lags] = main_autocorr(IM_restricted_3x3,Params);
     IM_all_r_3x3 = reshape(all_r_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2),size(all_r_3x3,2)]);
-    IM_all_pks_3x3 = reshape(all_pks_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2)]);
-    IM_all_locs_3x3 = reshape(all_locs_3x3,[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2)]);
+    for k=1:4
+        IM_all_pks_3x3(:,:,k) = reshape(all_pks_3x3(:,k),[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2)]);
+        IM_all_locs_3x3(:,:,k) = reshape(all_locs_3x3(:,k),[size(IM_restricted_3x3,1),size(IM_restricted_3x3,2)]);
+    end
 
     % Display results
     ax1ca = findobj(handles.FirstTab,'Tag','Ax1ca');
     cla(ax1ca);
     imagesc('XData',lags,'CData',all_r_3x3,'Parent',ax1ca);
     hold(ax1ca,'on');
-    line('XData',all_locs_3x3,'YData',1:length(all_locs_3x3),'Parent',ax1ca,'Tag','MaxPeak',...
+    %     line('XData',all_locs_3x3(:,1),'YData',1:length(all_locs_3x3(:,2)),'Parent',ax1ca,'Tag','MaxPeak',...
+    %         'LineStyle','none','Color','k','Linewidth',1,...
+    %         'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+    line('XData',all_locs_3x3(:,1),'YData',1:length(all_locs_3x3(:,1)),'Parent',ax1ca,'Tag','FirstPeak',...
         'LineStyle','none','Color','k','Linewidth',1,...
-        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])
+        'MarkerSize',1,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
     ax1ca.XLim =[lags(1) lags(end)];
     ax1ca.YLim =[.5 size(all_r_3x3,1)+.5];
     ax1ca.Title.String = sprintf('Auto-Correlation 1 [%s]',Params.str);
@@ -880,12 +896,16 @@ if flag_pixels
     ax1cb = findobj(handles.FirstTab,'Tag','Ax1cb');
     cla(ax1cb);
     hold(ax1cb,'on');
-    for i=1:size(all_r_3x3,1)
-        line('XData',lags,'YData',all_r_3x3(i,:),'Parent',ax1cb,'Tag','Line_R',...
-            'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
-    end
+    %     for i=1:size(all_r_3x3,1)
+    %         line('XData',lags,'YData',all_r_3x3(i,:),'Parent',ax1cb,'Tag','Line_R',...
+    %             'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.1);
+    %     end
     line('XData',lags,'YData',mean(all_r_3x3,1,'omitnan'),'Parent',ax1cb,'Tag','Mean_R',...
         'LineStyle','-','Color','r','Linewidth',1);
+    line('XData',lags,'YData',mean(all_r_3x3,1,'omitnan')+sem(all_r_3x3,1,'omitnan'),'Parent',ax1cb,'Tag','Mean_R',...
+        'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.5);
+    line('XData',lags,'YData',mean(all_r_3x3,1,'omitnan')+sem(all_r_3x3,1,'omitnan'),'Parent',ax1cb,'Tag','Mean_R',...
+        'LineStyle','-','Color',[.5 .5 .5],'Linewidth',.5);
     hold(ax1cb,'off');
     ax1cb.XLim =[lags(1) lags(end)];
     ax1cb.YLim =[-.5 1];
@@ -894,17 +914,17 @@ if flag_pixels
 
     ax1cc = findobj(handles.FirstTab,'Tag','Ax1cc');
     cla(ax1cc);
-    imagesc(IM_all_pks_3x3,'Parent',ax1cc);
+    imagesc(IM_all_locs_3x3(:,:,1),'Parent',ax1cc);
     ax1cc.XLim =[.5 size(IM_restricted_3x3,2)+.5];
     ax1cc.YLim =[.5 size(IM_restricted_3x3,1)+.5];
-    ax1cc.Title.String = sprintf('First Peak Value [%s]',Params.str);
+    ax1cc.Title.String = sprintf('Max Peak Time [%s]',Params.str);
     colorbar(ax1cc);
     ax1cc.FontSize = ftsize;
     ax1cc.Tag = 'Ax1cc';
 
     ax1cd = findobj(handles.FirstTab,'Tag','Ax1cd');
     cla(ax1cd);
-    imagesc(IM_all_locs_3x3,'Parent',ax1cd);
+    imagesc(IM_all_locs_3x3(:,:,1),'Parent',ax1cd);
     ax1cd.XLim =[.5 size(IM_restricted_3x3,2)+.5];
     ax1cd.YLim =[.5 size(IM_restricted_3x3,1)+.5];
     ax1cd.Title.String = sprintf('First Peak Time [%s]',Params.str);
@@ -918,17 +938,17 @@ if flag_regions && ~isempty(IM_region)
     % Regions
     Params.str='Regions';
     IM_restricted = IM_region(:,:,im_start:im_end);
-    [all_r_regions,all_pks_regions,all_locs_regions,lags,all_pks_regions_min,all_locs_regions_min] = main_autocorr(IM_restricted,Params);
+    [all_r_regions,all_pks_regions,all_locs_regions,lags] = main_autocorr(IM_restricted,Params);
 
     % Display results
     ax2aa = findobj(handles.SecondTab,'Tag','Ax2aa');
     cla(ax2aa);
     imagesc('XData',lags,'CData',all_r_regions,'Parent',ax2aa);
     hold(ax2aa,'on');
-    line('XData',all_locs_regions,'YData',1:length(all_locs_regions),'Parent',ax2aa,'Tag','MaxPeak',...
+    line('XData',all_locs_regions(:,1),'YData',1:length(all_locs_regions(:,1)),'Parent',ax2aa,'Tag','FirstPeak',...
         'LineStyle','none','Color','k','Linewidth',1,...
         'MarkerSize',3,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
-    line('XData',all_locs_regions_min,'YData',1:length(all_locs_regions_min),'Parent',ax2aa,'Tag','MinPeak',...
+    line('XData',all_locs_regions(:,3),'YData',1:length(all_locs_regions(:,3)),'Parent',ax2aa,'Tag','SecondPeak',...
         'LineStyle','none','Color','k','Linewidth',1,...
         'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',[.5 .5 .5]);
     ax2aa.XLim =[lags(1) lags(end)];
@@ -948,18 +968,18 @@ if flag_regions && ~isempty(IM_region)
         l=line('XData',lags,'YData',all_r_regions(i,:),'Parent',ax2ab,'Tag','Line_R',...
             'LineStyle','-','Color',color_regions(i,:),'Linewidth',.5);
         all_lines = [all_lines;l];
-        % Peak Max
-        line('XData',all_locs_regions(i),'YData',all_pks_regions(i),'Parent',ax2ab,'Tag','MaxPeak',...
+        % First Peak
+        line('XData',all_locs_regions(i,1),'YData',all_pks_regions(i,1),'Parent',ax2ab,'Tag','FirstPeak',...
             'LineStyle','none','Color','k','Linewidth',1,...
             'MarkerSize',5,'Marker','o','MarkerFaceColor',color_regions(i,:),'MarkerEdgeColor',color_regions(i,:));
-        % Peak Min
-        line('XData',all_locs_regions_min(i),'YData',all_pks_regions_min(i),'Parent',ax2ab,'Tag','MinPeak',...
+        % Second Peak
+        line('XData',all_locs_regions(i,3),'YData',all_pks_regions(i,3),'Parent',ax2ab,'Tag','SecondPeak',...
             'LineStyle','none','Color','k','Linewidth',1,...
             'MarkerSize',5,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',color_regions(i,:));
     end
     %     line('XData',lags,'YData',mean(all_r_regions,1,'omitnan'),'Parent',ax2ab,'Tag','Mean_R',...
     %         'LineStyle','-','Color','r','Linewidth',1);
-%     legend(ax2ab,label_regions);
+    %     legend(ax2ab,label_regions);
     legend(ax2ab,all_lines,label_regions);
     hold(ax2ab,'off');
     ax2ab.XLim =[lags(1) lags(end)];
@@ -974,17 +994,17 @@ if flag_groups && ~isempty(IM_group)
     % Region Groups
     Params.str='Region Groups';
     IM_restricted = IM_group(:,:,im_start:im_end);
-    [all_r_groups,all_pks_groups,all_locs_groups,lags,all_pks_groups_min,all_locs_groups_min] = main_autocorr(IM_restricted,Params);
+    [all_r_groups,all_pks_groups,all_locs_groups,lags] = main_autocorr(IM_restricted,Params);
 
     % Display results
     ax2ba = findobj(handles.SecondTab,'Tag','Ax2ba');
     cla(ax2ba);
     imagesc('XData',lags,'CData',all_r_groups,'Parent',ax2ba);
     hold(ax2ba,'on');
-    line('XData',all_locs_groups,'YData',1:length(all_locs_groups),'Parent',ax2ba,'Tag','MaxPeak',...
+    line('XData',all_locs_groups(:,1),'YData',1:length(all_locs_groups(:,1)),'Parent',ax2ba,'Tag','FirstPeak',...
         'LineStyle','none','Color','k','Linewidth',1,...
         'MarkerSize',3,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
-    line('XData',all_locs_groups_min,'YData',1:length(all_locs_groups_min),'Parent',ax2ba,'Tag','MinPeak',...
+    line('XData',all_locs_groups(:,3),'YData',1:length(all_locs_groups(:,3)),'Parent',ax2ba,'Tag','SecondPeak',...
         'LineStyle','none','Color','k','Linewidth',1,...
         'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',[.5 .5 .5]);
     ax2ba.XLim =[lags(1) lags(end)];
@@ -1005,11 +1025,11 @@ if flag_groups && ~isempty(IM_group)
             'LineStyle','-','Color',color_groups(i,:),'Linewidth',.5);
         all_lines = [all_lines;l];
         % Peak Max
-        line('XData',all_locs_groups(i),'YData',all_pks_groups(i),'Parent',ax2bb,'Tag','MaxPeak',...
+        line('XData',all_locs_groups(i,1),'YData',all_pks_groups(i,1),'Parent',ax2bb,'Tag','FirstPeak',...
             'LineStyle','none','Color','k','Linewidth',1,...
             'MarkerSize',5,'Marker','o','MarkerFaceColor',color_groups(i,:),'MarkerEdgeColor',color_groups(i,:));
         % Peak Min
-        line('XData',all_locs_groups_min(i),'YData',all_pks_groups_min(i),'Parent',ax2bb,'Tag','MaxPeak',...
+        line('XData',all_locs_groups(i,3),'YData',all_pks_groups(i,3),'Parent',ax2bb,'Tag','SecondPeak',...
             'LineStyle','none','Color','k','Linewidth',1,...
             'MarkerSize',5,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',color_groups(i,:));
     end
@@ -1034,25 +1054,29 @@ if flag_dynamics && ~isempty(IM_region)
     im_start = 1:bin_size:size(IM_region,3)-bin_length+1;
     im_end = im_start+bin_length-1;
     im_mid = (im_start+im_end)/2;
-%     label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS.FFF');
+    %     label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS.FFF');
     label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS');
 
     for j=1:length(im_start)
         IM_dynamic=cat(2,IM_dynamic,IM_region(:,:,im_start(j):im_end(j)));
     end
-    [all_r_dynamic,all_pks_dynamic,all_locs_dynamic,lags,all_pks_dynamic_min,all_locs_dynamic_min] = main_autocorr(IM_dynamic,Params);
+    [all_r_dynamic,all_pks_dynamic,all_locs_dynamic,lags] = main_autocorr(IM_dynamic,Params);
     IM_all_r_dynamic = reshape(all_r_dynamic,[size(IM_dynamic,1),size(IM_dynamic,2),size(all_r_dynamic,2)]);
-    IM_all_pks_dynamic = reshape(all_pks_dynamic,[size(IM_dynamic,1),size(IM_dynamic,2)]);
-    IM_all_locs_dynamic = reshape(all_locs_dynamic,[size(IM_dynamic,1),size(IM_dynamic,2)]);
-    IM_all_pks_dynamic_min = reshape(all_pks_dynamic_min,[size(IM_dynamic,1),size(IM_dynamic,2)]);
-    IM_all_locs_dynamic_min = reshape(all_locs_dynamic_min,[size(IM_dynamic,1),size(IM_dynamic,2)]);
+    IM_all_pks_dynamic=[];
+    for k=1:4
+        IM_all_pks_dynamic(:,:,k) = reshape(all_pks_dynamic(:,k),[size(IM_dynamic,1),size(IM_dynamic,2)]);
+    end
+    IM_all_locs_dynamic = [];
+    for k=1:4
+        IM_all_locs_dynamic(:,:,k) = reshape(all_locs_dynamic(:,k),[size(IM_dynamic,1),size(IM_dynamic,2)]);
+    end
 
     for i = 1:length(label_regions)
         all_r_dynamic=squeeze(IM_all_r_dynamic(i,:,:));
-        all_locs_dynamic=squeeze(IM_all_locs_dynamic(i,:));
-        all_pks_dynamic=squeeze(IM_all_pks_dynamic(i,:));
-        all_locs_dynamic_min=squeeze(IM_all_locs_dynamic_min(i,:));
-        all_pks_dynamic_min=squeeze(IM_all_pks_dynamic_min(i,:));
+        all_locs_dynamic=squeeze(IM_all_locs_dynamic(i,:,1));
+        all_pks_dynamic=squeeze(IM_all_pks_dynamic(i,:,1));
+        all_locs_dynamic_min=squeeze(IM_all_locs_dynamic(i,:,3));
+        all_pks_dynamic_min=squeeze(IM_all_pks_dynamic(i,:,3));
 
         % Building colors
         color1=[255, 255, 150]/255;
@@ -1070,13 +1094,13 @@ if flag_dynamics && ~isempty(IM_region)
         line('XData',all_locs_dynamic,'YData',im_mid,'Parent',ax1a,'Tag','MaxPeak',...
             'LineStyle','none','Color','k','Linewidth',1,...
             'MarkerSize',3,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
-         line('XData',all_locs_dynamic_min,'YData',im_mid,'Parent',ax1a,'Tag','MinPeak',...
+        line('XData',all_locs_dynamic_min,'YData',im_mid,'Parent',ax1a,'Tag','MinPeak',...
             'LineStyle','none','Color','k','Linewidth',1,...
             'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',[.5 .5 .5]);
         ax1a.XLim =[lags(1) lags(end)];
         ax1a.YDir ='reverse';
         ax1a.YLim =[im_mid(1) im_mid(end)];
-        
+
         ax1a.YTick = im_mid(1:10:end);
         ax1a.Title.String = label_regions(i);
         ax1a.CLim = [-.5 1];
@@ -1117,9 +1141,9 @@ if flag_dynamics && ~isempty(IM_region)
         else
             ax1a.YTickLabel = [];
             ax1b.YTickLabel = [];
-%             if i==length(label_regions)
-%                 colorbar(ax1a,"north");
-%             end
+            %             if i==length(label_regions)
+            %                 colorbar(ax1a,"north");
+            %             end
         end
     end
 
@@ -1134,25 +1158,29 @@ if flag_dynamics_groups && ~isempty(IM_group)
     im_start = 1:bin_size:size(IM_group,3)-bin_length+1;
     im_end = im_start+bin_length-1;
     im_mid = (im_start+im_end)/2;
-%     label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS.FFF');
+    %     label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS.FFF');
     label_mid = datestr(time_ref.Y(round(im_mid(1:10:end)))/(24*3600),'HH:MM:SS');
 
     for j=1:length(im_start)
         IM_dynamic_groups=cat(2,IM_dynamic_groups,IM_group(:,:,im_start(j):im_end(j)));
     end
-    [all_r_dynamic_groups,all_pks_dynamic_groups,all_locs_dynamic_groups,lags,all_pks_dynamic_groups_min,all_locs_dynamic_groups_min] = main_autocorr(IM_dynamic_groups,Params);
+    [all_r_dynamic_groups,all_pks_dynamic_groups,all_locs_dynamic_groups,lags] = main_autocorr(IM_dynamic_groups,Params);
     IM_all_r_dynamic_groups = reshape(all_r_dynamic_groups,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2),size(all_r_dynamic_groups,2)]);
-    IM_all_pks_dynamic_groups = reshape(all_pks_dynamic_groups,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
-    IM_all_locs_dynamic_groups = reshape(all_locs_dynamic_groups,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
-    IM_all_pks_dynamic_groups_min = reshape(all_pks_dynamic_groups_min,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
-    IM_all_locs_dynamic_groups_min = reshape(all_locs_dynamic_groups_min,[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
-   
+    IM_all_pks_dynamic_groups=[];
+    for k=1:4
+        IM_all_pks_dynamic_groups(:,:,k) = reshape(all_pks_dynamic_groups(:,k),[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
+    end
+    IM_all_locs_dynamic_groups = [];
+    for k=1:4
+        IM_all_locs_dynamic_groups(:,:,k) = reshape(all_locs_dynamic_groups(:,k),[size(IM_dynamic_groups,1),size(IM_dynamic_groups,2)]);
+    end
+
     for i = 1:length(label_groups)
         all_r_dynamic_groups=squeeze(IM_all_r_dynamic_groups(i,:,:));
-        all_locs_dynamic_groups=squeeze(IM_all_locs_dynamic_groups(i,:));
-        all_pks_dynamic_groups=squeeze(IM_all_pks_dynamic_groups(i,:));
-        all_locs_dynamic_groups_min=squeeze(IM_all_locs_dynamic_groups_min(i,:));
-        all_pks_dynamic_groups_min=squeeze(IM_all_pks_dynamic_groups_min(i,:));
+        all_locs_dynamic_groups=squeeze(IM_all_locs_dynamic_groups(i,:,1));
+        all_pks_dynamic_groups=squeeze(IM_all_pks_dynamic_groups(i,:,1));
+        all_locs_dynamic_groups_min=squeeze(IM_all_locs_dynamic_groups(i,:,3));
+        all_pks_dynamic_groups_min=squeeze(IM_all_pks_dynamic_groups(i,:,3));
 
         % Building colors
         color1=[255, 255, 150]/255;
@@ -1216,9 +1244,9 @@ if flag_dynamics_groups && ~isempty(IM_group)
         else
             ax1a.YTickLabel = [];
             ax1b.YTickLabel = [];
-%             if i==length(label_groups)
-%                 colorbar(ax1a,"north");
-%             end
+            %             if i==length(label_groups)
+            %                 colorbar(ax1a,"north");
+            %             end
         end
     end
 end
@@ -1262,30 +1290,21 @@ handles.ButtonCompute.UserData.label_groups = label_groups;
 handles.ButtonCompute.UserData.all_r_regions = all_r_regions;
 handles.ButtonCompute.UserData.all_pks_regions = all_pks_regions;
 handles.ButtonCompute.UserData.all_locs_regions = all_locs_regions;
-handles.ButtonCompute.UserData.all_pks_regions_min = all_pks_regions_min;
-handles.ButtonCompute.UserData.all_locs_regions_min = all_locs_regions_min;
-
 handles.ButtonCompute.UserData.all_r_groups = all_r_groups;
 handles.ButtonCompute.UserData.all_pks_groups = all_pks_groups;
 handles.ButtonCompute.UserData.all_locs_groups = all_locs_groups;
-handles.ButtonCompute.UserData.all_pks_groups_min = all_pks_groups_min;
-handles.ButtonCompute.UserData.all_locs_groups_min = all_locs_groups_min;
 
 handles.ButtonCompute.UserData.IM_all_r_dynamic = IM_all_r_dynamic;
 handles.ButtonCompute.UserData.IM_all_pks_dynamic = IM_all_pks_dynamic;
 handles.ButtonCompute.UserData.IM_all_locs_dynamic = IM_all_locs_dynamic;
-handles.ButtonCompute.UserData.IM_all_pks_dynamic_min = IM_all_pks_dynamic_min;
-handles.ButtonCompute.UserData.IM_all_locs_dynamic_min = IM_all_locs_dynamic_min;
 
 handles.ButtonCompute.UserData.IM_all_r_dynamic_groups = IM_all_r_dynamic_groups;
 handles.ButtonCompute.UserData.IM_all_pks_dynamic_groups = IM_all_pks_dynamic_groups;
 handles.ButtonCompute.UserData.IM_all_locs_dynamic_groups = IM_all_locs_dynamic_groups;
-handles.ButtonCompute.UserData.IM_all_pks_dynamic_groups_min = IM_all_pks_dynamic_groups_min;
-handles.ButtonCompute.UserData.IM_all_locs_dynamic_groups_min = IM_all_locs_dynamic_groups_min;
 
 end
 
-function [all_r,all_pks,all_locs,lags,all_pks_min,all_locs_min] = main_autocorr(IM_restricted,Params)
+function [all_r,all_pks,all_locs,lags] = main_autocorr(IM_restricted,Params)
 
 cur_file = Params.cur_file;
 t_step = Params.t_step;
@@ -1362,59 +1381,53 @@ all_r = Vq;
 
 % finding peaks
 h = waitbar(0,'Please wait');
-all_pks = ones(size(all_pixels_aligned,1),1);
-all_locs = zeros(size(all_pixels_aligned,1),1);
-all_pks_min = ones(size(all_pixels_aligned,1),1);
-all_locs_min = zeros(size(all_pixels_aligned,1),1);
+all_pks = NaN(size(all_pixels_aligned,1),4);
+all_locs = NaN(size(all_pixels_aligned,1),4);
+% First Positive Peak - Max Positive Peak - First Negative Peak - Max Negative Peak
 index_0=find(lags==0);
 
 for k = 1:size(all_r,1)
     prop = k/size(all_r,1);
     waitbar(prop,h,sprintf('Finding peaks [%s] %.1f %% completed',Params.str,100*prop));
 
-    %     r = all_r(k,:);
-    %     [pks,locs] = findpeaks(r);
-    %     if length(pks)>1
-    %         pks_ = pks(pks<1);
-    %         locs_= locs(pks<1);
-    %         [pk_max,i_max] = max(pks_);
-    %         loc_max = locs_(i_max);
-    %         all_pks(k)=pk_max;
-    %         all_locs(k)=lags(loc_max);
-    %     end
-
     r = all_r(k,index_0:end);
     % Positive peaks
     [pks,locs] = findpeaks(r);
     if length(pks)>1
+        pk_first = pks(1);
+        loc_first = locs(1)+(index_0-1);
         [pk_max,i_max] = max(pks);
         loc_max = locs(i_max)+(index_0-1);
-        all_pks(k)=pk_max;
-        all_locs(k) = lags(loc_max);
+        all_pks(k,1) = pk_first;
+        all_locs(k,1) = lags(loc_first);
+        all_pks(k,2) = pk_max;
+        all_locs(k,2) = lags(loc_max);
     elseif length(pks)==1
         pk_max = pks;
         loc_max = locs+(index_0-1);
-        all_pks(k)=pk_max;
-        all_locs(k) = lags(loc_max);
-    else
-        all_pks(k) = NaN;
-        all_locs(k) = NaN;
+        all_pks(k,1) = pk_max;
+        all_locs(k,1) = lags(loc_max);
+        all_pks(k,2) = pk_max;
+        all_locs(k,2) = lags(loc_max);
     end
     % Negative peaks
     [pks,locs] = findpeaks(-r);
     if length(pks)>1
+        pk_second = pks(1);
+        loc_second = locs(1)+(index_0-1);
         [pk_min,i_min] = max(pks);
         loc_min = locs(i_min)+(index_0-1);
-        all_pks_min(k)=-pk_min;
-        all_locs_min(k) = lags(loc_min);
+        all_pks(k,3) = -pk_second;
+        all_locs(k,3) = lags(loc_second);
+        all_pks(k,4) = -pk_min;
+        all_locs(k,4) = lags(loc_min);
     elseif length(pks)==1
         pk_min = pks;
         loc_min = locs+(index_0-1);
-        all_pks_min(k)=-pk_min;
-        all_locs_min(k) = lags(loc_min);
-    else
-        all_pks_min(k) = NaN;
-        all_locs_min(k) = NaN;
+        all_pks_min(k,3) = -pk_min;
+        all_locs_min(k,3) = lags(loc_min);
+        all_pks_min(k,4) = -pk_min;
+        all_locs_min(k,4) = lags(loc_min);
     end
 end
 close(h);
@@ -1448,7 +1461,7 @@ function saveimage_Callback(~,~,handles,flags)
 
 if nargin < 4
     flags = [1,1,1,1,1];
-end 
+end
 flag_pixels = flags(1);
 flag_regions = flags(2);
 flag_groups = flags(3);
@@ -1508,7 +1521,7 @@ function savestats_Callback(~,~,handles,flags)
 
 if nargin < 4
     flags = [1,1,1,1,1];
-end 
+end
 flag_pixels = flags(1);
 flag_regions = flags(2);
 flag_groups = flags(3);
@@ -1548,18 +1561,6 @@ IM_all_r_dynamic_groups = handles.ButtonCompute.UserData.IM_all_r_dynamic_groups
 IM_all_pks_dynamic_groups = handles.ButtonCompute.UserData.IM_all_pks_dynamic_groups;
 IM_all_locs_dynamic_groups = handles.ButtonCompute.UserData.IM_all_locs_dynamic_groups;
 
-all_pks_regions_min = handles.ButtonCompute.UserData.all_pks_regions_min;
-all_locs_regions_min = handles.ButtonCompute.UserData.all_locs_regions_min;
-
-all_pks_groups_min = handles.ButtonCompute.UserData.all_pks_groups_min;
-all_locs_groups_min = handles.ButtonCompute.UserData.all_locs_groups_min;
-
-IM_all_pks_dynamic_min = handles.ButtonCompute.UserData.IM_all_pks_dynamic_min;
-IM_all_locs_dynamic_min = handles.ButtonCompute.UserData.IM_all_locs_dynamic_min;
-
-IM_all_pks_dynamic_groups_min = handles.ButtonCompute.UserData.IM_all_pks_dynamic_groups_min;
-IM_all_locs_dynamic_groups_min = handles.ButtonCompute.UserData.IM_all_locs_dynamic_groups_min;
-
 
 % Creating Stats Directory
 data_dir = fullfile(DIR_STATS,'Auto-Correlation',recording);
@@ -1572,8 +1573,8 @@ if flag_pixels==1 || flag_regions==1 || flag_groups==1
     filename = sprintf('%s_Auto-Correlation_%s.mat',recording,tag);
     save(fullfile(data_dir,filename),'recording','tag', ...
         'IM_all_r','IM_all_pks','IM_all_locs',...
-        'label_regions','all_r_regions','all_pks_regions','all_locs_regions','all_pks_regions_min','all_locs_regions_min',...
-        'label_groups','all_r_groups','all_pks_groups','all_locs_groups','all_pks_groups_min','all_locs_groups_min',...
+        'label_regions','all_r_regions','all_pks_regions','all_locs_regions',...
+        'label_groups','all_r_groups','all_pks_groups','all_locs_groups',...
         'Params','-v7.3');
     fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
 end
@@ -1584,8 +1585,8 @@ if flag_dynamics==1 || flag_dynamics_groups==1
     save(fullfile(data_dir,filename),'recording', ...
         'label_regions',...
         'label_groups',...
-        'IM_all_r_dynamic','IM_all_pks_dynamic','IM_all_locs_dynamic','IM_all_pks_dynamic_min','IM_all_locs_dynamic_min',...
-        'IM_all_r_dynamic_groups','IM_all_pks_dynamic_groups','IM_all_locs_dynamic_groups','IM_all_pks_dynamic_groups_min','IM_all_locs_dynamic_groups_min',...
+        'IM_all_r_dynamic','IM_all_pks_dynamic','IM_all_locs_dynamic',...
+        'IM_all_r_dynamic_groups','IM_all_pks_dynamic_groups','IM_all_locs_dynamic_groups',...
         'Params','-v7.3');
     fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
 end
@@ -1631,11 +1632,11 @@ end
 % Compute for designated time tags
 % val = handles.Popup1.Value;
 for i = 1:length(ind_tag)%size(TimeTags_strings,1)
-    
+
     handles.Popup1.Value = ind_tag(i);
     update_popup_Callback(handles.Popup1,[],handles);
     buttonAutoScale_Callback([],[],handles);
-    
+
     flags = [0,1,1,0,0];
     compute_autocorr_Callback([],[],handles,val,flags);
     savestats_Callback([],[],handles,flags);
@@ -1645,9 +1646,9 @@ end
 % handles.Popup1.Value = val;
 % update_popup_Callback(handles.Popup1,[],handles);
 
-flags = [0,0,0,1,1];
-compute_autocorr_Callback([],[],handles,val,flags);
-savestats_Callback([],[],handles,flags);
-saveimage_Callback([],[],handles,flags);
+% flags = [0,0,0,1,1];
+% compute_autocorr_Callback([],[],handles,val,flags);
+% savestats_Callback([],[],handles,flags);
+% saveimage_Callback([],[],handles,flags);
 
 end
