@@ -12,6 +12,10 @@ global FILES CUR_FILE DIR_SAVE DIR_FIG DIR_STATS IM;
 
 recording_name = FILES(CUR_FILE).nlab;
 
+% Building Figure
+f1=figure;
+f1.UserData.success = false;
+
 if exist(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),'file')
     data_ripples = load(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
     channel_id = data_ripples.channel_ripple;
@@ -20,6 +24,7 @@ if exist(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),'file')
     mean_dur = mean(ripples_abs(:,4),1,'omitnan');
     mean_freq = mean(ripples_abs(:,5),1,'omitnan');
     mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
+    n_ripples = size(ripples_abs,1);
     fprintf('File Loaded [%s].\n',fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
 else
     errordlg('Missing File [%s].',fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
@@ -55,6 +60,8 @@ markersize = 3;
 face_color = [0.9300    0.6900    0.1900];
 face_alpha = .5 ;
 g_colors = get_colors(n_channels+1,'jet');
+% Flag save
+flags = [1,0,0]; % stats - figures - movies
 
 % Loading time reference
 data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
@@ -63,8 +70,10 @@ data_atlas = load(fullfile(DIR_SAVE,recording_name,'Atlas.mat'));
 switch data_atlas.AtlasName
     case 'Rat Coronal Paxinos'
         atlas_name = sprintf('AP=%.2fmm',data_atlas.AP_mm);
+        atlas_coordinate = data_atlas.AP_mm;
     case 'Rat Sagittal Paxinos'
         atlas_name = sprintf('ML=%.2fmm',data_atlas.ML_mm);
+        atlas_coordinate = data_atlas.ML_mm;
 end
 
 % Loading time groups
@@ -170,9 +179,8 @@ mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
 
 
 % Plotting
-f1=figure;
-f1.UserData.success = false;
-f1.Name = sprintf(strcat('[%s]%s[%s-%s][Ripples Means:%.1fsec-%1.fHz-%1.f]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id,mean_dur,mean_freq,mean_p2p);
+% f1.Name = sprintf(strcat('[%s]%s[%s-%s][Ripples Means:%.1fusec-%1.fHz-%1.f]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id,mean_dur,mean_freq,mean_p2p);
+f1.Name = sprintf(strcat('[%s]%s'),atlas_name,strrep(recording_name,'_nlab',''));
 colormap(f1,'jet');
 
 
@@ -214,7 +222,7 @@ ax1 = subplot(411,'parent',tab1);
 hold(ax1,'on');
 plot(Xraw,Yraw,'Color','k','Parent',ax1);
 % plot(data_spectro.X_trace,data_spectro.Y_trace,'ro','Parent',ax1)
-ax1.Title.String = 'Raw trace LFP';
+ax1.Title.String = sprintf('Raw trace LFP [%s]',channel_raw);
 n_iqr1 = 4;
 ax1.YLim = [median(Yraw(:))-n_iqr1*iqr(Yraw(:)),median(Yraw(:))+n_iqr1*iqr(Yraw(:))];
 
@@ -240,7 +248,7 @@ ax3 = subplot(413,'parent',tab1);
 hold(ax3,'on');
 % plot(Xq,Y1q,'Color',[.5 .5 .5],'Marker','.','MarkerSize',markersize,'Parent',ax3);
 plot(X1,Y1,'Color',[.5 .5 .5],'Parent',ax3);
-ax3.Title.String = 'Filtered trace (Ripple band 150-300 Hz)';
+ax3.Title.String = sprintf('Filtered trace [%s] (Ripple band 150-300 Hz)',channel1);
 % legend(ax3,cat(1,label1,all_labels_2))
 n_iqr3 = 10;
 ax3.YLim = [median(Y1(:))-n_iqr3*iqr(Y1(:)),median(Y1(:))+n_iqr3*iqr(Y1(:))];
@@ -269,7 +277,7 @@ for i=1:size(ripples_abs,1)
 %     l2.Color(4) = .5;
 %     l3.Color(4) = .5;
 end
-ax.Title.String = strcat(ax.Title.String,sprintf(' [%d ripples events]',size(ripples_abs,1)));ax.Title.String = strcat(ax.Title.String,sprintf(' [%d ripples events]',size(ripples_abs,1)));
+ax.Title.String = strcat(ax.Title.String,sprintf(' [%d ripples events]',size(ripples_abs,1)));
 
 sb = copyobj(handles.ScaleButton,f1);
 mb =copyobj(handles.MinusButton,f1);
@@ -351,7 +359,8 @@ Y2q_rip_baseline = mean(Y2q_rip_(:,ind_baseline,:),2,'omitnan');
 Y2q_rip_normalized = Y2q_rip_-repmat(Y2q_rip_baseline,[1 size(Y2q_rip_,2) 1]);
 Y3q_rip_baseline = mean(Y3q_rip_(:,ind_baseline,:),2,'omitnan');
 Y3q_rip_normalized = Y3q_rip_-repmat(Y3q_rip_baseline,[1 size(Y3q_rip_,2) 1]);
-Y3q_rip_mean = mean(Y3q_rip_normalized,3,'omitnan');
+% Y3q_rip_mean = mean(Y3q_rip_normalized,3,'omitnan');
+Y3q_rip_mean = median(Y3q_rip_normalized,3,'omitnan');
 Y3q_rip_reshaped = reshape(Y3q_rip_mean,[size(IM,1) size(IM,2) length(t_bins_fus)]);
 
 % Plotting
@@ -370,6 +379,7 @@ ax1.Title.String = 'Raw trace LFP';
 n_iqr = 4;
 data_iqr = Yraw_rip(~isnan(Yraw_rip));
 ax1.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+ax1.XLim = [-.1 .5];
 
 ax2 = subplot(323,'parent',tab2);
 hold(ax2,'on');
@@ -395,7 +405,8 @@ n_iqr= 2;
 data_iqr = Cdata_mean(~isnan(Cdata_mean));
 ax3.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
 ax3.YLim = [data_spectro.freqdom(1),data_spectro.freqdom(end)];
-ax3.XLim = [t_bins_lfp(1),t_bins_lfp(end)];
+% ax3.XLim = [t_bins_lfp(1),t_bins_lfp(end)];
+ax3.XLim = [-.1 .5];
 ax3.Title.String = 'Mean Spectrogram';
 
 
@@ -549,7 +560,7 @@ fprintf('>> Process 5/5 done [%s].\n',tab5.Title);
 load('Preferences.mat','GTraces');
 
 % Saving Stats
-flag_save_stats = false;
+flag_save_stats = flags(1);
 if flag_save_stats
     save_dir = fullfile(DIR_STATS,'Ripple_Imaging',recording_name);
     if ~isfolder(save_dir)
@@ -558,17 +569,15 @@ if flag_save_stats
     filename_save = sprintf(strcat('%s_Ripple-Imaging.mat'),recording_name);
     
     freqdom=data_spectro.freqdom;
-    % save(fullfile(save_dir,filename_save),'recording_name','band_name','channel_id',...
-    %     'Yraw_rip_','Y1_rip_','Cdata_rip_','Y2q_rip_','Y2q_rip_normalized',...
-    %     't_baseline_start','t_baseline_end','freqdom',...
-    %     't_before','t_after','sampling_fus','sampling_lfp','t_bins_fus','t_bins_lfp','-v7.3');
-    save(fullfile(save_dir,filename_save),'recording_name','band_name','channel_id',...
+    save(fullfile(save_dir,filename_save),'recording_name','data_atlas','atlas_name','atlas_coordinate',...
+        'mean_dur','mean_freq','mean_p2p','n_ripples','band_name','channel_id',...
+        'Y3q_rip_reshaped','all_labels_2',...'Yraw_rip_','Y1_rip_','Cdata_rip_','Y2q_rip_','Y2q_rip_normalized',...
         't_baseline_start','t_baseline_end','freqdom',...
         't_before','t_after','sampling_fus','sampling_lfp','t_bins_fus','t_bins_lfp','-v7.3');
 end
 
 % Saving Tabs
-flag_save_figs = false;
+flag_save_figs = flags(2);
 if flag_save_figs
     save_dir = fullfile(DIR_FIG,'Ripple_Imaging',recording_name);
     if ~isfolder(save_dir)
@@ -576,29 +585,29 @@ if flag_save_figs
     end
     
     tabgp.SelectedTab = tab1;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,tab1.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab1.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab1.Title,save_dir);
     
     tabgp.SelectedTab = tab2;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,tab2.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab2.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab2.Title,save_dir);
     
     tabgp.SelectedTab = tab3;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,tab3.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab3.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab3.Title,save_dir);
     
     tabgp.SelectedTab = tab4;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,tab4.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab4.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab4.Title,save_dir);
     
     tabgp.SelectedTab = tab5;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab5.Title,save_dir);
 end
 
 
 % Saving Movie
-flag_save_movie = true;
+flag_save_movie = flags(3);
 if flag_save_movie
     
     save_dir = fullfile(DIR_FIG,'Ripple_Imaging',recording_name);
@@ -627,8 +636,10 @@ if flag_save_movie
     end
     
     close(f2);
-    video_name = sprintf(strcat('%s_Ripple-Imaging'),recording_name);
-    save_video(work_dir,save_dir,video_name)
+%     video_name = sprintf(strcat('%s_Ripple-Imaging'),recording_name);
+    video_name = sprintf(strcat('%s_Ripple-Imaging'),f1.Name);
+    save_video(work_dir,save_dir,video_name);
+    rmdir(work_dir,'s');
 end
 
 f1.UserData.success = true;

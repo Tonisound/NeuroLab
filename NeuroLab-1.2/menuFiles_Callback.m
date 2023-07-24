@@ -205,7 +205,7 @@ end
         else
             % Sorting files
             % files_temp = sortstruct(F,files_temp);
-            files_temp = [F;files_temp];
+            files_temp = [F,files_temp];
 %             file_uitable.Data = [{files_temp.session}',{files_temp.nlab}',{files_temp.dir_fus}',{files_temp.video}'];
             file_uitable.Data = [{files_temp.nlab}',{files_temp.ns2}',{files_temp.dir_fus}',{files_temp.video}'];
         end
