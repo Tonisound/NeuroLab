@@ -2,6 +2,7 @@ function f1 = figure_Ripple_Imaging(handles,val,str_regions)
 % (Figure) Displays fUS imaging sequence associated with ripples
 
 % close all;
+load('Preferences.mat','GTraces');
 global FILES CUR_FILE DIR_SAVE DIR_FIG DIR_STATS IM;
 % if nargin<3
 %     str_tag = [];
@@ -61,7 +62,7 @@ face_color = [0.9300    0.6900    0.1900];
 face_alpha = .5 ;
 g_colors = get_colors(n_channels+1,'jet');
 % Flag save
-flags = [1,0,0]; % stats - figures - movies
+flags = [1,1,1]; % stats - figures - movies
 
 % Loading time reference
 data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
@@ -164,18 +165,24 @@ Xq(X_restrict==0) = NaN;
 Y2q(X_restrict==0,:) = NaN;
 Y3q(X_restrict==0,:) = NaN;
 
-
-% % Restricting ripples
-% column_sort = 6; % 4 duration, 5 frequency, 6 p2p amplitude;
-% ratio_keep = .1;
-% [~,ind_sorted] = sort(ripples_abs(:,column_sort),'descend');
-% ripples_abs_sorted = ripples_abs(ind_sorted,:);
-% index_keep = 1:round(ratio_keep*size(ripples_abs,1));
-% % index_keep = round(ratio_keep*size(ripples_abs,1)):size(ripples_abs,1);
-% ripples_abs = ripples_abs_sorted(index_keep,:);
+% Ripple Parameters
 mean_dur = mean(ripples_abs(:,4),1,'omitnan');
 mean_freq = mean(ripples_abs(:,5),1,'omitnan');
 mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
+% Restricting ripples
+[~,ind_sorted_duration] = sort(ripples_abs(:,4),'descend');
+[~,ind_sorted_frequency] = sort(ripples_abs(:,5),'descend');
+[~,ind_sorted_amplitude] = sort(ripples_abs(:,6),'descend');
+% % Keeping fixed ratio
+% ratio_keep = .1;
+% ind_keep_duration = ind_sorted_duration(1:round(ratio*n_ripples));
+% ind_keep_frequency = ind_sorted_frequency(1:round(ratio*n_ripples));
+% ind_keep_amplitude = ind_sorted_amplitude(1:round(ratio*n_ripples));
+% Keeping fixed amount
+n_keep = 50;
+ind_keep_duration = ind_sorted_duration(1:n_keep);
+ind_keep_frequency = ind_sorted_frequency(1:n_keep);
+ind_keep_amplitude = ind_sorted_amplitude(1:n_keep);
 
 
 % Plotting
@@ -211,12 +218,24 @@ tab4 = uitab('Parent',tabgp,...
     'Tag','FourthTab');
 tab5 = uitab('Parent',tabgp,...
     'Units','normalized',...
-    'Title','Sequence',...
+    'Title','Sequence-Mean',...
     'Tag','FifthTab');
-% tab6 = uitab('Parent',tabgp,...
-%     'Units','normalized',...
-%     'Title','Tab6',...
-%     'Tag','SixthTab');
+tab6 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Sequence-Median',...
+    'Tag','SixthTab');
+tab7 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Sequence-Longest',...
+    'Tag','SeventhTab');
+tab8 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Sequence-Fastest',...
+    'Tag','EighthTab');
+tab9 = uitab('Parent',tabgp,...
+    'Units','normalized',...
+    'Title','Sequence-Largest',...
+    'Tag','NinthTab');
 
 ax1 = subplot(411,'parent',tab1);
 hold(ax1,'on');
@@ -309,7 +328,7 @@ set(bb,'Callback',{@template_buttonBack_Callback,ax_control,edits});
 set(tb,'Callback',{@template_button_TagSelection_Callback,ax_control,edits,'single'});
 
 set(f1,'Units','normalized','OuterPosition',[0 0 1 1]);
-fprintf('>> Process 1/5 done [%s].\n',tab1.Title);
+fprintf('>> Process 1/9 done [%s].\n',tab1.Title);
 
 % Computing ripple averages and fUS averages
 t_before = -1;           % seconds
@@ -359,15 +378,22 @@ Y2q_rip_baseline = mean(Y2q_rip_(:,ind_baseline,:),2,'omitnan');
 Y2q_rip_normalized = Y2q_rip_-repmat(Y2q_rip_baseline,[1 size(Y2q_rip_,2) 1]);
 Y3q_rip_baseline = mean(Y3q_rip_(:,ind_baseline,:),2,'omitnan');
 Y3q_rip_normalized = Y3q_rip_-repmat(Y3q_rip_baseline,[1 size(Y3q_rip_,2) 1]);
-% Y3q_rip_mean = mean(Y3q_rip_normalized,3,'omitnan');
-Y3q_rip_mean = median(Y3q_rip_normalized,3,'omitnan');
+
+% Computing sequences
+Y3q_rip_mean = mean(Y3q_rip_normalized,3,'omitnan');
 Y3q_rip_reshaped = reshape(Y3q_rip_mean,[size(IM,1) size(IM,2) length(t_bins_fus)]);
+Y3q_rip_median = median(Y3q_rip_normalized,3,'omitnan');
+Y3q_rip_median_reshaped = reshape(Y3q_rip_median,[size(IM,1) size(IM,2) length(t_bins_fus)]);
+
+Y3q_rip_duration = mean(Y3q_rip_normalized(:,:,ind_keep_duration),3,'omitnan');
+Y3q_rip_duration_reshaped = reshape(Y3q_rip_duration,[size(IM,1) size(IM,2) length(t_bins_fus)]);
+Y3q_rip_frequency = mean(Y3q_rip_normalized(:,:,ind_keep_frequency),3,'omitnan');
+Y3q_rip_frequency_reshaped = reshape(Y3q_rip_frequency,[size(IM,1) size(IM,2) length(t_bins_fus)]);
+Y3q_rip_amplitude = mean(Y3q_rip_normalized(:,:,ind_keep_amplitude),3,'omitnan');
+Y3q_rip_amplitude_reshaped = reshape(Y3q_rip_amplitude,[size(IM,1) size(IM,2) length(t_bins_fus)]);
+
 
 % Plotting
-% f2=figure;
-% f2.Name = sprintf(strcat('[%s]%s[%s-%s-synthesis]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id);
-% colormap(f2,'jet');
-
 ax1 = subplot(321,'parent',tab2);
 hold(ax1,'on');
 for i=1:n_events
@@ -428,17 +454,8 @@ ax4.FontSize = 6;
 colorbar(ax4,'eastoutside');
 
 f2_axes=[ax1;ax2;ax3;ax4];
-% set(f2,'Units','normalized','OuterPosition',[0 0 1 1]);
-fprintf('>> Process 2/5 done [%s].\n',tab2.Title);
+fprintf('>> Process 2/9 done [%s].\n',tab2.Title);
 
-% linkaxes(f1_axes,'x');
-% ax1.XLim = [data_tr.time_ref.Y(1) data_tr.time_ref.Y(end)];
-
-
-% f3=figure;
-% f3.Name = sprintf(strcat('[%s]%s[%s-%s-regions]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id);
-% set(f3,'Units','normalized','OuterPosition',[0 0 1 1]);
-% colormap(f3,'jet');
 n_col = 4 ;
 n_rows = ceil(n_channels/n_col);
 f3_axes=[];
@@ -473,16 +490,10 @@ for i=1:n_channels
     f3_axes=[f3_axes;ax];
 
 end
-fprintf('>> Process 3/5 done [%s].\n',tab3.Title);
+fprintf('>> Process 3/9 done [%s].\n',tab3.Title);
 
-
-% f4=figure;
-% f4.Name = sprintf(strcat('[%s]%s[%s-%s-trials]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id);
-% set(f4,'Units','normalized','OuterPosition',[0 0 1 1]);
-% colormap(f4,'jet');
 
 f4_axes=[];
-
 for i=1:n_channels
     ax = subplot(n_rows,n_col,i,'parent',tab4);
     hold(ax,'on');
@@ -508,18 +519,12 @@ for i=1:n_channels
     f4_axes=[f4_axes;ax];
 
 end
-fprintf('>> Process 4/5 done [%s].\n',tab4.Title);
+fprintf('>> Process 4/9 done [%s].\n',tab4.Title);
 
-
-% f5=figure;
-% f5.Name = sprintf(strcat('[%s]%s[%s-%s-sequence]'),atlas_name,strrep(recording_name,'_nlab',''),band_name,channel_id);
-% set(f5,'Units','normalized','OuterPosition',[0 0 1 1]);
-% colormap(f5,'jet');
 
 f5_axes=[];
 n_iqr= 3;
 data_iqr = Y3q_rip_reshaped(~isnan(Y3q_rip_reshaped));
-
 temp=1:length(t_bins_fus);
 index_t_bins_fus = temp(1:end-1);%(1:2:end-1);
 
@@ -550,14 +555,143 @@ n_col = 10 ;
 n_rows = ceil(length(f5_axes)/n_col);
 eps1=.01;
 eps2=.01;
-
 for i=1:length(f5_axes)
     f5_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
 end
+fprintf('>> Process 5/9 done [%s].\n',tab5.Title);
 
-fprintf('>> Process 5/5 done [%s].\n',tab5.Title);
 
-load('Preferences.mat','GTraces');
+f6_axes=[];
+n_iqr= 3;
+data_iqr = Y3q_rip_median_reshaped(~isnan(Y3q_rip_median_reshaped));
+temp=1:length(t_bins_fus);
+index_t_bins_fus = temp(1:end-1);
+for i=index_t_bins_fus  
+    n=ceil(sqrt(length(index_t_bins_fus)));
+    ax = subplot(n,n,i,'parent',tab6);
+    hold(ax,'on');
+    imagesc(Y3q_rip_median_reshaped(:,:,i),'Parent',ax);    
+    ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));  
+%     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    ax.CLim = [-5,10];
+    ax.XLim = [.5 size(IM,2)+.5];
+    ax.YLim = [.5 size(IM,1)+.5]; 
+    set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+    ax.YDir = 'reverse';
+    if i == index_t_bins_fus(end)
+        cbar = colorbar(ax,'eastoutside');
+        cbar.Position = [.94 .01 .01 .15];
+    end
+    f6_axes=[f6_axes;ax];
+end
+n_col = 10 ;
+n_rows = ceil(length(f6_axes)/n_col);
+eps1=.01;
+eps2=.01;
+for i=1:length(f6_axes)
+    f6_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
+end
+fprintf('>> Process 6/9 done [%s].\n',tab6.Title);
+
+
+f7_axes=[];
+n_iqr= 3;
+data_iqr = Y3q_rip_duration_reshaped(~isnan(Y3q_rip_duration_reshaped));
+temp=1:length(t_bins_fus);
+index_t_bins_fus = temp(1:end-1);
+for i=index_t_bins_fus  
+    n=ceil(sqrt(length(index_t_bins_fus)));
+    ax = subplot(n,n,i,'parent',tab7);
+    hold(ax,'on');
+    imagesc(Y3q_rip_duration_reshaped(:,:,i),'Parent',ax);    
+    ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));  
+%     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    ax.CLim = [-5,10];
+    ax.XLim = [.5 size(IM,2)+.5];
+    ax.YLim = [.5 size(IM,1)+.5]; 
+    set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+    ax.YDir = 'reverse';
+    if i == index_t_bins_fus(end)
+        cbar = colorbar(ax,'eastoutside');
+        cbar.Position = [.94 .01 .01 .15];
+    end
+    f7_axes=[f7_axes;ax];
+end
+n_col = 10 ;
+n_rows = ceil(length(f7_axes)/n_col);
+eps1=.01;
+eps2=.01;
+for i=1:length(f7_axes)
+    f7_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
+end
+fprintf('>> Process 7/9 done [%s].\n',tab7.Title);
+
+
+f8_axes=[];
+n_iqr= 3;
+data_iqr = Y3q_rip_frequency_reshaped(~isnan(Y3q_rip_frequency_reshaped));
+temp=1:length(t_bins_fus);
+index_t_bins_fus = temp(1:end-1);
+for i=index_t_bins_fus  
+    n=ceil(sqrt(length(index_t_bins_fus)));
+    ax = subplot(n,n,i,'parent',tab8);
+    hold(ax,'on');
+    imagesc(Y3q_rip_frequency_reshaped(:,:,i),'Parent',ax);    
+    ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));  
+%     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    ax.CLim = [-5,10];
+    ax.XLim = [.5 size(IM,2)+.5];
+    ax.YLim = [.5 size(IM,1)+.5]; 
+    set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+    ax.YDir = 'reverse';
+    if i == index_t_bins_fus(end)
+        cbar = colorbar(ax,'eastoutside');
+        cbar.Position = [.94 .01 .01 .15];
+    end
+    f8_axes=[f8_axes;ax];
+end
+n_col = 10 ;
+n_rows = ceil(length(f8_axes)/n_col);
+eps1=.01;
+eps2=.01;
+for i=1:length(f8_axes)
+    f8_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
+end
+fprintf('>> Process 8/9 done [%s].\n',tab8.Title);
+
+
+f9_axes=[];
+n_iqr= 3;
+data_iqr = Y3q_rip_amplitude_reshaped(~isnan(Y3q_rip_amplitude_reshaped));
+temp=1:length(t_bins_fus);
+index_t_bins_fus = temp(1:end-1);
+for i=index_t_bins_fus  
+    n=ceil(sqrt(length(index_t_bins_fus)));
+    ax = subplot(n,n,i,'parent',tab9);
+    hold(ax,'on');
+    imagesc(Y3q_rip_amplitude_reshaped(:,:,i),'Parent',ax);    
+    ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));  
+%     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    ax.CLim = [-5,10];
+    ax.XLim = [.5 size(IM,2)+.5];
+    ax.YLim = [.5 size(IM,1)+.5]; 
+    set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+    ax.YDir = 'reverse';
+    if i == index_t_bins_fus(end)
+        cbar = colorbar(ax,'eastoutside');
+        cbar.Position = [.94 .01 .01 .15];
+    end
+    f9_axes=[f9_axes;ax];
+end
+n_col = 10 ;
+n_rows = ceil(length(f9_axes)/n_col);
+eps1=.01;
+eps2=.01;
+for i=1:length(f9_axes)
+    f9_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
+end
+fprintf('>> Process 9/9 done [%s].\n',tab9.Title);
+
 
 % Saving Stats
 flag_save_stats = flags(1);
@@ -570,11 +704,13 @@ if flag_save_stats
     
     freqdom=data_spectro.freqdom;
     save(fullfile(save_dir,filename_save),'recording_name','data_atlas','atlas_name','atlas_coordinate',...
-        'mean_dur','mean_freq','mean_p2p','n_ripples','band_name','channel_id',...
-        'Y3q_rip_reshaped','all_labels_2',...'Yraw_rip_','Y1_rip_','Cdata_rip_','Y2q_rip_','Y2q_rip_normalized',...
+        'mean_dur','mean_freq','mean_p2p','n_ripples','band_name','channel_id','all_labels_2',...
+        'Y3q_rip_reshaped','Y3q_rip_median_reshaped','Y3q_rip_duration_reshaped','Y3q_rip_frequency_reshaped','Y3q_rip_amplitude_reshaped',...'Yraw_rip_','Y1_rip_','Cdata_rip_','Y2q_rip_','Y2q_rip_normalized',...
         't_baseline_start','t_baseline_end','freqdom',...
         't_before','t_after','sampling_fus','sampling_lfp','t_bins_fus','t_bins_lfp','-v7.3');
+    fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save));
 end
+
 
 % Saving Tabs
 flag_save_figs = flags(2);
@@ -583,26 +719,42 @@ if flag_save_figs
     if ~isfolder(save_dir)
         mkdir(save_dir);
     end
-    
+
     tabgp.SelectedTab = tab1;
     saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab1.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab1.Title,save_dir);
-    
+
     tabgp.SelectedTab = tab2;
     saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab2.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab2.Title,save_dir);
-    
+
     tabgp.SelectedTab = tab3;
     saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab3.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab3.Title,save_dir);
-    
+
     tabgp.SelectedTab = tab4;
     saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab4.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab4.Title,save_dir);
-    
+
     tabgp.SelectedTab = tab5;
     saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab5.Title,save_dir);
+
+    tabgp.SelectedTab = tab6;
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    fprintf('Tab %s saved in [%s].\n',tab6.Title,save_dir);
+
+    tabgp.SelectedTab = tab7;
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    fprintf('Tab %s saved in [%s].\n',tab7.Title,save_dir);
+
+    tabgp.SelectedTab = tab8;
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    fprintf('Tab %s saved in [%s].\n',tab8.Title,save_dir);
+
+    tabgp.SelectedTab = tab9;
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    fprintf('Tab %s saved in [%s].\n',tab9.Title,save_dir);
 end
 
 
@@ -620,19 +772,66 @@ if flag_save_movie
     end
     mkdir(work_dir);
     
-    f2 = figure();
-    for i = 1:length(f5_axes)
-        ax = f5_axes(i);
-        ax2 = copyobj(ax,f2);
-        ax2.Title.String = strrep(ax2.Title.String,'t','Time from Ripple Peak');
+    f2 = figure('Units','normalized');
+%     for i = 1:length(f5_axes)
+%         ax2 = copyobj(f5_axes(i),f2);
+%         ax2.Title.String = strrep(ax2.Title.String,'t','Time from Ripple Peak');
+%         colorbar(ax2,'eastoutside');
+%         ax2.Position = [.05 .05 .85 .9];
+%         l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+%             'LineWidth',1,'Color','r','Parent',ax2);
+%         l.Color(4) = .25;
+%         
+%         pic_name = sprintf(strcat('%s_Ripple-Imaging_%03d.mat'),recording_name,i);
+%         saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+%         delete(ax2);
+%     end
+    f2.Position=[0.1    0.4    0.8    0.2];
+    t = uicontrol(f2,'Style','text','BackgroundColor','w','FontSize',16,'FontWeight','bold','Units','normalized','Position',[.25 .9 .5 .1],'Parent',f2);
+    
+    for i = index_t_bins_fus
+        t.String = sprintf('Time from Ripple Peak = %.1f s',t_bins_fus(i));
+
+        ax2 = copyobj(f5_axes(i),f2);
+        ax2.Title.String = 'Mean';
+        ax2.Position = [.005 .05 .19 .8];
         colorbar(ax2,'eastoutside');
-        ax2.Position = [.05 .05 .85 .9];
-        pic_name = sprintf(strcat('%s_Ripple-Imaging_%03d.mat'),recording_name,i);
         l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
             'LineWidth',1,'Color','r','Parent',ax2);
         l.Color(4) = .25;
+        ax2 = copyobj(f6_axes(i),f2);
+        ax2.Title.String = 'Median';
+        ax2.Position = [.205 .05 .19 .8];
+        colorbar(ax2,'eastoutside');
+        l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+            'LineWidth',1,'Color','r','Parent',ax2);
+        l.Color(4) = .25;
+        ax2 = copyobj(f7_axes(i),f2);
+        ax2.Title.String = 'Longest';
+        ax2.Position = [.405 .05 .19 .8];
+        colorbar(ax2,'eastoutside');
+        l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+            'LineWidth',1,'Color','r','Parent',ax2);
+        l.Color(4) = .25;
+        ax2 = copyobj(f8_axes(i),f2);
+        ax2.Title.String = 'Fastest';
+        ax2.Position = [.605 .05 .19 .8];
+        colorbar(ax2,'eastoutside');
+        l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+            'LineWidth',1,'Color','r','Parent',ax2);
+        l.Color(4) = .25;
+        ax2 = copyobj(f9_axes(i),f2);
+        ax2.Title.String = 'Largest';
+        ax2.Position = [.805 .05 .19 .8];
+        colorbar(ax2,'eastoutside');
+        l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+            'LineWidth',1,'Color','r','Parent',ax2);
+        l.Color(4) = .25;
+
+        pic_name = sprintf(strcat('%s_Ripple-Imaging_%03d.mat'),recording_name,i);
         saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-        delete(ax2);
+        delete(findobj(f2,'Type','Axes'));
+
     end
     
     close(f2);

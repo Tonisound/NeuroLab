@@ -66,7 +66,7 @@ for i=1:length(all_files)
         %         copyfile(fullfile(dd(j).folder,dd(j).name),fullfile(dd_dest,dd(j).name))
         %         fprintf('File copied [%s] ---> [%s].\n',dd(j).name,dd_dest);
         fprintf('Loading file [%s] ...',dd(j).name);
-        data = load(fullfile(dd(j).folder,dd(j).name),'Y3q_rip_reshaped','t_bins_fus','atlas_coordinate','atlas_name','data_atlas','n_ripples');
+        data = load(fullfile(dd(j).folder,dd(j).name),'Y3q_rip_reshaped','t_bins_fus','atlas_coordinate','atlas_name','data_atlas');%,'n_ripples'
         fprintf(' done.\n');
         S(i).data = data.Y3q_rip_reshaped;
         S(i).name = strrep(d(i).name,'_nlab_Ripple-Imaging.mat','');
@@ -74,7 +74,8 @@ for i=1:length(all_files)
         S(i).atlas_coordinate = data.atlas_coordinate;
         S(i).atlas_name = data.atlas_name;
         S(i).data_atlas = data.data_atlas;
-        S(i).n_ripples = data.n_ripples;
+%         S(i).n_ripples = data.n_ripples;
+        S(i).n_ripples = 1000;
         t_bins_fus = data.t_bins_fus;
         all_coordinates = [all_coordinates;data.atlas_coordinate];
     end
@@ -114,7 +115,7 @@ for j=1:length(unique_animals)
             ax = f_axes(i);
             hold(ax,'on');
             imagesc(S_animal(i).data(:,:,k),'Parent',ax);
-            ax.Title.String = strcat(S_animal(i).atlas_name,' ',S_animal(i).n_ripples,' ',sprintf('t=%.1f s',t_bins_fus(k)));
+            ax.Title.String = strcat(S_animal(i).atlas_name,sprintf(' n=%d ',S_animal(i).n_ripples),sprintf(' t=%.1f s',t_bins_fus(k)));
 
             l = line('XData',S_animal(i).data_atlas.line_x,'YData',S_animal(i).data_atlas.line_z,'Tag','AtlasMask',...
                 'LineWidth',.5,'Color','r','Parent',ax);
@@ -141,7 +142,7 @@ for j=1:length(unique_animals)
     end
 
     close(f);
-    video_name = 'Ripple-Synthesis_';
-    save_video(work_dir,fullfile(folder_dest,cur_animal),video_name);
+    video_name = strcat('Ripple-Synthesis_',cur_animal);
+    save_video(work_dir,folder_dest,video_name);
 %     rmdir(work_dir,'s');
 end
