@@ -1,12 +1,17 @@
-% Script regenerating moving from frames
+function regenerate_movies()
+% Function regenerating moving from frames and movie name (AVI to MP4)
 % Requires workingDir (frames) and original video .avi)
 
+addpath(genpath('/Users/tonio/Library/CloudStorage/OneDrive-McGillUniversity/Documents/MATLAB/NeuroLab'));
 folder_video = '/Volumes/DataMOBs171/Antoine-fUSDataset/NEUROLAB/NLab_Figures/Movie_Normalized[V3]';
+% folder_video = 'F:\Antoine-fUSDataset\NEUROLAB\NLab_Figures\Movie_Normalized[V3]';
 d = dir(fullfile(folder_video,'*','*.avi'));
+% Removing hidden files
+d = d(arrayfun(@(x) ~strcmp(x.name(1),'.'),d));
 
 video_quality = 25;
 
-for i=2%:length(d)
+for i=1:length(d)
     tic
     % Looking for workingDir
     dd = dir(fullfile(d(i).folder,'*Frames'));
@@ -22,4 +27,6 @@ for i=2%:length(d)
 
     save_video(workingDir,savedir,video_name,video_quality);
     toc;
+end
+
 end

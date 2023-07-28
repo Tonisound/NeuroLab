@@ -39,7 +39,9 @@ channel1 = strcat('LFP-',band_name,'_',channel_id);
 d_channels = dir(fullfile(DIR_SAVE,recording_name,'Sources_fUS','[SR]*.mat'));
 d_channels = d_channels(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_channels));
 ind_leftright = contains({d_channels(:).name}','-L.mat')+contains({d_channels(:).name}','-R.mat');
-d_channels =d_channels(ind_leftright==0);
+if ~isempty(d_channels(ind_leftright==0))
+    d_channels = d_channels(ind_leftright==0);
+end
 % [ind_channels,v] = listdlg('Name','Region Selection','PromptString','Select Regions to display',...
 %     'SelectionMode','multiple','ListString',{d_channels(:).name}','InitialValue',1,'ListSize',[300 500]);
 % if v==0
@@ -62,7 +64,7 @@ face_color = [0.9300    0.6900    0.1900];
 face_alpha = .5 ;
 g_colors = get_colors(n_channels+1,'jet');
 % Flag save
-flags = [1,1,1]; % stats - figures - movies
+flags = [1,0,0]; % stats - figures - movies
 
 % Loading time reference
 data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
@@ -175,11 +177,10 @@ mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
 [~,ind_sorted_amplitude] = sort(ripples_abs(:,6),'descend');
 % % Keeping fixed ratio
 % ratio_keep = .1;
-% ind_keep_duration = ind_sorted_duration(1:round(ratio*n_ripples));
-% ind_keep_frequency = ind_sorted_frequency(1:round(ratio*n_ripples));
-% ind_keep_amplitude = ind_sorted_amplitude(1:round(ratio*n_ripples));
+% n_keep = round(ratio_keep*n_ripples)
 % Keeping fixed amount
-n_keep = 50;
+n_fixed = 50;
+n_keep = min(n_ripples,n_fixed);
 ind_keep_duration = ind_sorted_duration(1:n_keep);
 ind_keep_frequency = ind_sorted_frequency(1:n_keep);
 ind_keep_amplitude = ind_sorted_amplitude(1:n_keep);
@@ -705,7 +706,8 @@ if flag_save_stats
     freqdom=data_spectro.freqdom;
     save(fullfile(save_dir,filename_save),'recording_name','data_atlas','atlas_name','atlas_coordinate',...
         'mean_dur','mean_freq','mean_p2p','n_ripples','band_name','channel_id','all_labels_2',...
-        'Y3q_rip_reshaped','Y3q_rip_median_reshaped','Y3q_rip_duration_reshaped','Y3q_rip_frequency_reshaped','Y3q_rip_amplitude_reshaped',...'Yraw_rip_','Y1_rip_','Cdata_rip_','Y2q_rip_','Y2q_rip_normalized',...
+        'Y3q_rip_reshaped','Y3q_rip_median_reshaped','Y3q_rip_duration_reshaped','Y3q_rip_frequency_reshaped','Y3q_rip_amplitude_reshaped',...
+        'Yraw_rip_','Y1_rip_','Cdata_mean','Y2q_rip_mean',...
         't_baseline_start','t_baseline_end','freqdom',...
         't_before','t_after','sampling_fus','sampling_lfp','t_bins_fus','t_bins_lfp','-v7.3');
     fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save));
