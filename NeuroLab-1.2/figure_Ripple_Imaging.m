@@ -64,7 +64,7 @@ face_color = [0.9300    0.6900    0.1900];
 face_alpha = .5 ;
 g_colors = get_colors(n_channels+1,'jet');
 % Flag save
-flags = [1,0,0]; % stats - figures - movies
+flags = [1,1,0]; % stats - figures - movies
 
 % Loading time reference
 data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
@@ -494,12 +494,16 @@ end
 fprintf('>> Process 3/9 done [%s].\n',tab3.Title);
 
 
+% [~,ind_sorted_duration] = sort(ripples_abs(:,4),'descend');
+% [~,ind_sorted_frequency] = sort(ripples_abs(:,5),'descend');
+% [~,ind_sorted_amplitude] = sort(ripples_abs(:,6),'descend');
 f4_axes=[];
 for i=1:n_channels
     ax = subplot(n_rows,n_col,i,'parent',tab4);
     hold(ax,'on');
     YData = squeeze(Y2q_rip_normalized(i,:,:));
-    imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData','Parent',ax)
+%     imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData','Parent',ax)
+    imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData(:,ind_sorted_duration)','Parent',ax)
     
     n_samples = sum(~isnan(YData),2);
     ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
@@ -743,19 +747,19 @@ if flag_save_figs
     fprintf('Tab %s saved in [%s].\n',tab5.Title,save_dir);
 
     tabgp.SelectedTab = tab6;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab6.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab6.Title,save_dir);
 
     tabgp.SelectedTab = tab7;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab7.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab7.Title,save_dir);
 
     tabgp.SelectedTab = tab8;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab8.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab8.Title,save_dir);
 
     tabgp.SelectedTab = tab9;
-    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab5.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab9.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Tab %s saved in [%s].\n',tab9.Title,save_dir);
 end
 

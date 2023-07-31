@@ -501,7 +501,7 @@ ax2bb.YLim=[-.5 1];
 all_display_axes3 = findobj(tab3,'Type','Axes');
 delete(all_display_axes3);
 
-eps = .03;
+eps = .003;
 for i=1:n_regions
     ax2aa=axes('Parent',tab3,'Tag',sprintf('Ax%da',i),'Position',[(i-1)/n_regions+eps .525 1/n_regions-2*eps .45],'FontSize',ftsize);
     ax2ab=axes('Parent',tab3,'Tag',sprintf('Ax%db',i),'Position',[(i-1)/n_regions+eps .025 1/n_regions-2*eps .45],'FontSize',ftsize);
@@ -511,7 +511,7 @@ end
 all_display_axes4 = findobj(tab4,'Type','Axes');
 delete(all_display_axes4);
 
-eps = .03;
+eps = .003;
 for i=1:n_groups
     ax2aa=axes('Parent',tab4,'Tag',sprintf('Ax%da',i),'Position',[(i-1)/n_groups+eps .525 1/n_groups-2*eps .45],'FontSize',ftsize);
     ax2ab=axes('Parent',tab4,'Tag',sprintf('Ax%db',i),'Position',[(i-1)/n_groups+eps .025 1/n_groups-2*eps .45],'FontSize',ftsize);
@@ -623,8 +623,8 @@ if nargin <5
     flag_pixels = false;
     flag_regions = true;
     flag_groups = true;
-    flag_dynamics = true;
-    flag_dynamics_groups = true;
+    flag_dynamics = false;
+    flag_dynamics_groups = false;
 else
     flag_pixels = flags(1);
     flag_regions = flags(2);
