@@ -68,7 +68,7 @@ for i=1:length(all_files)
         S(i).Yraw_rip_ = data.Yraw_rip_;
         S(i).t_bins_fus = data.t_bins_fus;
         S(i).t_bins_lfp = data.t_bins_lfp;
-        S(i).name = strrep(strrep(d(i).name,'_nlab_Ripple-Imaging.mat',''),'_','-');
+        S(i).name = strrep(strrep(d(i).name,'_nlab',''),'_','-');
         S(i).animal = char(all_animals(i));
         S(i).atlas_coordinate = data.atlas_coordinate;
         S(i).atlas_name = data.atlas_name;
@@ -159,13 +159,14 @@ for j=1:length(unique_animals)
             end
             mkdir(work_dir);
 
-            for k=1:10:length(t_bins_fus)
+            for k=1:length(t_bins_fus)
                 for i=1:length(f_axes)
                     ax = f_axes(i);
                     hold(ax,'on');
                     imagesc(S_animal_plane(i).Y3q_rip_full(:,:,k,l),'Parent',ax);
                     ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_ripples);
                     ax.YLabel.String = S_animal_plane(i).name;
+                    ax.YLabel.FontSize = 8;
                     t.String = sprintf('[%s] Time from Ripple Peak = %.1f s',cur_label,t_bins_fus(k));
                     l_ = line('XData',S_animal_plane(i).data_atlas.line_x,'YData',S_animal_plane(i).data_atlas.line_z,'Tag','AtlasMask',...
                         'LineWidth',.5,'Color','r','Parent',ax);
@@ -235,6 +236,7 @@ for j=1:length(unique_animals)
             ax.Title.String = sprintf('Channel %s [N=%d]',S_animal_plane(i).channel_id,S_animal_plane(i).n_ripples);
 %             ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_ripples);
             ax.YLabel.String = S_animal_plane(i).name;
+            ax.YLabel.FontSize = 8;
             n_iqr = 3;
             Yraw_rip = S_animal_plane(i).Yraw_rip_(:);
             data_iqr = Yraw_rip(~isnan(Yraw_rip));

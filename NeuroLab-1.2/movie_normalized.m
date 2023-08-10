@@ -120,7 +120,7 @@ else
 end
 
 % Loading Ripple Events
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Atlas.mat'),'file')
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'),'file')
     data_ripples = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'));
 else
     data_ripples = [];
@@ -719,7 +719,8 @@ for i=1:l1
     X_post = X(end)+(delta_x:delta_x:delta_x*1e6)';
     ax.UserData.X = [X_sup;X(:);X_post];
     
-    s = Y(floor(t(START_IM)/delta_x):floor(t(END_IM)/delta_x),1);
+%     s = Y(floor(t(START_IM)/delta_x):floor(t(END_IM)/delta_x),1);
+    s = Y(max(1,floor(t(START_IM)/delta_x)):floor(t(END_IM)/delta_x),1);
     ax.UserData.series = s;
     ax.UserData.delta_x = delta_x;
     ax.UserData.mean = mean(s);
