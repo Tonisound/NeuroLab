@@ -112,6 +112,14 @@ traces = traces(ind_1);
 phases = phases(ind_2);
 
 
+% Loading Ripple Events
+if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'),'file')
+    data_ripples = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'));
+else
+    data_ripples = [];
+end
+
+
 % Building Figure
 f2 = figure('Units','normalized',...
     'HandleVisibility','Callback',...
@@ -140,6 +148,7 @@ cb3_def = 1;                 % linkaxes all channels
 cb4_def = 1;                 % early break (spectrogramm only)
 cb11_def = 1;                % lfp display
 cb12_def = 0;                % lfp filtered
+cb13_def = 0;                % show events
 cb21_def = 1;                % Hold on for spectrogram
 cb31_def = 1;                % Hold on frequency coupling
 cb32_def = 1;                % Ascend/Descend frequency coupling
@@ -492,6 +501,14 @@ cb12 = uicontrol('Units','normalized',...
     'Enable',cb12_enable,...
     'Tag','Checkbox12',...
     'Tooltipstring','LFP filtered');
+cb13 = uicontrol('Units','normalized',...
+    'Style','checkbox',...
+    'Parent',bP,...
+    'Value',cb13_def,...
+    'Tag','Checkbox13',...
+    'Tooltipstring','Show Events');
+cb13.UserData.data_ripples = data_ripples;
+
 cb21 = uicontrol('Units','normalized',...
     'Style','checkbox',...
     'HorizontalAlignment','center',...
@@ -515,6 +532,7 @@ cb32 = uicontrol('Units','normalized',...
     'Tooltipstring','Ascend/Descend');
 cb11.Position = [0 0 .02 .04];
 cb12.Position = [0 .04 .02 .04];
+cb13.Position = [0 .08 .02 .04];
 cb21.Position = [.98 0 .02 .04];
 cb31.Position = [.98 0 .02 .04];
 cb32.Position = [.98 .04 .02 .04];
@@ -971,6 +989,7 @@ set(handles.Checkbox2,'Callback',{@checkbox2_Callback,handles});
 set(handles.Checkbox3,'Callback',{@checkbox3_Callback,handles});
 set(handles.Checkbox11,'Callback',{@checkbox11_Callback,handles});
 set(handles.Checkbox12,'Callback',{@checkbox12_Callback,handles});
+set(handles.Checkbox13,'Callback',{@checkbox13_Callback,handles});
 set(handles.Checkbox32,'Callback',{@checkbox32_Callback,handles});
 
 set(handles.ButtonReload,'Callback',{@reload_Callback,handles});
@@ -1232,6 +1251,49 @@ else
         t(i).Visible ='off';
     end
 end
+end
+
+function checkbox13_Callback(hObj,~,handles)
+% Display Ripple Events
+
+if isempty(hObj.UserData.data_ripples)
+    warning('No Events to show.')
+    return;
+end
+
+all_axes = findobj(hObj.Parent,'Type','Axes');
+if hObj.Value
+    
+    % Ripple Events
+    data_ripples = hObj.UserData.data_ripples;
+    t_ripples = data_ripples.ripples_abs(:,2);
+    t_ripples_start = data_ripples.ripples_abs(:,1);
+    t_ripples_end = data_ripples.ripples_abs(:,3);
+    
+    for k=1:length(all_axes)
+        ax = all_axes(k);
+        xdata = [repmat(t_ripples,[1,2]),NaN(length(t_ripples),1)]';
+        ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
+        line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
+        xdata = [repmat(t_ripples_start,[1,2]),NaN(length(t_ripples),1)]';
+        ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
+        line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','b','Parent',ax,'Tag','EventLine','HitTest','off');
+        xdata = [repmat(t_ripples_end,[1,2]),NaN(length(t_ripples),1)]';
+        ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
+        line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
+        %             patch('XData',[.5+x_rip_start*length(Y0) .5+x_rip_start*length(Y0) .5+x_rip_end*length(Y0) .5+x_rip_end*length(Y0)],...
+        %                 'YData',[ax.YLim(1) ax.YLim(2) ax.YLim(2) ax.YLim(1)],...
+        %                 'FaceColor',[.5 .5 .5],'EdgeColor',[.5 .5 .5],'FaceAlpha',.5,'Parent',ax,'Tag','EventPatch');     
+
+    end
+    
+else
+    for k=1:length(all_axes)
+        ax = all_axes(k);
+        delete(findobj(ax,'Tag','EventLine','-or','Tag','EventPatch'));
+    end
+end
+
 end
 
 function checkbox32_Callback(hObj,~,handles)
@@ -1943,7 +2005,7 @@ for i =1:length(panels)
         c = findobj(panels(i),'Tag',sprintf('Colorbar%d',j));
         im = findobj(ax,'Type','Image','-and','Visible','on');
         im_r = findobj(ax_r,'Type','Image','-and','Visible','on');
-        lines = findobj(ax,'Type','line','-and','Visible','on');
+        lines = findobj(ax,'Type','line','-not','Tag','EventLine','-and','Visible','on');
         lines_s = findobj(ax_s,'Type','line','-and','Visible','on');
         
         % Searching local max and min for all images in axes

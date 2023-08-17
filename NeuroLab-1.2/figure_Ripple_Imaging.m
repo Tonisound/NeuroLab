@@ -64,7 +64,7 @@ face_color = [0.9300    0.6900    0.1900];
 face_alpha = .5 ;
 g_colors = get_colors(n_channels+1,'jet');
 % Flag save
-flags = [1,1,0]; % stats - figures - movies
+flags = [0,0,1]; % stats - figures - movies
 
 % Loading time reference
 data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
@@ -401,12 +401,13 @@ for i=1:n_events
     l=line('XData',t_bins_lfp,'YData',Yraw_rip_(:,i),'Color','k','LineWidth',.1,'Parent',ax1);
     l.Color(4)=.5;
 end
-line('XData',t_bins_lfp,'YData',mean(Yraw_rip_,2,'omitnan'),'Color','r','Parent',ax1);
-ax1.Title.String = 'Raw trace LFP';
+line('XData',t_bins_lfp,'YData',mean(Yraw_rip_,2,'omitnan'),'Color','r','LineWidth',2,'Parent',ax1);
+ax1.Title.String = sprintf('Raw LFP [N=%d events]',n_events);
 n_iqr = 4;
 data_iqr = Yraw_rip(~isnan(Yraw_rip));
 ax1.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-ax1.XLim = [-.1 .5];
+% ax1.XLim = [-.1 .5];
+ax1.XLim = [-.2 .2];
 
 ax2 = subplot(323,'parent',tab2);
 hold(ax2,'on');
@@ -419,7 +420,7 @@ ax2.Title.String = 'Filtered trace LFP';
 n_iqr= 20;
 data_iqr = Y1_rip_(~isnan(Y1_rip_));
 ax2.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-ax2.XLim = [-.1 .5];
+ax2.XLim = ax1.XLim;
 
 
 % Spectrogram
@@ -433,7 +434,7 @@ data_iqr = Cdata_mean(~isnan(Cdata_mean));
 ax3.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
 ax3.YLim = [data_spectro.freqdom(1),data_spectro.freqdom(end)];
 % ax3.XLim = [t_bins_lfp(1),t_bins_lfp(end)];
-ax3.XLim = [-.1 .5];
+ax3.XLim = ax1.XLim;
 ax3.Title.String = 'Mean Spectrogram';
 
 
@@ -502,8 +503,8 @@ for i=1:n_channels
     ax = subplot(n_rows,n_col,i,'parent',tab4);
     hold(ax,'on');
     YData = squeeze(Y2q_rip_normalized(i,:,:));
-%     imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData','Parent',ax)
-    imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData(:,ind_sorted_duration)','Parent',ax)
+    imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData','Parent',ax)
+%     imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData(:,ind_sorted_duration)','Parent',ax)
     
     n_samples = sum(~isnan(YData),2);
     ax.XLim = [t_bins_fus(1),t_bins_fus(end)];

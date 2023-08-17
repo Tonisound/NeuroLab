@@ -1,6 +1,6 @@
 function template_buttonRescale_Callback(~,~,ax,edits)
 
-l = findobj(ax,'Type','line','-not','Tag','T2','-not','Tag','Tick_peak','-not','Tag','Threshold');
+l = findobj(ax,'Type','line','-not','Tag','T2','-not','Tag','Tick_peak','-not','Tag','Threshold','-not','Tag','EventLine');
 if length(l)>1
     l = l(1);
 end

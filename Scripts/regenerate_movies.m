@@ -3,7 +3,7 @@ function regenerate_movies()
 % Requires workingDir (frames) and original video .avi)
 
 addpath(genpath('/Users/tonio/Library/CloudStorage/OneDrive-McGillUniversity/Documents/MATLAB/NeuroLab'));
-folder_video = '/Volumes/DataMOBs171/Antoine-fUSDataset/NEUROLAB/NLab_Figures/Movie_Normalized[V3]';
+folder_video = '/Volumes/DataMOBs171/Antoine-fUSDataset/NEUROLAB/NLab_Figures/Convert_Movie_Normalized[V3]';
 % folder_video = 'F:\Antoine-fUSDataset\NEUROLAB\NLab_Figures\Movie_Normalized[V3]';
 d = dir(fullfile(folder_video,'*','*.avi'));
 % Removing hidden files

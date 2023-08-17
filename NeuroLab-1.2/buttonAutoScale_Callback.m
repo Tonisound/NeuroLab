@@ -7,7 +7,7 @@ global IM;
 % axis(handles.RightAxes,'auto y');
 % set(findobj(handles.RightAxes,'Tag','Cursor'),'YData',ylim(handles.RightAxes),'Visible','on');
 
-all_lines = findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-and','Visible','on');
+all_lines = findobj(handles.RightAxes,'Type','line','-not','Tag','Cursor','-not','Tag','EventLine','-and','Visible','on');
 all_M = [];
 for i =1:length(all_lines)
     index_x = find((all_lines(i).XData>handles.RightAxes.XLim(1)).*(all_lines(i).XData<handles.RightAxes.XLim(2))==1);
