@@ -729,8 +729,8 @@ for i = 1:length(ind_files)
             case '(Figure) Cross-Correlation LFP-fUS'
                 f2 = figure_CrossCorrelation(myhandles,0,str_tag);
                 
-            case '(Figure) Ripple Imaging'
-                f2 = figure_Ripple_Imaging(myhandles,0,str_regions);
+            case '(Figure) Event Imaging Imaging'
+                f2 = figure_Event_Imaging(myhandles,0,str_regions);
                 
             case '(Figure) Timed Frames'
                 f2 = figure_Timed_Frames(myhandles,0,str_regions);

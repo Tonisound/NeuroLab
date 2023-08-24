@@ -80,8 +80,8 @@ switch strtrim(str(val,:))
     case '(Figure) Auto-Correlation fUS'
         figure_AutoCorrelation(handles,1);
             
-    case '(Figure) Ripple Imaging'
-        figure_Ripple_Imaging(handles,1,[]);
+    case '(Figure) Event Imaging'
+        figure_Event_Imaging(handles,1,[]);
 
     case '(Figure) Timed Frames'
         figure_Timed_Frames(handles,1,[])

@@ -1,22 +1,23 @@
-%% Script reorganizing Ripple_Imaging image folder
-% generate a synthesis video of fUS ripple activations
+%% Script reorganizing Event_Imaging image folder
+% generate a synthesis video of fUS event activations
 
 global DIR_SYNT DIR_FIG DIR_STATS;
 load('Preferences.mat','GTraces');
 
+event_name = 'RippleEvents';
 
-folder_source_figs = fullfile(DIR_FIG,'Ripple_Imaging');
+folder_source_figs = fullfile(DIR_FIG,'Event_Imaging');
 if ~isdir(folder_source_figs)
     errordlg(sprintf('Not a directory [%s]',folder_source_figs));
     return;
 end
-folder_source_stats = fullfile(DIR_STATS,'Ripple_Imaging');
+folder_source_stats = fullfile(DIR_STATS,'Event_Imaging');
 if ~isdir(folder_source_stats)
     errordlg(sprintf('Not a directory [%s]',folder_source_stats));
     return;
 end
 
-folder_dest = fullfile(DIR_SYNT,'Ripple_Imaging');
+folder_dest = fullfile(DIR_SYNT,'Event_Imaging');
 if ~isdir(folder_dest)
     mkdir(folder_dest);
 end
@@ -37,52 +38,51 @@ unique_animals = unique(all_animals);
 
 
 % Browsing stats - Buidling struct
-S = struct('Y3q_rip_full',[],'name',[],'atlas_name',[],'atlas_coordinate',[],'data_atlas',[]);
+S = struct('Y3q_evt_full',[],'name',[],'atlas_name',[],'atlas_coordinate',[],'data_atlas',[]);
 % Listing planes 
 all_planes = cell(size(all_files));
 all_coordinates = NaN(size(all_files));
-label_Y3q_rip_full = {'Mean';'Median';'Longest';'Fastest';'Largest'};
+label_Y3q_evt_full = {'Mean';'Median';'Longest';'Fastest';'Largest'};
 
 for i=1:length(all_files)
-    dd = dir(fullfile(folder_source_stats,char(all_files(i)),'*Ripple-Imaging*'));
+    
+
+    % Traces    
+    dd = dir(fullfile(folder_source_stats,char(all_files(i)),event_name,'*Event-Imaging_Traces.mat'));
     for j=1:length(dd)
-        %         copyfile(fullfile(dd(j).folder,dd(j).name),fullfile(dd_dest,dd(j).name))
-        %         fprintf('File copied [%s] ---> [%s].\n',dd(j).name,dd_dest);
         fprintf('Loading file [%s] ...',dd(j).name);
-            data = load(fullfile(dd(j).folder,dd(j).name),'Y3q_rip_reshaped','Y3q_rip_median_reshaped','Y3q_rip_duration_reshaped','Y3q_rip_frequency_reshaped','Y3q_rip_amplitude_reshaped',...
-                'Yraw_rip_','t_bins_fus','t_bins_lfp','atlas_coordinate','atlas_name','data_atlas','n_ripples','channel_id','mean_dur','mean_freq','mean_p2p');
-%         try
-%         catch
-%             warning('Unable to load file [%s]',fullfile(dd(j).folder,dd(j).name));
-%             continue;
-%         end
+        data_traces = load(fullfile(dd(j).folder,dd(j).name),'t_bins_lfp','Yraw_evt_','Params');
+        fprintf(' done.\n');
+        S(i).Yraw_evt_ = data_seq.Yraw_evt_;
+        S(i).t_bins_lfp = data_seq.t_bins_lfp;
+    end
+    
+    % Sequence    
+    dd = dir(fullfile(folder_source_stats,char(all_files(i)),event_name,'*Event-Imaging_Sequence.mat'));
+    for j=1:length(dd)
+        fprintf('Loading file [%s] ...',dd(j).name);
+            data_seq = load(fullfile(dd(j).folder,dd(j).name),'Y3q_evt_reshaped','Y3q_evt_median_reshaped',...
+                'Y3q_evt_duration_reshaped','Y3q_evt_frequency_reshaped','Y3q_evt_amplitude_reshaped',...
+                't_bins_fus','data_atlas','Params');
         fprintf(' done.\n');
 
-
-        S(i).Y3q_rip_full = cat(4,data.Y3q_rip_reshaped,data.Y3q_rip_median_reshaped,data.Y3q_rip_duration_reshaped,data.Y3q_rip_frequency_reshaped,data.Y3q_rip_amplitude_reshaped);
-%         S(i).Y3q_rip_reshaped = data.Y3q_rip_reshaped;
-%         S(i).Y3q_rip_median_reshaped = data.Y3q_rip_median_reshaped;
-%         S(i).Y3q_rip_duration_reshaped = data.Y3q_rip_duration_reshaped;
-%         S(i).Y3q_rip_frequency_reshaped = data.Y3q_rip_frequency_reshaped;
-%         S(i).Y3q_rip_amplitude_reshaped = data.Y3q_rip_amplitude_reshaped;
-        S(i).Yraw_rip_ = data.Yraw_rip_;
-        S(i).t_bins_fus = data.t_bins_fus;
-        S(i).t_bins_lfp = data.t_bins_lfp;
+        S(i).Y3q_evt_full = cat(4,data_seq.Y3q_evt_reshaped,data_seq.Y3q_evt_median_reshaped,data_seq.Y3q_evt_duration_reshaped,data_seq.Y3q_evt_frequency_reshaped,data_seq.Y3q_evt_amplitude_reshaped);
+        S(i).t_bins_fus = data_seq.t_bins_fus;
         S(i).name = strrep(strrep(d(i).name,'_nlab',''),'_','-');
         S(i).animal = char(all_animals(i));
-        S(i).atlas_coordinate = data.atlas_coordinate;
-        S(i).atlas_name = data.atlas_name;
-        S(i).data_atlas = data.data_atlas;
-        S(i).plane = strtrim(strrep(strrep(data.data_atlas.AtlasName,'Rat',''),'Paxinos',''));
-        S(i).n_ripples = data.n_ripples;
-        S(i).channel_id = data.channel_id;
-        S(i).mean_dur = data.mean_dur;
-        S(i).mean_freq = data.mean_freq;
-        S(i).mean_p2p = data.mean_p2p;
+        S(i).atlas_coordinate = data_seq.Params.atlas_coordinate;
+        S(i).atlas_name = data_seq.Params.atlas_name;
+        S(i).data_atlas = data_seq.data_atlas;
+        S(i).plane = strtrim(strrep(strrep(data_seq.data_atlas.AtlasName,'Rat',''),'Paxinos',''));
+        S(i).n_events = data_seq.Params.n_events;
+        S(i).channel_id = data_seq.Params.channel_id;
+        S(i).mean_dur = data_seq.Params.mean_dur;
+        S(i).mean_freq = data_seq.Params.mean_freq;
+        S(i).mean_p2p = data_seq.Params.mean_p2p;
 
-        t_bins_fus = data.t_bins_fus;
-        all_coordinates(i) = data.atlas_coordinate;
-        all_planes(i) = {strtrim(strrep(strrep(data.data_atlas.AtlasName,'Rat',''),'Paxinos',''))};
+        t_bins_fus = data_seq.t_bins_fus;
+        all_coordinates(i) = data_seq.Params.atlas_coordinate;
+        all_planes(i) = {strtrim(strrep(strrep(data_seq.data_atlas.AtlasName,'Rat',''),'Paxinos',''))};
     end
 end
 % Sorting S
@@ -100,8 +100,11 @@ for i=1:length(unique_animals)
 end
 
 
+%% to be updated - Intermediate Commit
+
+
 % Moving figures
-all_filetypes = {'Dynamics';'Regions';'Ripple-Imaging';'Synthesis';'Trials';...
+all_filetypes = {'Dynamics';'Regions';'Event-Imaging';'Synthesis';'Trials';...
     'Sequence-Mean';'Sequence-Median';'Sequence-Largest';'Sequence-Fastest';'Sequence-Longest'};
 for i=1:length(all_files)
     for j=1:length(all_filetypes)
@@ -140,9 +143,9 @@ for j=1:length(unique_animals)
         % eps1=.01;
         % eps2=.01;
 
-        for l=1:length(label_Y3q_rip_full)
-            cur_label = char(label_Y3q_rip_full(l));
-            f = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Ripple-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label));
+        for l=1:length(label_Y3q_evt_full)
+            cur_label = char(label_Y3q_evt_full(l));
+            f = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Event-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label));
             colormap(f,"parula");
             f_axes = [];
             for i=1:length(S_animal_plane)
@@ -163,18 +166,18 @@ for j=1:length(unique_animals)
                 for i=1:length(f_axes)
                     ax = f_axes(i);
                     hold(ax,'on');
-                    imagesc(S_animal_plane(i).Y3q_rip_full(:,:,k,l),'Parent',ax);
-                    ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_ripples);
+                    imagesc(S_animal_plane(i).Y3q_evt_full(:,:,k,l),'Parent',ax);
+                    ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_events);
                     ax.YLabel.String = S_animal_plane(i).name;
                     ax.YLabel.FontSize = 8;
-                    t.String = sprintf('[%s] Time from Ripple Peak = %.1f s',cur_label,t_bins_fus(k));
+                    t.String = sprintf('[%s] Time from Event Peak = %.1f s',cur_label,t_bins_fus(k));
                     l_ = line('XData',S_animal_plane(i).data_atlas.line_x,'YData',S_animal_plane(i).data_atlas.line_z,'Tag','AtlasMask',...
                         'LineWidth',.5,'Color','r','Parent',ax);
                     l_.Color(4)=.5;
                     % ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
                     ax.CLim = [-5,10];
-                    ax.XLim = [.5 size(S_animal_plane(i).Y3q_rip_full,2)+.5];
-                    ax.YLim = [.5 size(S_animal_plane(i).Y3q_rip_full,1)+.5];
+                    ax.XLim = [.5 size(S_animal_plane(i).Y3q_evt_full,2)+.5];
+                    ax.YLim = [.5 size(S_animal_plane(i).Y3q_evt_full,1)+.5];
                     set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
                     ax.YDir = 'reverse';
                     if i ==length(f_axes)
@@ -183,11 +186,11 @@ for j=1:length(unique_animals)
                         c.Position(1) = pos(1)+pos(3)+.01;
                     end
                 end
-                pic_name = sprintf(strcat('Ripple-Synthesis_%03d.mat'),k);
+                pic_name = sprintf(strcat('Event-Synthesis_%03d.mat'),k);
                 saveas(f,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
             end
 
-            video_name = strcat('Ripple-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label);
+            video_name = strcat('Event-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label);
             save_video(work_dir,fullfile(folder_dest,strcat(cur_animal,'-',cur_plane)),video_name);
 %             rmdir(work_dir,'s');
             close(f);
@@ -196,7 +199,7 @@ for j=1:length(unique_animals)
 end
 
 
-%% Displaying ripple detection
+%% Displaying event detection
 for j=1:length(unique_animals)
     cur_animal = char(unique_animals(j));
     S_animal = S(strcmp({S(:).animal}',cur_animal)==1);
@@ -213,7 +216,7 @@ for j=1:length(unique_animals)
         n_col = ceil(1.2*sqrt(length(S_animal_plane)));
         n_rows = ceil(length(S_animal_plane)/n_col);
 
-        f = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Ripple-Detection_',cur_animal,'-',cur_plane));
+        f = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Event-Detection_',cur_animal,'-',cur_plane));
         colormap(f,"parula");
         f_axes = [];
         for i=1:length(S_animal_plane)
@@ -225,21 +228,21 @@ for j=1:length(unique_animals)
         for i=1:length(f_axes)
             ax = f_axes(i);
             hold(ax,'on');
-            % Displaying ripple detection
+            % Displaying event detection
             % Raw Trace
             hold(ax,'on');
-            for ii=1:S_animal_plane(i).n_ripples
-                l=line('XData',S_animal_plane(i).t_bins_lfp,'YData',S_animal_plane(i).Yraw_rip_(:,ii),'Color','k','LineWidth',.1,'Parent',ax);
+            for ii=1:S_animal_plane(i).n_events
+                l=line('XData',S_animal_plane(i).t_bins_lfp,'YData',S_animal_plane(i).Yraw_evt_(:,ii),'Color','k','LineWidth',.1,'Parent',ax);
                 l.Color(4)=.5;
             end
-            line('XData',S_animal_plane(i).t_bins_lfp,'YData',mean(S_animal_plane(i).Yraw_rip_,2,'omitnan'),'Color','r','LineWidth',2,'Parent',ax);
-            ax.Title.String = sprintf('Channel %s [N=%d]',S_animal_plane(i).channel_id,S_animal_plane(i).n_ripples);
-%             ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_ripples);
+            line('XData',S_animal_plane(i).t_bins_lfp,'YData',mean(S_animal_plane(i).Yraw_evt_,2,'omitnan'),'Color','r','LineWidth',2,'Parent',ax);
+            ax.Title.String = sprintf('Channel %s [N=%d]',S_animal_plane(i).channel_id,S_animal_plane(i).n_events);
+%             ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_events);
             ax.YLabel.String = S_animal_plane(i).name;
             ax.YLabel.FontSize = 8;
             n_iqr = 3;
-            Yraw_rip = S_animal_plane(i).Yraw_rip_(:);
-            data_iqr = Yraw_rip(~isnan(Yraw_rip));
+            Yraw_evt = S_animal_plane(i).Yraw_evt_(:);
+            data_iqr = Yraw_evt(~isnan(Yraw_evt));
             ax.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
             ax.XLim = [-.1 .1];
             set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
@@ -248,20 +251,20 @@ for j=1:length(unique_animals)
 %             ax2 = subplot(323,'parent',tab2);
 %             hold(ax2,'on');
 %             for i=1:n_events
-%                 l=line('XData',t_bins_lfp,'YData',Y1_rip_(:,i),'Color',[.5 .5 .5],'LineWidth',.1,'Parent',ax2);
+%                 l=line('XData',t_bins_lfp,'YData',Y1_evt_(:,i),'Color',[.5 .5 .5],'LineWidth',.1,'Parent',ax2);
 %                 l.Color(4)=.5;
 %             end
-%             line('XData',t_bins_lfp,'YData',mean(Y1_rip_,2,'omitnan'),'Color','r','Parent',ax2);
+%             line('XData',t_bins_lfp,'YData',mean(Y1_evt_,2,'omitnan'),'Color','r','Parent',ax2);
 %             ax2.Title.String = 'Filtered trace LFP';
 %             n_iqr= 20;
-%             data_iqr = Y1_rip_(~isnan(Y1_rip_));
+%             data_iqr = Y1_evt_(~isnan(Y1_evt_));
 %             ax2.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
 %             ax2.XLim = [-.1 .5];
 % 
 %             % Spectrogram
 %             ax3 = subplot(325,'parent',tab2);
 %             hold(ax3,'on');
-%             Cdata_mean = mean(Cdata_rip_,3,'omitnan');
+%             Cdata_mean = mean(Cdata_evt_,3,'omitnan');
 %             imagesc('XData',t_bins_lfp,'YData',data_spectro.freqdom,'CData',Cdata_mean,'HitTest','off','Parent',ax3);
 % 
 %             n_iqr= 2;
@@ -273,7 +276,7 @@ for j=1:length(unique_animals)
 %             ax3.Title.String = 'Mean Spectrogram';
         end
 
-        pic_name = sprintf(strcat('Ripple-Detection-Synthesis','_',cur_animal,'-',cur_plane));
+        pic_name = sprintf(strcat('Event-Detection-Synthesis','_',cur_animal,'-',cur_plane));
         saveas(f,fullfile(folder_dest,strcat(cur_animal,'-',cur_plane),strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
         close(f);
     end
