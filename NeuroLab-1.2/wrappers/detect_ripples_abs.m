@@ -133,15 +133,18 @@ fprintf('Ripple Detection [Channel:%s, %d events] saved in [%s].\n',channel_ripp
 
 % Saving figure
 load('Preferences.mat','GTraces');
-save_dir0 = fullfile(DIR_FIG,'Ripple_Imaging');
-save_dir = fullfile(DIR_FIG,'Ripple_Imaging',recording_name);
-if ~isfolder(save_dir)
-    mkdir(save_dir);
+save_dir0 = fullfile(DIR_FIG,'Ripple_Detection');
+if ~isfolder(save_dir0)
+    mkdir(save_dir0);
 end
+% save_dir = fullfile(DIR_FIG,'Ripple_Detection',recording_name);
+% if ~isfolder(save_dir)
+%     mkdir(save_dir);
+% end
 
 if isgraphics(f)
     saveas(f,fullfile(save_dir0,sprintf('%s-RippleDetection-%s%s',recording_name,channel_ripple,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-    saveas(f,fullfile(save_dir,sprintf('%s-RippleDetection-%s%s',recording_name,channel_ripple,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+%     saveas(f,fullfile(save_dir,sprintf('%s-RippleDetection-%s%s',recording_name,channel_ripple,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     fprintf('Image saved in [%s].\n',save_dir);
     close(f);
 end

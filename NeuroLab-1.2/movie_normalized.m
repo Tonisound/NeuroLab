@@ -920,9 +920,11 @@ while i>=START_IM && i<=END_IM
             
             % Ripple Events
             if ~isempty(data_ripples)
-                t_ripples = data_ripples.ripples_abs(:,2);
-                t_ripples_start = data_ripples.ripples_abs(:,1);
-                t_ripples_end = data_ripples.ripples_abs(:,3);
+                ripples = data_ripples.ripples_abs;
+%                 ripples = data_ripples.ripples_sqrt;
+                t_ripples = ripples(:,2);
+                t_ripples_start = ripples(:,1);
+                t_ripples_end = ripples(:,3);
                 ind_keep = find(sign((t_ripples-(t(i)-t_lfp)).*(t_ripples-(t(i)+t_lfp)))<=0);
                 if ~isempty(ind_keep)
                     for k=1:length(ind_keep)

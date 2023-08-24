@@ -21,11 +21,12 @@ if exist(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),'file')
     data_ripples = load(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
     channel_id = data_ripples.channel_ripple;
     band_name = 'ripple';
-    ripples_abs = data_ripples.ripples_abs;
-    mean_dur = mean(ripples_abs(:,4),1,'omitnan');
-    mean_freq = mean(ripples_abs(:,5),1,'omitnan');
-    mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
-    n_ripples = size(ripples_abs,1);
+    ripples = data_ripples.ripples_sqrt;
+%     ripples = data_ripples.ripples_abs;
+    mean_dur = mean(ripples(:,4),1,'omitnan');
+    mean_freq = mean(ripples(:,5),1,'omitnan');
+    mean_p2p = mean(ripples(:,6),1,'omitnan');
+    n_ripples = size(ripples,1);
     fprintf('File Loaded [%s].\n',fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
 else
     errordlg('Missing File [%s].',fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
@@ -168,13 +169,13 @@ Y2q(X_restrict==0,:) = NaN;
 Y3q(X_restrict==0,:) = NaN;
 
 % Ripple Parameters
-mean_dur = mean(ripples_abs(:,4),1,'omitnan');
-mean_freq = mean(ripples_abs(:,5),1,'omitnan');
-mean_p2p = mean(ripples_abs(:,6),1,'omitnan');
+mean_dur = mean(ripples(:,4),1,'omitnan');
+mean_freq = mean(ripples(:,5),1,'omitnan');
+mean_p2p = mean(ripples(:,6),1,'omitnan');
 % Restricting ripples
-[~,ind_sorted_duration] = sort(ripples_abs(:,4),'descend');
-[~,ind_sorted_frequency] = sort(ripples_abs(:,5),'descend');
-[~,ind_sorted_amplitude] = sort(ripples_abs(:,6),'descend');
+[~,ind_sorted_duration] = sort(ripples(:,4),'descend');
+[~,ind_sorted_frequency] = sort(ripples(:,5),'descend');
+[~,ind_sorted_amplitude] = sort(ripples(:,6),'descend');
 % % Keeping fixed ratio
 % ratio_keep = .1;
 % n_keep = round(ratio_keep*n_ripples)
@@ -287,17 +288,17 @@ linkaxes(f1_axes,'x');
 ax1.XLim = [data_tr.time_ref.Y(1) data_tr.time_ref.Y(end)];
 
 % Displaying ripples
-for i=1:size(ripples_abs,1)
+for i=1:size(ripples,1)
     ax = f1_axes(1);
     
-    l1 = line('XData',[ripples_abs(i,1) ripples_abs(i,1)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
-    l2 = line('XData',[ripples_abs(i,2) ripples_abs(i,2)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','b','Parent',ax,'Tag','EventLine','HitTest','off');
-    l3 = line('XData',[ripples_abs(i,3) ripples_abs(i,3)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
+    l1 = line('XData',[ripples(i,1) ripples(i,1)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
+    l2 = line('XData',[ripples(i,2) ripples(i,2)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','b','Parent',ax,'Tag','EventLine','HitTest','off');
+    l3 = line('XData',[ripples(i,3) ripples(i,3)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
 %     l1.Color(4) = .5;
 %     l2.Color(4) = .5;
 %     l3.Color(4) = .5;
 end
-ax.Title.String = strcat(ax.Title.String,sprintf(' [%d ripples events]',size(ripples_abs,1)));
+ax.Title.String = strcat(ax.Title.String,sprintf(' [%d ripples events]',size(ripples,1)));
 
 sb = copyobj(handles.ScaleButton,f1);
 mb =copyobj(handles.MinusButton,f1);
@@ -340,7 +341,7 @@ t_bins_fus  = (t_before:1/sampling_fus:t_after)';
 t_bins_lfp  = (t_before:1/sampling_lfp:t_after)';
 
 % Interpolate fUS
-t_rip_ref = ripples_abs(:,2);
+t_rip_ref = ripples(:,2);
 n_events = length(t_rip_ref);
 Xq_rip_fus = [];
 for i =1:n_events
@@ -495,9 +496,9 @@ end
 fprintf('>> Process 3/9 done [%s].\n',tab3.Title);
 
 
-% [~,ind_sorted_duration] = sort(ripples_abs(:,4),'descend');
-% [~,ind_sorted_frequency] = sort(ripples_abs(:,5),'descend');
-% [~,ind_sorted_amplitude] = sort(ripples_abs(:,6),'descend');
+% [~,ind_sorted_duration] = sort(ripples(:,4),'descend');
+% [~,ind_sorted_frequency] = sort(ripples(:,5),'descend');
+% [~,ind_sorted_amplitude] = sort(ripples(:,6),'descend');
 f4_axes=[];
 for i=1:n_channels
     ax = subplot(n_rows,n_col,i,'parent',tab4);

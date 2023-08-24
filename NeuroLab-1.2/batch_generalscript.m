@@ -653,20 +653,24 @@ for i = 1:length(ind_files)
                 success = detect_earlymidlate_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
             case 'Detect Hippocampal Ripples'
-                  success = detect_ripples_abs(FILES(ii).nlab,0);
+%                   success = detect_ripples_abs(FILES(ii).nlab,0);
+                  success = detect_ripples_both(FILES(ii).nlab,0);
+                  
 %                 % SD025 - reversed
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'017','009','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'008','009','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'010','009','NREM');
+%                 success = detect_ripples_both(FILES(ii).nlab,0,'010','NREM');
 %                 % SD025
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'016','024','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'025','024','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'023','024','NREM');
+%                 success = detect_ripples_both(FILES(ii).nlab,0,'023','NREM');
 %                 % SD032
-%                 success = detect_ripples_abs(FILES(ii).nlab,0,'006','025','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'005','025','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'016','025','NREM');
 %                 success = detect_ripples_abs(FILES(ii).nlab,0,'015','025','NREM');
+%                 success = detect_ripples_both(FILES(ii).nlab,0,'005','NREM');
                 
             case 'Generate Time Indexes'
                 success = generate_time_indexes(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);

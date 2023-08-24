@@ -1265,22 +1265,23 @@ all_axes = findobj(hObj.Parent,'Type','Axes');
 if hObj.Value
     
     % Ripple Events
-    data_ripples = hObj.UserData.data_ripples;
-    t_ripples = data_ripples.ripples_abs(:,2);
-    t_ripples_start = data_ripples.ripples_abs(:,1);
-    t_ripples_end = data_ripples.ripples_abs(:,3);
+   	ripples = hObj.UserData.data_ripples.ripples_abs;
+%     ripples = hObj.UserData.data_ripples.ripples_sqrt;
+    t_ripples = ripples(:,2);
+    t_ripples_start = ripples(:,1);
+    t_ripples_end = ripples(:,3);
     
     for k=1:length(all_axes)
         ax = all_axes(k);
-        xdata = [repmat(t_ripples,[1,2]),NaN(length(t_ripples),1)]';
-        ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
-        line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
         xdata = [repmat(t_ripples_start,[1,2]),NaN(length(t_ripples),1)]';
+        ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
+        line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
+        xdata = [repmat(t_ripples,[1,2]),NaN(length(t_ripples),1)]';
         ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
         line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','b','Parent',ax,'Tag','EventLine','HitTest','off');
         xdata = [repmat(t_ripples_end,[1,2]),NaN(length(t_ripples),1)]';
         ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
-        line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
+        line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
         %             patch('XData',[.5+x_rip_start*length(Y0) .5+x_rip_start*length(Y0) .5+x_rip_end*length(Y0) .5+x_rip_end*length(Y0)],...
         %                 'YData',[ax.YLim(1) ax.YLim(2) ax.YLim(2) ax.YLim(1)],...
         %                 'FaceColor',[.5 .5 .5],'EdgeColor',[.5 .5 .5],'FaceAlpha',.5,'Parent',ax,'Tag','EventPatch');     

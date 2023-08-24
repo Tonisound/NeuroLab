@@ -51,7 +51,7 @@ if strcmp(hObj.Tag,'Popup0')
     filename = char(pu0.String(pu0.Value,:));
     d_fus = dir(fullfile(DIR_SAVE,filename,'Sources_fUS','[SR]*.mat'));
     % Removing hidden files
-    d_fus = d_fus(arrayfun(@(x) ~strcmp(x.name(1),'.'),dir_time));
+    d_fus = d_fus(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_fus));
     pu1.String = strrep({d_fus(:).name}','.mat','');
     if sum(strcmp(pu1.String,previous_p1))>0
         ind_tt = find(strcmp(pu1.String,previous_p1)==1);
