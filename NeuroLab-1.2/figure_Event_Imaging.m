@@ -23,11 +23,8 @@ if exist(event_file,'file')
     data_events = load(event_file);
     channel_id = data_events.channel_ripple;
     band_name = 'ripple';
-    events = data_events.ripples_sqrt;
-%     events = data_events.ripples_abs;
-%     mean_dur = mean(events(:,4),1,'omitnan');
-%     mean_freq = mean(events(:,5),1,'omitnan');
-%     mean_p2p = mean(events(:,6),1,'omitnan');
+%     events = data_events.ripples_sqrt;
+    events = data_events.ripples_abs;
     n_events = size(events,1);
     fprintf('File Loaded [%s].\n',event_file);
 else
@@ -76,12 +73,14 @@ flag_save_movie = 1; % movie
 data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
 % Loading atlas
 data_atlas = load(fullfile(DIR_SAVE,recording_name,'Atlas.mat'));
-switch data_atlas.AtlasName
+atlas_name = data_atlas.AtlasName;
+switch atlas_name
     case 'Rat Coronal Paxinos'
-        atlas_name = sprintf('AP=%.2fmm',data_atlas.AP_mm);
+        atlas_fullname = sprintf('AP=%.2fmm',data_atlas.AP_mm);
         atlas_coordinate = data_atlas.AP_mm;
+        
     case 'Rat Sagittal Paxinos'
-        atlas_name = sprintf('ML=%.2fmm',data_atlas.ML_mm);
+        atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
         atlas_coordinate = data_atlas.ML_mm;
 end
 
@@ -194,7 +193,7 @@ ind_keep_amplitude = ind_sorted_amplitude(1:n_keep);
 
 
 % Plotting
-f1.Name = sprintf(strcat('[%s]%s'),atlas_name,strrep(recording_name,'_nlab',''));
+f1.Name = sprintf(strcat('[%s]%s'),atlas_fullname,strrep(recording_name,'_nlab',''));
 set(f1,'Units','normalized','OuterPosition',[0 0 1 1]);
 colormap(f1,'jet');
 
@@ -349,11 +348,11 @@ t_bins_fus  = (t_before:1/sampling_fus:t_after)';
 t_bins_lfp  = (t_before:1/sampling_lfp:t_after)';
 
 % Interpolate fUS
-t_evt_ref = events(:,2);
-n_events = length(t_evt_ref);
+t_events = events(:,2);
+n_events = length(t_events);
 Xq_evt_fus = [];
 for i =1:n_events
-    Xq_evt_fus = [Xq_evt_fus;t_evt_ref(i)+t_bins_fus];
+    Xq_evt_fus = [Xq_evt_fus;t_events(i)+t_bins_fus];
 end
 Y2q_evt = (interp1(X2,Y2,Xq_evt_fus))';
 Y3q_evt = (interp1(X2,Y3,Xq_evt_fus))';
@@ -361,7 +360,7 @@ Y3q_evt = (interp1(X2,Y3,Xq_evt_fus))';
 % Interpolate LFP
 Xq_evt_lfp = [];
 for i =1:n_events
-    Xq_evt_lfp = [Xq_evt_lfp;t_evt_ref(i)+t_bins_lfp];
+    Xq_evt_lfp = [Xq_evt_lfp;t_events(i)+t_bins_lfp];
 end
 Yraw_evt = interp1(Xraw,Yraw,Xq_evt_lfp);
 Y1_evt = interp1(X1,Y1,Xq_evt_lfp);
@@ -433,7 +432,6 @@ data_iqr = Y1_evt_(~isnan(Y1_evt_));
 ax2.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
 ax2.XLim = ax1.XLim;
 
-
 % Spectrogram
 % ax3 = subplot(325,'parent',tab2);
 ax3 = axes('Parent',tab2,'Position',[.05 .05 .25 .3]);
@@ -448,7 +446,6 @@ ax3.YLim = [data_spectro.freqdom(1),data_spectro.freqdom(end)];
 % ax3.XLim = [t_bins_lfp(1),t_bins_lfp(end)];
 ax3.XLim = ax1.XLim;
 ax3.Title.String = 'Mean Spectrogram';
-
 
 % fUS
 % ax4 = subplot(122,'parent',tab2);
@@ -545,7 +542,7 @@ for i=1:n_channels
     colorbar(ax,'eastoutside');
     
     ax.YTick= 1:10:n_events;
-    ax.YTickLabel= t_evt_ref(1:10:end);
+    ax.YTickLabel= t_events(1:10:end);
 %     ax.FontSize = 6;
     
     n_iqr= 3;
@@ -739,23 +736,25 @@ if sum(flag_save_stats)>0
     end
     Params.recording_name = recording_name;
     Params.atlas_coordinate = atlas_coordinate;
+    Params.atlas_fullname = atlas_fullname;
     Params.atlas_name = atlas_name;
-    %     Params.data_atlas = data_atlas;
+    % Params.data_atlas = data_atlas;
     Params.mean_dur = mean_dur;
     Params.mean_freq = mean_freq;
     Params.mean_p2p = mean_p2p;
     Params.n_events = n_events;
+    Params.t_events = t_events;
     Params.band_name = band_name;
     Params.channel_id = channel_id;
-    %     Params.all_labels_2 = all_labels_2;
+    % Params.all_labels_2 = all_labels_2;
     Params.t_baseline_start = t_baseline_start;
     Params.t_baseline_end = t_baseline_end;
     Params.t_before = t_before;
     Params.t_after = t_after;
     Params.sampling_fus = sampling_fus;
     Params.sampling_lfp = sampling_lfp;
-    %     Params.t_bins_fus = t_bins_fus;
-    %     Params.t_bins_lfp = t_bins_lfp;
+    % Params.t_bins_fus = t_bins_fus;
+    % Params.t_bins_lfp = t_bins_lfp;
 
     % Traces
     if flag_save_stats(1)
