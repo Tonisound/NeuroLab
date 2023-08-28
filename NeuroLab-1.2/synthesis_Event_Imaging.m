@@ -48,107 +48,150 @@ flag_regions_averages = true;
 
 
 %% Browsing stats - Buidling struct
-% if flag_building_struct
-S = struct('Y3q_evt_full',[],'name',[],'atlas_name',[],'atlas_coordinate',[],'data_atlas',[]);
-% Listing planes
-all_planes = cell(size(all_files));
-all_coordinates = NaN(size(all_files));
-label_Y3q_evt_full = {'Mean';'Median';'Longest';'Fastest';'Largest'};
+if exist(fullfile(folder_dest,strcat(event_name,'.mat')),'file')
 
-% list_regions = generate_lists('DisplayObj','groups','DisplayMode','bilateral');
-list_regions = {'[SR]AnteriorCortex';'[SR]PosteriorCortex';'[SR]HippocampalFormation';...
-    '[SR]Midbrain';'[SR]Thalamus';'[SR]Hypothalamus';'[SR]Amygdala';'[SR]Other'};
-R = struct('recording_name',[],'single_events',[],'atlas_coordinate',[],'atlas_name',[],...
-    'mean_events',[],'median_events',[],'mean_names',[]);
-R(length(list_regions)).recording_name = [];
+    fprintf('Loading file [%s] ...',folder_dest,strcat(event_name,'.mat'));
+    data_full = load(fullfile(folder_dest,strcat(event_name,'.mat')));
+    all_planes = data_full.all_planes;
+%     all_coordinates = data_full.all_coordinates;
+    list_regions = data_full.list_regions;
+    t_bins_fus = data_full.t_bins_fus;
+    t_bins_lfp = data_full.t_bins_lfp;
+    R = data_full.R;
+    Q = data_full.Q;
+    S = data_full.S;
+    fprintf(' done.\n');
 
-for i=1:length(all_files)
+else
 
-    % Traces
-    dd = dir(fullfile(folder_source_stats,char(all_files(i)),event_name,'*Event-Imaging_Traces.mat'));
-    for j=1:length(dd)
-        fprintf('Loading file [%s] ...',dd(j).name);
-        data_traces = load(fullfile(dd(j).folder,dd(j).name),...
-            'Y1_evt_','Yraw_evt_','t_bins_lfp','Cdata_mean','freqdom','Params');
-        fprintf(' done.\n');
-        S(i).Yraw_evt_ = data_traces.Yraw_evt_;
-        S(i).t_bins_lfp = data_traces.t_bins_lfp;
-        S(i).Y1_evt_ = data_traces.Y1_evt_;
-        S(i).Cdata_mean = data_traces.Cdata_mean;
-        S(i).freqdom = data_traces.freqdom;
+    % if flag_building_struct
+    S = struct('Y3q_evt_full',[],'name',[],'atlas_name',[],'atlas_coordinate',[],'data_atlas',[]);
+    % Listing planes
+    all_planes = cell(size(all_files));
+    all_coordinates = NaN(size(all_files));
+    % label_Y3q_evt_full = {'Mean';'Median';'Longest';'Fastest';'Largest'};
 
-        t_bins_lfp = data_traces.t_bins_lfp;
-    end
+    list_regions = generate_lists('DisplayObj','groups','DisplayMode','unilateral');
+%     list_regions = {'[SR]AnteriorCortex';'[SR]PosteriorCortex';'[SR]HippocampalFormation';...
+%         '[SR]Midbrain';'[SR]Thalamus';'[SR]Hypothalamus';'[SR]Amygdala';'[SR]Other'};
+    n_regions = length(list_regions);
 
-    % Sequence
-    dd = dir(fullfile(folder_source_stats,char(all_files(i)),event_name,'*Event-Imaging_Sequence.mat'));
-    for j=1:length(dd)
-        fprintf('Loading file [%s] ...',dd(j).name);
-        data_seq = load(fullfile(dd(j).folder,dd(j).name),'Y3q_evt_reshaped','Y3q_evt_median_reshaped',...
-            'Y3q_evt_duration_reshaped','Y3q_evt_frequency_reshaped','Y3q_evt_amplitude_reshaped',...
-            't_bins_fus','data_atlas','Params');
-        fprintf(' done.\n');
+    R = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
+        'single_events',[],'atlas_coordinate',[],'atlas_name',[],...
+        'mean_events',[],'median_events',[],'mean_names',[]);
+    R(n_regions).recording_name = [];
 
-        S(i).Y3q_evt_full = cat(4,data_seq.Y3q_evt_reshaped,data_seq.Y3q_evt_median_reshaped,data_seq.Y3q_evt_duration_reshaped,data_seq.Y3q_evt_frequency_reshaped,data_seq.Y3q_evt_amplitude_reshaped);
-        S(i).t_bins_fus = data_seq.t_bins_fus;
-        S(i).name = strrep(strrep(d(i).name,'_nlab',''),'_','-');
-        S(i).animal = char(all_animals(i));
-        S(i).atlas_coordinate = data_seq.Params.atlas_coordinate;
-        S(i).atlas_name = data_seq.Params.atlas_name;
-        S(i).data_atlas = data_seq.data_atlas;
-        S(i).plane = strtrim(strrep(strrep(data_seq.data_atlas.AtlasName,'Rat',''),'Paxinos',''));
-        S(i).n_events = data_seq.Params.n_events;
-        S(i).channel_id = data_seq.Params.channel_id;
-        S(i).mean_dur = data_seq.Params.mean_dur;
-        S(i).mean_freq = data_seq.Params.mean_freq;
-        S(i).mean_p2p = data_seq.Params.mean_p2p;
+    Q = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
+        'mean_events',[],'median_events',[],'atlas_coordinate',[],'atlas_name',[]);
+    Q(n_regions).recording_name = [];
 
-        t_bins_fus = data_seq.t_bins_fus;
-        all_coordinates(i) = data_seq.Params.atlas_coordinate;
-        all_planes(i) = {strtrim(strrep(strrep(data_seq.data_atlas.AtlasName,'Rat',''),'Paxinos',''))};
+    for i=1:length(all_files)
 
-    end
+        % Traces
+        dd = dir(fullfile(folder_source_stats,char(all_files(i)),event_name,'*Event-Imaging_Traces.mat'));
+        for j=1:length(dd)
+            fprintf('Loading file [%s] ...',dd(j).name);
+            data_traces = load(fullfile(dd(j).folder,dd(j).name),...
+                'Y1_evt_','Yraw_evt_','t_bins_lfp','Cdata_mean','freqdom','Params');
+            fprintf(' done.\n');
 
-    % Regions
-    dd = dir(fullfile(folder_source_stats,char(all_files(i)),event_name,'*Event-Imaging_Regions.mat'));
-    for j=1:length(dd)
-        fprintf('Loading file [%s] ...',dd(j).name);
-        data_regions = load(fullfile(dd(j).folder,dd(j).name),...
-            'Y2q_evt_normalized','Y2q_evt_mean','Y2q_evt_median','t_bins_fus','all_labels_2','Params');
-        fprintf(' done.\n');
-        S(i).Y2q_evt_mean = data_regions.Y2q_evt_mean;
-        S(i).Y2q_evt_median = data_regions.Y2q_evt_median;
-        S(i).Y2q_evt_normalized = data_regions.Y2q_evt_normalized;
-        S(i).t_bins_fus = data_regions.t_bins_fus;
-        S(i).all_labels_2 = data_regions.all_labels_2;
+            t_bins_lfp = data_traces.t_bins_lfp;
 
-        for k=1:length(list_regions)
-            cur_region = char(list_regions(k));
-            ind_label = find(strcmp(data_regions.all_labels_2,cur_region)==1);
-            if ~isempty(ind_label)
+            S(i).Yraw_evt_ = data_traces.Yraw_evt_;
+            S(i).t_bins_lfp = data_traces.t_bins_lfp;
+            S(i).Y1_evt_ = data_traces.Y1_evt_;
+            S(i).Cdata_mean = data_traces.Cdata_mean;
+            S(i).freqdom = data_traces.freqdom;
+        end
 
-                n_events = data_regions.Params.n_events;
-                cur_names = repmat({data_regions.Params.recording_name},[n_events,1]);
-                atlas_coordinates = repmat(data_regions.Params.atlas_coordinate,[n_events,1]);
-                atlas_names = repmat({data_regions.Params.atlas_name},[n_events,1]);
-                single_events = squeeze(data_regions.Y2q_evt_normalized(ind_label,:,:))';
+        % Sequence
+        dd = dir(fullfile(folder_source_stats,char(all_files(i)),event_name,'*Event-Imaging_Sequence.mat'));
+        for j=1:length(dd)
+            fprintf('Loading file [%s] ...',dd(j).name);
+            data_seq = load(fullfile(dd(j).folder,dd(j).name),'Y3q_evt_reshaped','Y3q_evt_median_reshaped',...
+                'Y3q_evt_duration_reshaped','Y3q_evt_frequency_reshaped','Y3q_evt_amplitude_reshaped',...
+                't_bins_fus','data_atlas','Params');
+            fprintf(' done.\n');
 
-                R(k).recording_name = [R(k).recording_name;cur_names];
-                R(k).atlas_coordinate = [R(k).atlas_coordinate;atlas_coordinates];
-                R(k).atlas_name = [R(k).atlas_name;atlas_names];
-                R(k).single_events = [R(k).single_events;single_events];
+            t_bins_fus = data_seq.t_bins_fus;
+            all_coordinates(i) = data_seq.Params.atlas_coordinate;
+            all_planes(i) = {strtrim(strrep(strrep(data_seq.data_atlas.AtlasName,'Rat',''),'Paxinos',''))};
 
-                R(k).mean_events = [R(k).mean_events;data_regions.Y2q_evt_mean(ind_label,:)];
-                R(k).median_events = [R(k).median_events;data_regions.Y2q_evt_median(ind_label,:)];
-                R(k).mean_names = [R(k).mean_names;{data_regions.Params.recording_name}];
+            S(i).Y3q_evt_full = cat(4,data_seq.Y3q_evt_reshaped,data_seq.Y3q_evt_median_reshaped,data_seq.Y3q_evt_duration_reshaped,data_seq.Y3q_evt_frequency_reshaped,data_seq.Y3q_evt_amplitude_reshaped);
+            S(i).t_bins_fus = data_seq.t_bins_fus;
+            S(i).name = strrep(strrep(d(i).name,'_nlab',''),'_','-');
+            S(i).animal = char(all_animals(i));
+            S(i).atlas_coordinate = data_seq.Params.atlas_coordinate;
+            S(i).atlas_name = data_seq.Params.atlas_name;
+            S(i).data_atlas = data_seq.data_atlas;
+            S(i).plane = char(all_planes(i));
+            S(i).n_events = data_seq.Params.n_events;
+            S(i).channel_id = data_seq.Params.channel_id;
+            S(i).mean_dur = data_seq.Params.mean_dur;
+            S(i).mean_freq = data_seq.Params.mean_freq;
+            S(i).mean_p2p = data_seq.Params.mean_p2p;
+        end
+
+        % Regions
+        dd = dir(fullfile(folder_source_stats,char(all_files(i)),event_name,'*Event-Imaging_Regions.mat'));
+        for j=1:length(dd)
+            fprintf('Loading file [%s] ...',dd(j).name);
+            data_regions = load(fullfile(dd(j).folder,dd(j).name),...
+                'Y2q_evt_normalized','Y2q_evt_mean','Y2q_evt_median','t_bins_fus','all_labels_2','Params');
+            fprintf(' done.\n');
+            S(i).Y2q_evt_mean = data_regions.Y2q_evt_mean;
+            S(i).Y2q_evt_median = data_regions.Y2q_evt_median;
+            S(i).Y2q_evt_normalized = data_regions.Y2q_evt_normalized;
+            S(i).t_bins_fus = data_regions.t_bins_fus;
+            S(i).all_labels_2 = data_regions.all_labels_2;
+
+            for k=1:n_regions
+                cur_region = char(list_regions(k));
+                ind_label = find(strcmp(data_regions.all_labels_2,cur_region)==1);
+                if ~isempty(ind_label)
+
+                    n_events = data_regions.Params.n_events;
+                    cur_names = repmat({data_regions.Params.recording_name},[n_events,1]);
+                    cur_regions = repmat(list_regions(k),[n_events,1]);
+                    cur_animals = repmat(all_animals(i),[n_events,1]);
+                    cur_planes = repmat(all_planes(i),[n_events,1]);
+                    atlas_coordinates = repmat(data_regions.Params.atlas_coordinate,[n_events,1]);
+                    atlas_names = repmat({data_regions.Params.atlas_name},[n_events,1]);
+                    single_events = squeeze(data_regions.Y2q_evt_normalized(ind_label,:,:))';
+
+                    R(k).recording_name = [R(k).recording_name;cur_names];
+                    R(k).region = [R(k).region;cur_regions];
+                    R(k).animal = [R(k).animal;cur_animals];
+                    R(k).plane = [R(k).plane;cur_planes];
+                    R(k).atlas_coordinate = [R(k).atlas_coordinate;atlas_coordinates];
+                    R(k).atlas_name = [R(k).atlas_name;atlas_names];
+                    R(k).single_events = [R(k).single_events;single_events];
+
+                    Q(k).recording_name = [Q(k).recording_name;{data_regions.Params.recording_name}];
+                    Q(k).region = [Q(k).region;list_regions(k)];
+                    Q(k).animal = [Q(k).animal;all_animals(i)];
+                    Q(k).plane = [Q(k).plane;all_planes(i)];
+                    Q(k).atlas_coordinate = [Q(k).atlas_coordinate;data_regions.Params.atlas_coordinate];
+                    Q(k).atlas_name = [Q(k).atlas_name;{data_regions.Params.atlas_name}];
+                    Q(k).mean_events = [Q(k).mean_events;data_regions.Y2q_evt_mean(ind_label,:)];
+                    Q(k).median_events = [Q(k).median_events;data_regions.Y2q_evt_median(ind_label,:)];
+                end
             end
         end
     end
+    % Sorting S
+    [~,ind_sorted] = sort(all_coordinates,'descend');
+    S = S(ind_sorted);
+
+%     % Saving
+%     fprintf('Saving file [%s] ...',folder_dest,strcat(event_name,'.mat'));
+%     save(fullfile(folder_dest,strcat(event_name,'.mat')),...
+%         'all_planes','all_coordinates',...
+%         'list_regions','t_bins_fus','t_bins_lfp',...
+%         'R','Q','S','-v7.3');
+%     fprintf(' done.\n');
 
 end
-% Sorting S
-[~,ind_sorted] = sort(all_coordinates,'descend');
-S = S(ind_sorted);
 
 % Create folders
 unique_planes = unique(all_planes);
@@ -370,113 +413,164 @@ end
 %% Displaying region averages
 if flag_regions_averages
 
-    for j=1:length(unique_animals)
-        cur_animal = char(unique_animals(j));
+    %     for j=1:length(unique_animals)
+    %         cur_animal = char(unique_animals(j));
+    %         R_animal = R(strcmp({R(:).animal}',cur_animal)==1);
+    %     end
+    %    for j=1:length(unique_animals)
+    %         cur_animal = char(unique_animals(j));
+    %         S_animal = S(strcmp({S(:).animal}',cur_animal)==1);
+    %
+    %         for jj=1:length(unique_planes)
+    %             cur_plane = char(unique_planes(jj));
+    %             S_animal_plane = S_animal(strcmp({S_animal(:).plane}',cur_plane)==1);
+    %         end
+    %    end
+
+    % All recordings - All animals
+    mean_regions_events = NaN(n_regions,length(t_bins_fus));
+    median_regions_events = NaN(n_regions,length(t_bins_fus));
+    n_regions_events = NaN(n_regions,1);
+    n_regions_recordings = NaN(n_regions,1);
+    label_regions = cell(n_regions,1);
+
+    for i=1:n_regions
+        if ~isempty(R(i).single_events)
+            mean_regions_events(i,:) = mean(R(i).single_events,1,'omitnan');
+            median_regions_events(i,:) = median(R(i).single_events,1,'omitnan');
+        end        
+        n_regions_events(i) = size(R(i).single_events,1);
+        n_regions_recordings(i) = size(unique(R(i).recording_name),1);
+        label_regions(i) = {sprintf('%s [N=%d-R=%d]',char(strrep(list_regions(i),'_','-')),n_regions_events(i),n_regions_recordings(i))};
     end
-    mean_regions = NaN(length(list_regions),length(t_bins_fus));
-    median_regions = NaN(length(list_regions),length(t_bins_fus));
-    for i=1:length(list_regions)
-        mean_regions(i,:) = mean(R(i).single_events,1,'omitnan');
-        median_regions(i,:) = median(R(i).single_events,1,'omitnan');
-    end
-    
-%     f = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Region-Average',cur_animal,'-',cur_plane));
+
     f = figure('Units','normalized','OuterPosition',[0 0 1 1]);
     colormap(f,'jet');
 
     % fUS
-    ax1 = axes('Parent',tab2,'Position',[.2 .05 .3 .9]);
+
+    ax1 = axes('Parent',f,'Position',[.1 .05 .4 .9]);
     hold(ax1,'on');
-    Y2q_evt_mean = mean(Y2q_evt_normalized,3,'omitnan');
-    imagesc('XData',t_bins_fus,'YData',1:length(all_labels_2),'CData',Y2q_evt_mean,'HitTest','off','Parent',ax1);
+    imagesc('XData',t_bins_fus,'YData',1:n_regions,'CData',mean_regions_events,'HitTest','off','Parent',ax1);
     n_iqr = 6;
-    data_iqr = Y2q_evt_mean(~isnan(Y2q_evt_mean));
-    % ax1.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    data_iqr = mean_regions_events(~isnan(mean_regions_events));
     ax1.CLim = [median(data_iqr(:))-2,median(data_iqr(:))+5];
-    ax1.YLim = [.5 length(all_labels_2)+.5];
+    ax1.YLim = [.5 n_regions+.5];
     ax1.XLim = [t_bins_fus(1),t_bins_fus(end)];
-    ax1.YTick = 1:length(all_labels_2);
-    ax1.YTickLabel = all_labels_2;
-    ax1.Title.String = 'Mean Regions fUS';
-    % ax1.FontSize = 8;
+    ax1.YTick = 1:n_regions;
+    ax1.YTickLabel = label_regions;
+    ax1.Title.String = 'Mean Regions All Events';
+    ax1.YDir = 'reverse';
     colorbar(ax1,'eastoutside');
+    line('XData',[0 0],'YData',ax1.YLim,'Color','r','LineStyle','--','LineWidth',.5,'Parent',ax1);
 
-    ax2 = axes('Parent',tab2,'Position',[.2 .05 .3 .9]);
+    ax2 = axes('Parent',f,'Position',[.6 .05 .4 .9]);
     hold(ax2,'on');
-    Y2q_evt_median = median(Y2q_evt_normalized,3,'omitnan');
-    imagesc('XData',t_bins_fus,'YData',1:length(all_labels_2),'CData',Y2q_evt_median,'HitTest','off','Parent',ax2);
+    imagesc('XData',t_bins_fus,'YData',1:n_regions,'CData',median_regions_events,'HitTest','off','Parent',ax2);
     n_iqr = 6;
-    data_iqr = Y2q_evt_median(~isnan(Y2q_evt_median));
-    % ax2.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    data_iqr = median_regions_events(~isnan(mean_regions_events));
     ax2.CLim = [median(data_iqr(:))-2,median(data_iqr(:))+5];
-    ax2.YLim = [.5 length(all_labels_2)+.5];
+    ax2.YLim = [.5 n_regions+.5];
     ax2.XLim = [t_bins_fus(1),t_bins_fus(end)];
-    ax2.YTick = 1:length(all_labels_2);
-    ax2.YTickLabel = all_labels_2;
-    ax2.Title.String = 'Median Regions fUS';
-    % ax2.FontSize = 8;
+    ax2.YTick = 1:n_regions;
+    ax2.YTickLabel = label_regions;
+    ax2.Title.String = 'Median Regions All Events';
+    ax2.YDir = 'reverse';
     colorbar(ax2,'eastoutside');
-
+    line('XData',[0 0],'YData',ax2.YLim,'Color','r','LineStyle','--','LineWidth',.5,'Parent',ax2);
     f_axes = [ax1;ax2];
 
-%     for i=1:n_channels
-%         %     ax = subplot(n_rows,n_col,i,'parent',tab3);
-%         ax = axes('Parent',tab3,'Position',get_position(n_rows,n_col,i));
-%         hold(ax,'on');
-%         YData = squeeze(Y2q_evt_normalized(i,:,:));
-%         for j=1:n_events
-%             try
-%                 l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(i,:),'LineWidth',.1,'Parent',ax);
-%             catch
-%                 l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(end,:),'LineWidth',.1,'Parent',ax);
-%             end
-%             l.Color(4)=.5;
-%         end
-%         YData_mean = mean(YData,2,'omitnan');
-%         l=line('XData',t_bins_fus,'YData',YData_mean,'Color','r','LineWidth',2,'Parent',ax);
-%         n_samples = sum(~isnan(YData),2);
-%         ebar_data = std(YData,0,2,'omitnan')./sqrt(n_samples);
-%         errorbar(t_bins_fus,YData_mean,ebar_data,'Color',[.5 .5 .5],...
-%             'linewidth',1,'linestyle','none',...
-%             'Parent',ax,'Visible','on','Tag','ErrorBar');
-%         uistack(l,'top');
-%         ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
-% 
-%         n_iqr= 2;
-%         data_iqr = YData_mean(~isnan(YData_mean));
-%         %     ax.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-%         ax.YLim = [median(data_iqr(:))-5,median(data_iqr(:))+10];
-%         ax.Title.String = char(all_labels_2(i));
-%         f3_axes=[f3_axes;ax];
-%     end
-% 
-%     for i=1:n_channels
-%         %     ax = subplot(n_rows,n_col,i,'parent',tab4);
-%         ax = axes('Parent',tab4,'Position',get_position(n_rows,n_col,i));
-%         hold(ax,'on');
-%         YData = squeeze(Y2q_evt_normalized(i,:,:));
-%         imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData','Parent',ax)
-%         %     imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData(:,ind_sorted_duration)','Parent',ax)
-% 
-%         n_samples = sum(~isnan(YData),2);
-%         ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
-%         ax.YLim = [.5,n_events+.5];
-%         ax.YDir = 'reverse';
-%         colorbar(ax,'eastoutside');
-% 
-%         ax.YTick= 1:10:n_events;
-%         ax.YTickLabel= t_events(1:10:end);
-%         %     ax.FontSize = 6;
-% 
-%         n_iqr= 3;
-%         data_iqr = YData(~isnan(YData));
-%         %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-%         ax.CLim = [-10,30];
-% 
-%         ax.Title.String = char(all_labels_2(i));
-%         f4_axes=[f4_axes;ax];
-% 
-%     end
+    pic_name = 'Regional-Responses_All-Trials-1';
+    saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    %     close(f);
+
+    delete(f_axes);
+    %     n_col = 10;
+    n_col = ceil(sqrt(n_regions));
+    n_rows = ceil(n_regions/n_col);
+
+    f_axes=[];
+    for i=1:n_regions
+        ax = axes('Parent',f,'Position',get_position(n_rows,n_col,i,[.05 .05 .01;.05 .05 .02]));
+        hold(ax,'on');
+
+        %         for j=1:n_events
+        %             try
+        %                 l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(i,:),'LineWidth',.1,'Parent',ax);
+        %             catch
+        %                 l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(end,:),'LineWidth',.1,'Parent',ax);
+        %             end
+        %             l.Color(4)=.5;
+        %         end
+
+        YData = R(i).single_events;
+        YData_median = median(YData,1,'omitnan');
+        YData_mean = mean(YData,1,'omitnan');
+        if ~isempty(YData_mean)
+            YData_std = std(YData,0,1,'omitnan');
+            l1 = line('XData',t_bins_fus,'YData',YData_mean,'Color','r','LineWidth',1,'Parent',ax);
+            l2 = line('XData',t_bins_fus,'YData',YData_median,'Color','b','LineWidth',1,'Parent',ax);
+            n_samples = sum(~isnan(YData),1);
+            ebar_data = YData_std./sqrt(n_samples);
+            errorbar(t_bins_fus,YData_mean,ebar_data,'Color','r',...
+                'linewidth',1,'linestyle','none',...
+                'Parent',ax,'Visible','on','Tag','ErrorBar');
+            errorbar(t_bins_fus,YData_median,ebar_data,'Color','b',...
+                'linewidth',1,'linestyle','none',...
+                'Parent',ax,'Visible','on','Tag','ErrorBar');
+
+            uistack([l1;l2],'top');
+            ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
+
+            n_iqr= 2;
+            data_iqr = YData_mean(~isnan(YData_mean));
+            % ax.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+            ax.YLim = [median(data_iqr(:))-5,median(data_iqr(:))+10];
+        end
+        
+        line('XData',[0 0],'YData',ax.YLim,'Color','r','LineStyle','--','LineWidth',.5,'Parent',ax);
+        ax.Title.String = char(label_regions(i));
+        set(ax,'XTick',[],'XTickLabel',[]);
+        f_axes=[f_axes;ax];
+        
+    end
+
+    pic_name = 'Regional-Responses_All-Trials-2';
+    saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    %     close(f);
+
+    delete(f_axes);
+    f_axes=[];
+    for i=1:n_regions
+        ax = axes('Parent',f,'Position',get_position(n_rows,n_col,i,[.05 .05 .01;.05 .05 .02]));
+        hold(ax,'on');
+        YData = R(i).single_events;
+        if ~isempty(YData)
+            imagesc('XData',t_bins_fus,'YData',1:n_regions_events(i),'CData',YData,'Parent',ax);
+            line('XData',[0 0],'YData',ax.YLim,'Color','r','LineStyle','--','LineWidth',.5,'Parent',ax);
+
+            ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
+            ax.YLim = [.5,n_regions_events(i)+.5];
+            ax.YDir = 'reverse';
+            %     colorbar(ax,'eastoutside');
+            %     ax.FontSize = 6;
+
+            n_iqr= 3;
+            data_iqr = YData(~isnan(YData));
+            %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+            ax.CLim = [-10,30];
+            
+        end
+        
+        ax.Title.String = char(label_regions(i));
+        set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+
+        f_axes=[f_axes;ax];
+    end
+
+    pic_name = 'Regional-Responses_All-Trials-3';
+    saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    close(f);
 
 end
 
