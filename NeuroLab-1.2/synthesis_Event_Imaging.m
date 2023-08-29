@@ -71,14 +71,24 @@ else
     all_coordinates = NaN(size(all_files));
     % label_Y3q_evt_full = {'Mean';'Median';'Longest';'Fastest';'Largest'};
 
-    list_regions = generate_lists('DisplayObj','groups','DisplayMode','unilateral');
+    list_regions = {'OrbitalCortex';'LimbicCortex';'CingulateCortex';'InsularCortex';'MotorCortex';'SomatosensoryCortex';...
+        'PiriformCortex';'RetrosplenialCortex';'ParietalCortex';'EntorhinalCortex';'VisualCortex';'AuditoryCortex';'RhinalCortex';...
+        'DentateGyrus';'CA1Region';'CA3Region';'ResidualHippocampus';'Subiculum';'Fimbria';...;'CA2Region'
+        'Striatum';'BasalForebrain';'SubstantiaNigra';'Septum';...
+        'StriaTerminalis';'SuperiorColliculus';'DPAG';'VPAG';...;'InferiorColliculus'
+        'DThalamus';'VThalamus';'Habenulla';'ZonaIncerta';'PretectalNuclei';'GeniculateNuclei';'ReticularFormation';...
+        'AnteriorAmygdala';'PosteriorAmygdala';...
+        'DHypothalamus';'LHypothalamus';'VHypothalamus';'VTegmentalArea';'PreopticArea';'MammillaryNuclei';'OlfactoryNuclei';...
+        'BrainStem';'OptChiasm';'Claustrum';'CCallosum';'Ventricles'};...'Cerebellum';'PinealGland'
 %     list_regions = {'[SR]AnteriorCortex';'[SR]PosteriorCortex';'[SR]HippocampalFormation';...
 %         '[SR]Midbrain';'[SR]Thalamus';'[SR]Hypothalamus';'[SR]Amygdala';'[SR]Other'};
     n_regions = length(list_regions);
 
+    T = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
+        'single_events',[],'atlas_coordinate',[],'atlas_name',[]);
+
     R = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
-        'single_events',[],'atlas_coordinate',[],'atlas_name',[],...
-        'mean_events',[],'median_events',[],'mean_names',[]);
+        'single_events',[],'atlas_coordinate',[],'atlas_name',[]);
     R(n_regions).recording_name = [];
 
     Q = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
@@ -158,6 +168,14 @@ else
                     atlas_coordinates = repmat(data_regions.Params.atlas_coordinate,[n_events,1]);
                     atlas_names = repmat({data_regions.Params.atlas_name},[n_events,1]);
                     single_events = squeeze(data_regions.Y2q_evt_normalized(ind_label,:,:))';
+
+%                     T.recording_name = [T.recording_name;cur_names];
+%                     T.region = [T.region;cur_regions];
+%                     T.animal = [T.animal;cur_animals];
+%                     T.plane = [T.plane;cur_planes];
+%                     T.atlas_coordinate = [T.atlas_coordinate;atlas_coordinates];
+%                     T.atlas_name = [T.atlas_name;atlas_names];
+%                     T.single_events = [T.single_events;single_events];
 
                     R(k).recording_name = [R(k).recording_name;cur_names];
                     R(k).region = [R(k).region;cur_regions];
@@ -413,21 +431,16 @@ end
 %% Displaying region averages
 if flag_regions_averages
 
-    %     for j=1:length(unique_animals)
-    %         cur_animal = char(unique_animals(j));
-    %         R_animal = R(strcmp({R(:).animal}',cur_animal)==1);
-    %     end
-    %    for j=1:length(unique_animals)
-    %         cur_animal = char(unique_animals(j));
-    %         S_animal = S(strcmp({S(:).animal}',cur_animal)==1);
-    %
-    %         for jj=1:length(unique_planes)
-    %             cur_plane = char(unique_planes(jj));
-    %             S_animal_plane = S_animal(strcmp({S_animal(:).plane}',cur_plane)==1);
-    %         end
-    %    end
+%     for j=1:length(unique_animals)
+%         cur_animal = char(unique_animals(j));
+%         T_animal = T(strcmp({T(:).animal}',cur_animal)==1);
+%         for jj=1:length(unique_planes)
+%             cur_plane = char(unique_planes(jj));
+%             T_animal_plane = T_animal(strcmp({T_animal(:).plane}',cur_plane)==1);
+%         end
+%     end
 
-    % All recordings - All animals
+    % All events 
     mean_regions_events = NaN(n_regions,length(t_bins_fus));
     median_regions_events = NaN(n_regions,length(t_bins_fus));
     n_regions_events = NaN(n_regions,1);
@@ -446,8 +459,6 @@ if flag_regions_averages
 
     f = figure('Units','normalized','OuterPosition',[0 0 1 1]);
     colormap(f,'jet');
-
-    % fUS
 
     ax1 = axes('Parent',f,'Position',[.1 .05 .4 .9]);
     hold(ax1,'on');
@@ -493,15 +504,6 @@ if flag_regions_averages
     for i=1:n_regions
         ax = axes('Parent',f,'Position',get_position(n_rows,n_col,i,[.05 .05 .01;.05 .05 .02]));
         hold(ax,'on');
-
-        %         for j=1:n_events
-        %             try
-        %                 l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(i,:),'LineWidth',.1,'Parent',ax);
-        %             catch
-        %                 l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(end,:),'LineWidth',.1,'Parent',ax);
-        %             end
-        %             l.Color(4)=.5;
-        %         end
 
         YData = R(i).single_events;
         YData_median = median(YData,1,'omitnan');
@@ -569,6 +571,142 @@ if flag_regions_averages
     end
 
     pic_name = 'Regional-Responses_All-Trials-3';
+    saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    close(f);
+
+    % All recordings 
+    mean_regions_recordings = NaN(n_regions,length(t_bins_fus));
+    median_regions_recordings = NaN(n_regions,length(t_bins_fus));
+    n_regions_recordings = NaN(n_regions,1);
+    label_regions = cell(n_regions,1);
+
+    for i=1:n_regions
+        if ~isempty(Q(i).mean_events)
+            mean_regions_recordings(i,:) = mean(Q(i).mean_events,1,'omitnan');
+            median_regions_recordings(i,:) = median(Q(i).median_events,1,'omitnan');
+        end        
+        n_regions_recordings(i) = size(unique(Q(i).recording_name),1);
+        label_regions(i) = {sprintf('%s [R=%d]',char(strrep(list_regions(i),'_','-')),n_regions_recordings(i))};
+    end
+
+    f = figure('Units','normalized','OuterPosition',[0 0 1 1]);
+    colormap(f,'jet');
+
+    ax1 = axes('Parent',f,'Position',[.1 .05 .4 .9]);
+    hold(ax1,'on');
+    imagesc('XData',t_bins_fus,'YData',1:n_regions,'CData',mean_regions_recordings,'HitTest','off','Parent',ax1);
+    n_iqr = 6;
+    data_iqr = mean_regions_recordings(~isnan(mean_regions_recordings));
+    ax1.CLim = [median(data_iqr(:))-2,median(data_iqr(:))+5];
+    ax1.YLim = [.5 n_regions+.5];
+    ax1.XLim = [t_bins_fus(1),t_bins_fus(end)];
+    ax1.YTick = 1:n_regions;
+    ax1.YTickLabel = label_regions;
+    ax1.Title.String = 'Mean Regions - All Recordings';
+    ax1.YDir = 'reverse';
+    colorbar(ax1,'eastoutside');
+    line('XData',[0 0],'YData',ax1.YLim,'Color','r','LineStyle','--','LineWidth',.5,'Parent',ax1);
+
+    ax2 = axes('Parent',f,'Position',[.6 .05 .4 .9]);
+    hold(ax2,'on');
+    imagesc('XData',t_bins_fus,'YData',1:n_regions,'CData',median_regions_recordings,'HitTest','off','Parent',ax2);
+    n_iqr = 6;
+    data_iqr = median_regions_recordings(~isnan(median_regions_recordings));
+    ax2.CLim = [median(data_iqr(:))-2,median(data_iqr(:))+5];
+    ax2.YLim = [.5 n_regions+.5];
+    ax2.XLim = [t_bins_fus(1),t_bins_fus(end)];
+    ax2.YTick = 1:n_regions;
+    ax2.YTickLabel = label_regions;
+    ax2.Title.String = 'Median Regions - All Recordings';
+    ax2.YDir = 'reverse';
+    colorbar(ax2,'eastoutside');
+    line('XData',[0 0],'YData',ax2.YLim,'Color','r','LineStyle','--','LineWidth',.5,'Parent',ax2);
+    f_axes = [ax1;ax2];
+
+    pic_name = 'Regional-Responses_All-Recordings-1';
+    saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    %     close(f);
+
+    delete(f_axes);
+    %     n_col = 10;
+    n_col = ceil(sqrt(n_regions));
+    n_rows = ceil(n_regions/n_col);
+
+    f_axes=[];
+    for i=1:n_regions
+        ax = axes('Parent',f,'Position',get_position(n_rows,n_col,i,[.05 .05 .01;.05 .05 .02]));
+        hold(ax,'on');
+
+        YData1 = Q(i).mean_events;
+        YData_mean = mean(YData1,1,'omitnan');
+        YData2 = Q(i).median_events;
+        YData_median = median(YData2,1,'omitnan');
+        if ~isempty(YData_mean)
+            YData1_std = std(YData1,0,1,'omitnan');
+            YData2_std = std(YData2,0,1,'omitnan');
+            l1 = line('XData',t_bins_fus,'YData',YData_mean,'Color','r','LineWidth',1,'Parent',ax);
+            l2 = line('XData',t_bins_fus,'YData',YData_median,'Color','b','LineWidth',1,'Parent',ax);
+            n_samples_1 = sum(~isnan(YData1),1);
+            ebar_data_1 = YData1_std./sqrt(n_samples_1);
+            errorbar(t_bins_fus,YData_mean,ebar_data_1,'Color','r',...
+                'linewidth',1,'linestyle','none',...
+                'Parent',ax,'Visible','on','Tag','ErrorBar');
+            n_samples_2 = sum(~isnan(YData2),1);
+            ebar_data_2 = YData2_std./sqrt(n_samples_2);
+            errorbar(t_bins_fus,YData_median,ebar_data_2,'Color','b',...
+                'linewidth',1,'linestyle','none',...
+                'Parent',ax,'Visible','on','Tag','ErrorBar');
+
+            uistack([l1;l2],'top');
+            ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
+
+            n_iqr= 2;
+            data_iqr = YData_mean(~isnan(YData_mean));
+            % ax.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+            ax.YLim = [median(data_iqr(:))-5,median(data_iqr(:))+10];
+        end
+        
+        line('XData',[0 0],'YData',ax.YLim,'Color','r','LineStyle','--','LineWidth',.5,'Parent',ax);
+        ax.Title.String = char(label_regions(i));
+        set(ax,'XTick',[],'XTickLabel',[]);
+        f_axes=[f_axes;ax];
+        
+    end
+
+    pic_name = 'Regional-Responses_All-Recordings-2';
+    saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+    %     close(f);
+
+    delete(f_axes);
+    f_axes=[];
+    for i=1:n_regions
+        ax = axes('Parent',f,'Position',get_position(n_rows,n_col,i,[.05 .05 .01;.05 .05 .02]));
+        hold(ax,'on');
+        YData = Q(i).mean_events;
+        if ~isempty(YData)
+            imagesc('XData',t_bins_fus,'YData',1:n_regions_recordings(i),'CData',YData,'Parent',ax);
+            line('XData',[0 0],'YData',ax.YLim,'Color','r','LineStyle','--','LineWidth',.5,'Parent',ax);
+
+            ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
+            ax.YLim = [.5,n_regions_recordings(i)+.5];
+            ax.YDir = 'reverse';
+            %     colorbar(ax,'eastoutside');
+            %     ax.FontSize = 6;
+
+            n_iqr= 3;
+            data_iqr = YData(~isnan(YData));
+            %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+            ax.CLim = [-5,15];
+            
+        end
+        
+        ax.Title.String = char(label_regions(i));
+        set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+
+        f_axes=[f_axes;ax];
+    end
+
+    pic_name = 'Regional-Responses_All-Recordings-3';
     saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
     close(f);
 
