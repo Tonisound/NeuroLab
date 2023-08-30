@@ -137,10 +137,27 @@ n_events_abs = size(ripples_abs,1);
 n_events_sqrt = size(ripples_sqrt,1);
 save(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),'ripples','ripples_abs','ripples_sqrt',...
     'n_events_abs','n_events_sqrt','recording_name','channel_ripple','channel_non_ripple','timegroup','-v7.3');
-
-    
-
 fprintf('RippleEvents [Channel:%s] saved in [%s].\n',channel_ripple,fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
+
+% % Saving in csv format
+folder_events = fullfile(DIR_SAVE,recording_name,'Events');
+if ~isfolder(folder_events)
+    mkdir(folder_events);
+end
+
+% Metadata and Header
+EventHeader = {'Start(s)';'Peak(s)';'End(s)';'Duration(s)';'Frequency(Hz)';'Amplitude(au)'};
+MetaData =    {sprintf('channel_ripple,%s',channel_ripple);...
+    sprintf('channel_non_ripple,%s',channel_non_ripple);...
+    sprintf('timegroup,%s',timegroup)};
+% Writing Abs Ripples
+output_file = fullfile(folder_events,'Ripples-Abs-All');
+R = ripples_abs;
+write_csv_events(output_file,R,EventHeader,MetaData);
+% Writing Sqrt Ripples
+output_file = fullfile(folder_events,'Ripples-Sqrt-All');
+R = ripples_abs;
+write_csv_events(output_file,R,EventHeader,MetaData);
 
 
 % Delete folders : 
