@@ -40,11 +40,10 @@ end
 unique_animals = unique(all_animals);
 
 
-% flag_building_struct = false;
 flag_moving_figures = false;
-flag_synthesis_movie = false;
+flag_synthesis_movie = true;
 flag_event_detection = false;
-flag_regions_averages = true;
+flag_regions_averages = false;
 
 
 %% Browsing stats - Buidling struct
@@ -64,12 +63,14 @@ if exist(fullfile(folder_dest,strcat(event_name,'.mat')),'file')
 
 else
 
-    % if flag_building_struct
-    S = struct('Y3q_evt_full',[],'name',[],'atlas_name',[],'atlas_coordinate',[],'data_atlas',[]);
+    S = struct('Y3q_evt_reshaped',[],'Y3q_evt_median_reshaped',[],'Y3q_evt_duration_reshaped',[],'Y3q_evt_frequency_reshaped',[],'Y3q_evt_amplitude_reshaped',[],...
+        'name',[],'atlas_name',[],'atlas_fullname',[],'atlas_coordinate',[],'data_atlas',[]);
+
     % Listing planes
     all_planes = cell(size(all_files));
     all_coordinates = NaN(size(all_files));
-    % label_Y3q_evt_full = {'Mean';'Median';'Longest';'Fastest';'Largest'};
+    label_Y3q_evt = {'Mean';'Median';'Longest';'Fastest';'Largest'};
+%     label_Y3q_evt = {'Longest';'Fastest';'Largest'};
 
     list_regions = {'OrbitalCortex';'LimbicCortex';'CingulateCortex';'InsularCortex';'MotorCortex';'SomatosensoryCortex';...
         'PiriformCortex';'RetrosplenialCortex';'ParietalCortex';'EntorhinalCortex';'VisualCortex';'AuditoryCortex';'RhinalCortex';...
@@ -84,15 +85,15 @@ else
 %         '[SR]Midbrain';'[SR]Thalamus';'[SR]Hypothalamus';'[SR]Amygdala';'[SR]Other'};
     n_regions = length(list_regions);
 
-    T = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
-        'single_events',[],'atlas_coordinate',[],'atlas_name',[]);
+%     T = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
+%         'single_events',[],'atlas_coordinate',[],'atlas_name',[],'atlas_fullname',[]);
 
     R = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
-        'single_events',[],'atlas_coordinate',[],'atlas_name',[]);
+        'single_events',[],'atlas_coordinate',[],'atlas_fullname',[]);
     R(n_regions).recording_name = [];
 
     Q = struct('recording_name',[],'region',[],'animal',[],'plane',[],...
-        'mean_events',[],'median_events',[],'atlas_coordinate',[],'atlas_name',[]);
+        'mean_events',[],'median_events',[],'atlas_coordinate',[],'atlas_fullname',[]);
     Q(n_regions).recording_name = [];
 
     for i=1:length(all_files)
@@ -127,12 +128,18 @@ else
             all_coordinates(i) = data_seq.Params.atlas_coordinate;
             all_planes(i) = {strtrim(strrep(strrep(data_seq.data_atlas.AtlasName,'Rat',''),'Paxinos',''))};
 
-            S(i).Y3q_evt_full = cat(4,data_seq.Y3q_evt_reshaped,data_seq.Y3q_evt_median_reshaped,data_seq.Y3q_evt_duration_reshaped,data_seq.Y3q_evt_frequency_reshaped,data_seq.Y3q_evt_amplitude_reshaped);
+            S(i).Y3q_evt_reshaped = data_seq.Y3q_evt_reshaped;
+            S(i).Y3q_evt_median_reshaped = data_seq.Y3q_evt_median_reshaped;
+            S(i).Y3q_evt_duration_reshaped = data_seq.Y3q_evt_duration_reshaped;
+            S(i).Y3q_evt_frequency_reshaped = data_seq.Y3q_evt_frequency_reshaped;
+            S(i).Y3q_evt_amplitude_reshaped = data_seq.Y3q_evt_amplitude_reshaped;
+
             S(i).t_bins_fus = data_seq.t_bins_fus;
             S(i).name = strrep(strrep(d(i).name,'_nlab',''),'_','-');
             S(i).animal = char(all_animals(i));
             S(i).atlas_coordinate = data_seq.Params.atlas_coordinate;
             S(i).atlas_name = data_seq.Params.atlas_name;
+            S(i).atlas_fullname = data_seq.Params.atlas_fullname;
             S(i).data_atlas = data_seq.data_atlas;
             S(i).plane = char(all_planes(i));
             S(i).n_events = data_seq.Params.n_events;
@@ -166,7 +173,7 @@ else
                     cur_animals = repmat(all_animals(i),[n_events,1]);
                     cur_planes = repmat(all_planes(i),[n_events,1]);
                     atlas_coordinates = repmat(data_regions.Params.atlas_coordinate,[n_events,1]);
-                    atlas_names = repmat({data_regions.Params.atlas_name},[n_events,1]);
+                    atlas_fullnames = repmat({data_regions.Params.atlas_fullname},[n_events,1]);
                     single_events = squeeze(data_regions.Y2q_evt_normalized(ind_label,:,:))';
 
 %                     T.recording_name = [T.recording_name;cur_names];
@@ -174,7 +181,7 @@ else
 %                     T.animal = [T.animal;cur_animals];
 %                     T.plane = [T.plane;cur_planes];
 %                     T.atlas_coordinate = [T.atlas_coordinate;atlas_coordinates];
-%                     T.atlas_name = [T.atlas_name;atlas_names];
+%                     T.atlas_fullname = [T.atlas_fullname;atlas_fullnames];
 %                     T.single_events = [T.single_events;single_events];
 
                     R(k).recording_name = [R(k).recording_name;cur_names];
@@ -182,7 +189,7 @@ else
                     R(k).animal = [R(k).animal;cur_animals];
                     R(k).plane = [R(k).plane;cur_planes];
                     R(k).atlas_coordinate = [R(k).atlas_coordinate;atlas_coordinates];
-                    R(k).atlas_name = [R(k).atlas_name;atlas_names];
+                    R(k).atlas_fullname = [R(k).atlas_fullname;atlas_fullnames];
                     R(k).single_events = [R(k).single_events;single_events];
 
                     Q(k).recording_name = [Q(k).recording_name;{data_regions.Params.recording_name}];
@@ -190,7 +197,7 @@ else
                     Q(k).animal = [Q(k).animal;all_animals(i)];
                     Q(k).plane = [Q(k).plane;all_planes(i)];
                     Q(k).atlas_coordinate = [Q(k).atlas_coordinate;data_regions.Params.atlas_coordinate];
-                    Q(k).atlas_name = [Q(k).atlas_name;{data_regions.Params.atlas_name}];
+                    Q(k).atlas_fullname = [Q(k).atlas_fullname;{data_regions.Params.atlas_fullname}];
                     Q(k).mean_events = [Q(k).mean_events;data_regions.Y2q_evt_mean(ind_label,:)];
                     Q(k).median_events = [Q(k).median_events;data_regions.Y2q_evt_median(ind_label,:)];
                 end
@@ -220,7 +227,6 @@ for i=1:length(unique_animals)
         end
     end
 end
-% end
 
 
 %% Moving figures
@@ -265,8 +271,8 @@ if flag_synthesis_movie
             % eps1=.01;
             % eps2=.01;
 
-            for l=1:length(label_Y3q_evt_full)
-                cur_label = char(label_Y3q_evt_full(l));
+            for l=1:length(label_Y3q_evt)
+                cur_label = char(label_Y3q_evt(l));
                 f = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Event-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label));
                 colormap(f,"parula");
                 f_axes = [];
@@ -288,8 +294,23 @@ if flag_synthesis_movie
                     for i=1:length(f_axes)
                         ax = f_axes(i);
                         hold(ax,'on');
-                        imagesc(S_animal_plane(i).Y3q_evt_full(:,:,k,l),'Parent',ax);
-                        ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_events);
+                        switch cur_label
+                            case 'Mean'
+                                Y3q_evt = S_animal_plane(i).Y3q_evt_reshaped;
+                            case 'Median'
+                                Y3q_evt = S_animal_plane(i).Y3q_evt_median_reshaped;
+                            case 'Longest'
+                                Y3q_evt = S_animal_plane(i).Y3q_evt_duration_reshaped;
+                            case 'Fastest'
+                                Y3q_evt = S_animal_plane(i).Y3q_evt_frequency_reshaped;
+                            case 'Strongest'
+                                Y3q_evt = S_animal_plane(i).Y3q_evt_amplitude_reshaped;
+                            otherwise
+                                Y3q_evt = NaN(1,1,length(t_bins_fus));
+                        end
+                
+                        imagesc(Y3q_evt(:,:,k),'Parent',ax);
+                        ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_fullname,S_animal_plane(i).n_events);
                         ax.YLabel.String = S_animal_plane(i).name;
                         ax.YLabel.FontSize = 8;
                         t.String = sprintf('[%s] Time from Event Peak = %.1f s',cur_label,t_bins_fus(k));
@@ -298,8 +319,8 @@ if flag_synthesis_movie
                         l_.Color(4)=.5;
                         % ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
                         ax.CLim = [-5,10];
-                        ax.XLim = [.5 size(S_animal_plane(i).Y3q_evt_full,2)+.5];
-                        ax.YLim = [.5 size(S_animal_plane(i).Y3q_evt_full,1)+.5];
+                        ax.XLim = [.5 size(Y3q_evt,2)+.5];
+                        ax.YLim = [.5 size(Y3q_evt,1)+.5];
                         set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
                         ax.YDir = 'reverse';
                         if i ==length(f_axes)
@@ -359,7 +380,6 @@ if flag_event_detection
                 end
                 line('XData',S_animal_plane(i).t_bins_lfp,'YData',mean(S_animal_plane(i).Yraw_evt_,2,'omitnan'),'Color','r','LineWidth',2,'Parent',ax);
                 ax.Title.String = sprintf('Channel %s [N=%d]',S_animal_plane(i).channel_id,S_animal_plane(i).n_events);
-                %             ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_events);
                 ax.YLabel.String = S_animal_plane(i).name;
                 ax.YLabel.FontSize = 8;
                 n_iqr = 3;
@@ -384,7 +404,6 @@ if flag_event_detection
                 end
                 line('XData',S_animal_plane(i).t_bins_lfp,'YData',mean(S_animal_plane(i).Y1_evt_,2,'omitnan'),'Color','r','LineWidth',1,'Parent',ax);
                 ax.Title.String = sprintf('Channel %s [N=%d]',S_animal_plane(i).channel_id,S_animal_plane(i).n_events);
-                %             ax.Title.String = sprintf('%s [N = %d]',S_animal_plane(i).atlas_name,S_animal_plane(i).n_events);
                 ax.YLabel.String = S_animal_plane(i).name;
                 ax.YLabel.FontSize = 8;
                 n_iqr = 15;

@@ -37,11 +37,14 @@ channel1 = strcat('LFP-',band_name,'_',channel_id);
 
 % d_channels = dir(fullfile(DIR_SAVE,recording_name,'Sources_fUS','[SR]*.mat'));
 d_channels = dir(fullfile(DIR_SAVE,recording_name,'Sources_fUS','*.mat'));
-d_channels = d_channels(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_channels));
-ind_leftright = contains({d_channels(:).name}','-L.mat')+contains({d_channels(:).name}','-R.mat');
-if ~isempty(d_channels(ind_leftright==0))
-    d_channels = d_channels(ind_leftright==0);
-end
+
+% % Restricting to bilateral regions 
+% d_channels = d_channels(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_channels));
+% ind_leftright = contains({d_channels(:).name}','-L.mat')+contains({d_channels(:).name}','-R.mat');
+% if ~isempty(d_channels(ind_leftright==0))
+%     d_channels = d_channels(ind_leftright==0);
+% end
+
 % [ind_channels,v] = listdlg('Name','Region Selection','PromptString','Select Regions to display',...
 %     'SelectionMode','multiple','ListString',{d_channels(:).name}','InitialValue',1,'ListSize',[300 500]);
 % if v==0
@@ -255,15 +258,16 @@ ax1.YLim = [median(Yraw(:))-n_iqr1*iqr(Yraw(:)),median(Yraw(:))+n_iqr1*iqr(Yraw(
 ax2 = subplot(412,'parent',tab1);
 % Correction
 exp_cor = .5;
-t_gauss = .1;
 n_iqr2 = 1.5;
 correction = repmat((data_spectro.freqdom(:).^exp_cor),1,size(data_spectro.Cdata_sub,2));
 correction = correction/correction(end,1);
 Cdata_corr = data_spectro.Cdata_sub.*correction;
-%Gaussian smoothing
-step = t_gauss*round(1/median(diff(data_spectro.Xdata_sub)));
-Cdata_smooth = imgaussfilt(Cdata_corr,[1 step]);
-Cdata = Cdata_smooth;
+% %Gaussian smoothing
+% t_gauss = .1;
+% step = t_gauss*round(1/median(diff(data_spectro.Xdata_sub)));
+% Cdata_smooth = imgaussfilt(Cdata_corr,[1 step]);
+% Cdata = Cdata_smooth;
+Cdata = Cdata_corr;
 
 hold(ax2,'on');
 imagesc('XData',data_spectro.Xdata_sub,'YData',data_spectro.freqdom,'CData',Cdata,'HitTest','off','Parent',ax2);

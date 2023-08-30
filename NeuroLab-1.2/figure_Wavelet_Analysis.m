@@ -553,16 +553,37 @@ bc.UserData.traces_name = traces_name;
 bc.UserData.phases_name = phases_name;
 bc.UserData.save_data = [];
 
+% % Uncomment to process one channel in batch mode
+% if val == 0
+%     e4.String = 1;
+% end
+
 handles2 = reset_Callback([],[],handles2,myhandles);
 colormap(f2,'jet');
 edit_Callback([handles2.Edit1 handles2.Edit2],[],handles2.CenterAxes);
 
+% Comment to process one channel in batch mode
 % If nargin > 3 batch processing
 % val indicates callback provenance (0 : batch mode - 1 : user mode)
 % str_tag contains group names 
 if val==0
     batchsave_Callback([],[],handles2,str_tag,1);
 end
+
+% % Uncomment to process one channel in batch mode
+% if val==0
+%     pu = findobj(handles2.InfoPanel,'Tag',sprintf('Popup%d',1));
+%     ax = findobj(handles2.BotPanel,'Tag',sprintf('Ax%d',1));
+%     for k=1:size(pu.String,1) 
+%         pu.Value = k;
+%         temp = strtrim(pu.String(pu.Value,:));
+%         if contains(temp,'005') || contains(temp,'023') || contains(temp,'010')
+%             update_popup_Callback(pu,[],ax,handles2);
+%             compute_wavelet_Callback(handles2.ButtonCompute,[],handles2);
+%             savestats_Callback([],[],handles2);
+%         end
+%     end
+% end
 
 end
 
