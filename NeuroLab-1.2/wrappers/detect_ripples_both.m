@@ -146,7 +146,7 @@ if ~isfolder(folder_events)
 end
 
 % Metadata and Header
-EventHeader = {'Start(s)';'Peak(s)';'End(s)';'Duration(s)';'Frequency(Hz)';'Amplitude(au)'};
+EventHeader = {'Start(s)';'Peak(s)';'End(s)';'MeanDur(us)';'MeanFreq(Hz)';'MeanPeaktoPeak(uV)'};
 MetaData =    {sprintf('channel_ripple,%s',channel_ripple);...
     sprintf('channel_non_ripple,%s',channel_non_ripple);...
     sprintf('timegroup,%s',timegroup)};
@@ -158,6 +158,24 @@ write_csv_events(output_file,R,EventHeader,MetaData);
 output_file = fullfile(folder_events,'Ripples-Sqrt-All');
 R = ripples_abs;
 write_csv_events(output_file,R,EventHeader,MetaData);
+
+% % Event Parameters
+% mean_dur = mean(events(:,4),1,'omitnan');
+% mean_freq = mean(events(:,5),1,'omitnan');
+% mean_p2p = mean(events(:,6),1,'omitnan');
+% % Restricting events
+% [~,ind_sorted_duration] = sort(events(:,4),'descend');
+% [~,ind_sorted_frequency] = sort(events(:,5),'descend');
+% [~,ind_sorted_amplitude] = sort(events(:,6),'descend');
+% % % Keeping fixed ratio
+% % ratio_keep = .1;
+% % n_keep = round(ratio_keep*n_events)
+% % Keeping fixed amount
+% n_fixed = 50;
+% n_keep = min(n_events,n_fixed);
+% ind_keep_duration = ind_sorted_duration(1:n_keep);
+% ind_keep_frequency = ind_sorted_frequency(1:n_keep);
+% ind_keep_amplitude = ind_sorted_amplitude(1:n_keep);
 
 
 % Delete folders : 
