@@ -39,10 +39,17 @@ if isempty(d_events)
 elseif length(d_events)==1
     all_event_names = char(d_events.name);
 else
-    [ind_events,v] = listdlg('Name','Region Selection','PromptString','Select Events to display',...
-        'SelectionMode','multiple','ListString',{d_events(:).name}','InitialValue',1,'ListSize',[300 500]);
-    if v==0 || isempty(ind_events)
-        return;
+    if val == 1
+        % user mode
+        [ind_events,v] = listdlg('Name','Region Selection','PromptString','Select Events to display',...
+            'SelectionMode','multiple','ListString',{d_events(:).name}','InitialValue',1,'ListSize',[300 500]);
+        if v==0 || isempty(ind_events)
+            return;
+        end
+        
+    else
+        % batch mode
+        ind_events = 1:length(d_events);
     end
     all_event_names = {d_events(ind_events).name}';
 end
@@ -53,12 +60,33 @@ for kk=1:length(all_event_names)
     event_name = char(all_event_names(kk));
     event_file = fullfile(DIR_SAVE,recording_name,'Events',event_name);
     [events,EventHeader,MetaData] = read_csv_events(event_file);
-    channel_id = data_events.channel_ripple;
+    
+    % Getting channel_id
+    mline = char(MetaData(contains(MetaData,'channel_ripple')));
+    textsep = ',';
+    temp = regexp(mline,textsep,'split');
+    channel_id = char(temp(end));
+%     channel_id = data_events.channel_ripple;
     band_name = 'ripple';
-    t_events = events(:,2);
+    
+    % Getting t_events
+    if isempty(EventHeader)
+        % Taking first column as default
+        t_events = events(:,1);
+    else
+       % Taking first column as default
+       ind_events = find(strcmp(EventHeader,'Peak(s)')==1);
+       t_events = events(:,ind_events);
+    end
     n_events = size(events,1);
+    
+    % Sanity Check
+    if isempty(t_events) || n_events == 0
+        errordlg(sprintf('Unable to load events [File: %s]',event_file));
+        return;
+    end
+    
     fprintf('File Loaded [%s].\n',event_file);
-
 
     % Building Figure
     f1=figure;
@@ -266,18 +294,18 @@ for kk=1:length(all_event_names)
         'Units','normalized',...
         'Title','Sequence-Median',...
         'Tag','SixthTab');
-    tab7 = uitab('Parent',tabgp,...
-        'Units','normalized',...
-        'Title','Sequence-Longest',...
-        'Tag','SeventhTab');
-    tab8 = uitab('Parent',tabgp,...
-        'Units','normalized',...
-        'Title','Sequence-Fastest',...
-        'Tag','EighthTab');
-    tab9 = uitab('Parent',tabgp,...
-        'Units','normalized',...
-        'Title','Sequence-Largest',...
-        'Tag','NinthTab');
+%     tab7 = uitab('Parent',tabgp,...
+%         'Units','normalized',...
+%         'Title','Sequence-Longest',...
+%         'Tag','SeventhTab');
+%     tab8 = uitab('Parent',tabgp,...
+%         'Units','normalized',...
+%         'Title','Sequence-Fastest',...
+%         'Tag','EighthTab');
+%     tab9 = uitab('Parent',tabgp,...
+%         'Units','normalized',...
+%         'Title','Sequence-Largest',...
+%         'Tag','NinthTab');
 
     ax1 = subplot(411,'parent',tab1);
     hold(ax1,'on');
@@ -858,17 +886,17 @@ for kk=1:length(all_event_names)
         saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab6.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
         fprintf('Tab %s saved in [%s].\n',tab6.Title,save_dir);
 
-        tabgp.SelectedTab = tab7;
-        saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab7.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-        fprintf('Tab %s saved in [%s].\n',tab7.Title,save_dir);
-
-        tabgp.SelectedTab = tab8;
-        saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab8.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-        fprintf('Tab %s saved in [%s].\n',tab8.Title,save_dir);
-
-        tabgp.SelectedTab = tab9;
-        saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab9.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-        fprintf('Tab %s saved in [%s].\n',tab9.Title,save_dir);
+%         tabgp.SelectedTab = tab7;
+%         saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab7.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+%         fprintf('Tab %s saved in [%s].\n',tab7.Title,save_dir);
+% 
+%         tabgp.SelectedTab = tab8;
+%         saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab8.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+%         fprintf('Tab %s saved in [%s].\n',tab8.Title,save_dir);
+% 
+%         tabgp.SelectedTab = tab9;
+%         saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab9.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+%         fprintf('Tab %s saved in [%s].\n',tab9.Title,save_dir);
     end
 
 
@@ -899,7 +927,7 @@ for kk=1:length(all_event_names)
         %         saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
         %         delete(ax2);
         %     end
-        f2.Position=[0.1    0.4    0.8    0.2];
+        f2.Position=[0.1    0.4    0.4    0.25];
         t = uicontrol(f2,'Style','text','BackgroundColor','w','FontSize',16,'FontWeight','bold','Units','normalized','Position',[.25 .9 .5 .1],'Parent',f2);
 
         for i = index_t_bins_fus
@@ -907,39 +935,39 @@ for kk=1:length(all_event_names)
 
             ax2 = copyobj(f5_axes(i),f2);
             ax2.Title.String = 'Mean';
-            ax2.Position = [.005 .05 .19 .8];
+            ax2.Position = [.005 .05 .49 .8];
             colorbar(ax2,'eastoutside');
             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
                 'LineWidth',1,'Color','r','Parent',ax2);
             l.Color(4) = .25;
             ax2 = copyobj(f6_axes(i),f2);
             ax2.Title.String = 'Median';
-            ax2.Position = [.205 .05 .19 .8];
+            ax2.Position = [.505 .05 .49 .8];
             colorbar(ax2,'eastoutside');
             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
                 'LineWidth',1,'Color','r','Parent',ax2);
             l.Color(4) = .25;
-            ax2 = copyobj(f7_axes(i),f2);
-            ax2.Title.String = 'Longest';
-            ax2.Position = [.405 .05 .19 .8];
-            colorbar(ax2,'eastoutside');
-            l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-                'LineWidth',1,'Color','r','Parent',ax2);
-            l.Color(4) = .25;
-            ax2 = copyobj(f8_axes(i),f2);
-            ax2.Title.String = 'Fastest';
-            ax2.Position = [.605 .05 .19 .8];
-            colorbar(ax2,'eastoutside');
-            l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-                'LineWidth',1,'Color','r','Parent',ax2);
-            l.Color(4) = .25;
-            ax2 = copyobj(f9_axes(i),f2);
-            ax2.Title.String = 'Largest';
-            ax2.Position = [.805 .05 .19 .8];
-            colorbar(ax2,'eastoutside');
-            l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-                'LineWidth',1,'Color','r','Parent',ax2);
-            l.Color(4) = .25;
+%             ax2 = copyobj(f7_axes(i),f2);
+%             ax2.Title.String = 'Longest';
+%             ax2.Position = [.405 .05 .19 .8];
+%             colorbar(ax2,'eastoutside');
+%             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+%                 'LineWidth',1,'Color','r','Parent',ax2);
+%             l.Color(4) = .25;
+%             ax2 = copyobj(f8_axes(i),f2);
+%             ax2.Title.String = 'Fastest';
+%             ax2.Position = [.605 .05 .19 .8];
+%             colorbar(ax2,'eastoutside');
+%             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+%                 'LineWidth',1,'Color','r','Parent',ax2);
+%             l.Color(4) = .25;
+%             ax2 = copyobj(f9_axes(i),f2);
+%             ax2.Title.String = 'Largest';
+%             ax2.Position = [.805 .05 .19 .8];
+%             colorbar(ax2,'eastoutside');
+%             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+%                 'LineWidth',1,'Color','r','Parent',ax2);
+%             l.Color(4) = .25;
 
             pic_name = sprintf(strcat('%s_Event-Imaging_%03d'),recording_name,i);
             saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
