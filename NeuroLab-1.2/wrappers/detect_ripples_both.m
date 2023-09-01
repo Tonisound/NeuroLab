@@ -1,13 +1,15 @@
-function success = detect_ripples_both(recording_name,val,channel_ripple,timegroup)
+function success = detect_ripples_both(savedir,val,channel_ripple,timegroup)
+% Detect Hippocampal Ripples Script based on Kteam/PrgMatlab
+% Two methods sqrt & abs
+% Generates events files Ripples-Abs|Sqrt|Merged-All.csv'
 
 % Addpath
 addpath(genpath('/home/hobbes/Dropbox/Kteam/PrgMatlab/'));
 
-global DIR_SAVE;
 success  = false;
 
-if exist(fullfile(DIR_SAVE,recording_name,'Nconfig.mat'),'file')
-    data_nconfig = load(fullfile(DIR_SAVE,recording_name,'Nconfig.mat'));
+if exist(fullfile(savedir,'Nconfig.mat'),'file')
+    data_nconfig = load(fullfile(savedir,'Nconfig.mat'));
 else
     data_nconfig = [];
 end
@@ -18,7 +20,7 @@ if val == 1
         timegroup = 'NREM';
     end    
     if nargin < 3
-        d_lfp = dir(fullfile(DIR_SAVE,recording_name,'Sources_LFP','LFP_*.mat'));
+        d_lfp = dir(fullfile(savedir,'Sources_LFP','LFP_*.mat'));
         % If NConfig file exists, keep electrode order
         if ~isempty(data_nconfig)
             lfp_ordered = data_nconfig.channel_list(contains(data_nconfig.channel_list,'LFP'));
@@ -46,11 +48,11 @@ end
 
 
 % Loading traces and intepolate
-if exist(fullfile(DIR_SAVE,recording_name,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)),'file')
-    data_lfp = load(fullfile(DIR_SAVE,recording_name,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)));
-    fprintf('LFP file loaded [%s].\n',fullfile(DIR_SAVE,recording_name,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)));
+if exist(fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)),'file')
+    data_lfp = load(fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)));
+    fprintf('LFP file loaded [%s].\n',fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)));
 else
-    warning('Channel not found [%s-%s]',recording_name,channel_ripple);
+    warning('Channel not found [%s-%s]',savedir,channel_ripple);
     return;
 end
 X=(data_lfp.x_start:data_lfp.f:data_lfp.x_end)';
@@ -61,11 +63,11 @@ X = Xq;
 Y = Yq;
 
 % Loading time groups
-if exist(fullfile(DIR_SAVE,recording_name,'Time_Groups.mat'),'file')
-    data_tg = load(fullfile(DIR_SAVE,recording_name,'Time_Groups.mat'));
-    fprintf('Time Groups loaded [%s].\n',fullfile(DIR_SAVE,recording_name,'Time_Groups.mat'));
+if exist(fullfile(savedir,'Time_Groups.mat'),'file')
+    data_tg = load(fullfile(savedir,'Time_Groups.mat'));
+    fprintf('Time Groups loaded [%s].\n',fullfile(savedir,'Time_Groups.mat'));
 else
-    warning('Time Groups not found [%s-%s]',recording_name,channel_ripple);
+    warning('Time Groups not found [%s-%s]',savedir,channel_ripple);
     return;
 end
 ind_nrem = find(strcmp(data_tg.TimeGroups_name,timegroup)==1);
@@ -131,16 +133,16 @@ TTLInfo = intervalSet([],[]);
 save('behavResources.mat','TTLInfo')
 
 % CreateRipplesSleep
-[ripples , ripples_abs , ripples_sqrt] = CreateRipplesSleep_AB();
+[ripples,ripples_abs,ripples_sqrt] = CreateRipplesSleep_AB();
 channel_non_ripple = [];
-n_events_abs = size(ripples_abs,1);
-n_events_sqrt = size(ripples_sqrt,1);
-save(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),'ripples','ripples_abs','ripples_sqrt',...
-    'n_events_abs','n_events_sqrt','recording_name','channel_ripple','channel_non_ripple','timegroup','-v7.3');
-fprintf('RippleEvents [Channel:%s] saved in [%s].\n',channel_ripple,fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
+% n_events_abs = size(ripples_abs,1);
+% n_events_sqrt = size(ripples_sqrt,1);
+% save(fullfile(savedir,'RippleEvents.mat'),'ripples','ripples_abs','ripples_sqrt',...
+%     'n_events_abs','n_events_sqrt','recording_name','channel_ripple','channel_non_ripple','timegroup','-v7.3');
+% fprintf('RippleEvents [Channel:%s] saved in [%s].\n',channel_ripple,fullfile(savedir,'RippleEvents.mat'));
 
 % % Saving in csv format
-folder_events = fullfile(DIR_SAVE,recording_name,'Events');
+folder_events = fullfile(savedir,'Events');
 if ~isfolder(folder_events)
     mkdir(folder_events);
 end
@@ -150,32 +152,16 @@ EventHeader = {'Start(s)';'Peak(s)';'End(s)';'MeanDur(us)';'MeanFreq(Hz)';'MeanP
 MetaData =    {sprintf('channel_ripple,%s',channel_ripple);...
     sprintf('channel_non_ripple,%s',channel_non_ripple);...
     sprintf('timegroup,%s',timegroup)};
-% Writing Abs Ripples
-output_file = fullfile(folder_events,'Ripples-Abs-All');
-R = ripples_abs;
-write_csv_events(output_file,R,EventHeader,MetaData);
-% Writing Sqrt Ripples
-output_file = fullfile(folder_events,'Ripples-Sqrt-All');
-R = ripples_abs;
-write_csv_events(output_file,R,EventHeader,MetaData);
 
-% % Event Parameters
-% mean_dur = mean(events(:,4),1,'omitnan');
-% mean_freq = mean(events(:,5),1,'omitnan');
-% mean_p2p = mean(events(:,6),1,'omitnan');
-% % Restricting events
-% [~,ind_sorted_duration] = sort(events(:,4),'descend');
-% [~,ind_sorted_frequency] = sort(events(:,5),'descend');
-% [~,ind_sorted_amplitude] = sort(events(:,6),'descend');
-% % % Keeping fixed ratio
-% % ratio_keep = .1;
-% % n_keep = round(ratio_keep*n_events)
-% % Keeping fixed amount
-% n_fixed = 50;
-% n_keep = min(n_events,n_fixed);
-% ind_keep_duration = ind_sorted_duration(1:n_keep);
-% ind_keep_frequency = ind_sorted_frequency(1:n_keep);
-% ind_keep_amplitude = ind_sorted_amplitude(1:n_keep);
+% Writing Abs Ripples
+output_file = fullfile(folder_events,'Ripples-Abs-All.csv');
+write_csv_events(output_file,ripples_abs,EventHeader,MetaData);
+% Writing Sqrt Ripples
+output_file = fullfile(folder_events,'Ripples-Sqrt-All.csv');
+write_csv_events(output_file,ripples_sqrt,EventHeader,MetaData);
+% Writing Mergel Ripples
+output_file = fullfile(folder_events,'Ripples-Merged-All.csv');
+write_csv_events(output_file,ripples,EventHeader,MetaData);
 
 
 % Delete folders : 

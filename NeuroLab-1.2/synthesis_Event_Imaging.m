@@ -69,8 +69,8 @@ else
     % Listing planes
     all_planes = cell(size(all_files));
     all_coordinates = NaN(size(all_files));
-    label_Y3q_evt = {'Mean';'Median';'Longest';'Fastest';'Largest'};
-%     label_Y3q_evt = {'Longest';'Fastest';'Largest'};
+%     label_Y3q_evt = {'Mean';'Median';'Longest';'Fastest';'Largest'};
+    label_Y3q_evt = {'Longest';'Fastest';'Largest'};
 
     list_regions = {'OrbitalCortex';'LimbicCortex';'CingulateCortex';'InsularCortex';'MotorCortex';'SomatosensoryCortex';...
         'PiriformCortex';'RetrosplenialCortex';'ParietalCortex';'EntorhinalCortex';'VisualCortex';'AuditoryCortex';'RhinalCortex';...

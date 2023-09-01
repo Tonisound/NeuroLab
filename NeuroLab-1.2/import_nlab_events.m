@@ -106,7 +106,7 @@ handles.EventBox.UserData.S = S;
 boxEvent_Callback(handles.EventBox,[],handles.RightAxes);
 
 % Save NeuroLab_Events.mat
-fprintf('===> NeuroLab_Events saved at %s.mat\n',fullfile(dir_save,'NeuroLab_Events.mat'));
+fprintf('===> NeuroLab_Events saved at %s.mat\n',fullfile(dir_save,'    .mat'));
 save(fullfile(dir_save,'NeuroLab_Events.mat'),'events','all_events','all_parents','-v7.3');
 
 % Updating success

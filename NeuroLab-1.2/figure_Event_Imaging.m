@@ -13,25 +13,9 @@ global FILES CUR_FILE DIR_SAVE DIR_FIG DIR_STATS IM;
 
 recording_name = FILES(CUR_FILE).nlab;
 
-% event_name = 'RippleEvents';
-% event_file = fullfile(DIR_SAVE,recording_name,strcat(event_name,'.mat'));
-% if exist(event_file,'file')
-%     data_events = load(event_file);
-%     channel_id = data_events.channel_ripple;
-%     band_name = 'ripple';
-% %     events = data_events.ripples_sqrt;
-%     events = data_events.ripples_abs;
-%     n_events = size(events,1);
-%     t_events = events(:,2);
-%     fprintf('File Loaded [%s].\n',event_file);
-% else
-%     errordlg('Missing File [%s].',event_file);
-%     return;
-% end
-
 % Select event file
 folder_events = fullfile(DIR_SAVE,recording_name,'Events');
-d_events = dir(folder_events);
+d_events = dir(fullfile(folder_events,'*.csv'));
 d_events = d_events(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_events));
 if isempty(d_events)
     errordlg('Absent or empty Event folder [%s].',folder_events);
@@ -82,12 +66,10 @@ for kk=1:length(all_event_names)
     
     % Sanity Check
     if isempty(t_events) || n_events == 0
-        errordlg(sprintf('Unable to load events [File: %s]',event_file));
-        return;
+        warning('Unable to load events [File: %s]',event_file);
+        continue;
     end
     
-    fprintf('File Loaded [%s].\n',event_file);
-
     % Building Figure
     f1=figure;
     f1.UserData.success = false;
@@ -236,24 +218,6 @@ for kk=1:length(all_event_names)
     Y2q(X_restrict==0,:) = NaN;
     Y3q(X_restrict==0,:) = NaN;
 
-    % % Event Parameters
-    % mean_dur = mean(events(:,4),1,'omitnan');
-    % mean_freq = mean(events(:,5),1,'omitnan');
-    % mean_p2p = mean(events(:,6),1,'omitnan');
-    % % Restricting events
-    % [~,ind_sorted_duration] = sort(events(:,4),'descend');
-    % [~,ind_sorted_frequency] = sort(events(:,5),'descend');
-    % [~,ind_sorted_amplitude] = sort(events(:,6),'descend');
-    % % % Keeping fixed ratio
-    % % ratio_keep = .1;
-    % % n_keep = round(ratio_keep*n_events)
-    % % Keeping fixed amount
-    % n_fixed = 50;
-    % n_keep = min(n_events,n_fixed);
-    % ind_keep_duration = ind_sorted_duration(1:n_keep);
-    % ind_keep_frequency = ind_sorted_frequency(1:n_keep);
-    % ind_keep_amplitude = ind_sorted_amplitude(1:n_keep);
-
 
     % Plotting
     f1.Name = sprintf(strcat('[%s]%s'),atlas_fullname,strrep(recording_name,'_nlab',''));
@@ -294,18 +258,6 @@ for kk=1:length(all_event_names)
         'Units','normalized',...
         'Title','Sequence-Median',...
         'Tag','SixthTab');
-%     tab7 = uitab('Parent',tabgp,...
-%         'Units','normalized',...
-%         'Title','Sequence-Longest',...
-%         'Tag','SeventhTab');
-%     tab8 = uitab('Parent',tabgp,...
-%         'Units','normalized',...
-%         'Title','Sequence-Fastest',...
-%         'Tag','EighthTab');
-%     tab9 = uitab('Parent',tabgp,...
-%         'Units','normalized',...
-%         'Title','Sequence-Largest',...
-%         'Tag','NinthTab');
 
     ax1 = subplot(411,'parent',tab1);
     hold(ax1,'on');
@@ -371,35 +323,6 @@ for kk=1:length(all_event_names)
     end
     ax.Title.String = strcat(ax.Title.String,sprintf(' [N=%d]',size(events,1)));
 
-    % sb = copyobj(handles.ScaleButton,f1);
-    % mb =copyobj(handles.MinusButton,f1);
-    % pb = copyobj(handles.PlusButton,f1);
-    % rb = copyobj(handles.RescaleButton,f1);
-    % bb = copyobj(handles.BackButton,f1);
-    % skb = copyobj(handles.SkipButton,f1);
-    % tb = copyobj(handles.TagButton,f1);
-    % ptb = copyobj(handles.prevTagButton,f1);
-    % ntb = copyobj(handles.nextTagButton,f1);
-
-    % e2 = uicontrol('Units','normalized','Parent',f1,'Style','edit','ToolTipString','Start Time','Tag','Edit2','String','');
-    % e2.Position = [sb.Position(1) sb.Position(2)+sb.Position(4) sb.Position(3) sb.Position(4)];
-    % e2.Callback = {@e1_Callback,all_axes_control};
-    % e3 = uicontrol('Units','normalized','Parent',f1,'Style','edit','ToolTipString','End Time','Tag','Edit3','String','');
-    % e3.Position = [e2.Position(1) e2.Position(2)+e2.Position(4) e2.Position(3) e2.Position(4)];
-    % e3.Callback = {@e1_Callback,all_axes_control};
-
-    % edits = [e2;e3];
-    % ax_control = f1_axes(1);
-    % set(sb,'Callback',{@template_buttonScale_Callback,ax_control});
-    % set(ptb,'Callback',{@template_prevTag_Callback,tb,ax_control,edits});
-    % set(ntb,'Callback',{@template_nextTag_Callback,tb,ax_control,edits});
-    % set(pb,'Callback',{@template_buttonPlus_Callback,ax_control,edits});
-    % set(mb,'Callback',{@template_buttonMinus_Callback,ax_control,edits});
-    % set(rb,'Callback',{@template_buttonRescale_Callback,ax_control,edits});
-    % set(skb,'Callback',{@template_buttonSkip_Callback,ax_control,edits});
-    % set(bb,'Callback',{@template_buttonBack_Callback,ax_control,edits});
-    % set(tb,'Callback',{@template_button_TagSelection_Callback,ax_control,edits,'single'});
-
     fprintf('>> Process 1/6 done [%s].\n',tab1.Title);
 
     % Computing event averages and fUS averages
@@ -454,13 +377,6 @@ for kk=1:length(all_event_names)
     Y3q_evt_reshaped = reshape(Y3q_evt_mean,[size(IM,1) size(IM,2) length(t_bins_fus)]);
     Y3q_evt_median = median(Y3q_evt_normalized,3,'omitnan');
     Y3q_evt_median_reshaped = reshape(Y3q_evt_median,[size(IM,1) size(IM,2) length(t_bins_fus)]);
-
-    % Y3q_evt_duration = mean(Y3q_evt_normalized(:,:,ind_keep_duration),3,'omitnan');
-    % Y3q_evt_duration_reshaped = reshape(Y3q_evt_duration,[size(IM,1) size(IM,2) length(t_bins_fus)]);
-    % Y3q_evt_frequency = mean(Y3q_evt_normalized(:,:,ind_keep_frequency),3,'omitnan');
-    % Y3q_evt_frequency_reshaped = reshape(Y3q_evt_frequency,[size(IM,1) size(IM,2) length(t_bins_fus)]);
-    % Y3q_evt_amplitude = mean(Y3q_evt_normalized(:,:,ind_keep_amplitude),3,'omitnan');
-    % Y3q_evt_amplitude_reshaped = reshape(Y3q_evt_amplitude,[size(IM,1) size(IM,2) length(t_bins_fus)]);
 
 
     % Plotting
@@ -690,106 +606,7 @@ for kk=1:length(all_event_names)
     fprintf('>> Process 6/6 done [%s].\n',tab6.Title);
 
 
-    % f7_axes=[];
-    % n_iqr= 3;
-    % data_iqr = Y3q_evt_duration_reshaped(~isnan(Y3q_evt_duration_reshaped));
-    % temp=1:length(t_bins_fus);
-    % index_t_bins_fus = temp(1:end-1);
-    % for i=index_t_bins_fus
-    %     n=ceil(sqrt(length(index_t_bins_fus)));
-    %     ax = subplot(n,n,i,'parent',tab7);
-    %     hold(ax,'on');
-    %     imagesc(Y3q_evt_duration_reshaped(:,:,i),'Parent',ax);
-    %     ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
-    % %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    %     ax.CLim = [-5,10];
-    %     ax.XLim = [.5 size(IM,2)+.5];
-    %     ax.YLim = [.5 size(IM,1)+.5];
-    %     set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
-    %     ax.YDir = 'reverse';
-    %     if i == index_t_bins_fus(end)
-    %         cbar = colorbar(ax,'eastoutside');
-    %         cbar.Position = [.94 .01 .01 .15];
-    %     end
-    %     f7_axes=[f7_axes;ax];
-    % end
-    % n_col = 10 ;
-    % n_rows = ceil(length(f7_axes)/n_col);
-    % eps1=.01;
-    % eps2=.01;
-    % for i=1:length(f7_axes)
-    %     f7_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
-    % end
-    % fprintf('>> Process 7/6 done [%s].\n',tab7.Title);
-    %
-    %
-    % f8_axes=[];
-    % n_iqr= 3;
-    % data_iqr = Y3q_evt_frequency_reshaped(~isnan(Y3q_evt_frequency_reshaped));
-    % temp=1:length(t_bins_fus);
-    % index_t_bins_fus = temp(1:end-1);
-    % for i=index_t_bins_fus
-    %     n=ceil(sqrt(length(index_t_bins_fus)));
-    %     ax = subplot(n,n,i,'parent',tab8);
-    %     hold(ax,'on');
-    %     imagesc(Y3q_evt_frequency_reshaped(:,:,i),'Parent',ax);
-    %     ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
-    % %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    %     ax.CLim = [-5,10];
-    %     ax.XLim = [.5 size(IM,2)+.5];
-    %     ax.YLim = [.5 size(IM,1)+.5];
-    %     set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
-    %     ax.YDir = 'reverse';
-    %     if i == index_t_bins_fus(end)
-    %         cbar = colorbar(ax,'eastoutside');
-    %         cbar.Position = [.94 .01 .01 .15];
-    %     end
-    %     f8_axes=[f8_axes;ax];
-    % end
-    % n_col = 10 ;
-    % n_rows = ceil(length(f8_axes)/n_col);
-    % eps1=.01;
-    % eps2=.01;
-    % for i=1:length(f8_axes)
-    %     f8_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
-    % end
-    % fprintf('>> Process 8/6 done [%s].\n',tab8.Title);
-    %
-    %
-    % f9_axes=[];
-    % n_iqr= 3;
-    % data_iqr = Y3q_evt_amplitude_reshaped(~isnan(Y3q_evt_amplitude_reshaped));
-    % temp=1:length(t_bins_fus);
-    % index_t_bins_fus = temp(1:end-1);
-    % for i=index_t_bins_fus
-    %     n=ceil(sqrt(length(index_t_bins_fus)));
-    %     ax = subplot(n,n,i,'parent',tab9);
-    %     hold(ax,'on');
-    %     imagesc(Y3q_evt_amplitude_reshaped(:,:,i),'Parent',ax);
-    %     ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
-    % %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    %     ax.CLim = [-5,10];
-    %     ax.XLim = [.5 size(IM,2)+.5];
-    %     ax.YLim = [.5 size(IM,1)+.5];
-    %     set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
-    %     ax.YDir = 'reverse';
-    %     if i == index_t_bins_fus(end)
-    %         cbar = colorbar(ax,'eastoutside');
-    %         cbar.Position = [.94 .01 .01 .15];
-    %     end
-    %     f9_axes=[f9_axes;ax];
-    % end
-    % n_col = 10 ;
-    % n_rows = ceil(length(f9_axes)/n_col);
-    % eps1=.01;
-    % eps2=.01;
-    % for i=1:length(f9_axes)
-    %     f9_axes(i).Position = get_position(n_rows,n_col,i,[.01,.07,.01;.01,.01,.02]);
-    % end
-    % fprintf('>> Process 9/6 done [%s].\n',tab9.Title);
-
-
-    % Saving Stats
+     % Saving Stats
     if sum(flag_save_stats)>0
         save_dir = fullfile(DIR_STATS,'Event_Imaging',recording_name,event_name);
         if ~isfolder(save_dir)
@@ -837,14 +654,6 @@ for kk=1:length(all_event_names)
             fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save));
         end
 
-        % Sequence
-        %     if flag_save_stats(3)
-        %         filename_save = sprintf(strcat('%s-%s_Event-Imaging_Sequence.mat'),recording_name,event_name);
-        %         save(fullfile(save_dir,filename_save),'Params',...
-        %             'Y3q_evt_reshaped','Y3q_evt_median_reshaped','Y3q_evt_duration_reshaped','Y3q_evt_frequency_reshaped','Y3q_evt_amplitude_reshaped',...
-        %             'data_atlas','t_bins_fus','-v7.3');
-        %         fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save));
-        %     end
         if flag_save_stats(3)
             filename_save = sprintf(strcat('%s-%s_Event-Imaging_Sequence.mat'),recording_name,event_name);
             save(fullfile(save_dir,filename_save),'Params',...
@@ -886,17 +695,6 @@ for kk=1:length(all_event_names)
         saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab6.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
         fprintf('Tab %s saved in [%s].\n',tab6.Title,save_dir);
 
-%         tabgp.SelectedTab = tab7;
-%         saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab7.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-%         fprintf('Tab %s saved in [%s].\n',tab7.Title,save_dir);
-% 
-%         tabgp.SelectedTab = tab8;
-%         saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab8.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-%         fprintf('Tab %s saved in [%s].\n',tab8.Title,save_dir);
-% 
-%         tabgp.SelectedTab = tab9;
-%         saveas(f1,fullfile(save_dir,strcat(f1.Name,'_',tab9.Title,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-%         fprintf('Tab %s saved in [%s].\n',tab9.Title,save_dir);
     end
 
 
@@ -914,19 +712,6 @@ for kk=1:length(all_event_names)
         mkdir(work_dir);
 
         f2 = figure('Units','normalized');
-        %     for i = 1:length(f5_axes)
-        %         ax2 = copyobj(f5_axes(i),f2);
-        %         ax2.Title.String = strrep(ax2.Title.String,'t','Time from Event Peak');
-        %         colorbar(ax2,'eastoutside');
-        %         ax2.Position = [.05 .05 .85 .9];
-        %         l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-        %             'LineWidth',1,'Color','r','Parent',ax2);
-        %         l.Color(4) = .25;
-        %
-        %         pic_name = sprintf(strcat('%s_Event-Imaging_%03d'),recording_name,i);
-        %         saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
-        %         delete(ax2);
-        %     end
         f2.Position=[0.1    0.4    0.4    0.25];
         t = uicontrol(f2,'Style','text','BackgroundColor','w','FontSize',16,'FontWeight','bold','Units','normalized','Position',[.25 .9 .5 .1],'Parent',f2);
 
@@ -947,27 +732,6 @@ for kk=1:length(all_event_names)
             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
                 'LineWidth',1,'Color','r','Parent',ax2);
             l.Color(4) = .25;
-%             ax2 = copyobj(f7_axes(i),f2);
-%             ax2.Title.String = 'Longest';
-%             ax2.Position = [.405 .05 .19 .8];
-%             colorbar(ax2,'eastoutside');
-%             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-%                 'LineWidth',1,'Color','r','Parent',ax2);
-%             l.Color(4) = .25;
-%             ax2 = copyobj(f8_axes(i),f2);
-%             ax2.Title.String = 'Fastest';
-%             ax2.Position = [.605 .05 .19 .8];
-%             colorbar(ax2,'eastoutside');
-%             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-%                 'LineWidth',1,'Color','r','Parent',ax2);
-%             l.Color(4) = .25;
-%             ax2 = copyobj(f9_axes(i),f2);
-%             ax2.Title.String = 'Largest';
-%             ax2.Position = [.805 .05 .19 .8];
-%             colorbar(ax2,'eastoutside');
-%             l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-%                 'LineWidth',1,'Color','r','Parent',ax2);
-%             l.Color(4) = .25;
 
             pic_name = sprintf(strcat('%s_Event-Imaging_%03d'),recording_name,i);
             saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
