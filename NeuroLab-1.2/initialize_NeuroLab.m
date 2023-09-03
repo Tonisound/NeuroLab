@@ -490,14 +490,6 @@ h42bis = uicontrol(f,'Style','checkbox',...
     'Value',0,...
     'Parent',rightPanel);
 h42bis.Value = UiValues.TimePatchBox;
-% handles.EventBox
-h42ter = uicontrol(f,'Style','checkbox',...
-    'Units','normalized',...
-    'TooltipString','Show NLab Events',...
-    'Tag','EventBox',...
-    'Value',0,...
-    'Parent',rightPanel);
-h42ter.Value = 0;
 % AutoScale Button
 % handles.AutoScaleButton
 h43 = uicontrol(f,'Style','pushbutton',...
@@ -603,7 +595,6 @@ b.Position = [.05 .1 .85 .8];
 h41.Position = [.25/60 28/30 1.25/60 1.5/30];
 h42.Position = [0 .01 2/60 1.4/30];
 h42bis.Position = [0 .06 2/60 1.4/30];
-h42ter.Position = [0 .11 2/60 1.4/30];
 
 h43.Position = [56/60 3/30 3/60 1.5/30];
 h44.Position = [50/60 -.5/30 9/60 2/30];
@@ -742,7 +733,6 @@ set(myhandles.ProcessButton,'Callback',{@processButtonCallback,myhandles});
 set(myhandles.DisplayButton,'Callback',{@displayButtonCallback,myhandles});
 set(myhandles.LabelBox,'Callback',{@boxLabel_Callback,myhandles});
 set(myhandles.TimePatchBox,'Callback',{@boxTimePatch_Callback,myhandles.RightAxes});
-set(myhandles.EventBox,'Callback',{@boxEvent_Callback,myhandles.RightAxes});
 set(myhandles.AutoScaleButton,'Callback',{@buttonAutoScale_Callback,myhandles});
 set(myhandles.TracesButton,'Callback',{@menuEdit_TracesEdition_Callback,myhandles.RightAxes,myhandles});
 set(myhandles.TagButton,'Callback',{@menuDisplay_TimeTagSelection_Callback,myhandles});

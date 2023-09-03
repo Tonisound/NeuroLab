@@ -100,10 +100,7 @@ for index=1:length(all_events)
     S(index).xdata = xdata(:);
     S(index).ydata = ydata(:);
 end
-handles.EventBox.UserData.all_events = all_events;
-handles.EventBox.UserData.all_parents = all_parents;
-handles.EventBox.UserData.S = S;
-boxEvent_Callback(handles.EventBox,[],handles.RightAxes);
+
 
 % Save NeuroLab_Events.mat
 fprintf('===> NeuroLab_Events saved at %s.mat\n',fullfile(dir_save,'    .mat'));
