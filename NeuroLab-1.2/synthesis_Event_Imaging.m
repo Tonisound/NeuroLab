@@ -1,13 +1,10 @@
-function synthesis_Event_Imaging()
+function synthesis_Event_Imaging(event_name)
 % Reorganizes Event-Imaging figures in one folder
 % Generates a synthesis video of fUS peri-event activations
 % Generates Event Detection synthesis figures
 
-
 global DIR_SYNT DIR_FIG DIR_STATS;
 load('Preferences.mat','GTraces');
-
-event_name = 'RippleEvents';
 
 % Sanity Checks
 folder_source_figs = fullfile(DIR_FIG,'Event_Imaging');

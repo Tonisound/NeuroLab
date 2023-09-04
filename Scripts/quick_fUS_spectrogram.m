@@ -74,17 +74,16 @@ if strcmp(hObj.Tag,'Popup0')
     data_tg = load(fullfile(DIR_SAVE,filename,'Time_Groups.mat'));
 
     % Loading Ripple Events
-    if exist(fullfile(DIR_SAVE,filename,'RippleEvents.mat'),'file')
-        data_ripples = load(fullfile(DIR_SAVE,filename,'RippleEvents.mat'));
-    else
-        data_ripples = [];
-    end
+    input_file = fullfile(DIR_SAVE,filename,'Events','Ripples-Sqrt-All.csv');
+    [ripples,EventHeader,MetaData] = read_csv_events(input_file);
 
     % Storing
     f.UserData.d_fus = d_fus;
     f.UserData.data_tt = data_tt;
     f.UserData.data_tg = data_tg;
-    f.UserData.data_ripples = data_ripples;
+    f.UserData.ripples = ripples;
+    f.UserData.EventHeader = EventHeader;
+    f.UserData.MetaData = MetaData;
 end
 
 list_tracename = pu1.String;
@@ -92,8 +91,7 @@ list_tags = pu2.String;
 d_fus = handles.MainFigure.UserData.d_fus;
 data_tt = handles.MainFigure.UserData.data_tt;
 data_tg = handles.MainFigure.UserData.data_tg;
-data_ripples = handles.MainFigure.UserData.data_ripples;
-ripples_abs = data_ripples.ripples_abs;
+ripples = handles.MainFigure.UserData.ripples;
 
 % Loading fUS Trace
 % tracename = 'S1BF';
@@ -190,17 +188,17 @@ Y_phase = interp1(X_phase_nn,Y_phase_nn,Xq);
 
 X_phase_ripple = [];
 Y_phase_ripple = [];
-for i=1:size(ripples_abs,1)
-    if ripples_abs(i,1)>X(1) && ripples_abs(i,1)<X(end)
-        [~,ind_closest1] = min((ripples_abs(i,1)-Xq).^2);
-        [~,ind_closest2] = min((ripples_abs(i,2)-Xq).^2);
-        [~,ind_closest3] = min((ripples_abs(i,3)-Xq).^2);
+for i=1:size(ripples,1)
+    if ripples(i,1)>X(1) && ripples(i,1)<X(end)
+        [~,ind_closest1] = min((ripples(i,1)-Xq).^2);
+        [~,ind_closest2] = min((ripples(i,2)-Xq).^2);
+        [~,ind_closest3] = min((ripples(i,3)-Xq).^2);
         X_phase_ripple = [X_phase_ripple;Xq(ind_closest1),Xq(ind_closest2),Xq(ind_closest3)];
         Y_phase_ripple = [Y_phase_ripple;Y_phase(ind_closest1),Y_phase(ind_closest2),Y_phase(ind_closest3)];
     end
-%     l1 = line('XData',[ripples_abs(i,1) ripples_abs(i,1)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
-%     l2 = line('XData',[ripples_abs(i,2) ripples_abs(i,2)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','b','Parent',ax,'Tag','EventLine','HitTest','off');
-%     l3 = line('XData',[ripples_abs(i,3) ripples_abs(i,3)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
+%     l1 = line('XData',[ripples(i,1) ripples(i,1)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
+%     l2 = line('XData',[ripples(i,2) ripples(i,2)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','b','Parent',ax,'Tag','EventLine','HitTest','off');
+%     l3 = line('XData',[ripples(i,3) ripples(i,3)],'YData',[ax.YLim(1) ax.YLim(2)],'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
 end
 
 % all_ripple_axes = [handles.Ax7;handles.Ax8;handles.Ax9];

@@ -123,13 +123,21 @@ PlotFigure = 1;
 newfig = 1;
 [M,T,f] = PlotRipRaw_AB(HPCrip, ripples_abs(:,2), durations, cleaning, PlotFigure, newfig);
 
-% Saving variables
-% save(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),...
-%     'ripples_abs','HPCrip','meanVal','stdVal','durations','M','T',...
-%     'recording_name','channel_ripple','channel_non_ripple','timegroup','-v7.3');
-save(fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'),'ripples_abs','n_events',...
-    'recording_name','channel_ripple','channel_non_ripple','timegroup','-v7.3');
-fprintf('Ripple Detection [Channel:%s, %d events] saved in [%s].\n',channel_ripple,n_events,fullfile(DIR_SAVE,recording_name,'RippleEvents.mat'));
+
+% Saving in csv format
+folder_events = fullfile(DIR_SAVE,recording_name,'Events');
+if ~isfolder(folder_events)
+    mkdir(folder_events);
+end
+% Metadata and Header
+EventHeader = {'Start(s)';'Peak(s)';'End(s)';'MeanDur(us)';'MeanFreq(Hz)';'MeanPeaktoPeak(uV)'};
+MetaData =    {sprintf('channel_ripple,%s',channel_ripple);...
+    sprintf('channel_non_ripple,%s',channel_non_ripple);...
+    sprintf('timegroup,%s',timegroup)};
+% Writing Abs Ripples
+output_file = fullfile(folder_events,'Ripples-Abs-All.csv');
+write_csv_events(output_file,ripples_abs,EventHeader,MetaData);
+
 
 % Saving figure
 load('Preferences.mat','GTraces');

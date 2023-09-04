@@ -6,6 +6,15 @@ if nargin < 2
     textsep = ',';
 end
 
+% Sanity Check
+if ~isfile(input_file)
+    R = [];
+    EventHeader = [];
+    MetaData = [];
+    warning('File not found [%s].',input_file);
+    return;
+end
+
 fid = fopen(input_file,'r');
 hline = fgetl(fid);
 temp = regexp(hline,textsep,'split')';

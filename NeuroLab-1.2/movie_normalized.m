@@ -119,12 +119,11 @@ else
     atlas_name = 'Unregistered';
 end
 
+
 % Loading Ripple Events
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'),'file')
-    data_ripples = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'));
-else
-    data_ripples = [];
-end
+input_file = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Events','Ripples-Sqrt-All.csv');
+[events,EventHeader,MetaData] = read_csv_events(input_file);
+
 
 % Trace Selection
 l = flipud(findobj(handles.RightAxes,'Tag','Trace_Cerep','-or','Tag','Trace_Region','-or','Tag','Trace_Mean'));
@@ -918,14 +917,14 @@ while i>=START_IM && i<=END_IM
             line(1:length(Y0),Y0,'Parent',ax,'Tag','Trace',...
                 'LineWidth',.5,'Color',ax.UserData.color);
             
-            % Ripple Events
-            if ~isempty(data_ripples)
-                ripples = data_ripples.ripples_abs;
-%                 ripples = data_ripples.ripples_sqrt;
-                t_ripples = ripples(:,2);
-                t_ripples_start = ripples(:,1);
-                t_ripples_end = ripples(:,3);
+            % Show Ripple Events
+            if ~isempty(events)
+%                 n_events = size(events,2);
+                t_ripples_start = events(:,1);
+                t_ripples = events(:,2);
+                t_ripples_end = events(:,3);
                 ind_keep = find(sign((t_ripples-(t(i)-t_lfp)).*(t_ripples-(t(i)+t_lfp)))<=0);
+
                 if ~isempty(ind_keep)
                     for k=1:length(ind_keep)
                         t_rip = t_ripples(ind_keep(k));

@@ -135,11 +135,6 @@ save('behavResources.mat','TTLInfo')
 % CreateRipplesSleep
 [ripples,ripples_abs,ripples_sqrt] = CreateRipplesSleep_AB();
 channel_non_ripple = [];
-% n_events_abs = size(ripples_abs,1);
-% n_events_sqrt = size(ripples_sqrt,1);
-% save(fullfile(savedir,'RippleEvents.mat'),'ripples','ripples_abs','ripples_sqrt',...
-%     'n_events_abs','n_events_sqrt','recording_name','channel_ripple','channel_non_ripple','timegroup','-v7.3');
-% fprintf('RippleEvents [Channel:%s] saved in [%s].\n',channel_ripple,fullfile(savedir,'RippleEvents.mat'));
 
 % % Saving in csv format
 folder_events = fullfile(savedir,'Events');

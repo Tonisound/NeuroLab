@@ -113,11 +113,8 @@ phases = phases(ind_2);
 
 
 % Loading Ripple Events
-if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'),'file')
-    data_ripples = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'RippleEvents.mat'));
-else
-    data_ripples = [];
-end
+input_file = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Events','Ripples-Sqrt-All.csv');
+[events,EventHeader,MetaData] = read_csv_events(input_file);
 
 
 % Building Figure
@@ -507,7 +504,9 @@ cb13 = uicontrol('Units','normalized',...
     'Value',cb13_def,...
     'Tag','Checkbox13',...
     'Tooltipstring','Show Events');
-cb13.UserData.data_ripples = data_ripples;
+cb13.UserData.events = events;
+cb13.UserData.EventHeader = EventHeader;
+cb13.UserData.MetaData = MetaData;
 
 cb21 = uicontrol('Units','normalized',...
     'Style','checkbox',...
@@ -1277,7 +1276,7 @@ end
 function checkbox13_Callback(hObj,~,handles)
 % Display Ripple Events
 
-if isempty(hObj.UserData.data_ripples)
+if isempty(hObj.UserData.events)
     warning('No Events to show.')
     return;
 end
@@ -1285,28 +1284,36 @@ end
 all_axes = findobj(hObj.Parent,'Type','Axes');
 if hObj.Value
     
-    % Ripple Events
-   	ripples = hObj.UserData.data_ripples.ripples_abs;
-%     ripples = hObj.UserData.data_ripples.ripples_sqrt;
-    t_ripples = ripples(:,2);
-    t_ripples_start = ripples(:,1);
-    t_ripples_end = ripples(:,3);
+    % Displaying Events
+   	events = hObj.UserData.events;
+    n_events = size(events,1);
+
+    t_events_start = events(:,1);
+    if size(events,2)>1
+        t_events = events(:,2);
+    else
+        t_events = NaN(n_events,1);
+    end
+    if size(events,2)>2
+        t_events_end = events(:,3);
+    else
+        t_events_end = NaN(n_events,1);
+    end
     
     for k=1:length(all_axes)
         ax = all_axes(k);
-        xdata = [repmat(t_ripples_start,[1,2]),NaN(length(t_ripples),1)]';
-        ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
+        xdata = [repmat(t_events_start,[1,2]),NaN(n_events,1)]';
+        ydata = [repmat(ax.YLim,[n_events,1]),NaN(n_events,1)]';
         line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','g','Parent',ax,'Tag','EventLine','HitTest','off');
-        xdata = [repmat(t_ripples,[1,2]),NaN(length(t_ripples),1)]';
-        ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
+        xdata = [repmat(t_events,[1,2]),NaN(n_events,1)]';
+        ydata = [repmat(ax.YLim,[n_events,1]),NaN(n_events,1)]';
         line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','b','Parent',ax,'Tag','EventLine','HitTest','off');
-        xdata = [repmat(t_ripples_end,[1,2]),NaN(length(t_ripples),1)]';
-        ydata = [repmat(ax.YLim,[length(t_ripples),1]),NaN(length(t_ripples),1)]';
+        xdata = [repmat(t_events_end,[1,2]),NaN(n_events,1)]';
+        ydata = [repmat(ax.YLim,[n_events,1]),NaN(n_events,1)]';
         line('XData',xdata(:),'YData',ydata(:),'LineWidth',1,'LineStyle','-','Color','r','Parent',ax,'Tag','EventLine','HitTest','off');
-        %             patch('XData',[.5+x_rip_start*length(Y0) .5+x_rip_start*length(Y0) .5+x_rip_end*length(Y0) .5+x_rip_end*length(Y0)],...
-        %                 'YData',[ax.YLim(1) ax.YLim(2) ax.YLim(2) ax.YLim(1)],...
-        %                 'FaceColor',[.5 .5 .5],'EdgeColor',[.5 .5 .5],'FaceAlpha',.5,'Parent',ax,'Tag','EventPatch');     
-
+%         patch('XData',[.5+x_rip_start*length(Y0) .5+x_rip_start*length(Y0) .5+x_rip_end*length(Y0) .5+x_rip_end*length(Y0)],...
+%             'YData',[ax.YLim(1) ax.YLim(2) ax.YLim(2) ax.YLim(1)],...
+%             'FaceColor',[.5 .5 .5],'EdgeColor',[.5 .5 .5],'FaceAlpha',.5,'Parent',ax,'Tag','EventPatch');
     end
     
 else
