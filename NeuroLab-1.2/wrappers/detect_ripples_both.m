@@ -154,7 +154,7 @@ write_csv_events(output_file,ripples_abs,EventHeader,MetaData);
 % Writing Sqrt Ripples
 output_file = fullfile(folder_events,'Ripples-Sqrt-All.csv');
 write_csv_events(output_file,ripples_sqrt,EventHeader,MetaData);
-% Writing Mergel Ripples
+% Writing Merged Ripples
 output_file = fullfile(folder_events,'Ripples-Merged-All.csv');
 write_csv_events(output_file,ripples,EventHeader,MetaData);
 

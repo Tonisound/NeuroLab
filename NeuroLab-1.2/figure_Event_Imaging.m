@@ -33,7 +33,13 @@ else
         
     else
         % batch mode
-        ind_events = 1:length(d_events);
+%         ind_events = 1:length(d_events);
+        batch_csv_events = {'Ripples-Abs-All.csv';'Ripples-Sqrt-All.csv';'Ripples-Merged-All.csv'};
+        ind_events = [];
+        for i=1:length(batch_csv_events)
+            ind_keep = find({d_events(:).name}',char(batch_csv_events(i)));
+            ind_events = [ind_events;ind_keep];
+        end
     end
     all_event_names = {d_events(ind_events).name}';
 end
@@ -41,8 +47,9 @@ end
 for kk=1:length(all_event_names)
     
     % Read csv event file
-    event_name = char(all_event_names(kk));
-    event_file = fullfile(DIR_SAVE,recording_name,'Events',event_name);
+    event_name_csv = char(all_event_names(kk));
+    event_name = strrep(event_name_csv,'.csv','');
+    event_file = fullfile(DIR_SAVE,recording_name,'Events',event_name_csv);
     [events,EventHeader,MetaData] = read_csv_events(event_file);
     
     % Getting channel_id
