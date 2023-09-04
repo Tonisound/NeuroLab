@@ -34,10 +34,10 @@ else
     else
         % batch mode
 %         ind_events = 1:length(d_events);
-        batch_csv_events = {'Ripples-Abs-All.csv';'Ripples-Sqrt-All.csv';'Ripples-Merged-All.csv'};
+        batch_csv_events = {'Ripples-Abs-All.csv';'Ripples-Sqrt-All.csv'};%;'Ripples-Merged-All.csv'
         ind_events = [];
         for i=1:length(batch_csv_events)
-            ind_keep = find({d_events(:).name}',char(batch_csv_events(i)));
+            ind_keep = find(strcmp({d_events(:).name}',char(batch_csv_events(i))));
             ind_events = [ind_events;ind_keep];
         end
     end

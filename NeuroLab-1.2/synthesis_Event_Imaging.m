@@ -37,10 +37,10 @@ end
 unique_animals = unique(all_animals);
 
 
-flag_moving_figures = false;
+flag_moving_figures = true;
 flag_synthesis_movie = true;
-flag_event_detection = false;
-flag_regions_averages = false;
+flag_event_detection = true;
+flag_regions_averages = true;
 
 
 %% Browsing stats - Buidling struct
@@ -66,8 +66,7 @@ else
     % Listing planes
     all_planes = cell(size(all_files));
     all_coordinates = NaN(size(all_files));
-%     label_Y3q_evt = {'Mean';'Median';'Longest';'Fastest';'Largest'};
-    label_Y3q_evt = {'Longest';'Fastest';'Largest'};
+    label_Y3q_evt = {'Mean';'Median'};
 
     list_regions = {'OrbitalCortex';'LimbicCortex';'CingulateCortex';'InsularCortex';'MotorCortex';'SomatosensoryCortex';...
         'PiriformCortex';'RetrosplenialCortex';'ParietalCortex';'EntorhinalCortex';'VisualCortex';'AuditoryCortex';'RhinalCortex';...
@@ -117,7 +116,6 @@ else
         for j=1:length(dd)
             fprintf('Loading file [%s] ...',dd(j).name);
             data_seq = load(fullfile(dd(j).folder,dd(j).name),'Y3q_evt_reshaped','Y3q_evt_median_reshaped',...
-                'Y3q_evt_duration_reshaped','Y3q_evt_frequency_reshaped','Y3q_evt_amplitude_reshaped',...
                 't_bins_fus','data_atlas','Params');
             fprintf(' done.\n');
 
@@ -127,9 +125,6 @@ else
 
             S(i).Y3q_evt_reshaped = data_seq.Y3q_evt_reshaped;
             S(i).Y3q_evt_median_reshaped = data_seq.Y3q_evt_median_reshaped;
-            S(i).Y3q_evt_duration_reshaped = data_seq.Y3q_evt_duration_reshaped;
-            S(i).Y3q_evt_frequency_reshaped = data_seq.Y3q_evt_frequency_reshaped;
-            S(i).Y3q_evt_amplitude_reshaped = data_seq.Y3q_evt_amplitude_reshaped;
 
             S(i).t_bins_fus = data_seq.t_bins_fus;
             S(i).name = strrep(strrep(d(i).name,'_nlab',''),'_','-');
@@ -141,9 +136,9 @@ else
             S(i).plane = char(all_planes(i));
             S(i).n_events = data_seq.Params.n_events;
             S(i).channel_id = data_seq.Params.channel_id;
-            S(i).mean_dur = data_seq.Params.mean_dur;
-            S(i).mean_freq = data_seq.Params.mean_freq;
-            S(i).mean_p2p = data_seq.Params.mean_p2p;
+%             S(i).mean_dur = data_seq.Params.mean_dur;
+%             S(i).mean_freq = data_seq.Params.mean_freq;
+%             S(i).mean_p2p = data_seq.Params.mean_p2p;
         end
 
         % Regions
@@ -228,8 +223,7 @@ end
 
 %% Moving figures
 if flag_moving_figures
-    all_filetypes = {'Dynamics';'Regions';'Event-Imaging';'Synthesis';'Trials';...
-        'Sequence-Mean';'Sequence-Median';'Sequence-Largest';'Sequence-Fastest';'Sequence-Longest'};
+    all_filetypes = {'Dynamics';'Regions';'Event-Imaging';'Synthesis';'Trials';'Sequence-Mean';'Sequence-Median'};
     for i=1:length(all_files)
         for j=1:length(all_filetypes)
             filetype = char(all_filetypes(j));
@@ -296,12 +290,6 @@ if flag_synthesis_movie
                                 Y3q_evt = S_animal_plane(i).Y3q_evt_reshaped;
                             case 'Median'
                                 Y3q_evt = S_animal_plane(i).Y3q_evt_median_reshaped;
-                            case 'Longest'
-                                Y3q_evt = S_animal_plane(i).Y3q_evt_duration_reshaped;
-                            case 'Fastest'
-                                Y3q_evt = S_animal_plane(i).Y3q_evt_frequency_reshaped;
-                            case 'Strongest'
-                                Y3q_evt = S_animal_plane(i).Y3q_evt_amplitude_reshaped;
                             otherwise
                                 Y3q_evt = NaN(1,1,length(t_bins_fus));
                         end
