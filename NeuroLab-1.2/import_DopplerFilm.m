@@ -34,17 +34,22 @@ if isempty(Doppler_film)
     end
 end
 
+% Compute Doppler_dB
+Doppler_dB = 20*log10(abs(Doppler_film)/max(abs(Doppler_film(:))));
+Doppler_dB = rescale(Doppler_dB,0,1000);
 
 % Checking Doppler
 if flag == 0
     % first import
-    [ind_remove,thresh,tag] = check_Doppler(Doppler_film);
+%     [ind_remove,thresh,tag] = check_Doppler(Doppler_film);
+    [ind_remove,thresh,tag] = check_Doppler(Doppler_dB);
     Doppler_type = 'Doppler_source';
 else
     % re-import
     % d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh','Doppler_type');
     d = load(fullfile(DIR_SAVE,F.nlab,'Doppler.mat'),'ind_remove','thresh');
-    [ind_remove,thresh,tag] = check_Doppler(Doppler_film,d.ind_remove,d.thresh);
+%     [ind_remove,thresh,tag] = check_Doppler(Doppler_film,d.ind_remove,d.thresh);
+    [ind_remove,thresh,tag] = check_Doppler(Doppler_dB,d.ind_remove,d.thresh);
     %Doppler_type = d.Doppler_type;
     Doppler_type = 'Doppler_source';
 end

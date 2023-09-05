@@ -202,7 +202,8 @@ set(f,'KeyPressFcn',{@key_pressFcn});
                 %Move Cursor
                 if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<Ylim(2))
                     l_cursor.XData = [round(pt_rp(1,1)) round(pt_rp(1,1))];
-                    im.CData = Doppler_film(:,:,round(pt_rp(1,1)));
+%                     im.CData = Doppler_film(:,:,round(pt_rp(1,1)));
+                    im.CData = Doppler_film(:,:,round(pt_rp(1,1)))*ind_keep(round(pt_rp(1,1)));
                     text1.String = sprintf('%d/%d',round(pt_rp(1,1)),size(Doppler_film,3));
                 end
             case 2
@@ -237,7 +238,8 @@ set(f,'KeyPressFcn',{@key_pressFcn});
         %Move Cursor
         if(pt_rp(1,1)>Xlim(1) && pt_rp(1,1)<Xlim(2) && pt_rp(1,2)>Ylim(1) && pt_rp(1,2)<Ylim(2))
             l_cursor.XData = [round(pt_rp(1,1)) round(pt_rp(1,1))];
-            im.CData = Doppler_film(:,:,round(pt_rp(1,1)));
+%             im.CData = Doppler_film(:,:,round(pt_rp(1,1)));
+            im.CData = Doppler_film(:,:,round(pt_rp(1,1)))*ind_keep(round(pt_rp(1,1)));
             text1.String = sprintf('%d/%d',round(pt_rp(1,1)),size(Doppler_film,3));
         end
     end
@@ -255,25 +257,29 @@ set(f,'KeyPressFcn',{@key_pressFcn});
             case 'leftarrow'
                 if l_cursor.XData(1)>1
                     l_cursor.XData = l_cursor.XData-1;
-                    im.CData = Doppler_film(:,:,l_cursor.XData(1));
+%                     im.CData = Doppler_film(:,:,l_cursor.XData(1));
+                    im.CData = Doppler_film(:,:,l_cursor.XData(1))*ind_keep(l_cursor.XData(1));
                     text1.String = sprintf('%d/%d',l_cursor.XData(1),size(Doppler_film,3));
                 end
             case 'rightarrow'
                 if l_cursor.XData(1)<size(Doppler_film,3)
                     l_cursor.XData = l_cursor.XData+1;
-                    im.CData = Doppler_film(:,:,l_cursor.XData(1));
+%                     im.CData = Doppler_film(:,:,l_cursor.XData(1));
+                    im.CData = Doppler_film(:,:,l_cursor.XData(1))*ind_keep(l_cursor.XData(1));
                     text1.String = sprintf('%d/%d',l_cursor.XData(1),size(Doppler_film,3));
                 end
             case 'downarrow'
                 if l_cursor.XData(1)>1
                     l_cursor.XData = l_cursor.XData-10;
-                    im.CData = Doppler_film(:,:,l_cursor.XData(1));
+%                     im.CData = Doppler_film(:,:,l_cursor.XData(1));
+                    im.CData = Doppler_film(:,:,l_cursor.XData(1))*ind_keep(l_cursor.XData(1));
                     text1.String = sprintf('%d/%d',l_cursor.XData(1),size(Doppler_film,3));
                 end
             case 'uparrow'
                 if l_cursor.XData(1)<size(Doppler_film,3)
                     l_cursor.XData = l_cursor.XData+10;
-                    im.CData = Doppler_film(:,:,l_cursor.XData(1));
+%                     im.CData = Doppler_film(:,:,l_cursor.XData(1));
+                    im.CData = Doppler_film(:,:,l_cursor.XData(1))*ind_keep(l_cursor.XData(1));
                     text1.String = sprintf('%d/%d',l_cursor.XData(1),size(Doppler_film,3));
                 end
             case 'space'
