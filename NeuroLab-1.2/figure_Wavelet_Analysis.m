@@ -1579,9 +1579,11 @@ for k=1:bands
     %Gaussian smoothing
     t_gauss = str2double(handles.EditGaussian.String);
     step = t_gauss*round(f_sub);
-    Cdata_smooth = imgaussfilt(Cdata,[1 step]);
-    %Cdata_smooth = imgaussfilt(Cdata,[1 1]);
-    
+    try
+        Cdata_smooth = imgaussfilt(Cdata,[1 step]);
+    catch
+        Cdata_smooth = imgaussfilt(Cdata,[1 1]);
+    end
     
     % First Tab
     ax = findobj(handles.FirstBotPanel,'Tag',sprintf('Ax%d',k));

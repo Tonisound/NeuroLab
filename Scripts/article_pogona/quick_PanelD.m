@@ -1,7 +1,7 @@
 function f=quick_PanelD(rec_name)
 
 folder = '/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_Statistics/Auto-Correlation';
-% rec_name = '20190930_P3-021_E_nlab';
+rec_name = '20190930_P3-020_E_nlab';
 filename = strcat(rec_name,'_Auto-Correlation-Dynamics.mat');
 data_ac=load(fullfile(folder,rec_name,filename));
 
@@ -30,7 +30,7 @@ all_locs_dynamic_4=squeeze(data_ac.IM_all_locs_dynamic(i,:,4));
 
 f=figure;
 f.Name = strcat(rec_name,' - Panel D');
-colormap(f,'parula');
+colormap(f,'jet');
 color1 = 'r';
 color2 = [.5 .5 .5];
 color3 = [.5 .5 .5];

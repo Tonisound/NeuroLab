@@ -720,7 +720,7 @@ for i = 1:length(ind_files)
                 f2 = figure_Event_Imaging(myhandles,0,str_regions);
                 
             case '(Figure) Timed Frames'
-                f2 = figure_Timed_Frames(myhandles,0,str_regions);
+                f2 = figure_Timed_Frames(myhandles,0,str_regions,str_tag);
             
             case 'Edit Traces'
                 success = menuEdit_TracesEdition_Callback([],[],myhandles.RightAxes,myhandles);

@@ -1,9 +1,11 @@
-function quick_export_ext(X,Y)
+function quick_export_ext(X,Y,file_ext)
 % Export trace in .ext format
 
 % Modify if needed
 parent_folder = pwd;
-file_ext = 'myfile.ext';
+if nargin <3
+    file_ext = 'myfile.ext';
+end
 T.format = 'float32';
 T.nb_samples = length(X);
 T.unit = 'mV';

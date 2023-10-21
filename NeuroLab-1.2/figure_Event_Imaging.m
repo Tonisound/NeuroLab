@@ -56,9 +56,14 @@ for kk=1:length(all_event_names)
     mline = char(MetaData(contains(MetaData,'channel_ripple')));
     textsep = ',';
     temp = regexp(mline,textsep,'split');
+    % Removing blanks
+    while isempty(char(temp(end)))
+        temp=temp(1:end-1);
+    end
     channel_id = char(temp(end));
 %     channel_id = data_events.channel_ripple;
-    band_name = 'ripple';
+%     band_name = 'ripple';
+    band_name = 'beta';
     
     % Getting t_events
     if isempty(EventHeader)
@@ -124,16 +129,23 @@ for kk=1:length(all_event_names)
     % Loading time reference
     data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
     % Loading atlas
-    data_atlas = load(fullfile(DIR_SAVE,recording_name,'Atlas.mat'));
-    atlas_name = data_atlas.AtlasName;
-    switch atlas_name
-        case 'Rat Coronal Paxinos'
-            atlas_fullname = sprintf('AP=%.2fmm',data_atlas.AP_mm);
-            atlas_coordinate = data_atlas.AP_mm;
+    if exist(fullfile(DIR_SAVE,recording_name,'Atlas.mat'),'file')
+        data_atlas = load(fullfile(DIR_SAVE,recording_name,'Atlas.mat'));
+        atlas_name = data_atlas.AtlasName;
+        switch atlas_name
+            case 'Rat Coronal Paxinos'
+                atlas_fullname = sprintf('AP=%.2fmm',data_atlas.AP_mm);
+                atlas_coordinate = data_atlas.AP_mm;
 
-        case 'Rat Sagittal Paxinos'
-            atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
-            atlas_coordinate = data_atlas.ML_mm;
+            case 'Rat Sagittal Paxinos'
+                atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
+                atlas_coordinate = data_atlas.ML_mm;
+        end
+    else
+        data_atlas = [];
+        atlas_name = [];
+        atlas_fullname = 'Unregistered';
+        atlas_coordinate = 0;
     end
 
     % Loading time groups
@@ -335,7 +347,11 @@ for kk=1:length(all_event_names)
     % Computing event averages and fUS averages
     t_before = -1;          % time window before (seconds)
     t_after = 5;            % time window after (seconds)
+    t_before = -10;          % time window before (seconds)
+    t_after = 30;            % time window after (seconds)
+    
     sampling_fus = 10;      % Hz
+    sampling_fus = 1;      % Hz
     sampling_lfp = 1000;    % Hz
     t_bins_fus  = (t_before:1/sampling_fus:t_after)';
     t_bins_lfp  = (t_before:1/sampling_lfp:t_after)';
@@ -399,8 +415,8 @@ for kk=1:length(all_event_names)
     n_iqr = 4;
     data_iqr = Yraw_evt(~isnan(Yraw_evt));
     ax1.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    % ax1.XLim = [-.1 .5];
-    ax1.XLim = [-.2 .2];
+    % ax1.XLim = [-.2 .2];
+    ax1.XLim = [-40 40];
 
     % ax2 = subplot(323,'parent',tab2);
     ax2 = axes('Parent',tab2,'Position',[.05 .4 .25 .25]);
@@ -729,16 +745,20 @@ for kk=1:length(all_event_names)
             ax2.Title.String = 'Mean';
             ax2.Position = [.005 .05 .49 .8];
             colorbar(ax2,'eastoutside');
-            l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-                'LineWidth',1,'Color','r','Parent',ax2);
-            l.Color(4) = .25;
+            if ~isempty(data_atlas)
+                l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+                    'LineWidth',1,'Color','r','Parent',ax2);
+                l.Color(4) = .25;
+            end
             ax2 = copyobj(f6_axes(i),f2);
             ax2.Title.String = 'Median';
             ax2.Position = [.505 .05 .49 .8];
             colorbar(ax2,'eastoutside');
-            l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
-                'LineWidth',1,'Color','r','Parent',ax2);
-            l.Color(4) = .25;
+            if ~isempty(data_atlas)
+                l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+                    'LineWidth',1,'Color','r','Parent',ax2);
+                l.Color(4) = .25;
+            end
 
             pic_name = sprintf(strcat('%s_Event-Imaging_%03d'),recording_name,i);
             saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);

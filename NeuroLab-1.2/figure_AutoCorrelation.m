@@ -623,8 +623,8 @@ if nargin <5
     flag_pixels = false;
     flag_regions = true;
     flag_groups = true;
-    flag_dynamics = false;
-    flag_dynamics_groups = false;
+    flag_dynamics = true;
+    flag_dynamics_groups = true;
 else
     flag_pixels = flags(1);
     flag_regions = flags(2);
@@ -1372,7 +1372,11 @@ xq = -max_delay:step_delay:max_delay;
 yq = y;
 [Xq,Yq]=meshgrid(xq,yq);
 V=all_r;
-Vq = interp2(X,Y,V,Xq,Yq);
+if size(all_r,1)==1
+    Vq = interp1(X,V,Xq);
+else
+    Vq = interp2(X,Y,V,Xq,Yq);
+end
 fprintf(' done.\n');
 
 % Renaming things

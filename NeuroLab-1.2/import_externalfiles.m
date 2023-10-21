@@ -192,6 +192,20 @@ for i=1:length(ind_traces)
         hl.UserData = s;
         fprintf('External Trace successfully loaded (%s)\n',traces(ind_traces(i)).fullname);
     end
+
+    % Saving External Trace
+    dir_ext = fullfile(dir_save,'Sources_ext');
+    if ~exist(dir_ext,'dir')
+        mkdir(dir_ext);
+    end
+    save_name = traces(ind_traces(i)).fullname;
+    Y = traces(ind_traces(i)).Y;
+    X = traces(ind_traces(i)).X;
+%     f = traces(ind_traces(i)).X(2)-traces(ind_traces(i)).X(1);
+%     x_start = traces(ind_traces(i)).X(1);
+%     x_end = traces(ind_traces(i)).X(end);
+    save(fullfile(dir_ext,strcat(save_name,'.mat')),'X','Y','-v7.3');
+    fprintf('External Trace Saved [%s].\n',fullfile(dir_ext,strcat(save_name,'.mat')));
     
 end
 
