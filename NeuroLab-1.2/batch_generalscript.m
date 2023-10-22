@@ -654,7 +654,21 @@ for i = 1:length(ind_files)
                 
             case 'Detect Hippocampal Ripples'
 %                   success = detect_ripples_abs(fullfile(DIR_SAVE,FILES(ii).nlab),0);
-                  success = detect_ripples_both(fullfile(DIR_SAVE,FILES(ii).nlab),0);
+%                   success = detect_ripples_both(fullfile(DIR_SAVE,FILES(ii).nlab),0);
+
+                  % Detect Ripples on All channels
+                  % Comment if unnecessary
+                  if exist(fullfile(savedir,'Nconfig.mat'),'file')
+                      data_nconfig = load(fullfile(DIR_SAVE,FILES(ii).nlab,'Nconfig.mat'));
+                      all_channels = data_nconfig.channel_id(strcmp(data_nconfig.channel_type,'LFP'));
+                      for k=1:length(all_channels)
+                          channel_ripple = char(all_channels(k));
+                          timegroup = 'NREM';
+                          success = detect_ripples_both(fullfile(DIR_SAVE,FILES(ii).nlab),val,channel_ripple,timegroup);
+                      end
+                  else
+                      success = false;
+                  end                 
 
             case 'Segregate Hippocampal Ripples'
                 success = segregate_ripple_events(fullfile(DIR_SAVE,FILES(ii).nlab),0);

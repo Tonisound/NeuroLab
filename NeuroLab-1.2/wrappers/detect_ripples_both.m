@@ -159,6 +159,23 @@ output_file = fullfile(folder_events,'Ripples-Merged-All.csv');
 write_csv_events(output_file,ripples,EventHeader,MetaData);
 
 
+% Saving in separate folder
+% Comment if unnecessary
+global DIR_SAVE DIR_STATS;
+folder_separate = fullfile(DIR_STATS,'Separate-Ripple-Detection');
+if ~isfolder(folder_separate)
+    mkdir(folder_separate);
+end
+cur_file = strrep(savedir,DIR_SAVE,'');
+cur_file = strrep(cur_file,filesep,'');
+output_file = fullfile(folder_separate,'[%][%]Ripples-Merged-All.csv',cur_file,channel_ripple);
+write_csv_events(output_file,ripples,EventHeader,MetaData);
+output_file = fullfile(folder_separate,'[%][%]Ripples-Abs-All.csv',cur_file,channel_ripple);
+write_csv_events(output_file,ripples_abs,EventHeader,MetaData);
+output_file = fullfile(folder_separate,'[%][%]Ripples-Sqrt-All.csv',cur_file,channel_ripple);
+write_csv_events(output_file,ripples_sqrt,EventHeader,MetaData);
+
+
 % Delete folders : 
 rmdir('ChannelsToAnalyse','s');
 rmdir('LFPData','s');
