@@ -11,7 +11,7 @@ for i=1:length(FILES)
         for k=1:length(all_channels)
             channel_ripple = char(all_channels(k));
             timegroup = 'NREM';
-            success = detect_ripples_both(fullfile(savedir,0,channel_ripple,timegroup));
+            success = detect_ripples_both(savedir,0,channel_ripple,timegroup);
         end
     else
         success = false;
