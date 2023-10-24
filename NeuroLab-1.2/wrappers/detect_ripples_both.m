@@ -168,11 +168,11 @@ if ~isfolder(folder_separate)
 end
 cur_file = strrep(savedir,DIR_SAVE,'');
 cur_file = strrep(cur_file,filesep,'');
-output_file = fullfile(folder_separate,sprintf('[%][%]Ripples-Merged-All.csv',cur_file,channel_ripple));
+output_file = fullfile(folder_separate,sprintf('[%s][%s]Ripples-Merged-All.csv',cur_file,channel_ripple));
 write_csv_events(output_file,ripples,EventHeader,MetaData);
-output_file = fullfile(folder_separate,sprintf('[%][%]Ripples-Abs-All.csv',cur_file,channel_ripple));
+output_file = fullfile(folder_separate,sprintf('[%s][%s]Ripples-Abs-All.csv',cur_file,channel_ripple));
 write_csv_events(output_file,ripples_abs,EventHeader,MetaData);
-output_file = fullfile(folder_separate,sprintf('[%][%]Ripples-Sqrt-All.csv',cur_file,channel_ripple));
+output_file = fullfile(folder_separate,sprintf('[%s][%s]Ripples-Sqrt-All.csv',cur_file,channel_ripple));
 write_csv_events(output_file,ripples_sqrt,EventHeader,MetaData);
 
 
