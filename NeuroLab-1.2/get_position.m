@@ -8,9 +8,7 @@ if nargin<4
     h_margin_1 = .05; % bottom margin
     h_margin_2 = .05; % top margin
     h_eps = .01;      % vertical spacing
-    
-    margins = [w_margin_1,w_margin_2,w_eps;
-        h_margin_1,h_margin_2,h_eps];
+    margins = [w_margin_1,w_margin_2,w_eps;h_margin_1,h_margin_2,h_eps];
 end
 
 w_margin_1 = margins(1,1); % left margin

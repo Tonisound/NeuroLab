@@ -40,7 +40,7 @@ for i=1:size(R,1)
 end
 
 Xq = X_events(1):step_interp:X_events(end);
-Yq = interp1(X_events,Y_events,Xq); 
+Yq = interp1(X_events,Y_events,Xq);
 % Yphase = rescale(mod(Yq,1),-pi,pi);
 Yphase = rescale(mod(Yq,1),0,2*pi);
 
@@ -101,12 +101,12 @@ all_pd = [];
 all_pd_lp = [];
 all_pd_fa = [];
 pimp_factor = 2;
-     
+
 % f1_1 = figure('Name','Raw tuning curves');
 % for counter = 1:n_traces
 %     pos = get_position(n_rows,n_columns,counter);
 %     pax = polaraxes('Parent',f1_1,'Position',pos);
-%     
+%
 %     hold(pax,'on');
 %     polarplot(hd_miniscope,data_miniscope_cells(:,counter),'Parent',pax,...
 %         'LineStyle','none','Marker','.','MarkerFaceColor',g_colors(counter,:),'MarkerEdgeColor',g_colors(counter,:));
@@ -114,27 +114,27 @@ pimp_factor = 2;
 % %     set(pax,'RTickLabel',[],'ThetaTickLabel',[]);
 % %     pax.Title.String = strcat(char(labels_miniscope_cells(counter)));
 %     pax.ThetaZeroLocation='top';
-% 
+%
 %     this_bin_counts = bin_counts(:,counter);
 %     polarhistogram('BinEdges',bin_edges,'BinCounts',pimp_factor*this_bin_counts,'Parent',pax,...
 %         'FaceAlpha',.75,'FaceColor',[.5 .5 .5],'EdgeColor','k');
-% 
+%
 %     this_mvl = sqrt((sum(cos(bin_centers)'.*this_bin_counts)).^2+(sum(sin(bin_centers)'.*this_bin_counts)).^2)/10;
 %     [~,ind_pd] = max(this_bin_counts);
 %     this_pd = bin_centers(ind_pd);
 %     polarplot([this_pd this_pd],[0 pimp_factor*this_mvl],'Parent',pax,...
 %         'LineStyle','-','Color','r','LineWidth',2);
 %     pax.Title.String = strcat(char(labels_miniscope_cells(counter)),sprintf('[MVL=%.2f]',this_mvl));
-% 
+%
 %     all_mvl = [all_mvl;this_mvl];
 %     all_pd = [all_pd;this_pd];
 % end
 
-f1_2 = figure('Name','Mean curves');
+f1_2 = figure('Name','Mean curves Polar');
 for counter = 1:n_traces
     pos = get_position(n_rows,n_columns,counter);
     pax = polaraxes('Parent',f1_2,'Position',pos);
-    
+
     hold(pax,'on');
     this_bin_counts = bin_counts(:,counter);
     this_bin_counts_plus_sem = bin_counts(:,counter)+bin_counts_sem(:,counter);
@@ -142,7 +142,7 @@ for counter = 1:n_traces
     this_bin_counts_minus_sem = bin_counts(:,counter)-bin_counts_sem(:,counter);
     this_bin_counts_minus_std = bin_counts(:,counter)-bin_counts_std(:,counter);
 
-%     this_bin_counts_plot = rescale([this_bin_counts(:);this_bin_counts(1)],0,1);
+    %     this_bin_counts_plot = rescale([this_bin_counts(:);this_bin_counts(1)],0,1);
     this_bin_counts_plot = [this_bin_counts(:);this_bin_counts(1)];
     this_bin_counts_plot_plus_sem = [this_bin_counts_plus_sem(:);this_bin_counts_plus_sem(1)];
     this_bin_counts_plot_plus_std = [this_bin_counts_plus_std(:);this_bin_counts_plus_std(1)];
@@ -159,12 +159,49 @@ for counter = 1:n_traces
     polarplot(bin_centers_plot,this_bin_counts_plot_minus_sem,'Parent',pax,...
         'LineStyle','--','LineWidth',1,'Color',g_colors(counter,:),...
         'Marker','none','MarkerFaceColor',g_colors(counter,:),'MarkerEdgeColor',g_colors(counter,:));
-%     set(pax,'RTick',[],'RTickLabel',[],'ThetaTick',[],'ThetaTickLabel',[]);
-%     set(pax,'RTickLabel',[],'ThetaTickLabel',[]);
-%     pax.Title.String = strcat(char(all_labels(counter)));
+    if mod(counter,n_columns)~=1
+        set(pax,'RTick',[],'RTickLabel',[],'ThetaTick',[],'ThetaTickLabel',[]);
+        set(pax,'RTickLabel',[],'ThetaTickLabel',[]);
+    end
     pax.ThetaZeroLocation='top';
     pax.Title.String = strcat(char(labels_miniscope_cells(counter)));
     pax.RLim = [min(this_bin_counts_plot_minus_sem) max(this_bin_counts_plot_plus_sem)];
-
 end
+
+f1_3 = figure('Name','Mean curves Cartesian');
+for counter = 1:n_traces
+    pos = get_position(n_rows,n_columns,counter,[.05,.05,.01;.05,.05,.05]);
+    ax = axes('Parent',f1_3,'Position',pos);
+
+    hold(ax,'on');
+    this_bin_counts = bin_counts(:,counter);
+    this_bin_counts_plus_sem = bin_counts(:,counter)+bin_counts_sem(:,counter);
+    this_bin_counts_plus_std = bin_counts(:,counter)+bin_counts_std(:,counter);
+    this_bin_counts_minus_sem = bin_counts(:,counter)-bin_counts_sem(:,counter);
+    this_bin_counts_minus_std = bin_counts(:,counter)-bin_counts_std(:,counter);
+
+
+    plot(bin_centers,this_bin_counts,'Parent',ax,...
+        'LineStyle','-','LineWidth',2,'Color',g_colors(counter,:),...
+        'Marker','none','MarkerFaceColor',g_colors(counter,:),'MarkerEdgeColor',g_colors(counter,:));
+    plot(bin_centers,this_bin_counts_plus_sem,'Parent',ax,...
+        'LineStyle','--','LineWidth',1,'Color',g_colors(counter,:),...
+        'Marker','none','MarkerFaceColor',g_colors(counter,:),'MarkerEdgeColor',g_colors(counter,:));
+    plot(bin_centers,this_bin_counts_minus_sem,'Parent',ax,...
+        'LineStyle','--','LineWidth',1,'Color',g_colors(counter,:),...
+        'Marker','none','MarkerFaceColor',g_colors(counter,:),'MarkerEdgeColor',g_colors(counter,:));
+%     % Patch
+%     patch('XData',[bin_centers_plot;(bin_centers_plot)],...
+%         'YData',[this_bin_counts_plus_sem;(this_bin_counts_minus_sem)],'Parent',ax,...
+%         'FaceAlpha',.5,'EdgeColor',g_colors(counter,:),'FaceColor',g_colors(counter,:));
+
+    ax.XLim=[bin_centers(1) bin_centers(end)];
+    ax.XTick = 0:pi/2:2*pi;
+    grid(ax,'on');
+    ax.XTickLabel = {'0';'90';'180';'270';'360'};
+    ax.Title.String = strcat(char(labels_miniscope_cells(counter)));
+    ax.YLim = [min(this_bin_counts_minus_sem) max(this_bin_counts_plus_sem)];
+    line('XData',[pi pi],'YData',ax.YLim,'Parent',ax,'Color','r');
+end
+
 end
