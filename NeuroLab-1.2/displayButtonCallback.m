@@ -70,6 +70,9 @@ switch strtrim(str(val,:))
 
     case '(Figure) Peri-Event Time Histogram'
         figure_PeriEventHistogramm(handles,1);
+
+    case '(Figure) Peri-Event LFP'
+        figure_PeriEventLFP(handles,1);
         
     case '(Figure) Global Episode Display'
         figure_GlobalDisplay(handles,1);

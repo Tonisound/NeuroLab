@@ -709,7 +709,10 @@ for i = 1:length(ind_files)
                 
             case '(Figure) Peri-Event Time Histogram'
                 f2 = figure_PeriEventHistogramm(myhandles,0,str_group,str_regions,str_traces);
-                
+
+            case '(Figure) Peri-Event LFP'
+                f2 = figure_PeriEventLFP(myhandles,0);
+
             case '(Figure) Auto-Correlation fUS'
                 f2 = figure_AutoCorrelation(myhandles,0,str_tag,str_regions,str_group_regions);
                             

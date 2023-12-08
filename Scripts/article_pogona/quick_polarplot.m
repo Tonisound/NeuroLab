@@ -4,7 +4,7 @@ global DIR_SAVE FILES CUR_FILE;
 close all;
 
 if nargin<1
-    n_bins = 36;
+    n_bins = 72;
 end
 if nargin<2
     step_interp = .5;
@@ -28,7 +28,8 @@ end
 input_file = fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Events','PS-All.csv');
 [R,EventHeader,MetaData] = read_csv_events(input_file);
 
-counter = 0;
+% counter = 0; % S2 between 0 and 180 degrees
+counter = .5; % S1 between 0 and 180 degrees
 X_events = [];
 Y_events = [];
 for i=1:size(R,1)
@@ -200,6 +201,11 @@ for counter = 1:n_traces
     grid(ax,'on');
     ax.XTickLabel = {'0';'90';'180';'270';'360'};
     ax.Title.String = strcat(char(labels_miniscope_cells(counter)));
+%     if counter>6
+%         ax.YLim = [min(this_bin_counts_minus_sem) max(this_bin_counts_plus_sem)];
+%     else
+%         ax.YLim = [0 .5]; 
+%     end
     ax.YLim = [min(this_bin_counts_minus_sem) max(this_bin_counts_plus_sem)];
     line('XData',[pi pi],'YData',ax.YLim,'Parent',ax,'Color','r');
 end

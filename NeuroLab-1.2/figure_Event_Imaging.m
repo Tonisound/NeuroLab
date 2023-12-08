@@ -25,7 +25,7 @@ elseif length(d_events)==1
 else
     if val == 1
         % user mode
-        [ind_events,v] = listdlg('Name','Region Selection','PromptString','Select Events to display',...
+        [ind_events,v] = listdlg('Name','Event Selection','PromptString','Select Events to display',...
             'SelectionMode','multiple','ListString',{d_events(:).name}','InitialValue',1,'ListSize',[300 500]);
         if v==0 || isempty(ind_events)
             return;
@@ -62,8 +62,7 @@ for kk=1:length(all_event_names)
     end
     channel_id = char(temp(end));
 %     channel_id = data_events.channel_ripple;
-%     band_name = 'ripple';
-    band_name = 'beta';
+    band_name = 'ripple';
     
     % Getting t_events
     if isempty(EventHeader)
@@ -121,9 +120,11 @@ for kk=1:length(all_event_names)
     % face_alpha = .5 ;
     g_colors = get_colors(n_channels+1,'jet');
     % Flag save
-    flag_save_stats = [1,1,1]; % traces - regions - sequences
+    flag_show_events = 0;
+    flag_show_regions = 0;
+    flag_save_stats = [0,0,0]; % traces - regions - sequences
     flag_save_figure = 1; % all panels
-    flag_save_movie = 1; % movie
+    flag_save_movie = 0; % movie
 
 
     % Loading time reference
@@ -242,7 +243,8 @@ for kk=1:length(all_event_names)
     f1.Name = sprintf(strcat('[%s]%s'),atlas_fullname,strrep(recording_name,'_nlab',''));
     set(f1,'Units','normalized','OuterPosition',[0 0 1 1]);
     colormap(f1,'jet');
-
+    bg_color='w';
+        
 
     mP = uipanel('Units','normalized',...
         'Position',[0 0 1 1],...
@@ -256,26 +258,32 @@ for kk=1:length(all_event_names)
     tab1 = uitab('Parent',tabgp,...
         'Units','normalized',...
         'Title','Dynamics',...
+        'BackgroundColor',bg_color,...
         'Tag','FirstTab');
     tab2 = uitab('Parent',tabgp,...
         'Units','normalized',...
         'Title','Synthesis',...
+        'BackgroundColor',bg_color,...
         'Tag','SecondTab');
     tab3 = uitab('Parent',tabgp,...
         'Units','normalized',...
         'Title','Regions',...
+        'BackgroundColor',bg_color,...
         'Tag','ThirdTab');
     tab4 = uitab('Parent',tabgp,...
         'Units','normalized',...
         'Title','Trials',...
+        'BackgroundColor',bg_color,...
         'Tag','FourthTab');
     tab5 = uitab('Parent',tabgp,...
         'Units','normalized',...
         'Title','Sequence-Mean',...
+        'BackgroundColor',bg_color,...
         'Tag','FifthTab');
     tab6 = uitab('Parent',tabgp,...
         'Units','normalized',...
         'Title','Sequence-Median',...
+        'BackgroundColor',bg_color,...
         'Tag','SixthTab');
 
     ax1 = subplot(411,'parent',tab1);
@@ -288,7 +296,7 @@ for kk=1:length(all_event_names)
 
     ax2 = subplot(412,'parent',tab1);
     % Correction
-    exp_cor = .5;
+    exp_cor = .25;
     n_iqr2 = 1.5;
     correction = repmat((data_spectro.freqdom(:).^exp_cor),1,size(data_spectro.Cdata_sub,2));
     correction = correction/correction(end,1);
@@ -347,11 +355,10 @@ for kk=1:length(all_event_names)
     % Computing event averages and fUS averages
     t_before = -1;          % time window before (seconds)
     t_after = 5;            % time window after (seconds)
-    t_before = -10;          % time window before (seconds)
-    t_after = 30;            % time window after (seconds)
     
     sampling_fus = 10;      % Hz
-    sampling_fus = 1;      % Hz
+%     % comment when done
+%     sampling_fus = 5;      % Hz
     sampling_lfp = 1000;    % Hz
     t_bins_fus  = (t_before:1/sampling_fus:t_after)';
     t_bins_lfp  = (t_before:1/sampling_lfp:t_after)';
@@ -415,8 +422,7 @@ for kk=1:length(all_event_names)
     n_iqr = 4;
     data_iqr = Yraw_evt(~isnan(Yraw_evt));
     ax1.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    % ax1.XLim = [-.2 .2];
-    ax1.XLim = [-40 40];
+    ax1.XLim = [-.1 .1];
 
     % ax2 = subplot(323,'parent',tab2);
     ax2 = axes('Parent',tab2,'Position',[.05 .4 .25 .25]);
@@ -489,72 +495,80 @@ for kk=1:length(all_event_names)
     n_rows = ceil(n_channels/n_col);
     f3_axes=[];
 
-    for i=1:n_channels
-        %     ax = subplot(n_rows,n_col,i,'parent',tab3);
-        ax = axes('Parent',tab3,'Position',get_position(n_rows,n_col,i));
-        hold(ax,'on');
-        YData = squeeze(Y2q_evt_normalized(i,:,:));
-        for j=1:n_events
-            try
-                l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(i,:),'LineWidth',.1,'Parent',ax);
-            catch
-                l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(end,:),'LineWidth',.1,'Parent',ax);
+    if flag_show_regions
+        for i=1:n_channels
+            %     ax = subplot(n_rows,n_col,i,'parent',tab3);
+            ax = axes('Parent',tab3,'Position',get_position(n_rows,n_col,i));
+            hold(ax,'on');
+            YData = squeeze(Y2q_evt_normalized(i,:,:));
+            for j=1:n_events
+                try
+                    l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(i,:),'LineWidth',.1,'Parent',ax);
+                catch
+                    l=line('XData',t_bins_fus,'YData',YData(:,j),'Color',g_colors(end,:),'LineWidth',.1,'Parent',ax);
+                end
+                l.Color(4)=.5;
             end
-            l.Color(4)=.5;
+            YData_mean = mean(YData,2,'omitnan');
+            l=line('XData',t_bins_fus,'YData',YData_mean,'Color','r','LineWidth',2,'Parent',ax);
+            n_samples = sum(~isnan(YData),2);
+            ebar_data = std(YData,0,2,'omitnan')./sqrt(n_samples);
+            errorbar(t_bins_fus,YData_mean,ebar_data,'Color',[.5 .5 .5],...
+                'linewidth',1,'linestyle','none',...
+                'Parent',ax,'Visible','on','Tag','ErrorBar');
+            uistack(l,'top');
+            ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
+
+            n_iqr= 2;
+            data_iqr = YData_mean(~isnan(YData_mean));
+            %     ax.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+            ax.YLim = [median(data_iqr(:))-5,median(data_iqr(:))+10];
+            ax.Title.String = char(all_labels_2(i));
+            f3_axes=[f3_axes;ax];
+
         end
-        YData_mean = mean(YData,2,'omitnan');
-        l=line('XData',t_bins_fus,'YData',YData_mean,'Color','r','LineWidth',2,'Parent',ax);
-        n_samples = sum(~isnan(YData),2);
-        ebar_data = std(YData,0,2,'omitnan')./sqrt(n_samples);
-        errorbar(t_bins_fus,YData_mean,ebar_data,'Color',[.5 .5 .5],...
-            'linewidth',1,'linestyle','none',...
-            'Parent',ax,'Visible','on','Tag','ErrorBar');
-        uistack(l,'top');
-        ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
-
-        n_iqr= 2;
-        data_iqr = YData_mean(~isnan(YData_mean));
-        %     ax.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-        ax.YLim = [median(data_iqr(:))-5,median(data_iqr(:))+10];
-        ax.Title.String = char(all_labels_2(i));
-        f3_axes=[f3_axes;ax];
-
+        fprintf('>> Process 3/6 done [%s].\n',tab3.Title);
+    else
+        fprintf('>> Process 3/6 skipped [%s].\n',tab3.Title);
     end
-    fprintf('>> Process 3/6 done [%s].\n',tab3.Title);
 
 
     % [~,ind_sorted_duration] = sort(events(:,4),'descend');
     % [~,ind_sorted_frequency] = sort(events(:,5),'descend');
     % [~,ind_sorted_amplitude] = sort(events(:,6),'descend');
     f4_axes=[];
-    for i=1:n_channels
-        %     ax = subplot(n_rows,n_col,i,'parent',tab4);
-        ax = axes('Parent',tab4,'Position',get_position(n_rows,n_col,i));
-        hold(ax,'on');
-        YData = squeeze(Y2q_evt_normalized(i,:,:));
-        imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData','Parent',ax)
-        %     imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData(:,ind_sorted_duration)','Parent',ax)
+    if flag_show_events
+        for i=1:n_channels
+            %     ax = subplot(n_rows,n_col,i,'parent',tab4);
+            ax = axes('Parent',tab4,'Position',get_position(n_rows,n_col,i));
+            hold(ax,'on');
+            YData = squeeze(Y2q_evt_normalized(i,:,:));
+            imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData','Parent',ax)
+            %     imagesc('XData',t_bins_fus,'YData',1:n_events,'CData',YData(:,ind_sorted_duration)','Parent',ax)
 
-        n_samples = sum(~isnan(YData),2);
-        ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
-        ax.YLim = [.5,n_events+.5];
-        ax.YDir = 'reverse';
-        colorbar(ax,'eastoutside');
+            n_samples = sum(~isnan(YData),2);
+            ax.XLim = [t_bins_fus(1),t_bins_fus(end)];
+            ax.YLim = [.5,n_events+.5];
+            ax.YDir = 'reverse';
+            colorbar(ax,'eastoutside');
 
-        ax.YTick= 1:10:n_events;
-        ax.YTickLabel= t_events(1:10:end);
-        %     ax.FontSize = 6;
+            ax.YTick= 1:10:n_events;
+            ax.YTickLabel= t_events(1:10:end);
+            %     ax.FontSize = 6;
 
-        n_iqr= 3;
-        data_iqr = YData(~isnan(YData));
-        %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-        ax.CLim = [-10,30];
+            n_iqr= 3;
+            data_iqr = YData(~isnan(YData));
+            %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+            ax.CLim = [-10,30];
 
-        ax.Title.String = char(all_labels_2(i));
-        f4_axes=[f4_axes;ax];
+            ax.Title.String = char(all_labels_2(i));
+            f4_axes=[f4_axes;ax];
 
+        end
+        fprintf('>> Process 4/6 done [%s].\n',tab4.Title);
+    else
+        fprintf('>> Process 4/6 skipped [%s].\n',tab4.Title);
     end
-    fprintf('>> Process 4/6 done [%s].\n',tab4.Title);
 
 
     f5_axes=[];
@@ -570,7 +584,7 @@ for kk=1:length(all_event_names)
         hold(ax,'on');
         imagesc(Y3q_evt_reshaped(:,:,i),'Parent',ax);
 
-        ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
+%         ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
 
         %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
         ax.CLim = [-5,10];
@@ -587,6 +601,8 @@ for kk=1:length(all_event_names)
     end
 
     n_col = 10 ;
+%     % comment when done
+%     n_col = 5 ;
     n_rows = ceil(length(f5_axes)/n_col);
     eps1=.01;
     eps2=.01;
@@ -606,7 +622,7 @@ for kk=1:length(all_event_names)
         ax = subplot(n,n,i,'parent',tab6);
         hold(ax,'on');
         imagesc(Y3q_evt_median_reshaped(:,:,i),'Parent',ax);
-        ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
+%         ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
         %     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
         ax.CLim = [-5,10];
         ax.XLim = [.5 size(IM,2)+.5];

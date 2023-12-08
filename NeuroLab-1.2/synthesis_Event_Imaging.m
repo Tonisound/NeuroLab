@@ -37,8 +37,8 @@ end
 unique_animals = unique(all_animals);
 
 
-flag_moving_figures = true;
-flag_synthesis_movie = true;
+flag_moving_figures = false;
+flag_synthesis_movie = false;
 flag_event_detection = true;
 flag_regions_averages = true;
 
