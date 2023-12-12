@@ -139,6 +139,8 @@ end
 
 f1=figure;
 f1.UserData.success = false;
+f1.Units='normalized';
+f1.OuterPosition=[0 0 .4 1];
 
 for kk=1:length(d_selected_events)
     
@@ -148,6 +150,7 @@ for kk=1:length(d_selected_events)
     
     % Read csv event file
     event_file = fullfile(d_selected_events(kk).folder,d_selected_events(kk).name);
+    short_name = strrep(d_selected_events(kk).name,'.csv','');
     event_name_csv = strrep(event_file,strcat(folder_events,filesep),'');
     event_name = strrep(event_name_csv,'.csv','');
     [events,EventHeader,MetaData] = read_csv_events(event_file);
@@ -180,7 +183,8 @@ for kk=1:length(d_selected_events)
         warning('Error loading Events [File: %s]',event_file);
         continue;
     end
-    f1.Name = sprintf('[%s]Peri-Event-LFP[%s][N=%d]',recording_name,strrep(event_name,filesep,'|'),n_events);
+%     f1.Name = sprintf('[%s]Peri-Event-LFP[%s][N=%d]',recording_name,strrep(event_name,filesep,'_'),n_events);
+    f1.Name = sprintf('[%s]Peri-Event-LFP[%s][N=%d]',recording_name,short_name,n_events);
     
 
     % Computing event averages and fUS averages
@@ -208,6 +212,13 @@ for kk=1:length(d_selected_events)
         Yraw_evt = interp1(Xraw,S(jj).Yraw,Xq_evt_lfp);
         Yfiltered_evt = interp1(Xfiltered,S(jj).Yfiltered,Xq_evt_lfp);
         Cdata_evt = (interp1(Xspectro,S(jj).Yspectro',Xq_evt_spectro))';
+        
+        % Sanity check
+        if isempty(Yraw_evt(~isnan(Yraw_evt)))
+            warning('No Events to display [%s][%s]',event_name,cur_channel);
+            counter = counter+3;
+            continue;
+        end
 
         % Reshaping LFP
         % Xq_evt_lfp_ = reshape(Xq_evt_lfp,[length(t_bins_lfp) n_events]);
@@ -226,6 +237,9 @@ for kk=1:length(d_selected_events)
             ax1.Title.String = 'Raw';
         end
         ax1.YLabel.String = cur_channel;
+        if strcmp(cur_channel,channel_id)
+            ax1.YLabel.Color = 'r';
+        end
         n_iqr = 4;
         data_iqr = Yraw_evt(~isnan(Yraw_evt));
         ax1.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];

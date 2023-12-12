@@ -30,7 +30,7 @@ if exist(fullfile(folder_name,'Nconfig.mat'),'file')
     % D = [num2cell(ind_channel),channel_id,channel_type,channel_list];
     D = [temp,channel_id,channel_type,channel_list];
 else
-    D=cell(39,3);
+    D=cell(39,4);
     for j=1:32
         D(j,:)={sprintf('%d',j),sprintf('%d',j),'LFP',sprintf('LFP-%03d',j)};
     end
