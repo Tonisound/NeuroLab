@@ -102,10 +102,26 @@ end
 % Exporting RawData
 MetaData = data_ns.MetaTags;
 RawData = data_ns.Data;
-% t_samp = MetaData.SamplingFreq;
-% n_channels = MetaData.ChannelCount;
-RawData_vect = RawData(:);
 
+% Filtering
+n_channels = MetaData.ChannelCount;
+f_samp = MetaData.SamplingFreq;
+% Pass-band filtering
+f1 = 48;
+f2 = 52;
+f3 = 250;
+[B,A]  = butter(1,[f1 f2]/(f_samp/2),'stop');
+[D,C]  = butter(1,f3/(f_samp/2),'low');
+FilteredData = [];
+for i=1:n_channels
+    Y=RawData(i,:);
+    Y_temp = int16(filtfilt(B,A,double(Y)));
+    Y_temp = int16(filtfilt(D,C,double(Y_temp)));
+    FilteredData = [FilteredData ; Y_temp];
+end
+% Writing to vector
+RawData_vect = FilteredData(:);
+% RawData_vect = RawData(:);
 
 % Writing file
 fprintf('Exporting LFP data ...');
@@ -115,6 +131,15 @@ fclose(fileID);
 fprintf(' done.\n');
 fprintf('LFP data exported [%s].\n',dat_filename);
 
+% Comment if needed
+% Direct exportation to Ephys folder
+temp = regexp(dat_filename,'_','split');
+temp1 = sprintf('Rat-%s',char(temp(2)));
+temp2 = strrep(dat_filename,'.dat','');
+temp3 = strrep(DIR_SAVE,strcat('NEUROLAB',filesep,'NLab_DATA'),'EphysFiltered');
+new_folder = fullfile(temp3,temp1,temp2);
+copyfile(fullfile(F.fullpath,F.dir_lfp,dat_filename),fullfile(new_folder,dat_filename));
+fprintf('LFP data exported [%s].\n',new_folder);
 
 % Writing metadata
 fid_info = fopen(fullfile(F.fullpath,F.dir_lfp,meta_filename),'w');

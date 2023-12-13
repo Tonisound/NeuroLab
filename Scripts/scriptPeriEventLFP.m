@@ -114,7 +114,12 @@ for i =1:length(FILES)
     f1=figure;
     f1.Units='normalized';
     f1.OuterPosition=[0 0 1 1];
-    f1.Name = sprintf('[%s]Peri-Event-LFP-traces',cur_recording);
+    f1.Name = sprintf('[%s]Peri-Event-LFP-raw',cur_recording);
+    
+    f2=figure;
+    f2.Units='normalized';
+    f2.OuterPosition=[0 0 1 1];
+    f2.Name = sprintf('[%s]Peri-Event-LFP-filtered',cur_recording);
     
     for j=1:n_channels
         cur_channel = char(all_lfp_channels(j));
@@ -176,11 +181,12 @@ for i =1:length(FILES)
         counter=j;
         for jj = 1:n_channels
             ax1 = axes('Parent',f1,'Position',get_position(n_channels,n_channels,counter));
+            ax2 = axes('Parent',f2,'Position',get_position(n_channels,n_channels,counter));
             counter=counter+n_channels;
             
             Yraw_evt = interp1(Xraw,S(jj).Yraw,Xq_evt_lfp);
             Yfiltered_evt = interp1(Xfiltered,S(jj).Yfiltered,Xq_evt_lfp);
-            Cdata_evt = (interp1(Xspectro,S(jj).Yspectro',Xq_evt_spectro))';
+%             Cdata_evt = (interp1(Xspectro,S(jj).Yspectro',Xq_evt_spectro))';
             
 %             % Sanity check
 %             if isempty(Yraw_evt(~isnan(Yraw_evt)))
@@ -191,7 +197,7 @@ for i =1:length(FILES)
             % Reshaping LFP
             Yraw_evt_ = reshape(Yraw_evt,[length(t_bins_lfp) n_events]);
             Yfiltered_evt_ = reshape(Yfiltered_evt,[length(t_bins_lfp) n_events]);
-            Cdata_evt_ = reshape(Cdata_evt,[size(Cdata_evt,1) length(t_bins_spectro) n_events]);
+%             Cdata_evt_ = reshape(Cdata_evt,[size(Cdata_evt,1) length(t_bins_spectro) n_events]);
             
             % Plotting
             hold(ax1,'on');
@@ -199,50 +205,59 @@ for i =1:length(FILES)
                 l=line('XData',t_bins_lfp,'YData',Yraw_evt_(:,k),'Color','k','LineWidth',.1,'Parent',ax1);
                 l.Color(4)=.5;
             end
-            line('XData',t_bins_lfp,'YData',mean(Yraw_evt_,2,'omitnan'),'Color','r','LineWidth',2,'Parent',ax1);
+            l = line('XData',t_bins_lfp,'YData',mean(Yraw_evt_,2,'omitnan'),'Color','r','LineWidth',2,'Parent',ax1);
 
             % Layout
-            n_iqr = 4;
+            n_iqr = 3;
             data_iqr = Yraw_evt(~isnan(Yraw_evt));
             if ~isempty(data_iqr)
                 ax1.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
             end
             ax1.XLim = [-.1 .1];
             if jj==1
-                ax1.Title.String = sprintf('[Rip:%s][%devents]',channel_id,n_events);
+                ax1.Title.String = sprintf('[Rip:%s][N=%d]',channel_id,n_events);
             end
-%             if j==1
-%                 ax1.YLabel.String = S(jj).channel;
-%             end
-            ax1.YLabel.String = S(jj).channel;
+            if j==1
+                ax1.YLabel.String = S(jj).channel;
+            end
             if strcmp(S(jj).channel,channel_id)
-                ax1.YLabel.Color = 'r';
+                l.Color = 'b';
             end
-            if j==n_channels
+            if jj==n_channels
                 set(ax1,'YTick',[],'YTickLabel',[]);
             else
                 set(ax1,'XTick',[],'XtickLabel',[],'YTick',[],'YTickLabel',[]);
             end
             
-%             % Filtered
-%             hold(ax2,'on');
-%             for i=1:n_events
-%                 l=line('XData',t_bins_lfp,'YData',Yfiltered_evt_(:,i),'Color',[.5 .5 .5],'LineWidth',.1,'Parent',ax2);
-%                 l.Color(4)=.5;
-%             end
-%             line('XData',t_bins_lfp,'YData',mean(Yfiltered_evt_,2,'omitnan'),'Color','r','Parent',ax2);
-%             if j==1
-%                 ax2.Title.String = strcat('Filtered-',band_name);
-%             end
-%             n_iqr= 10;
-%             data_iqr = Yfiltered_evt_(~isnan(Yfiltered_evt_));
-%             ax2.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-%             ax2.XLim = ax1.XLim;
-%             if j==n_channels
-%                 set(ax2,'YTick',[],'YTickLabel',[]);
-%             else
-%                 set(ax2,'XTick',[],'XtickLabel',[],'YTick',[],'YTickLabel',[]);
-%             end
+            % Filtered
+            hold(ax2,'on');
+            for k=1:n_events
+                l=line('XData',t_bins_lfp,'YData',Yfiltered_evt_(:,k),'Color',[.5 .5 .5],'LineWidth',.1,'Parent',ax2);
+                l.Color(4)=.5;
+            end
+            l=line('XData',t_bins_lfp,'YData',mean(Yfiltered_evt_,2,'omitnan'),'Color','r','Parent',ax2);
+            
+            % Layout
+            n_iqr = 6;
+            data_iqr = Yfiltered_evt_(~isnan(Yfiltered_evt_));
+            if ~isempty(data_iqr)
+                ax2.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+            end
+            ax2.XLim = [-.1 .1];
+            if jj==1
+                ax2.Title.String = sprintf('[Rip:%s][N=%d]',channel_id,n_events);
+            end
+            if j==1
+                ax2.YLabel.String = S(jj).channel;
+            end
+            if strcmp(S(jj).channel,channel_id)
+                l.Color = 'b';
+            end
+            if jj==n_channels
+                set(ax2,'YTick',[],'YTickLabel',[]);
+            else
+                set(ax2,'XTick',[],'XtickLabel',[],'YTick',[],'YTickLabel',[]);
+            end
             
 %             % Spectrogram
 %             hold(ax3,'on');
@@ -267,13 +282,22 @@ for i =1:length(FILES)
     
     % Saving figure
     if flag_save_figure
-        save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP-traces');
+        save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP-raw');
         if ~isfolder(save_dir)
             mkdir(save_dir);
         end
         pic_name = sprintf(f1.Name,GTraces.ImageSaveExtension);
         saveas(f1,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
         fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+        
+        save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP-filtered');
+        if ~isfolder(save_dir)
+            mkdir(save_dir);
+        end
+        pic_name = sprintf(f1.Name,GTraces.ImageSaveExtension);
+        saveas(f2,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+        fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
     end
     close(f1);
+    close(f2);
 end

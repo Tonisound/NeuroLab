@@ -162,7 +162,8 @@ write_csv_events(output_file,ripples,EventHeader,MetaData);
 % Saving in separate folder
 % Comment if unnecessary
 global DIR_SAVE DIR_STATS;
-folder_separate = fullfile(DIR_STATS,'Separate-Ripple-Detection');
+% folder_separate = fullfile(DIR_STATS,'Separate-Ripple-Detection');
+folder_separate = fullfile(folder_events,channel_ripple);
 if ~isfolder(folder_separate)
     mkdir(folder_separate);
 end
