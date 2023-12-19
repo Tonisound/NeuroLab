@@ -184,8 +184,19 @@ rmdir('Ripples','s');
 delete('behavResources.mat');
 delete('StateEpochSB.mat');
 delete('Rippleraw.png');
-delete('swr.evt.swr');
 delete('SWR.mat');
+
+% delete('swr.evt.swr');
+
+temp = strrep(savedir,DIR_SAVE,'');
+temp = strrep(temp,filesep,'');
+temp = regexp(temp,'_','split');
+temp1 = sprintf('Rat-%s',char(temp(2)));
+% temp2 = strrep(dat_filename,'.dat','');
+temp3 = strrep(DIR_SAVE,strcat('NEUROLAB',filesep,'NLab_DATA'),'Ephys');
+% new_folder = fullfile(temp3,temp1,temp2);
+new_folder = fullfile(temp3,temp1);
+movefile('swr.evt.swr',new_folder);
 
 success  = true;
 

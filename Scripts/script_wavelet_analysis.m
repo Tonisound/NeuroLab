@@ -1,7 +1,7 @@
 % Script - Dec 23
 % Compute Wavelet for all channels
 
-global FILES DIR_SAVE ;
+global FILES DIR_SAVE CUR_FILE;
 
 % Parameters
 fdom_min = 1;
@@ -10,9 +10,13 @@ fdom_step = 1;
 Fb = 2;
 Fc = 2;
 freqdom = fdom_min:fdom_step:fdom_max;
+bout_save_duration = 3600; % seconds
+step_save_duration = .01; % seconds
+f_save_duration = 1/step_save_duration;
+save_ratio = 100;
 
 
-for i =1:length(FILES)
+for i = 1:length(FILES)
     
     cur_recording = FILES(i).nlab;
     
@@ -34,8 +38,6 @@ for i =1:length(FILES)
         else
             data_raw = load(fullfile(d_raw.folder,d_raw.name));
             Xraw = data_raw.x_start:data_raw.f:data_raw.x_end;
-%             x_start = data_raw.x_start;
-%             x_end = data_raw.x_end;
             Yraw = data_raw.Y;
             f_samp = 1/data_raw.f;
         end  
@@ -45,7 +47,7 @@ for i =1:length(FILES)
         f_sub = f_samp/sub_samp;
         scales = Fc*f_sub./freqdom;
         
-        n_samples = 1200*f_samp;
+        n_samples = bout_save_duration*f_samp;
         index_start = 1:n_samples:length(Yraw);
         index_end = [n_samples:n_samples:length(Yraw),length(Yraw)];
         
@@ -57,7 +59,7 @@ for i =1:length(FILES)
         end
         for k=1:length(index_start)
             fprintf('Computing Time-Frequency Spectrogramm [%s] [%d/%d] ...',cur_channel,k,length(index_start));
-            Y = Yraw(index_start(k):index_end(k));
+            Y = Yraw(index_start(k):sub_samp:index_end(k));
             coefs_wav   = cmorcwt(Y,scales,Fb,Fc);
             Cdata = log10(abs(coefs_wav)).^2;
 %             all_Cdata = [all_Cdata,Cdata];
@@ -65,12 +67,22 @@ for i =1:length(FILES)
             
             x_start = Xraw(index_start(k));
             x_end = Xraw(index_end(k));
+            X = Xraw(index_start(k):sub_samp:index_end(k));
+            
+            % Subsampling Cdata to save
+            Xq = x_start:step_save_duration:x_end;
+            Cdata_sub_interp = (interp1(X,Cdata',Xq))';
+            step_sub = max(floor(f_sub/f_save_duration),1);
+            Cdata_sub_subsampled = Cdata(:,1:step_sub:end);
+            Cdata_sub = Cdata_sub_subsampled;
+            Cdata_sub_int = int16(save_ratio*Cdata_sub);
             
             % Saving    
             filename = sprintf('Wav_%s_%03d.mat',cur_channel,k);
             save(fullfile(data_dir,filename),'Fb','Fc','fdom_step','fdom_min','fdom_max','freqdom',...
-                'cur_recording','cur_channel','x_start','x_end',...
-                'f_sub','f_samp','sub_samp','scales','Cdata','-v7.3');
+                'f_sub','f_samp','sub_samp','scales',...
+                'cur_recording','cur_channel','bout_save_duration','save_ratio',...
+                'Cdata_sub_int','step_save_duration','x_start','x_end','-v7.3');
             fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
         end
         

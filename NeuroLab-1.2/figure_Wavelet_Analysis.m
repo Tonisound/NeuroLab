@@ -2366,6 +2366,7 @@ for i =1:length(data)
     %subsampling Cdata to save
     step_sub = max(floor(f_sub/50),1);
     Cdata_sub = Cdata(:,1:step_sub:end);
+%     Cdata_sub_int = int16(Cdata);
     Xdata_sub  = X_trace(1:step_sub:end);
     
     temp = regexprep(trace_name,'/','_');
@@ -2375,6 +2376,13 @@ for i =1:length(data)
         'f_sub','f_samp','Tag_Selection','x_start','x_end','gamma','gamma_ascend','gamma_descend',...
         'r_low','r_mid','r_high','lags','labels',...
         'Cdata_sub','Xdata_sub','step_sub','Cdata_phase_ascend','Cdata_phase_descend','-v7.3');
+    
+%     filename = sprintf('%s_Wavelet_Analysis_%s_int.mat',FILES(CUR_FILE).nlab,char(temp));
+%     save(fullfile(data_dir,filename),'Fb','Fc','fdom_step','fdom_min','fdom_max','freqdom',...
+%         'delta_d','bins','trace_name','X_trace','X_phase','Y_trace','Y_phase',...
+%         'f_sub','f_samp','Tag_Selection','x_start','x_end','gamma','gamma_ascend','gamma_descend',...
+%         'r_low','r_mid','r_high','lags','labels',...
+%         'Cdata_sub_int','Xdata_sub','step_sub','Cdata_phase_ascend','Cdata_phase_descend','-v7.3');
     
     fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
 end

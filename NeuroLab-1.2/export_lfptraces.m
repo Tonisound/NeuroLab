@@ -6,6 +6,10 @@ global DIR_SAVE;
 load('Preferences.mat','GImport','GFilt');
 dir_save = fullfile(DIR_SAVE,F.nlab);
 
+flag_write_dat = false; % Copy dat file in DATA/_lfp folder
+flag_write_txt = false; % Copy txt file in DATA/_lfp folder
+flag_write_direct = true; % Copy dat file in specified folder
+
 % Manual mode val = 1; batch mode val =0
 if nargin<3
     val=1;
@@ -123,59 +127,105 @@ end
 RawData_vect = FilteredData(:);
 % RawData_vect = RawData(:);
 
-% Writing file
-fprintf('Exporting LFP data ...');
-fileID = fopen(fullfile(F.fullpath,F.dir_lfp,dat_filename),'w');
-fwrite(fileID,RawData_vect,'int16');
-fclose(fileID);
-fprintf(' done.\n');
-fprintf('LFP data exported [%s].\n',dat_filename);
-
-% Comment if needed
-% Direct exportation to Ephys folder
-temp = regexp(dat_filename,'_','split');
-temp1 = sprintf('Rat-%s',char(temp(2)));
-temp2 = strrep(dat_filename,'.dat','');
-temp3 = strrep(DIR_SAVE,strcat('NEUROLAB',filesep,'NLab_DATA'),'EphysFiltered');
-new_folder = fullfile(temp3,temp1,temp2);
-copyfile(fullfile(F.fullpath,F.dir_lfp,dat_filename),fullfile(new_folder,dat_filename));
-fprintf('LFP data exported [%s].\n',new_folder);
-
-% Writing metadata
-fid_info = fopen(fullfile(F.fullpath,F.dir_lfp,meta_filename),'w');
-% Ubuntu bug fix
-try
-    fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeID));
-catch
-    fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeIDMetaData));
+% Writing file .dat
+if flag_write_dat
+    fprintf('Exporting LFP data ...');
+    fileID = fopen(fullfile(F.fullpath,F.dir_lfp,dat_filename),'w');
+    fwrite(fileID,RawData_vect,'int16');
+    fclose(fileID);
+    fprintf(' done.\n');
+    fprintf('LFP data exported [%s].\n',dat_filename);
 end
-fwrite(fid_info,sprintf('SamplingLabel : %s \n',MetaData.SamplingLabel));
-fwrite(fid_info,sprintf('ChannelCount : %d \n',MetaData.ChannelCount));
-fwrite(fid_info,sprintf('SamplingFreq : %.2f \n',MetaData.SamplingFreq));
-fwrite(fid_info,sprintf('TimeRes : %.d \n',MetaData.TimeRes));
-%fwrite(fid_info,sprintf('ChannelID : %.d \n',MetaData.ChannelID));
-fwrite(fid_info,sprintf('DateTime : %s \n',MetaData.DateTime));
-%fwrite(fid_info,sprintf('DateTimeRaw : %s \n',MetaData.DateTimeRaw));
-fwrite(fid_info,sprintf('DataPoints : %d \n',MetaData.DataPoints));
-fwrite(fid_info,sprintf('DataDurationSec : %d \n',MetaData.DataDurationSec));
-fwrite(fid_info,sprintf('DataPointsSec : %d \n',MetaData.DataPointsSec));
-fwrite(fid_info,sprintf('Filename : %s \n',MetaData.Filename));
-fwrite(fid_info,sprintf('FilePath : %s \n',MetaData.FilePath));
-fwrite(fid_info,sprintf('FileExt : %s \n',MetaData.FileExt));
-fwrite(fid_info,newline);
 
-if isempty(d_ncf)
-    fwrite(fid_info,sprintf('NConfig File : %s \n','none'));
-else
-    fwrite(fid_info,sprintf('NConfig File : %s \n',fullfile(DIR_SAVE,F.nlab,'Nconfig.mat')));
-    fwrite(fid_info,sprintf('id \t type \t name \n'));
-    for i =1:length(d_ncf.ind_channel)     
-        fwrite(fid_info,sprintf('%d \t %s \t %s \n',d_ncf.ind_channel(i),char(d_ncf.channel_type(i)),char(d_ncf.channel_id(i))));
+% Direct exportation to specified folder
+if flag_write_direct
+    temp = regexp(dat_filename,'_','split');
+    temp1 = sprintf('Rat-%s',char(temp(2)));
+    temp2 = strrep(dat_filename,'.dat','');
+    temp3 = strrep(DIR_SAVE,strcat('NEUROLAB',filesep,'NLab_DATA'),'EphysFiltered');
+    new_folder = fullfile(temp3,temp1,temp2);
+%     new_folder = strrep(DIR_SAVE,strcat('NEUROLAB',filesep,'NLab_DATA'),'EphysRepo');
+    
+    fprintf('Exporting LFP data ...');
+    fileID = fopen(fullfile(new_folder,dat_filename),'w');
+    fwrite(fileID,RawData_vect,'int16');
+    fclose(fileID);
+    fprintf(' done.\n');
+    fprintf('LFP data exported [%s].\n',dat_filename);
+    
+    fid_info = fopen(fullfile(new_folder,meta_filename),'w');
+    % Ubuntu bug fix
+    try
+        fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeID));
+    catch
+        fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeIDMetaData));
     end
+    fwrite(fid_info,sprintf('SamplingLabel : %s \n',MetaData.SamplingLabel));
+    fwrite(fid_info,sprintf('ChannelCount : %d \n',MetaData.ChannelCount));
+    fwrite(fid_info,sprintf('SamplingFreq : %.2f \n',MetaData.SamplingFreq));
+    fwrite(fid_info,sprintf('TimeRes : %.d \n',MetaData.TimeRes));
+    %fwrite(fid_info,sprintf('ChannelID : %.d \n',MetaData.ChannelID));
+    fwrite(fid_info,sprintf('DateTime : %s \n',MetaData.DateTime));
+    %fwrite(fid_info,sprintf('DateTimeRaw : %s \n',MetaData.DateTimeRaw));
+    fwrite(fid_info,sprintf('DataPoints : %d \n',MetaData.DataPoints));
+    fwrite(fid_info,sprintf('DataDurationSec : %d \n',MetaData.DataDurationSec));
+    fwrite(fid_info,sprintf('DataPointsSec : %d \n',MetaData.DataPointsSec));
+    fwrite(fid_info,sprintf('Filename : %s \n',MetaData.Filename));
+    fwrite(fid_info,sprintf('FilePath : %s \n',MetaData.FilePath));
+    fwrite(fid_info,sprintf('FileExt : %s \n',MetaData.FileExt));
+    fwrite(fid_info,newline);
+    
+    if isempty(d_ncf)
+        fwrite(fid_info,sprintf('NConfig File : %s \n','none'));
+    else
+        fwrite(fid_info,sprintf('NConfig File : %s \n',fullfile(DIR_SAVE,F.nlab,'Nconfig.mat')));
+        fwrite(fid_info,sprintf('id \t type \t name \n'));
+        for i =1:length(d_ncf.ind_channel)
+            fwrite(fid_info,sprintf('%d \t %s \t %s \n',d_ncf.ind_channel(i),char(d_ncf.channel_type(i)),char(d_ncf.channel_id(i))));
+        end
+    end
+    
+    fclose(fid_info);
+    fprintf('Metadata exported [%s].\n',meta_filename);
 end
 
-fclose(fid_info);
-fprintf('Metadata exported [%s].\n',meta_filename);
+% Writing metadata .txt
+if flag_write_txt
+    fid_info = fopen(fullfile(F.fullpath,F.dir_lfp,meta_filename),'w');
+    % Ubuntu bug fix
+    try
+        fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeID));
+    catch
+        fwrite(fid_info,sprintf('FileTypeIDMetaData : %s \n',MetaData.FileTypeIDMetaData));
+    end
+    fwrite(fid_info,sprintf('SamplingLabel : %s \n',MetaData.SamplingLabel));
+    fwrite(fid_info,sprintf('ChannelCount : %d \n',MetaData.ChannelCount));
+    fwrite(fid_info,sprintf('SamplingFreq : %.2f \n',MetaData.SamplingFreq));
+    fwrite(fid_info,sprintf('TimeRes : %.d \n',MetaData.TimeRes));
+    %fwrite(fid_info,sprintf('ChannelID : %.d \n',MetaData.ChannelID));
+    fwrite(fid_info,sprintf('DateTime : %s \n',MetaData.DateTime));
+    %fwrite(fid_info,sprintf('DateTimeRaw : %s \n',MetaData.DateTimeRaw));
+    fwrite(fid_info,sprintf('DataPoints : %d \n',MetaData.DataPoints));
+    fwrite(fid_info,sprintf('DataDurationSec : %d \n',MetaData.DataDurationSec));
+    fwrite(fid_info,sprintf('DataPointsSec : %d \n',MetaData.DataPointsSec));
+    fwrite(fid_info,sprintf('Filename : %s \n',MetaData.Filename));
+    fwrite(fid_info,sprintf('FilePath : %s \n',MetaData.FilePath));
+    fwrite(fid_info,sprintf('FileExt : %s \n',MetaData.FileExt));
+    fwrite(fid_info,newline);
+    
+    if isempty(d_ncf)
+        fwrite(fid_info,sprintf('NConfig File : %s \n','none'));
+    else
+        fwrite(fid_info,sprintf('NConfig File : %s \n',fullfile(DIR_SAVE,F.nlab,'Nconfig.mat')));
+        fwrite(fid_info,sprintf('id \t type \t name \n'));
+        for i =1:length(d_ncf.ind_channel)
+            fwrite(fid_info,sprintf('%d \t %s \t %s \n',d_ncf.ind_channel(i),char(d_ncf.channel_type(i)),char(d_ncf.channel_id(i))));
+        end
+    end
+    
+    fclose(fid_info);
+    fprintf('Metadata exported [%s].\n',meta_filename);
+end
 
 success = true;
 
