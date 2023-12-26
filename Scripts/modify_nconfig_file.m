@@ -16,13 +16,13 @@ for i = 1:length(FILES)
     
     ind_old = 1:8;
     if contains(FILES(i).nlab,'SD092')
-        ind_new = [1,3,4,6,7,5,2,8];
+        ind_new = [1,4,6,7,5,2,8,3];
     elseif contains(FILES(i).nlab,'SD093')
-        ind_new = [5,3,1,4,2,6,7,8];
+        ind_new = [8,7,6,2,4,1,3,5];
     elseif contains(FILES(i).nlab,'SD111')
         ind_new = [3,1,4,8,2,5,6,7];
     elseif contains(FILES(i).nlab,'SD113')
-        ind_new = [6,4,7,2,1,8,5,3];
+        ind_new = [1,2,8,3,5,6,7,4];
     elseif contains(FILES(i).nlab,'SD121')
         ind_new = [1,2,3,7,4,8,6,5];
     elseif contains(FILES(i).nlab,'SD122')
@@ -30,9 +30,9 @@ for i = 1:length(FILES)
     elseif contains(FILES(i).nlab,'SD123')
         ind_new = [4,2,1,3,5,6,7,8];
     elseif contains(FILES(i).nlab,'SD131')
-        ind_new = [3,4,5,8,6,7,1,2];
+        ind_new = [3,5,8,6,7,4,1,2];
     elseif contains(FILES(i).nlab,'SD132')
-        ind_new = [1,8,4,3,6,2,5,7];
+        ind_new = [8,1,4,2,3,5,6,7];
     else
         continue;
     end

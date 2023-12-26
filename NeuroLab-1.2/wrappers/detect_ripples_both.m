@@ -1,4 +1,4 @@
-function success = detect_ripples_both(savedir,val,channel_ripple,timegroup)
+function success = detect_ripples_both(savedir,dir_dat,val,channel_ripple,timegroup)
 % Detect Hippocampal Ripples Script based on Kteam/PrgMatlab
 % Two methods sqrt & abs
 % Generates events files Ripples-Abs|Sqrt|Merged-All.csv'
@@ -16,10 +16,10 @@ end
 
 if val == 1
     % user mode
-    if nargin < 4
+    if nargin < 5
         timegroup = 'NREM';
     end    
-    if nargin < 3
+    if nargin < 4
         d_lfp = dir(fullfile(savedir,'Sources_LFP','LFP_*.mat'));
         % If NConfig file exists, keep electrode order
         if ~isempty(data_nconfig)
@@ -38,16 +38,16 @@ if val == 1
     
 else
     % batch mode
-    if nargin < 4
+    if nargin < 5
         timegroup = 'NREM';
     end
-    if nargin < 3
+    if nargin < 4
         channel_ripple = '005';
     end
 end
 
 
-% Loading traces and intepolate
+% Loading traces and interpolate
 if exist(fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)),'file')
     data_lfp = load(fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)));
     fprintf('LFP file loaded [%s].\n',fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_ripple)));
@@ -177,7 +177,7 @@ output_file = fullfile(folder_separate,sprintf('[%s][%s]Ripples-Sqrt-All.csv',cu
 write_csv_events(output_file,ripples_sqrt,EventHeader,MetaData);
 
 
-% Delete folders : 
+% Delete folders 
 rmdir('ChannelsToAnalyse','s');
 rmdir('LFPData','s');
 rmdir('Ripples','s');
@@ -186,17 +186,15 @@ delete('StateEpochSB.mat');
 delete('Rippleraw.png');
 delete('SWR.mat');
 
-% delete('swr.evt.swr');
 
-temp = strrep(savedir,DIR_SAVE,'');
-temp = strrep(temp,filesep,'');
-temp = regexp(temp,'_','split');
-temp1 = sprintf('Rat-%s',char(temp(2)));
-% temp2 = strrep(dat_filename,'.dat','');
-temp3 = strrep(DIR_SAVE,strcat('NEUROLAB',filesep,'NLab_DATA'),'Ephys');
-% new_folder = fullfile(temp3,temp1,temp2);
-new_folder = fullfile(temp3,temp1);
-movefile('swr.evt.swr',new_folder);
+% Move or Delete evt file
+if isfolder(dir_dat)
+    evt_filename = sprintf('[%s][%s]swr-merged.evt.swr',cur_file,channel_ripple);
+    movefile('swr.evt.swr',fullfile(dir_dat,evt_filename));
+else
+    delete('swr.evt.swr');
+    warning('Event file deleted: Dat Directory empty [%s]',dir_dat);
+end
 
 success  = true;
 

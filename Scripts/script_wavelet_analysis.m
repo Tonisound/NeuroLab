@@ -101,4 +101,5 @@ for i = 1:length(FILES)
 %         fprintf('Data saved at %s.\n',fullfile(data_dir,filename));
         
     end
+    fprintf('=========== File [%s][%d/%d] done. ===========\n',cur_recording,i,length(FILES));
 end
