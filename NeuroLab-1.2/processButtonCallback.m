@@ -31,7 +31,7 @@ switch strtrim(str(val,:))
         
     case 'Import NEV Tracking'
         import_tracking_info(FILES(CUR_FILE),handles);
-
+        
     case 'Divide LFP Frequency Bands'
         divide_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
@@ -68,6 +68,9 @@ switch strtrim(str(val,:))
     case 'Filter ACC/GYR/EMG channels - Extract Power Envelope'
         filter_accgyremg_extractenvelope(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Compute Wavelet Spectrogram'
+        compute_wavelet_channels(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
+
     case 'Run GLM Analysis'
         run_glm_analysis(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         

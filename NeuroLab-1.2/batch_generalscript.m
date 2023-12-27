@@ -634,6 +634,9 @@ for i = 1:length(ind_files)
             case 'Filter ACC/GYR/EMG channels - Extract Power Envelope'
                 success = filter_accgyremg_extractenvelope(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
+            case 'Compute Wavelet Spectrogram'
+                success = compute_wavelet_channels(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
+                
             case 'Divide LFP Frequency Bands'
                 success = divide_lfp_bands(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 

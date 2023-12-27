@@ -3,19 +3,23 @@
 
 global DIR_SAVE FILES;
 
-% % Use with caution
-% for i =1:length(FILES)
-%     % copying previous file
-%     copyfile(fullfile(DIR_SAVE,FILES(i).nlab,'Nconfig.mat'),fullfile(DIR_SAVE,FILES(i).nlab,'~Nconfig.mat'));
-%     fprintf('===> Channel Configuration copied at %s.\n',fullfile(DIR_SAVE,FILES(i).nlab,'~Nconfig.mat'));
-% end
+% Use with caution
+for i =1:length(FILES)
+    % copying previous file
+    copyfile(fullfile(DIR_SAVE,FILES(i).nlab,'Nconfig.mat'),fullfile(DIR_SAVE,FILES(i).nlab,'~Nconfig.mat'));
+    fprintf('===> Channel Configuration copied at %s.\n',fullfile(DIR_SAVE,FILES(i).nlab,'~Nconfig.mat'));
+end
 
 for i = 1:length(FILES)
     % loading previous file
     data_config = load(fullfile(DIR_SAVE,FILES(i).nlab,'~Nconfig.mat'));
     
     ind_old = 1:8;
-    if contains(FILES(i).nlab,'SD092')
+    if contains(FILES(i).nlab,'SD025')
+        ind_new = [8,5,7,1,3,4,2,6];
+    elseif contains(FILES(i).nlab,'SD032')
+        ind_new = [1,2,3,4,5,6,7,8];
+    elseif contains(FILES(i).nlab,'SD092')
         ind_new = [1,4,6,7,5,2,8,3];
     elseif contains(FILES(i).nlab,'SD093')
         ind_new = [8,7,6,2,4,1,3,5];

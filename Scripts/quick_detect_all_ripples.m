@@ -3,7 +3,7 @@
 
 global DIR_SAVE FILES;
 
-for i=36:length(FILES)
+for i=1:length(FILES)
     savedir = fullfile(DIR_SAVE,FILES(i).nlab);
     dir_dat = FILES(i).dir_dat;
     if exist(fullfile(savedir,'Nconfig.mat'),'file')
