@@ -1,5 +1,6 @@
 function f1 = figure_PeriEventLFP(handles,val,str_traces)
-% (Figure) Displays fUS imaging sequence associated with events
+% (Figure) Displays LFP raw, filtered and spectrogramm around events
+% for all channels following Nconfig
 
 if nargin < 3
     str_traces = [];
@@ -15,7 +16,7 @@ pattern_evt = 'Peak(s)';
 t_before = -1;          % time window before (seconds)
 t_after = 5;            % time window after (seconds)
 sampling_lfp = 1000;    % Hz
-sampling_spectro = 100;    % Hz
+sampling_spectro = 1000;    % Hz
 flag_save_figure = 1;
     
 
@@ -102,6 +103,27 @@ all_lfp_channels = strrep(all_lfp_channels,'.mat','');
 n_channels = length(all_lfp_channels);
 
 
+% Loading time groups
+if exist(fullfile(DIR_SAVE,recording_name,'Time_Groups.mat'),'file')
+    data_tg = load(fullfile(DIR_SAVE,recording_name,'Time_Groups.mat'));
+    fprintf('Time Groups loaded [%s].\n',fullfile(DIR_SAVE,recording_name,'Time_Groups.mat'));
+else
+    warning('Time Groups not found [%s]',recording_name);
+end
+% Finding timegroup
+timegroup = 'NREM';
+ind_tg = find(strcmp(data_tg.TimeGroups_name,timegroup)==1);
+% Computing timegroup duration
+if isempty(ind_tg)
+    warning('Time Group not found [%s-%s]',timegroup,cur_recording);
+    timegroup_duration = NaN;
+else
+    temp = datenum(data_tg.TimeGroups_duration);
+    all_tg_dur = 24*3600*(temp-floor(temp));
+    timegroup_duration = all_tg_dur(ind_tg);
+end
+
+
 % Loading data
 S = struct('Yraw',[],'Yfiltered',[],'Yspectro',[]);
 S(n_channels).Yraw = [];
@@ -125,14 +147,11 @@ for jj=1:n_channels
         Xfiltered = data_filtered.x_start:data_filtered.f:data_filtered.x_end;
         S(jj).Yfiltered = data_filtered.Y;
     end
-    d_spectro = dir(fullfile(DIR_STATS,'Wavelet_Analysis',recording_name,'*',strcat(recording_name,'*',cur_channel,'.mat')));
-    if isempty(d_spectro)
-        warning('No spectrogram found [%s]',recording_name);
+    [Cdata_sub,Xspectro,freqdom] = load_wavelet(recording_name,cur_channel);
+    if isempty(Cdata_sub)
+        warning('No spectrogram found [%s]',cur_recording);
     else
-        data_spectro = load(fullfile(d_spectro.folder,d_spectro.name));
-        Xspectro = data_spectro.Xdata_sub;
-        freqdom = data_spectro.freqdom;
-        S(jj).Yspectro = data_spectro.Cdata_sub;
+        S(jj).Yspectro = Cdata_sub;
     end
     fprintf('Data Loaded [%s][%s].\n',recording_name,cur_channel);
 end
@@ -177,15 +196,15 @@ for kk=1:length(d_selected_events)
        t_events = events(:,ind_events);
     end
     n_events = size(events,1);
+    density_events = n_events/timegroup_duration;
     
     % Sanity Check
     if isempty(t_events) || n_events == 0
         warning('Error loading Events [File: %s]',event_file);
         continue;
     end
-%     f1.Name = sprintf('[%s]Peri-Event-LFP[%s][N=%d]',recording_name,strrep(event_name,filesep,'_'),n_events);
-    f1.Name = sprintf('[%s]Peri-Event-LFP[%s][N=%d]',recording_name,short_name,n_events);
-    
+%     f1.Name = sprintf('[%s]Peri-Event-LFP[%s][Rip:%s][N=%d]',recording_name,short_name,channel_id,n_events);
+    f1.Name = sprintf('[%s]Peri-Event-LFP[%s]',recording_name,short_name);    
 
     % Computing event averages and fUS averages
     t_bins_lfp  = (t_before:1/sampling_lfp:t_after)';
@@ -208,6 +227,7 @@ for kk=1:length(d_selected_events)
         ax1 = axes('Parent',f1,'Position',get_position(n_channels,3,counter));
         ax2 = axes('Parent',f1,'Position',get_position(n_channels,3,counter+1));
         ax3 = axes('Parent',f1,'Position',get_position(n_channels,3,counter+2));
+        colormap(ax3,'jet')
 
         Yraw_evt = interp1(Xraw,S(jj).Yraw,Xq_evt_lfp);
         Yfiltered_evt = interp1(Xfiltered,S(jj).Yfiltered,Xq_evt_lfp);
@@ -232,15 +252,16 @@ for kk=1:length(d_selected_events)
             l=line('XData',t_bins_lfp,'YData',Yraw_evt_(:,i),'Color','k','LineWidth',.1,'Parent',ax1);
             l.Color(4)=.5;
         end
-        line('XData',t_bins_lfp,'YData',mean(Yraw_evt_,2,'omitnan'),'Color','r','LineWidth',2,'Parent',ax1);
+        l = line('XData',t_bins_lfp,'YData',mean(Yraw_evt_,2,'omitnan'),'Color',[.5 .5 .5],'LineWidth',2,'Parent',ax1);
         if jj==1
             ax1.Title.String = 'Raw';
         end
         ax1.YLabel.String = cur_channel;
         if strcmp(cur_channel,channel_id)
             ax1.YLabel.Color = 'r';
+            l.Color = 'r';
         end
-        n_iqr = 4;
+        n_iqr = 3;
         data_iqr = Yraw_evt(~isnan(Yraw_evt));
         ax1.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
         ax1.XLim = [-.1 .1];
@@ -255,11 +276,14 @@ for kk=1:length(d_selected_events)
             l=line('XData',t_bins_lfp,'YData',Yfiltered_evt_(:,i),'Color',[.5 .5 .5],'LineWidth',.1,'Parent',ax2);
             l.Color(4)=.5;
         end
-        line('XData',t_bins_lfp,'YData',mean(Yfiltered_evt_,2,'omitnan'),'Color','r','Parent',ax2);
+        l = line('XData',t_bins_lfp,'YData',mean(Yfiltered_evt_,2,'omitnan'),'Color','k','LineWidth',2,'Parent',ax2);
+        if strcmp(cur_channel,channel_id)
+            l.Color = 'r';
+        end
         if jj==1
             ax2.Title.String = strcat('Filtered-',band_name);
         end
-        n_iqr= 10;
+        n_iqr= 6;
         data_iqr = Yfiltered_evt_(~isnan(Yfiltered_evt_));
         ax2.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
         ax2.XLim = ax1.XLim;
@@ -272,12 +296,12 @@ for kk=1:length(d_selected_events)
         % Spectrogram
         hold(ax3,'on');
         Cdata_mean = mean(Cdata_evt_,3,'omitnan');
-        imagesc('XData',t_bins_lfp,'YData',data_spectro.freqdom,'CData',Cdata_mean,'HitTest','off','Parent',ax3);
+        imagesc('XData',t_bins_lfp,'YData',freqdom,'CData',Cdata_mean,'HitTest','off','Parent',ax3);
 
         n_iqr= 2;
         data_iqr = Cdata_mean(~isnan(Cdata_mean));
         ax3.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-        ax3.YLim = [data_spectro.freqdom(1),data_spectro.freqdom(end)];
+        ax3.YLim = [freqdom(1),freqdom(end)];
         % ax3.XLim = [t_bins_lfp(1),t_bins_lfp(end)];
         ax3.XLim = ax1.XLim;
 %         ax3.Title.String = 'Mean Spectrogram';
@@ -289,6 +313,10 @@ for kk=1:length(d_selected_events)
         end
         counter = counter+3;
     end
+    
+    str = sprintf('[Rip:%s][N=%d][%.2fHz]',channel_id,n_events,density_events);
+    uicontrol('Style','text','Units','normalized','String',str,'Parent',f1,...
+        'Position',[.25 .97 .5 .03],'BackgroundColor','w','FontWeight','bold');
 
     if flag_save_figure
         save_dir = fullfile(DIR_FIG,'Peri-Event-LFP',recording_name);
