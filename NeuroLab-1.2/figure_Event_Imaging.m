@@ -171,9 +171,7 @@ for kk=1:length(all_event_names)
         d2 = [d2;dir(fullfile(DIR_SAVE,recording_name,'*',strcat(channel2,'.mat')))];
     end
 
-    % Loading spectrogramm
-    d_spectro = dir(fullfile(DIR_STATS,'Wavelet_Analysis',recording_name,'*',strcat(recording_name,'*',channel_raw,'.mat')));
-
+    
     if isempty(d_raw)
         warning('Channel not found [%s-%s]',recording_name,channel_raw);
         return;
@@ -207,12 +205,19 @@ for kk=1:length(all_event_names)
     % Getting pixel activity
     Y3 = reshape(IM,[size(IM,1)*size(IM,2) size(IM,3)])';
 
-    if isempty(d_spectro)
+    % Loading spectrogramm
+%     d_spectro = dir(fullfile(DIR_STATS,'Wavelet_Analysis',recording_name,'*',strcat(recording_name,'*',channel_raw,'.mat')));
+%     if isempty(d_spectro)
+%         warning('Spectrogram not found [%s-%s]',recording_name,channel_raw);
+%         return;
+%     else
+%         data_spectro = load(fullfile(d_spectro.folder,d_spectro.name));
+%     end
+    [Cdata_sub,Xdata_sub,freqdom] = load_wavelet(recording_name,channel_id);
+    if isempty(Cdata_sub)
         warning('Spectrogram not found [%s-%s]',recording_name,channel_raw);
         return;
     else
-        data_spectro = load(fullfile(d_spectro.folder,d_spectro.name));
-    end
 
     % Interpolation
     Xq = (data_tr.time_ref.Y(1):t_step:data_tr.time_ref.Y(end))';
@@ -289,7 +294,6 @@ for kk=1:length(all_event_names)
     ax1 = subplot(411,'parent',tab1);
     hold(ax1,'on');
     plot(Xraw,Yraw,'Color','k','Parent',ax1);
-    % plot(data_spectro.X_trace,data_spectro.Y_trace,'ro','Parent',ax1)
     ax1.Title.String = sprintf('Raw trace LFP [%s]',strrep(channel_raw,'_','-'));
     n_iqr1 = 4;
     ax1.YLim = [median(Yraw(:))-n_iqr1*iqr(Yraw(:)),median(Yraw(:))+n_iqr1*iqr(Yraw(:))];
@@ -298,20 +302,20 @@ for kk=1:length(all_event_names)
     % Correction
     exp_cor = .25;
     n_iqr2 = 1.5;
-    correction = repmat((data_spectro.freqdom(:).^exp_cor),1,size(data_spectro.Cdata_sub,2));
+    correction = repmat((freqdom(:).^exp_cor),1,size(Cdata_sub,2));
     correction = correction/correction(end,1);
-    Cdata_corr = data_spectro.Cdata_sub.*correction;
+    Cdata_corr = Cdata_sub.*correction;
     % %Gaussian smoothing
     % t_gauss = .1;
-    % step = t_gauss*round(1/median(diff(data_spectro.Xdata_sub)));
+    % step = t_gauss*round(1/median(diff(Xdata_sub)));
     % Cdata_smooth = imgaussfilt(Cdata_corr,[1 step]);
     % Cdata = Cdata_smooth;
     Cdata = Cdata_corr;
 
     hold(ax2,'on');
-    imagesc('XData',data_spectro.Xdata_sub,'YData',data_spectro.freqdom,'CData',Cdata,'HitTest','off','Parent',ax2);
+    imagesc('XData',Xdata_sub,'YData',freqdom,'CData',Cdata,'HitTest','off','Parent',ax2);
     ax2.CLim = [median(Cdata(:))-n_iqr2*iqr(Cdata(:)),median(Cdata(:))+n_iqr2*iqr(Cdata(:))];
-    ax2.YLim = [data_spectro.freqdom(1),data_spectro.freqdom(end)];
+    ax2.YLim = [freqdom(1),freqdom(end)];
     ax2.Title.String = sprintf('Spectrogram [%s]',strrep(channel_raw,'_','-'));
 
     ax3 = subplot(413,'parent',tab1);
@@ -378,7 +382,7 @@ for kk=1:length(all_event_names)
     end
     Yraw_evt = interp1(Xraw,Yraw,Xq_evt_lfp);
     Y1_evt = interp1(X1,Y1,Xq_evt_lfp);
-    Cdata_evt = (interp1(data_spectro.Xdata_sub,Cdata',Xq_evt_lfp))';
+    Cdata_evt = (interp1(Xdata_sub,Cdata',Xq_evt_lfp))';
 
     % Reshaping fUS
     % Xq_evt_fus_ = reshape(Xq_evt_fus,[length(t_bins_fus) n_events]);
@@ -443,12 +447,12 @@ for kk=1:length(all_event_names)
     ax3 = axes('Parent',tab2,'Position',[.05 .05 .25 .3]);
     hold(ax3,'on');
     Cdata_mean = mean(Cdata_evt_,3,'omitnan');
-    imagesc('XData',t_bins_lfp,'YData',data_spectro.freqdom,'CData',Cdata_mean,'HitTest','off','Parent',ax3);
+    imagesc('XData',t_bins_lfp,'YData',freqdom,'CData',Cdata_mean,'HitTest','off','Parent',ax3);
 
     n_iqr= 2;
     data_iqr = Cdata_mean(~isnan(Cdata_mean));
     ax3.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    ax3.YLim = [data_spectro.freqdom(1),data_spectro.freqdom(end)];
+    ax3.YLim = [freqdom(1),freqdom(end)];
     % ax3.XLim = [t_bins_lfp(1),t_bins_lfp(end)];
     ax3.XLim = ax1.XLim;
     ax3.Title.String = 'Mean Spectrogram';
@@ -676,7 +680,6 @@ for kk=1:length(all_event_names)
         % Traces
         if flag_save_stats(1)
             filename_save = sprintf(strcat('%s-%s_Event-Imaging_Traces.mat'),recording_name,event_name);
-            freqdom = data_spectro.freqdom;
             save(fullfile(save_dir,filename_save),'Params',...
                 'Yraw_evt_','Y1_evt_','Cdata_mean',...
                 'freqdom','t_bins_lfp','-v7.3');
