@@ -8,13 +8,15 @@ global FILES DIR_SAVE DIR_SYNT;
 load('Preferences.mat','GTraces');
 
 all_csv_patterns = {'Ripples-Abs-All';'Ripples-Sqrt-All'};
+% all_csv_patterns = {'Ripples-Sqrt-All'};
+
 timegroup = 'NREM';
 band_name = 'ripple';
 pattern_evt = 'Peak(s)';
 
 t_before = -1;          % time window before (seconds)
 t_after = 5;            % time window after (seconds)
-sampling_lfp = 1000;    % Hz
+sampling_lfp = 500;    % Hz
 sampling_spectro = 500;    % Hz
 flag_save_figure = 1;
 
