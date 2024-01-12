@@ -7,7 +7,7 @@ global FILES DIR_SAVE DIR_SYNT;
 % Parameters
 load('Preferences.mat','GTraces');
 
-all_csv_patterns = {'-000]Ripples-Abs-All'};
+all_csv_patterns = {'-000]Ripples-Abs-All';'-000]Ripples-Sqrt-All'};
 % all_csv_patterns = {'Ripples-Sqrt-All'};
 
 timegroup = 'NREM';
@@ -166,14 +166,20 @@ for h = 1:length(all_csv_patterns)
         f4.Name = sprintf('[%s][%s]Peri-Event-LFP-spectro',cur_recording,cur_csv_pattern);
         colormap(f4,'jet');
         
+        f5=figure;
+        f5.Units='normalized';
+        f5.OuterPosition=[0 0 1 1];
+        f5.Name = sprintf('[%s][%s]Peri-Event-LFP-crosscorr',cur_recording,cur_csv_pattern);
+        colormap(f5,'jet');
+        
         all_y_tg = [];
         all_ax1 = gobjects(n_channels,n_channels);
         all_ax2 = gobjects(n_channels,n_channels);
         all_ax3 = gobjects(n_channels,n_channels);
         all_ax4 = gobjects(n_channels,n_channels);
+        all_ax5 = gobjects(n_channels,n_channels);
         
         for j=1:n_channels
-            tic;
             cur_channel = char(all_lfp_channels(j));
             
             % Read csv event file
@@ -258,6 +264,7 @@ for h = 1:length(all_csv_patterns)
                 ax2 = axes('Parent',f2,'Position',get_position(n_channels,n_channels,counter));
                 ax3 = axes('Parent',f3,'Position',get_position(n_channels,n_channels,counter));
                 ax4 = axes('Parent',f4,'Position',get_position(n_channels,n_channels,counter));
+                ax5 = axes('Parent',f5,'Position',get_position(n_channels,n_channels,counter));
                 counter=counter+n_channels;
                 
                 Yraw_evt = interp1(Xraw,S(jj).Yraw,Xq_evt_lfp);
@@ -296,7 +303,7 @@ for h = 1:length(all_csv_patterns)
                 patch('XData',xdata,'YData',ydata,'Parent',ax1,...
                     'Tag','PatchEpisode','FaceColor',[.5 .5 .5],'FaceAlpha',.5,'EdgeColor','none');                
                 % Layout
-                n_iqr = 2;
+                n_iqr = 1.5;
                 data_iqr = Yraw_evt(~isnan(Yraw_evt));
                 if ~isempty(data_iqr)
                     ax1.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
@@ -334,7 +341,7 @@ for h = 1:length(all_csv_patterns)
                 patch('XData',xdata,'YData',ydata,'Parent',ax2,...
                     'Tag','PatchEpisode','FaceColor',[.5 .5 .5],'FaceAlpha',.5,'EdgeColor','none');                
                 % Layout
-                n_iqr = 2;
+                n_iqr = 1.5;
                 data_iqr = Yraw_evt_zscored(~isnan(Yraw_evt_zscored));
                 data_iqr=data_iqr(:);
                 if ~isempty(data_iqr)
@@ -398,7 +405,7 @@ for h = 1:length(all_csv_patterns)
                 hold(ax4,'on');
                 Cdata_mean = mean(Cdata_evt_,3,'omitnan');
                 imagesc('XData',t_bins_lfp,'YData',freqdom,'CData',Cdata_mean,'HitTest','off','Parent',ax4);
-                n_iqr= 2;
+                n_iqr= 1.5;
                 data_iqr = Cdata_mean(~isnan(Cdata_mean));
                 if ~isempty(data_iqr)
                     ax4.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
@@ -419,54 +426,103 @@ for h = 1:length(all_csv_patterns)
                 if jj~=n_channels
                     set(ax4,'XTick',[],'XtickLabel',[]);
                 end
+                
+                % cross-corr
+                if jj==1
+                    ax5.Title.String = sprintf('[Rip:%s][N=%d][%.2fHz]',channel_id,n_events,density_events);
+                end
+                if j==1
+                    ax5.YLabel.String = S(jj).channel;
+                end
+%                 if j==jj
+%                     set(ax5,'YTick',[-.1 0 .1 .2 .3 .4 .5]);
+%                 else
+%                     set(ax5,'YTick',[],'YTickLabel',[]);
+%                 end
+%                 if jj~=n_channels
+%                     set(ax5,'XTick',[],'XtickLabel',[]);
+%                 end
+                
                 all_ax1(jj,j) = ax1;
                 all_ax2(jj,j) = ax2;
                 all_ax3(jj,j) = ax3;
                 all_ax4(jj,j) = ax4;
+                all_ax5(jj,j) = ax5;
             end
-            toc;
         end
         
         % Evnt Correlation Matrix
+        tic;
+        tmax = 2;
+        tstep = .1;
+        max_step = max(round(tmax/median(diff(Xraw))),1);
+        step_size = max(round(tstep/median(diff(Xraw))),1);
+        t_lags = median(diff(Xraw))*lags;
         C = corr(all_y_tg','rows','complete');
         for j=1:n_channels
             for jj=1:n_channels
-                if j~=jj
-                    ax=all_ax1(jj,j);
-                    x = ax.XLim(1)+.8*(ax.XLim(2)-ax.XLim(1));
-                    y = ax.YLim(1)+.9*(ax.YLim(2)-ax.YLim(1));
-                    str = sprintf('C=%.2f',C(jj,j));
-                    t1 = text(x,y,str,'Parent',ax);
-                    t1.FontSize=8;
-                    t1.BackgroundColor='w';
-                    ax=all_ax2(jj,j);
-                    x = ax.XLim(1)+.8*(ax.XLim(2)-ax.XLim(1));
-                    y = ax.YLim(1)+.9*(ax.YLim(2)-ax.YLim(1));
-                    str = sprintf('C=%.2f',C(jj,j));
-                    t1 = text(x,y,str,'Parent',ax);
-                    t1.FontSize=8;
-                    t1.BackgroundColor='w';
-                    ax=all_ax3(jj,j);
-                    x = ax.XLim(1)+.8*(ax.XLim(2)-ax.XLim(1));
-                    y = ax.YLim(1)+.9*(ax.YLim(2)-ax.YLim(1));
-                    str = sprintf('C=%.2f',C(jj,j));
-                    t1 = text(x,y,str,'Parent',ax);
-                    t1.FontSize=8;
-                    t1.BackgroundColor='w';
-                    ax=all_ax4(jj,j);
-                    x = ax.XLim(1)+.8*(ax.XLim(2)-ax.XLim(1));
-                    y = ax.YLim(1)+.9*(ax.YLim(2)-ax.YLim(1));
-                    str = sprintf('C=%.2f',C(jj,j));
-                    t1 = text(x,y,str,'Parent',ax);
-                    t1.FontSize=8;
-                    t1.BackgroundColor='w';
+                ax=all_ax5(jj,j);
+                X = all_y_tg(j,:);
+                Y = all_y_tg(jj,:);
+                [r,lags] = cross_corr(X,Y,max_step,step_size);
+                l=line('XData',t_lags,'YData',r,'Parent',ax);
+                ax.XLim = [t_lags(1) t_lags(end)];
+                if j==jj
+                    ax.YLim = [-.1 1];
+                    l.Color='r';
+                else
+                    ax.YLim = [-.1 C(jj,j)+.1];
                 end
+                grid(ax,'on');
+                % zero-lag
+                x = ax.XLim(1)+.75*(ax.XLim(2)-ax.XLim(1));
+                y = ax.YLim(1)+.85*(ax.YLim(2)-ax.YLim(1));
+                str = sprintf('C=%.2f',C(jj,j));
+                t1 = text(x,y,str,'Parent',ax);
+                t1.FontSize=8;
+                t1.BackgroundColor='w';
             end
         end
+        toc;
+        
+%         for j=1:n_channels
+%             for jj=1:n_channels
+%                 if j~=jj
+%                     ax=all_ax1(jj,j);
+%                     x = ax.XLim(1)+.8*(ax.XLim(2)-ax.XLim(1));
+%                     y = ax.YLim(1)+.9*(ax.YLim(2)-ax.YLim(1));
+%                     str = sprintf('C=%.2f',C(jj,j));
+%                     t1 = text(x,y,str,'Parent',ax);
+%                     t1.FontSize=8;
+%                     t1.BackgroundColor='w';
+%                     ax=all_ax2(jj,j);
+%                     x = ax.XLim(1)+.8*(ax.XLim(2)-ax.XLim(1));
+%                     y = ax.YLim(1)+.9*(ax.YLim(2)-ax.YLim(1));
+%                     str = sprintf('C=%.2f',C(jj,j));
+%                     t1 = text(x,y,str,'Parent',ax);
+%                     t1.FontSize=8;
+%                     t1.BackgroundColor='w';
+%                     ax=all_ax3(jj,j);
+%                     x = ax.XLim(1)+.8*(ax.XLim(2)-ax.XLim(1));
+%                     y = ax.YLim(1)+.9*(ax.YLim(2)-ax.YLim(1));
+%                     str = sprintf('C=%.2f',C(jj,j));
+%                     t1 = text(x,y,str,'Parent',ax);
+%                     t1.FontSize=8;
+%                     t1.BackgroundColor='w';
+%                     ax=all_ax4(jj,j);
+%                     x = ax.XLim(1)+.8*(ax.XLim(2)-ax.XLim(1));
+%                     y = ax.YLim(1)+.9*(ax.YLim(2)-ax.YLim(1));
+%                     str = sprintf('C=%.2f',C(jj,j));
+%                     t1 = text(x,y,str,'Parent',ax);
+%                     t1.FontSize=8;
+%                     t1.BackgroundColor='w';
+%                 end
+%             end
+%         end
         
         % Saving figure
         if flag_save_figure
-            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP','Raw',cur_csv_pattern);
+            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP',cur_csv_pattern,'raw');
             if ~isfolder(save_dir)
                 mkdir(save_dir);
             end
@@ -474,7 +530,7 @@ for h = 1:length(all_csv_patterns)
             saveas(f1,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
             fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
             
-            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP','zscored',cur_csv_pattern);
+            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP',cur_csv_pattern,'zscored');
             if ~isfolder(save_dir)
                 mkdir(save_dir);
             end
@@ -482,7 +538,7 @@ for h = 1:length(all_csv_patterns)
             saveas(f2,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
             fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
             
-            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP','filtered',cur_csv_pattern);
+            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP',cur_csv_pattern,'filtered');
             if ~isfolder(save_dir)
                 mkdir(save_dir);
             end
@@ -490,17 +546,26 @@ for h = 1:length(all_csv_patterns)
             saveas(f3,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
             fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
             
-            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP','spectro',cur_csv_pattern);
+            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP',cur_csv_pattern,'spectro');
             if ~isfolder(save_dir)
                 mkdir(save_dir);
             end
             pic_name = sprintf(f4.Name,GTraces.ImageSaveExtension);
             saveas(f4,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
             fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
+            
+            save_dir = fullfile(DIR_SYNT,'Peri-Event-LFP',cur_csv_pattern,'cross-corr');
+            if ~isfolder(save_dir)
+                mkdir(save_dir);
+            end
+            pic_name = sprintf(f5.Name,GTraces.ImageSaveExtension);
+            saveas(f5,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
+            fprintf('Image saved at %s.\n',fullfile(save_dir,pic_name));
         end
         close(f1);
         close(f2);
         close(f3);
         close(f4);
+        close(f5);
     end
 end

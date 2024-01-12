@@ -231,7 +231,8 @@ for index_event=1:length(all_event_names)
     end
     
     % Create folders
-    unique_planes = unique(all_planes);
+%     unique_planes = unique(all_planes);
+     unique_planes = all_planes(1);
     for i=1:length(unique_animals)
         for j=1:length(unique_planes)
             if ~isfolder(fullfile(folder_dest,strcat(char(unique_animals(i)),'-',char(unique_planes(j)))))

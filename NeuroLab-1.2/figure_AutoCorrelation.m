@@ -1340,11 +1340,11 @@ for k = 1:size(all_pixels_aligned,1)
         if kk<0
             temp = A(abs(kk)+1:end);
             B(1:length(temp),index_kk) = temp;
-        elseif k>0
+        elseif kk>0
             temp = A(1:end-kk);
             B(kk+1:end,index_kk) = temp;
         else
-            B(:,:,index_kk) = A;
+            B(:,index_kk) = A;
         end
     end
     r = corr(B,A,'rows','complete');
