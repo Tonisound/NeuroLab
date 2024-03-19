@@ -2,15 +2,18 @@ function quick_export_ext(X,Y,file_ext)
 % Export trace in .ext format
 
 % Modify if needed
-parent_folder = pwd;
 if nargin <3
     file_ext = 'myfile.ext';
 end
 T.format = 'float32';
 T.nb_samples = length(X);
 T.unit = 'mV';
-T.shortname = 'EOG';
-T.fullname = strrep(file_ext,'.ext','');
+
+temp = regexp(file_ext,filesep,'split');
+shortname = strrep(char(temp(end)),'.ext','');
+parent_folder = strrep(file_ext,strcat(filesep,char(temp(end))),'');
+T.shortname = shortname;
+T.fullname = shortname;
 T.parent = parent_folder;
 
 % export

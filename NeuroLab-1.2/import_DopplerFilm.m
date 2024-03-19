@@ -35,8 +35,12 @@ if isempty(Doppler_film)
 end
 
 % Compute Doppler_dB
+% uncomment when done
 Doppler_dB = 20*log10(abs(Doppler_film)/max(abs(Doppler_film(:))));
 Doppler_dB = rescale(Doppler_dB,0,1000);
+
+% % comment when done
+% Doppler_dB = rescale(Doppler_film,0,1000);
 
 % Checking Doppler
 if flag == 0

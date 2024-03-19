@@ -10,12 +10,13 @@ else
     return;
 end
 
+str_filtered = 'theta';
 
 % Loading Traces
 all_traces = struct('name',[],'folder',[],'X',[],'Y',[],'f_samp',[]);
 d_lfp = dir(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_*.mat'));
-d_theta = dir(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP-theta_*.mat'));
-d_all = [d_lfp;d_theta];
+d_filtered = dir(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP',sprintf('LFP-%s_*.mat',str_filtered)));
+d_all = [d_lfp;d_filtered];
 for i =1:length(d_all)
     all_traces(i).name = strrep(char(d_all(i).name),'_','/');
     all_traces(i).name = strrep(all_traces(i).name,'.mat','');
@@ -48,21 +49,23 @@ if exist(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Nconfig.mat'),'file')
     ind_remainder = ~ind_all.*contains(temp,'LFP/');
     ind_1=[ind_1;find(ind_remainder==1)];
     
-    % sorting LFP-theta
-    pattern_theta = strcat('LFP-theta/',[channel_id;channel_id_diff]);
+    % sorting LFP-filtered
+    pattern_filtered = strcat('LFP-',str_filtered,'/',[channel_id;channel_id_diff]);
     ind_2 = [];
     ind_all = zeros(size(temp));
-    for i =1:length(pattern_theta)
-        ind_keep = strcmp(temp,pattern_theta(i));
+    for i =1:length(pattern_filtered)
+        ind_keep = strcmp(temp,pattern_filtered(i));
         ind_all = ind_all+ind_keep;
         ind_2 = [ind_2;find(ind_keep==1)];
     end
-    ind_remainder = ~ind_all.*contains(temp,'LFP-theta/');
+    ind_remainder = ~ind_all.*contains(temp,strcat('LFP-',str_filtered,'/'));
     ind_2=[ind_2;find(ind_remainder==1)];
 else
     %unsorted
-    ind_1 = find(~(cellfun('isempty',strfind(temp,'LFP/')))==1);
-    ind_2 = find(~(cellfun('isempty',strfind(temp,'LFP-theta/')))==1);
+    ind_1 = contains(temp,'LFP/');
+    ind_2 = contains(temp,strcat('LFP',str_filtered,'/'));
+%     ind_1 = find(~(cellfun('isempty',strfind(temp,'LFP/')))==1);
+%     ind_2 = find(~(cellfun('isempty',strfind(temp,'LFP/')))==1);
 end
 
 
@@ -72,7 +75,7 @@ if sum(ind_1)==0
     return;
 end
 if sum(ind_2)==0 || length(ind_2)<length(ind_1)
-    warning('LFP-theta and LFP channels do not match. Mode spectrogramm only.');
+    warning('LFP-filtered and LFP channels do not match. Mode spectrogramm only.');
     cb4_enable = 'off';
     cb12_enable = 'off';
 else

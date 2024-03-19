@@ -1371,8 +1371,6 @@ for k = 1:size(all_pixels_aligned,1)
             B(:,index_kk) = A;
         end
     end
-%     R = corrcoef(B,'rows','pairwise');
-%     r = R(1,:);
     r = corr(B,A,'rows','pairwise');
 %     r = corr(B,A,'rows','complete');
 

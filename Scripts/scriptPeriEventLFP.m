@@ -7,7 +7,7 @@ global FILES DIR_SAVE DIR_SYNT;
 % Parameters
 load('Preferences.mat','GTraces');
 
-all_csv_patterns = {'-000]Ripples-Abs-All';'-000]Ripples-Sqrt-All'};
+all_csv_patterns = {'-000]Ripples-Abs-All';'-999]Ripples-Abs-All'};
 % all_csv_patterns = {'Ripples-Sqrt-All'};
 
 timegroup = 'NREM';
@@ -457,7 +457,6 @@ for h = 1:length(all_csv_patterns)
         tstep = .1;
         max_step = max(round(tmax/median(diff(Xraw))),1);
         step_size = max(round(tstep/median(diff(Xraw))),1);
-        t_lags = median(diff(Xraw))*lags;
         C = corr(all_y_tg','rows','complete');
         for j=1:n_channels
             for jj=1:n_channels
@@ -465,12 +464,13 @@ for h = 1:length(all_csv_patterns)
                 X = all_y_tg(j,:);
                 Y = all_y_tg(jj,:);
                 [r,lags] = cross_corr(X,Y,max_step,step_size);
+                t_lags = median(diff(Xraw))*lags;
                 l=line('XData',t_lags,'YData',r,'Parent',ax);
                 ax.XLim = [t_lags(1) t_lags(end)];
                 if j==jj
                     ax.YLim = [-.1 1];
                     l.Color='r';
-                else
+                elseif ~isnan(C(jj,j))
                     ax.YLim = [-.1 C(jj,j)+.1];
                 end
                 grid(ax,'on');
