@@ -158,9 +158,11 @@ for counter = 1:n_traces
     polarhistogram('BinEdges',bin_edges,'BinCounts',this_bin_counts,'Parent',pax,...
         'FaceAlpha',.75,'FaceColor',[.5 .5 .5],'EdgeColor','k');
 
+    % Generating pvalue
+    [pvalue,pdf,this_mvl2] = PAC_stats(Yphase,all_Y(:,counter)); 
+
     mvl_x = mean(cos(bin_centers)'.*this_bin_counts);
     mvl_y = mean(sin(bin_centers)'.*this_bin_counts);
-
     this_mvl = sqrt(mvl_x.^2+mvl_y.^2);
     %     [~,ind_pd] = max(this_bin_counts);
     %     this_pd = bin_centers(ind_pd);
@@ -169,14 +171,17 @@ for counter = 1:n_traces
     else
         this_pd = atan(mvl_y/mvl_x)+pi;
     end
+    
     polarplot([this_pd this_pd],[0 pimp_factor*this_mvl],'Parent',pax,...
         'LineStyle','-','Color','r','LineWidth',2);
-    pax.Title.String = strcat(char(all_labels(counter)),sprintf('[MVL=%.2f]',this_mvl*pimp_factor));
+    pax.Title.String = strcat(char(all_labels(counter)),sprintf('[MVL=%.2f][MVL=%.2f][P=%.4f]',this_mvl*pimp_factor,this_mvl2*pimp_factor,pvalue));
 
     all_mvl = [all_mvl;this_mvl];
     all_pd = [all_pd;this_pd];
 end
 f1_1.OuterPosition = [0 .5 1 .5];
+
+
 
 f1_2 = figure('Units','normalized','Name','Peri-Event Time Histogram (Start)');
 for counter = 1:n_traces

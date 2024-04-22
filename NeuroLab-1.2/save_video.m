@@ -5,7 +5,7 @@ function save_video(workingDir,savedir,video_name,video_quality)
 % end
 
 if nargin < 4
-    video_quality = 100;
+    video_quality = 50;
 end
 
 load('Preferences.mat','GTraces');
