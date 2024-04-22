@@ -18,8 +18,10 @@ if ~isfolder(folder_source_stats)
     return;
 end
 
-all_event_names = {'[Gyr]Ripples-Abs-All';'[Pyr]Ripples-Abs-All'};
-
+% all_event_names = {'[Gyr]Ripples-Abs-All';'[Pyr]Ripples-Abs-All'};
+all_event_names = {'[Pyr]Ripples-Abs-Fast';'[Pyr]Ripples-Abs-Long';'[Pyr]Ripples-Abs-Strong';...
+    '[Gyr]Ripples-Abs-Fast';'[Gyr]Ripples-Abs-Long';'[Gyr]Ripples-Abs-Strong'};
+        
 
 for index_event=1:length(all_event_names)
     

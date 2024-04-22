@@ -1,5 +1,4 @@
 global DIR_STATS DIR_SAVE;
-
 d_mat = dir(fullfile(DIR_STATS,'Event_Imaging','*','*','*.mat'));
 
 for i =1:length(d_mat)
