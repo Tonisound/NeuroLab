@@ -160,7 +160,7 @@ for i=1:length(selected_tags)
 
             % Getting CLim
             ax.CLim = [clim1,clim2];
-            ax.CLim = [-10,50];
+            ax.CLim = [0,150];%[-10,50];
 
             ax.Title.String = data_tr.time_str(index_im);
             set(ax,'XTick','','YTick','','XTickLabel','','YTickLabel','');
@@ -245,7 +245,7 @@ if flag_concatenate
 
         % Getting CLim
         ax.CLim = [clim1,clim2];
-        ax.CLim = [-10,50];
+        ax.CLim = [0,150];%[-10,50];
 
         ax.Title.String = data_tr.time_str(index_im);
         set(ax,'XTick','','YTick','','XTickLabel','','YTickLabel','');
