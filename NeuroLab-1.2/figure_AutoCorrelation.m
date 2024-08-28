@@ -1117,10 +1117,10 @@ if flag_dynamics && ~isempty(IM_region)
         hold(ax1a,'on');
         line('XData',all_locs_dynamic,'YData',im_mid,'Parent',ax1a,'Tag','MaxPeak',...
             'LineStyle','none','Color','k','Linewidth',1,...
-            'MarkerSize',3,'Marker','o','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
+            'MarkerSize',1.5,'Marker','^','MarkerFaceColor','r','MarkerEdgeColor','r');
         line('XData',all_locs_dynamic_min,'YData',im_mid,'Parent',ax1a,'Tag','MinPeak',...
             'LineStyle','none','Color','k','Linewidth',1,...
-            'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',[.5 .5 .5]);
+            'MarkerSize',1.5,'Marker','v','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5]);
         ax1a.XLim =[lags(1) lags(end)];
         ax1a.YDir ='reverse';
         ax1a.YLim =[im_mid(1) im_mid(end)];
@@ -1143,10 +1143,10 @@ if flag_dynamics && ~isempty(IM_region)
                 'LineStyle','-','Color',colors_p(j,:),'Linewidth',.5);%[.5 .5 .5]
             line('XData',all_locs_dynamic(j),'YData',all_r_dynamic(j)+offset_vec(j),'Parent',ax1b,'Tag','MaxPeak',...
                 'LineStyle','none','Color','k','Linewidth',1,...
-                'MarkerSize',3,'Marker','o','MarkerFaceColor',colors_p(j,:),'MarkerEdgeColor',colors_p(j,:));
+                'MarkerSize',1.5,'Marker','^','MarkerFaceColor','r','MarkerEdgeColor','r');
             line('XData',all_locs_dynamic_min(j),'YData',all_r_dynamic(j)+offset_vec(j),'Parent',ax1b,'Tag','MinPeak',...
                 'LineStyle','none','Color','k','Linewidth',1,...
-                'MarkerSize',3,'Marker','o','MarkerFaceColor','none','MarkerEdgeColor',colors_p(j,:));
+                'MarkerSize',1.5,'Marker','v','MarkerFaceColor',colors_p(j,:),'MarkerEdgeColor',colors_p(j,:));
         end
         %     line('XData',lags,'YData',mean(all_r_regions,1,'omitnan'),'Parent',ax1b,'Tag','Mean_R',...
         %         'LineStyle','-','Color','r','Linewidth',1);
@@ -1165,10 +1165,11 @@ if flag_dynamics && ~isempty(IM_region)
         else
             ax1a.YTickLabel = [];
             ax1b.YTickLabel = [];
-            %             if i==length(label_regions)
-            %                 colorbar(ax1a,"north");
-            %             end
+%                         if i==length(label_regions)
+%                             colorbar(ax1a,"north");
+%                         end
         end
+        colormap(ax1a,'parula');
     end
 
 end

@@ -270,7 +270,7 @@ save(fullfile(dir_save,'Time_Reference.mat'),'time_str','time_ref',...
     'reference','padding','offset','delay_lfp_video',...
     'rec_mode','ind_jumps','ind_bursts','length_burst','n_burst','-v7.3');
 fprintf('Succesful Reference Time Importation [%s,%d,%d]\n',rec_mode,n_burst,length_burst);
-fprintf('===> Saved at %s.mat\n',fullfile(dir_save,'Time_Reference.mat'));
+fprintf('===> Saved at %s\n',fullfile(dir_save,'Time_Reference.mat'));
 
 success = true;
 

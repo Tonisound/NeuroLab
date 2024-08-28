@@ -1,14 +1,14 @@
 f = figure;
-colormap(f,'gray');
-l_reg = findobj(myhandles.RightAxes,'Tag','Trace_Region');
-bin_size = 900;
+colormap(f,'hot');
+l_reg = flipud(findobj(myhandles.RightAxes,'Tag','Trace_Region'));
+bin_size = 1200;
 
 for i =1:length(l_reg)
     ax = subplot(1,length(l_reg),i);
     temp= l_reg(i).YData(1:end-1)';
     temp2 = reshape(temp,[bin_size,length(temp)/bin_size]);
     imagesc(temp2','Parent',ax);
-    ax.CLim = [-50 100];
+    ax.CLim = [-10 150];
     ax.Title.String = l_reg(i).UserData.Name;
     colorbar(ax,'southoutside');
 

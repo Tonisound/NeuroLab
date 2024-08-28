@@ -218,8 +218,8 @@ colormap(ax100,'hot');
 % t101 = uicontrol('Units','normalized','Style','text','Parent',f,'Position',[.4 .925 .1 .04],...
 %     'Fontsize',22,'BackgroundColor','k','ForegroundColor','w','String','REM');
 
-im_start = 10518%9612;
-im_end = 11118%11412;
+im_start = 10500%9612;
+im_end = 11100%11412;
 temp = datenum(myhandles.TimeDisplay.UserData(im_start,:));
 t_start = (temp-floor(temp))*24*3600;
 temp = datenum(myhandles.TimeDisplay.UserData(im_end,:));

@@ -139,6 +139,11 @@ all_pd = [];
 all_pd_lp = [];
 all_pd_fa = [];
 
+YPhase=bin_centers;
+YData=bin_counts;
+YData_std=bin_counts_std;
+YData_sem=bin_counts_sem;
+save('MyPolarPlot_data','YPhase','YData','YData_std','YData_sem','-v7.3')
 
 f1_1 = figure('Units','normalized','Name','Raw tuning curves');
 for counter = 1:n_traces
@@ -160,6 +165,7 @@ for counter = 1:n_traces
 
     % Generating pvalue
     [pvalue,pdf,this_mvl2] = PAC_stats(Yphase,all_Y(:,counter)); 
+%     [MeanRho,MeanAmp,pvalue] = MyPolarPlot(hax,Yphase,0,all_Y(:,counter),'r');
 
     mvl_x = mean(cos(bin_centers)'.*this_bin_counts);
     mvl_y = mean(sin(bin_centers)'.*this_bin_counts);
@@ -172,8 +178,7 @@ for counter = 1:n_traces
         this_pd = atan(mvl_y/mvl_x)+pi;
     end
     
-    polarplot([this_pd this_pd],[0 pimp_factor*this_mvl],'Parent',pax,...
-        'LineStyle','-','Color','r','LineWidth',2);
+    polarplot([this_pd this_pd],[0 pimp_factor*this_mvl],'Parent',pax,'LineStyle','-','Color','r','LineWidth',2);
     pax.Title.String = strcat(char(all_labels(counter)),sprintf('[MVL=%.2f][MVL=%.2f][P=%.4f]',this_mvl*pimp_factor,this_mvl2*pimp_factor,pvalue));
 
     all_mvl = [all_mvl;this_mvl];
@@ -184,6 +189,10 @@ f1_1.OuterPosition = [0 .5 1 .5];
 
 
 f1_2 = figure('Units','normalized','Name','Peri-Event Time Histogram (Start)');
+
+f1_2bis = figure('Units','normalized','Name','Peri-Event Time Histogram (Start) Bis');
+ax_bis = axes('Parent',f1_2bis);
+
 for counter = 1:n_traces
     pos = get_position(n_rows,n_columns,counter,[.05,.05,.01;.05,.05,.05]);
     ax = axes('Parent',f1_2,'Position',pos);
@@ -204,10 +213,30 @@ for counter = 1:n_traces
     data_iqr = im.CData(~isnan(im.CData));
     ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
     colorbar(ax,'southoutside');
+    colormap(ax,'jet');
+%     ax.CLim = [-10 40];
 
     % Mean line
-    mline_data = rescale(nanmean(im.CData,1),.5,n_events-.5);
+    n_samples = sum(~isnan(im.CData),1);
+    if strcmp(char(all_labels(counter)),'Power-beta-DVR2')
+        mdata = 1e6*nanmean(im.CData,1);
+        std_data = 1e6*std(im.CData,1,'omitnan');
+    else
+        mdata = nanmean(im.CData,1);
+        std_data = std(im.CData,1,'omitnan');
+    end
+    
+    sem_data = std_data./sqrt(n_samples);
+
+    mline_data = rescale(mdata,.5,n_events-.5);
     line('XData',window_peth,'YData',n_events-mline_data,'Parent',ax,'Color','r','Linewidth',2);
+    
+    patch_xdata = [window_peth,fliplr(window_peth)];
+    line('XData',window_peth,'YData',mdata,'Parent',ax_bis,'Color','r','Linewidth',1);
+%     patch_ydata = [mdata-std_data,fliplr(mdata+std_data)];
+    patch_ydata = [mdata-sem_data,fliplr(mdata+sem_data)];
+    patch('XData',patch_xdata,'YData',patch_ydata,'EdgeColor','none','Parent',ax_bis,'FaceColor','r','FaceAlpha',.25);
+
 end
 f1_2.OuterPosition = [0 0 1 .5];
 
@@ -255,6 +284,7 @@ for counter = 1:n_traces
     this_bin_counts_plot_minus_sem = [this_bin_counts_minus_sem(:);this_bin_counts_minus_sem(1)];
     this_bin_counts_plot_minus_std = [this_bin_counts_minus_std(:);this_bin_counts_minus_std(1)];
     bin_centers_plot = [bin_centers(:);bin_centers(1)];
+    
 
     polarplot(bin_centers_plot,this_bin_counts_plot,'Parent',pax,...
         'LineStyle','-','LineWidth',1,'Color',g_colors(counter,:),...
