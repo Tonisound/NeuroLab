@@ -620,6 +620,9 @@ for i = 1:length(ind_files)
             case 'Import LFP Traces'
                 success = import_lfptraces(FILES(CUR_FILE),myhandles,0);
                 
+            case 'Import Intan Files'
+                success = import_intan_files(FILES(CUR_FILE),myhandles,0);
+                
             case'Import External Files'
                 success = import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles,0);
                 

@@ -208,7 +208,7 @@ for ind_file = 1:length(FileList)
             str = char(dd(1).name);
             F(ind_file).ns1 = str;
         end
-        dd = [dir(fullfile(FileName,dir_lfp,'*.ns2'));dir(fullfile(FileName,dir_lfp,'*.sk2'))];
+        dd = [dir(fullfile(FileName,dir_lfp,'*.ns2'));dir(fullfile(FileName,dir_lfp,'*.sk2'));dir(fullfile(FileName,dir_lfp,'*.rhd'))];
         if ~isempty(dd)
             str = char(dd(1).name);
             F(ind_file).ns2 = str;

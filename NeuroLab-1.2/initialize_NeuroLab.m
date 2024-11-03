@@ -348,7 +348,7 @@ pl = uicontrol(f,'Style','popup',...
     'Parent',botPanel);
 
 pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Convert Neuroshop Masks|';
-pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import External Files|Import NEV Tracking');
+pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import Intan Files|Import External Files|Import NEV Tracking');
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope|Compute Wavelet Spectrogram');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Locomotion Events|Detect Sleep Events');
 pl_str = strcat(pl_str,'|Detect Left-Right Runs|Detect Early-Mid-Late Runs|Detect Hippocampal Ripples|Segregate Hippocampal Ripples');
@@ -674,6 +674,7 @@ set(myhandles.ImportMenu_NLabEvents,'Callback','import_nlab_events(FILES(CUR_FIL
 set(myhandles.ImportMenu_Video,'Callback','import_crop_video(FILES(CUR_FILE),myhandles,1);');
 set(myhandles.ImportMenu_ImportConfig,'Callback','import_lfpconfig(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 % set(myhandles.ImportMenu_LFPTraces,'Callback','import_lfptraces(FILES(CUR_FILE),myhandles);');
+% set(myhandles.ImportMenu_IntanFiles,'Callback','import_intan_files(FILES(CUR_FILE),myhandles);');
 % set(myhandles.ImportMenu_Regions,'Callback','import_regions(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).recording,myhandles);');
 % set(myhandles.ImportMenu_ExternalFiles,'Callback','import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),myhandles);');
 

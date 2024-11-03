@@ -219,8 +219,13 @@ t1.Data = D;
             save('Files.mat','FILES','-append');
             fprintf('Files.mat updated.\n');
         else
-            save(fullfile(folder_name,'Nconfig.mat'),...
-                'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type','-append');
+            if isfile(fullfile(folder_name,'Nconfig.mat'))
+                save(fullfile(folder_name,'Nconfig.mat'),...
+                    'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type','-append');
+            else
+                save(fullfile(folder_name,'Nconfig.mat'),...
+                    'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type','-v7.3');
+            end
             fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
         end
         

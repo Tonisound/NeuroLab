@@ -26,6 +26,9 @@ switch strtrim(str(val,:))
     case 'Import LFP Traces'
         import_lfptraces(FILES(CUR_FILE),handles);
         
+    case 'Import Intan Files'
+        import_intan_files(FILES(CUR_FILE),handles);
+        
     case'Import External Files'
         import_externalfiles(FILES(CUR_FILE).fullpath,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
