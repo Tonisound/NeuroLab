@@ -28,7 +28,7 @@ fclose(fid);
 
 % Writing output file
 fid2 = fopen(filepath_csv_out,'w');
-fwrite(fid2,sprintf('FileName,Importation Start,Importation End,NumTrigs,NumFrames,AnaloginChannels,AmpChannels,AuxChannels\n'));
+fwrite(fid2,sprintf('FileName,Importation Start,Importation End,fUSTrigs,fUSFrames,AnaloginChannels,AmpChannels,AuxChannels,VidFrames,TrackedFrames\n'));
 fclose(fid2);
 
 % Sanity Check for exisiting files and folder
@@ -72,7 +72,7 @@ for i = 1:nFiles
     ext_name = create_ext_folder(base_filepath);
     
     % Move video file
-    %     movefile(char(S(i).fus));
+    [numVidFrames,numTrackedFrames,~] = move_video_file(char(S(i).video),base_filepath,ext_name);
     
     datestr_end = datestr(now);
     num_channels_adc = RHD_S.num_channels_adc;
@@ -80,8 +80,9 @@ for i = 1:nFiles
     num_channels_aux = RHD_S.num_channels_aux;
     
     fid2 = fopen(filepath_csv_out,'a');
-    fwrite(fid2,sprintf('%s,%s,%s,%d,%d,%d,%d,%d\n',base_filepath,datestr_start,datestr_end,...
-        nTrigs,nFrames,num_channels_adc,num_channels_amp,num_channels_aux));
+    fwrite(fid2,sprintf('%s,%s,%s,%d,%d,%d,%d,%d,%d,%d\n',base_filepath,datestr_start,datestr_end,...
+        nTrigs,nFrames,num_channels_adc,num_channels_amp,num_channels_aux,...
+        numVidFrames,numTrackedFrames));
     fclose(fid2);
     
     fprintf('================ File (%d/%d): Exportation Done ================ \n',i,nFiles);
@@ -239,7 +240,7 @@ end
 
 
 % Read amplifier.dat
-if ~isfile(fullfile(lfp_folder,'amplifier.mat'))
+if isfile(fullfile(lfp_folder,'amplifier.mat'))
     fprintf('File amplifier.mat already exported.\n');
 else
     
@@ -341,6 +342,80 @@ end
 end
 
 
+function [numVidFrames,numTrackedFrames,video_name] = move_video_file(filepath,base_filepath,ext_name)
+
+% Checking if video file is present
+d_vid = dir(fullfile(filepath,'*.avi'));
+if isempty(d_vid)
+    warning('Missing video file in [%s].',filepath);
+elseif length(d_vid) > 1
+    warning('Multiple video files in [%s]. Taking first: [%s].',filepath,d_vid(1).name);
+    d_vid = d_vid(1);
+end
+
+filepath_csv = fullfile(base_filepath,'timing_video_frames.csv');
+if isfile(fullfile(base_filepath,'timing_frames.csv'))
+    delete(fullfile(base_filepath,'timing_frames.csv'));
+end
+
+% % Checking if video file is present - Copying video
+% if isfile(fullfile(base_filepath,d_vid.name)) && isfile(filepath_csv)
+%     fprintf('Video file already exported.\n');
+%     [t_tracking,video_name,numVidFrames] = read_time_frames_csv(filepath_csv);
+%     numTrackedFrames = length(t_tracking);
+%     
+% else
+    % Loading behavResources.mat
+    if isfile(fullfile(filepath,'behavResources.mat'))
+        data_br = load(fullfile(filepath,'behavResources.mat'));
+        video_name = d_vid.name;
+        
+        % Frames Timing
+        v = VideoReader(fullfile(d_vid.folder,video_name));
+        numVidFrames = v.Duration*v.FrameRate;
+        t_tracking = data_br.PosMat(data_br.GotFrame==1,1);
+        numTrackedFrames = length(t_tracking);
+        write_time_frames_csv(filepath_csv,t_tracking,video_name,numVidFrames);
+        fprintf('Video time frames exported [%s].\n',filepath_csv);
+        if numTrackedFrames ~= numVidFrames
+            warning('Collected %d from %d tracked frames in [%s]',numVidFrames,numTrackedFrames,base_filepath);
+        end
+        
+        % Body temperature
+        t_temp = data_br.MouseTemp(:,1);
+        Y_temp = data_br.MouseTemp(:,2);
+        parent = fullfile(filepath,'behavResources.mat');
+        shortname = 'Temp';
+        fullname = 'MouseTemp';
+        file_ext = fullfile(base_filepath,ext_name,[fullname,'.ext']);
+        write_ext_file(t_temp,Y_temp,file_ext,parent,shortname,fullname);
+        fprintf('Body Temperature exported [%s].\n',file_ext);
+        
+       % Body position
+        t_pos = data_br.PosMat(:,1);
+        X_pos = data_br.PosMat(:,2);     
+        parent = fullfile(filepath,'behavResources.mat');
+        shortname = 'Xpos';
+        fullname = 'Xposition.ext';
+        file_ext = fullfile(base_filepath,ext_name,[fullname,'.ext']);
+        write_ext_file(t_pos,X_pos,file_ext,parent,shortname,fullname);
+        Y_pos = data_br.PosMat(:,3);
+        shortname = 'Ypos';
+        fullname = 'Yposition.ext';
+        file_ext = fullfile(base_filepath,ext_name,[fullname,'.ext']);
+        write_ext_file(t_pos,Y_pos,file_ext,parent,shortname,fullname);
+        fprintf('Body Position exported [%s].\n',file_ext);
+    end
+    
+    % Copying
+    copyfile(fullfile(d_vid.folder,d_vid.name),fullfile(base_filepath,video_name));
+    fprintf('Video File exported [%s].\n',fullfile(base_filepath,video_name));
+
+% end
+
+end
+
+
 function detect_rising_falling_edges(t_raw,y,filepath_csv,thresh,step)
 
 % Padding vectors to extract min-max binned signal
@@ -378,13 +453,17 @@ function [nTrigs,nFrames] = generate_trigger_txt(filename_fus,base_filepath,lfp_
 
 filepath_txt = fullfile(base_filepath,fus_name,'trigger.txt');
 
+nFrames = load(filename_fus,'nFrames','-mat');
+nFrames = nFrames.nFrames;
+
 if isfile(filepath_txt)
+    
     fprintf('File trigger.txt already exported.\n');
+    trigger = read_trigger_txt(filepath_txt);
+    nTrigs = length(trigger);
+    
 else
-    
-    nFrames = load(filename_fus,'nFrames','-mat');
-    nFrames = nFrames.nFrames;
-    
+
     trigger_csv = 'trigger_adc-00.csv';
     if isfile(fullfile(base_filepath,lfp_name,trigger_csv))
         [time_rising,time_falling,~,~] = read_trigger_csv(fullfile(base_filepath,lfp_name,trigger_csv));
@@ -450,6 +529,58 @@ fclose(fid_txt);
 end
 
 
+function [trigger,reference,padding,offset,delay_lfp_video] = read_trigger_txt(filepath_txt)
+
+fid_txt = fopen(filepath_txt,'r');
+A = fread(fid_txt,'*char')';
+fclose(fid_txt);
+
+% REF
+delim1 = '<REF>';
+delim2 = '</REF>';
+if strfind(A,delim1)
+    %B = regexp(A,'<REF>|<\REF>','split');
+    B = A(strfind(A,delim1)+length(delim1):strfind(A,delim2)-1);
+    C = regexp(B,'\t|\n|\r','split');
+    D = C(~cellfun('isempty',C));
+    reference = char(D);
+end
+% PAD
+delim1 = '<PAD>';
+delim2 = '</PAD>';
+if strfind(A,delim1)
+    B = A(strfind(A,delim1)+length(delim1):strfind(A,delim2)-1);
+    C = regexp(B,'\t|\n|\r','split');
+    D = C(~cellfun('isempty',C));
+    padding = char(D);
+end
+% OFFSET
+delim1 = '<OFFSET>';
+delim2 = '</OFFSET>';
+if strfind(A,delim1)
+    B = regexp(A,'<OFFSET>|</OFFSET>','split');
+    C = char(B(2));
+    D = textscan(C,'%f');
+    offset = D{1,1};
+end
+% DELAY
+delim1 = '<DELAY>';
+delim2 = '</DELAY>';
+if strfind(A,delim1)
+    B = regexp(A,'<DELAY>|</DELAY>','split');
+    C = char(B(2));
+    D = textscan(C,'%f');
+    delay_lfp_video = D{1,1};
+end
+% TRIG
+B = regexp(A,'<TRIG>|</TRIG>','split');
+C = char(B(2));
+D = textscan(C,'%f');
+trigger = D{1,1};
+
+end
+
+
 function write_trigger_csv(filepath_csv,time_rising,time_falling,thresh,step)
 
 if nargin <4
@@ -474,27 +605,134 @@ end
 
 function [time_rising,time_falling,thresh,step] = read_trigger_csv(filepath_csv)
 
+time_rising=[];
+time_falling=[];
+thresh = 'NaN';
+step = 1;
+
 fid = fopen(filepath_csv,'r');
 header = regexp(fgetl(fid),',','split');
 thresh = str2double(regexprep(header(1),'Threshold=',''));
 step = str2double(regexprep(header(2),'BinSize=',''));
-nTrigs = str2double(regexprep(header(3),'NumTrigs=',''));
+% nTrigs = str2double(regexprep(header(3),'NumTrigs=',''));
 
 header2 = regexp(fgetl(fid),',','split');
 
-time_rising = [];
-time_falling = [];
 while ~feof(fid)
     hline = regexp(fgetl(fid),',','split');
     time_rising = [time_rising;str2double(hline(1))];
-    time_falling = [time_falling;str2double(hline(1))];
+    time_falling = [time_falling;str2double(hline(2))];
 end
 fclose(fid);
 
-if nTrigs~=length(time_rising) || nTrigs~=length(time_falling) || length(time_rising)~=length(time_falling)
-    warning('Problem with trig number in [%s].',filepath_csv);
-    time_rising = [];
-    time_falling = [];
 end
+
+
+function write_time_frames_csv(filepath_csv,t_tracking,video_name,numVidFrames)
+
+if nargin <4
+    video_name = '';
+end
+if nargin <5
+    numVidFrames = NaN;
+end
+
+fid_csv = fopen(filepath_csv,'w');
+fprintf(fid_csv,'%s',sprintf('VideoName=%s,NumVidFrames=%d\n',video_name,numVidFrames));
+fprintf(fid_csv,'%s',sprintf('FrameNumber,Time(s)\n'));
+for k = 1:length(t_tracking)
+    fprintf(fid_csv,'%s',sprintf('%d,%.3f\n',k,t_tracking(k)));
+end
+fclose(fid_csv);
+
+end
+
+
+function [t_tracking,video_name,numVidFrames] = read_time_frames_csv(filepath_csv)
+
+t_tracking=[];
+video_name = '';
+numVidFrames = NaN;
+
+fid = fopen(filepath_csv,'r');
+header = regexp(fgetl(fid),',','split');
+video_name = str2double(regexprep(header(1),'VideoName=',''));
+numVidFrames = str2double(regexprep(header(2),'NumVidFrames=',''));
+
+header2 = regexp(fgetl(fid),',','split');
+
+frameId = [];
+t_tracking = [];
+while ~feof(fid)
+    hline = regexp(fgetl(fid),',','split');
+    frameId = [frameId;str2double(hline(1))];
+    t_tracking = [t_tracking;str2double(hline(2))];
+end
+fclose(fid);
+
+end
+
+
+function write_ext_file(X,Y,file_ext,parent,shortname,fullname)
+% Export trace in .ext format
+
+% Default Parameters
+format = 'float32';
+nb_samples = length(X);
+unit = 'mV';
+if nargin <6
+    fullname='';
+end
+if nargin <5
+    shortname='';
+end
+if nargin <4
+    parent='';
+end
+
+% export
+fid_ext = fopen(file_ext,'w');
+fprintf(fid_ext,'%s',sprintf('<HEADER>\tformat=%s\tnb_samples=%d\tunit=%s',format,nb_samples,unit));
+fprintf(fid_ext,'%s',sprintf('shortname=%s\tfullname=%s\tparent=%s\t</HEADER>\n',shortname,fullname,parent));
+for k = 1:nb_samples
+    fwrite(fid_ext,X(k),format);
+    fwrite(fid_ext,Y(k),format);
+end
+% fprintf('External File exported at %s.\n',file_ext);
+
+end
+
+
+function [X,Y,format,nb_samples,parent,shortname,fullname] = read_ext_file(file_ext)
+
+    fid_ext = fopen(file_ext,'r');
+    header = fgetl(fid_ext);
+    header = regexp(header,'\t+','split');
+    
+    % Format readout
+    ind_keep = contains(header,'format');
+    header_keep = char(header(ind_keep));
+    format = strrep(header_keep,'format=','');
+    ind_keep = contains(header,'nb_samples');
+    header_keep = char(header(ind_keep));
+    nb_samples = eval(strrep(header_keep,'nb_samples=',''));
+    ind_keep = contains(header,'parent');
+    header_keep = char(header(ind_keep));
+    parent = strrep(header_keep,'parent=','');
+    ind_keep = contains(header,'shortname');
+    header_keep = char(header(ind_keep));
+    shortname = strrep(header_keep,'shortname=','');
+    ind_keep = contains(header,'fullname');
+    header_keep = char(header(ind_keep));
+    fullname = strrep(header_keep,'fullname=','');
+    
+    X = NaN(nb_samples,1);
+    Y = NaN(nb_samples,1);
+    for k = 1:nb_samples
+        X(k) = fread(fid_ext,1,format);
+        Y(k) = fread(fid_ext,1,format);
+    end
+    fclose(fid_ext);
+%     fprintf('External File loaded at %s.\n',file_ext);
 
 end
