@@ -149,6 +149,7 @@ f = figure('Name',sprintf('Video Importation [%s]',F.video),...
 f.Position(4) = 1.2*f.Position(3)/v_ratio;
 f.UserData.v = v;
 f.UserData.t_interp = t_interp;
+f.UserData.video_file = video_file;
 f.UserData.output_file = output_file;
 colormap(f,'gray');
 
@@ -323,7 +324,7 @@ set(cancelButton,'Callback',{@cancelButton_callback,handles});
 
 % Updating UserData and aspect
 update_imagecrop(handles);
-e1_callback(e1,[],handles)
+e1_callback(e1,[],handles);
 
 waitfor(f);
 success = true;
@@ -475,9 +476,28 @@ hObj.UserData.delay_lfp_video = delay_lfp_video;
 %delay_lfp_video
 
 t_interp = f.UserData.t_interp;
-t_corrected = t_interp-delay_lfp_video;
-s2 = sprintf('Time Interval: %s - %s',datestr(datenum(t_corrected(1)/(24*3600)),'HH:MM:SS.FFF'),datestr(datenum(t_corrected(end)/(24*3600)),'HH:MM:SS.FFF'));
-t2.String{2} = s2;
+
+
+
+
+sync_file = [f.UserData.video_file,'_sync.csv'];
+if isfile(sync_file)
+    [t_tracking_csv,t_apparent_csv,~,~] = read_time_frames_csv(sync_file);
+    fprintf('Video Sync file loaded [%s].\n',sync_file);
+    
+    t_corrected = -1*ones(size(t_interp));
+    for i=1:length(t_interp)
+        [m,index] = min(abs(t_tracking_csv-t_interp(i)));
+        if m<=.1
+            t_corrected(i) = t_apparent_csv(index);
+        end
+    end
+else
+    t_corrected = t_interp-delay_lfp_video;
+    s2 = sprintf('Time Interval: %s - %s',datestr(datenum(t_corrected(1)/(24*3600)),'HH:MM:SS.FFF'),...
+        datestr(datenum(t_corrected(end)/(24*3600)),'HH:MM:SS.FFF'));
+    t2.String{2} = s2;
+end
 
 % Storing 
 f.UserData.t_corrected = t_corrected;
