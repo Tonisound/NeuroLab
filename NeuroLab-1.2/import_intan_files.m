@@ -27,29 +27,104 @@ else
     return;
 end
 
-fprintf('Loading LFP data (%s)...',GImport.LFP_loading);
-filepath = fullfile(F.fullpath,F.dir_lfp);
-% S = read_Intan_RHD2000_file_AB(filepath);
-fprintf(' done.\n');
+% Loading rhd2 file
+if isfile(fullfile(F.fullpath,F.dir_lfp,'info.rhd2'))
+    data_rhd2 = load(fullfile(F.fullpath,F.dir_lfp,'info.rhd2'),'-mat');
+    fprintf('File rhd2 loaded at [%s].\n',fullfile(F.fullpath,F.dir_lfp));
+else
+    errordlg(sprintf('Missing rhd2 File [%s]',fullfile(F.fullpath,F.dir_lfp)));
+    return;
+end
+num_channels_amp = data_rhd2.num_channels_amp;
+num_channels_aux = data_rhd2.num_channels_aux;
+num_channels_adc = data_rhd2.num_channels_adc;
+% f_samp = data_rhd2.f_samp;
+numChannels = num_channels_amp+num_channels_aux+num_channels_adc;
+count=0;
+
 
 % Browsing dir_lfp
-d_intan = dir(fullfile(filepath,'*.mat'));
-channel_id = regexprep({d_intan(:).name}','.mat','');
-numChannels = length(channel_id);
+channel_id = cell(numChannels,1);
 channel_type = cell(numChannels,1);
 channel_list = cell(numChannels,1);
-for i = 1:numChannels
-    if contains(char(channel_id(i)),'AUX')
-        channel_type{i}='ACC';
-    elseif contains(char(channel_id(i)),'ADC')
-        channel_type{i}='TRIGGER';
-    elseif contains(char(channel_id(i)),'EMG')
-        channel_type{i}='EMG';
-    else
-        channel_type{i}='LFP';
-    end
-    channel_list(i) = {sprintf('%s/%s',char(channel_type(i)),char(channel_id(i)))};
+RawData = [];
+
+
+% Time Data
+if isfile(fullfile(F.fullpath,F.dir_lfp,'time.mat'))
+    
+    fprintf('Loading Time Data [%s]...',F.dir_lfp);
+    data_time = load(fullfile(F.fullpath,F.dir_lfp,'time.mat'));
+    fprintf(' done.\n');
+    
+else
+    errordlg(sprintf('Missing time.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
+    return;
 end
+
+% Amplifier Data
+if isfile(fullfile(F.fullpath,F.dir_lfp,'amplifier.mat')) && num_channels_amp>0
+    
+    fprintf('Loading Amplifier Data [%s]...',F.dir_lfp);
+    data_amp = load(fullfile(F.fullpath,F.dir_lfp,'amplifier.mat'));
+    fprintf(' done.\n');
+    for i = 1:num_channels_amp
+        count=count+1;
+        native_name = data_amp.InfoRHD(i).native_channel_name;
+        port_prefix = data_amp.InfoRHD(i).port_prefix;
+        channel_id{count} = strrep(native_name,[port_prefix,'-'],'');
+        channel_type{count} = 'LFP';
+        channel_list{count} = sprintf('%s/%s',char(channel_type(count)),char(channel_id(count)));      
+    end
+    RawData = [RawData;data_amp.data'];
+    
+else
+    errordlg(sprintf('Missing amplifier.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
+    return;
+end
+
+% Auxiliary Data
+if isfile(fullfile(F.fullpath,F.dir_lfp,'auxiliary.mat')) && num_channels_aux>0
+    
+    fprintf('Loading Auxiliary Data [%s]...',F.dir_lfp);
+    data_aux = load(fullfile(F.fullpath,F.dir_lfp,'auxiliary.mat'));
+    fprintf(' done.\n');
+    for i = 1:num_channels_aux
+        count=count+1;
+        native_name = data_aux.InfoRHD(i).native_channel_name;
+        port_prefix = data_aux.InfoRHD(i).port_prefix;
+        channel_id{count} = strrep(native_name,[port_prefix,'-'],'');
+        channel_type{count} = 'ACC';
+        channel_list{count} = sprintf('%s/%s',char(channel_type(count)),char(channel_id(count)));        
+    end
+    RawData = [RawData;data_aux.data'];
+    
+else
+    errordlg(sprintf('Missing auxiliary.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
+    return;
+end
+
+% Analogin Data
+if isfile(fullfile(F.fullpath,F.dir_lfp,'analogin.mat')) && num_channels_adc>0
+    
+    fprintf('Loading Analogin Data [%s]...',F.dir_lfp);
+    data_adc = load(fullfile(F.fullpath,F.dir_lfp,'analogin.mat'));
+    fprintf(' done.\n');
+    for i = 1:num_channels_adc
+        count=count+1;
+        native_name = data_adc.InfoRHD(i).native_channel_name;
+        port_prefix = data_adc.InfoRHD(i).port_prefix;
+        channel_id{count} = strrep(native_name,[port_prefix,'-'],'');
+        channel_type{count} = 'TRIG';
+        channel_list{count} = sprintf('%s/%s',char(channel_type(count)),char(channel_id(count)));   
+    end
+    RawData = [RawData;data_adc.data'];
+    
+else
+    errordlg(sprintf('Missing analogin.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
+    return;
+end
+numSamples = size(RawData,2);
 
 
 % Looking for NConfig file
@@ -72,8 +147,7 @@ else
         % batch mode
         % select all channels
         ind_channel = 1:length(channel_list);
-        v = 1;
-        
+        v = 1;  
     end
     
     if isempty(ind_channel)||v==0
@@ -89,39 +163,39 @@ else
     %F.ncf = strcat(F.recording,'.mat');
 end
 
-% % Loading Data
-% Data = NaN(length(ind_channel),numSamples);
-% for i =1:length(ind_channel)
-%     if isnan(ind_channel_diff(i))
-%         if isnan(ind_channel(i))
-%             warning('Invalid index channels importing trace [%s].',char(channel_list(i)));
-%             Data(i,:) = NaN(1,size(RawData,2));
-%         else
-%             Data(i,:) = RawData(ind_channel(i),:);
-%         end
-%         
-%     else
-%         if isnan(ind_channel(i))
-%             Data(i,:) = -RawData(ind_channel_diff(i),:);
-%         else
-%             Data(i,:) = RawData(ind_channel(i),:)-RawData(ind_channel_diff(i),:);
-%         end
-%     end
-% end
-
+% Loading Data
 Data = NaN(length(ind_channel),numSamples);
 for i =1:length(ind_channel)
-    channelName = strcat(char(channel_id(i)),'.mat');
-    data_channel = load(filepath,channelName);
-    Data(i,:) = RawData(ind_channel(i),:);
+    if isnan(ind_channel_diff(i))
+        if isnan(ind_channel(i))
+            warning('Invalid index channels importing trace [%s].',char(channel_list(i)));
+            Data(i,:) = NaN(1,size(RawData,2));
+        else
+            Data(i,:) = RawData(ind_channel(i),:);
+        end
+        
+    else
+        if isnan(ind_channel(i))
+            Data(i,:) = -RawData(ind_channel_diff(i),:);
+        else
+            Data(i,:) = RawData(ind_channel(i),:)-RawData(ind_channel_diff(i),:);
+        end
+    end
 end
+
+% Data = NaN(length(ind_channel),numSamples);
+% for i =1:length(ind_channel)
+%     channelName = strcat(char(channel_id(i)),'.mat');
+%     data_channel = load(filepath,channelName);
+%     Data(i,:) = RawData(ind_channel(i),:);
+% end
 
 
 % Storing data in traces
-parent = strcat(MetaData.Filename,MetaData.FileExt);
-nb_samples = MetaData.DataPoints;
-duration = MetaData.DataDurationSec;
-f_samp = MetaData.SamplingFreq;
+parent = fullfile(F.fullpath,F.dir_lfp,'info.rhd2');
+nb_samples = numSamples;
+duration = data_time.t(end);
+f_samp = data_time.f_samp;
 traces = struct('ID',{},'shortname',{},'fullname',{},'parent',{},...
     'X',{},'Y',{},'X_ind',{},'X_im',{},'Y_im',{},'nb_samples',{});
 
@@ -130,7 +204,8 @@ for i=1:length(ind_channel)
     traces(i).shortname = char(channel_type(i));
     traces(i).parent = parent;
     traces(i).fullname = char(channel_list(i));
-    traces(i).X = (0: 1/f_samp : duration-(1/f_samp))';
+%     traces(i).X = (0: 1/f_samp : duration-(1/f_samp))';
+    traces(i).X = data_time.t;
     traces(i).Y = double(Data(i,:)');
     traces(i).X_ind = data_t.time_ref.X;
     traces(i).X_im = data_t.time_ref.Y;
@@ -320,6 +395,10 @@ for i=1:length(ind_traces)
     f = X(2)-X(1);
     x_start = X(1);
     x_end = X(end);
+    delta = length(Y)-length(x_start:f:x_end);
+    if delta>0
+        Y=Y(1:end-delta);
+    end
     save(fullfile(dir_source,strcat(save_name,'.mat')),'Y','f','x_start','x_end','-v7.3');
     fprintf('- Saved [%s]\n',fullfile(dir_source,strcat(save_name,'.mat')));
     

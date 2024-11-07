@@ -1,12 +1,17 @@
-function main_fusephysvid_2nlab()
+function main_fusephysvid_2nlab(filepath_csv,seed)
 % Reads a csv file of metadata
-% moves Ephys-fUS-Video files to DATA folder
-% Parent folder will be the same as the csv filename
+% Moves Ephys-fUS-Video files to seed/DATA/Parent folder
+% Parent will be the same as the csv filename
 
 
-% Reading input file
-filepath_csv = '/media/hobbes/DataMOBs206/FUS-REPLAY.csv';
-[~,basename_csv,~] = fileparts(filepath_csv);
+if nargin<1
+    % Reading input file
+    filepath_csv = '/media/hobbes/DataMOBs206/FUS-REPLAY.csv';
+end
+if nargin<2
+    % Destination folder
+    seed = '/media/hobbes/DataMOBs204/DATA';
+end
 
 
 % Creating struct S
@@ -44,14 +49,14 @@ nFiles = length(S);
 
 
 % Exporting Data
-seed = '/media/hobbes/DataMOBs204/DATA';
+[~,basename_csv,~] = fileparts(filepath_csv);
 parent = basename_csv;
 new_path = fullfile(seed,parent);
 
 % Writing output file
 filepath_csv_out = strcat(new_path,'_out.csv');
 fid2 = fopen(filepath_csv_out,'w');
-fwrite(fid2,sprintf('FileName,Importation Start,Importation End,fUSTrigs,fUSFrames,AnaloginChannels,AmpChannels,AuxChannels,VidFrames,TrackedFrames\n'));
+fwrite(fid2,sprintf('FileName,Importation Start,Importation End,fUSTrigs,fUSFrames,AnaloginChannels,AmpChannels,AuxChannels,VidFrames,GotFrames,TrackedFrames\n'));
 fclose(fid2);
 
 for i = 1:nFiles
@@ -72,7 +77,7 @@ for i = 1:nFiles
     ext_name = create_ext_folder(base_filepath);
     
     % Move video file
-    [numVidFrames,numTrackedFrames,~] = move_video_file(char(S(i).video),base_filepath,ext_name);
+    [numVidFrames,numGotFrames,numTrackedFrames,~] = move_video_file(char(S(i).video),base_filepath,ext_name);
     
     datestr_end = datestr(now);
     num_channels_adc = RHD_S.num_channels_adc;
@@ -80,9 +85,9 @@ for i = 1:nFiles
     num_channels_aux = RHD_S.num_channels_aux;
     
     fid2 = fopen(filepath_csv_out,'a');
-    fwrite(fid2,sprintf('%s,%s,%s,%d,%d,%d,%d,%d,%d,%d\n',base_filepath,datestr_start,datestr_end,...
+    fwrite(fid2,sprintf('%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%d\n',base_filepath,datestr_start,datestr_end,...
         nTrigs,nFrames,num_channels_adc,num_channels_amp,num_channels_aux,...
-        numVidFrames,numTrackedFrames));
+        numVidFrames,numGotFrames,numTrackedFrames));
     fclose(fid2);
     
     fprintf('================ File (%d/%d): Exportation Done ================ \n',i,nFiles);
@@ -343,7 +348,7 @@ end
 end
 
 
-function [numVidFrames,numTrackedFrames,video_name] = move_video_file(filepath,base_filepath,ext_name)
+function [numVidFrames,numGotFrames,numTrackedFrames,video_name] = move_video_file(filepath,base_filepath,ext_name)
 
 % Checking if video file is present
 d_vid = dir(fullfile(filepath,'*.avi'));
@@ -354,69 +359,79 @@ elseif length(d_vid) > 1
     d_vid = d_vid(1);
 end
 
-if isfile(fullfile(base_filepath,'timing_video_frames.csv'))
-    delete(fullfile(base_filepath,'timing_video_frames.csv'));
-end
+video_name = d_vid.name;
+filepath_csv = fullfile(base_filepath,[video_name,'_sync.csv']);
 
 % Checking if video file is present - Copying video
-if isfile(fullfile(base_filepath,d_vid.name)) && isfile(filepath_csv)
+if  isfile(filepath_csv)
     fprintf('Video file already exported.\n');
-    [t_tracking,t_apparent,video_name,numVidFrames] = read_time_frames_csv(filepath_csv);
-    numTrackedFrames = length(t_tracking);
+    [~,~,video_name,numVidFrames,numGotFrames,numTrackedFrames] = read_time_frames_csv(filepath_csv);
     
 else
     % Loading behavResources.mat
     if isfile(fullfile(filepath,'behavResources.mat'))
 
         data_br = load(fullfile(filepath,'behavResources.mat'));   
-        video_name = d_vid.name;
-        filepath_csv = fullfile(base_filepath,[video_name,'_sync.csv']);
         % Tracked Frames
-        t_tracking = data_br.PosMat(data_br.GotFrame==1,1);
-        numTrackedFrames = length(t_tracking);
+        numTrackedFrames = length(data_br.PosMat(:,1));
+        t_gotframe = data_br.PosMat(data_br.GotFrame==1,1);
+        numGotFrames = length(t_gotframe);
         
         % Vid Frames
         try
             v = VideoReader(fullfile(d_vid.folder,video_name));
             t_apparent = (0:1/v.FrameRate:v.Duration-1/v.FrameRate)';
             numVidFrames = v.Duration*v.FrameRate;
-            write_time_frames_csv(filepath_csv,t_tracking,t_apparent,video_name,numVidFrames);
-            fprintf('Video time frames exported [%s].\n',filepath_csv);
-            if numTrackedFrames ~= numVidFrames
-                warning('Collected %d from %d tracked frames in [%s]',numVidFrames,numTrackedFrames,base_filepath);
-            end
-            % Copying video file
-            copyfile(fullfile(d_vid.folder,d_vid.name),fullfile(base_filepath,video_name));
-            fprintf('Video File exported [%s].\n',fullfile(base_filepath,video_name));           
         catch
             numVidFrames = 0;
+            t_apparent = NaN(size(t_gotframe));
         end
         
+        % Sanity Check
+        if numVidFrames~=numGotFrames
+            errordlg(sprintf('Mismatch between numGotFrames and numVideoFrames [%s].',fullfile(base_filepath,d_vid.name)));
+        end
+
+        % Writing sync file
+        write_time_frames_csv(filepath_csv,t_gotframe,t_apparent,video_name,numVidFrames,numGotFrames,numTrackedFrames)
+        fprintf('Sync File exported [%s].\n',filepath_csv);
+        % Copying video file
+        copyfile(fullfile(d_vid.folder,d_vid.name),fullfile(base_filepath,video_name));
+        fprintf('Video File exported [%s].\n',fullfile(base_filepath,video_name));
+        
         % Body temperature
-        t_temp = data_br.MouseTemp(:,1);
-        Y_temp = data_br.MouseTemp(:,2);
         parent = fullfile(filepath,'behavResources.mat');
         shortname = 'Temp';
         fullname = 'MouseTemp';
         file_ext = fullfile(base_filepath,ext_name,[fullname,'.ext']);
-        write_ext_file(t_temp,Y_temp,file_ext,parent,shortname,fullname);
-        fprintf('Body Temperature exported [%s].\n',file_ext);
+        if ~isfile(file_ext)
+            t_temp = data_br.MouseTemp(:,1);
+            Y_temp = data_br.MouseTemp(:,2);
+            write_ext_file(t_temp,Y_temp,file_ext,parent,shortname,fullname);
+            fprintf('Body Temperature exported [%s].\n',file_ext);
+        end
         
        % Body position
-        t_pos = data_br.PosMat(:,1);
-        X_pos = data_br.PosMat(:,2);     
         parent = fullfile(filepath,'behavResources.mat');
         shortname = 'Xpos';
         fullname = 'Xposition';
         file_ext = fullfile(base_filepath,ext_name,[fullname,'.ext']);
-        write_ext_file(t_pos,X_pos,file_ext,parent,shortname,fullname);
-        Y_pos = data_br.PosMat(:,3);
+        if ~isfile(file_ext)
+            t_pos = data_br.PosMat(:,1);
+            X_pos = data_br.PosMat(:,2);     
+            write_ext_file(t_pos,X_pos,file_ext,parent,shortname,fullname);
+            fprintf('X Body Position exported [%s].\n',file_ext);
+        end
         shortname = 'Ypos';
         fullname = 'Yposition';
         file_ext = fullfile(base_filepath,ext_name,[fullname,'.ext']);
-        write_ext_file(t_pos,Y_pos,file_ext,parent,shortname,fullname);
-        fprintf('Body Position exported [%s].\n',file_ext);
-    end
+        if ~isfile(file_ext)
+            t_pos = data_br.PosMat(:,1);
+            Y_pos = data_br.PosMat(:,3);
+            write_ext_file(t_pos,Y_pos,file_ext,parent,shortname,fullname);
+            fprintf('Y Body Position exported [%s].\n',file_ext);
+        end
+     end
 
 end
 

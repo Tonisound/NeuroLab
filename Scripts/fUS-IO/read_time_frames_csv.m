@@ -1,4 +1,4 @@
-function [t_tracking,t_apparent,video_name,numVidFrames] = read_time_frames_csv(filepath_csv)
+function [t_tracking,t_apparent,video_name,numVidFrames,numGotFrames,numTrackedFrames] = read_time_frames_csv(filepath_csv)
 
 t_tracking=[];
 t_apparent=[];
@@ -9,6 +9,8 @@ fid = fopen(filepath_csv,'r');
 header = regexp(fgetl(fid),',','split');
 video_name = str2double(regexprep(header(1),'VideoName=',''));
 numVidFrames = str2double(regexprep(header(2),'NumVidFrames=',''));
+numGotFrames = str2double(regexprep(header(3),'NumGotFrames=',''));
+numTrackedFrames = str2double(regexprep(header(4),'NumTrackedFrames=',''));
 
 header2 = regexp(fgetl(fid),',','split');
 
