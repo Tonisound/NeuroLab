@@ -28,11 +28,15 @@ else
 end
 
 % Loading rhd2 file
-if isfile(fullfile(F.fullpath,F.dir_lfp,'info.rhd2'))
-    data_rhd2 = load(fullfile(F.fullpath,F.dir_lfp,'info.rhd2'),'-mat');
-    fprintf('File rhd2 loaded at [%s].\n',fullfile(F.fullpath,F.dir_lfp));
-else
+d_rhd2 = dir(fullfile(F.fullpath,F.dir_lfp,'*.rhd2'));
+if length(d_rhd2) == 1
+    data_rhd2 = load(fullfile(d_rhd2.folder,d_rhd2.name),'-mat');
+    fprintf('File rhd2 loaded at [%s].\n',fullfile(d_rhd2.folder,d_rhd2.name));
+elseif isempty(d_rhd2)
     errordlg(sprintf('Missing rhd2 File [%s]',fullfile(F.fullpath,F.dir_lfp)));
+    return;
+else
+    errordlg(sprintf('Multiple rhd2 Files - Abort. [%s]',fullfile(F.fullpath,F.dir_lfp)));
     return;
 end
 num_channels_amp = data_rhd2.num_channels_amp;
@@ -76,7 +80,7 @@ if isfile(fullfile(F.fullpath,F.dir_lfp,'amplifier.mat')) && num_channels_amp>0
         channel_type{count} = 'LFP';
         channel_list{count} = sprintf('%s/%s',char(channel_type(count)),char(channel_id(count)));      
     end
-    RawData = [RawData;data_amp.data'];
+    RawData = [RawData;data_amp.data];
     
 else
     errordlg(sprintf('Missing amplifier.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
@@ -192,7 +196,7 @@ end
 
 
 % Storing data in traces
-parent = fullfile(F.fullpath,F.dir_lfp,'info.rhd2');
+parent = data_rhd2.parent;
 nb_samples = numSamples;
 duration = data_time.t(end);
 f_samp = data_time.f_samp;

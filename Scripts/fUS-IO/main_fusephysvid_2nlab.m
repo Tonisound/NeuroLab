@@ -15,18 +15,30 @@ end
 
 
 % Creating struct S
-S = struct('fus',[],'intan',[],'video',[]);
+S = struct('fus',[],'intan',[],'video',[],'fipho',[]);
 nFiles = 0;
 
 fid = fopen(filepath_csv,'r');
-% ignoring header
+% reading header
 header = regexp(fgetl(fid),',','split');
+if length(header)==3 && contains(header(1),'fUS') && contains(header(2),'Intan') && contains(header(3),'Tracking')
+    rec_type = 'Ephys-fUS-Vid';
+elseif length(header)==4 && contains(header(1),'fUS') && contains(header(2),'Intan') && contains(header(3),'Tracking') contains(header(4),'Fiber')
+    rec_type = 'Fiber-fUS-Vid';
+else
+    errordlg(sprintf('Incompatible CSV header. Impossible to find recording type.\n File [%s]',filepath_csv));
+    return;
+end
+
 while ~feof(fid)
     nFiles = nFiles+1;
     hline = regexp(fgetl(fid),',','split');
     S(nFiles).fus = hline(1);
     S(nFiles).intan = hline(2);
     S(nFiles).video = hline(3);
+    if strcmp(rec_type,'Fiber-fUS-Vid')
+        S(nFiles).fipho = hline(4);
+    end
 end
 fclose(fid);
 
@@ -39,6 +51,8 @@ for i = 1:nFiles
         warning('Folder [%s] does not exist.',char(S(i).intan));
     elseif ~isfolder(char(S(i).video))
         warning('Folder [%s] does not exist.',char(S(i).video));
+    elseif strcmp(rec_type,'Fiber-fUS-Vid') && ~isfile(char(S(i).fipho))
+        warning('File [%s] does not exist.',char(S(i).fipho));
     else
         ind_sane = [ind_sane;i];
     end
@@ -54,9 +68,14 @@ parent = basename_csv;
 new_path = fullfile(seed,parent);
 
 % Writing output file
+filepath_fipho_out = strcat(new_path,'-','FiPho_timing.csv');
+fid1 = fopen(filepath_fipho_out,'w');
+fwrite(fid1,sprintf('FileName,FirstRising,FirstFalling,LastRising,LastFalling\n'));
+fclose(fid1);
+% Writing output file
 filepath_csv_out = strcat(new_path,'_out.csv');
 fid2 = fopen(filepath_csv_out,'w');
-fwrite(fid2,sprintf('FileName,Importation Start,Importation End,fUSTrigs,fUSFrames,AnaloginChannels,AmpChannels,AuxChannels,VidFrames,GotFrames,TrackedFrames\n'));
+fwrite(fid2,sprintf('FileName,TriggerFile,Importation Start,Importation End,fUSTrigs,fUSFrames,FirstTrig,LastTrig,Analogin,Amp,Aux,VidFrames,GotFrames,TrackedFrames\n'));
 fclose(fid2);
 
 for i = 1:nFiles
@@ -71,7 +90,7 @@ for i = 1:nFiles
     [lfp_name,RHD_S] = create_lfp_folder(char(S(i).intan),base_filepath);
     
     % Generate trigger.txt
-    [nTrigs,nFrames] = generate_trigger_txt(char(S(i).fus),base_filepath,lfp_name,fus_name);
+    [nTrigs,nFrames,first_trig,last_trig,filepath_txt] = generate_trigger_txt(char(S(i).fus),base_filepath,lfp_name,fus_name);
     
     % Create ext folder
     ext_name = create_ext_folder(base_filepath);
@@ -79,14 +98,30 @@ for i = 1:nFiles
     % Move video file
     [numVidFrames,numGotFrames,numTrackedFrames,~] = move_video_file(char(S(i).video),base_filepath,ext_name);
     
+    % Fiber trigs
+    filepath_csv_fipho = fullfile(base_filepath,lfp_name,'trigger_adc-01.csv');
+    if ~isempty(S(i).fipho) && isfile(filepath_csv_fipho)
+        [time_rising,time_falling,~,~] = read_trigger_csv(filepath_csv_fipho);
+        if ~isempty(time_rising) && ~isempty(time_falling)
+            fid1 = fopen(filepath_fipho_out,'a');
+            fwrite(fid1,sprintf('%s,%.3f,%.3f,%.3f,%.3f\n',char(S(i).fipho),time_rising(1),time_falling(1),time_rising(end),time_falling(end)));
+            fclose(fid1);
+        else
+            fid1 = fopen(filepath_fipho_out,'a');
+            fwrite(fid1,sprintf('%s,%.3f,%.3f,%.3f,%.3f\n',char(S(i).fipho),NaN,NaN,NaN,NaN));
+            fclose(fid1);
+        end
+    end
+    
+    % Log file
     datestr_end = datestr(now);
     num_channels_adc = RHD_S.num_channels_adc;
     num_channels_amp = RHD_S.num_channels_amp;
     num_channels_aux = RHD_S.num_channels_aux;
     
     fid2 = fopen(filepath_csv_out,'a');
-    fwrite(fid2,sprintf('%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%d\n',base_filepath,datestr_start,datestr_end,...
-        nTrigs,nFrames,num_channels_adc,num_channels_amp,num_channels_aux,...
+    fwrite(fid2,sprintf('%s,%s,%s,%s,%d,%d,%.3f,%.3f,%d,%d,%d,%d,%d,%d\n',base_filepath,filepath_txt,datestr_start,datestr_end,...
+        nTrigs,nFrames,first_trig,last_trig,num_channels_adc,num_channels_amp,num_channels_aux,...
         numVidFrames,numGotFrames,numTrackedFrames));
     fclose(fid2);
     
@@ -192,10 +227,10 @@ else
         t = t_raw(1:subsamp_amp:end);
         % Saving time data
         f_samp=f_out;
+        num_samples=length(t);
         save(fullfile(lfp_folder,'time.mat'),'t','f_samp','num_samples','-v7.3');
         fprintf('Time Data saved in [%s].\n',fullfile(lfp_folder,'time.mat'));
     end
-    
 end
 
 
@@ -204,7 +239,7 @@ if isfile(fullfile(lfp_folder,'analogin.mat'))
     fprintf('File analogin.mat already exported.\n');
 else
     
-    if isfield(S,'board_adc_channels')
+    if num_channels_adc > 0
         fprintf('--- Loading analog input ---\n');
         num_channels = length(S.board_adc_channels); % ADC input info from header file
         fileinfo = dir(fullfile(filepath,'analogin.dat'));
@@ -216,7 +251,6 @@ else
         % convert to volts
         data_adc = data_adc_raw(:,1:subsamp_adc:end);
         data_adc = (data_adc - 32768) * 0.0003125;
-        data_adc = data_adc';
         % Saving analogin data
         InfoRHD = S.board_adc_channels;
         f_samp=f_out;
@@ -227,7 +261,7 @@ else
     
     % Detecting rising falling edges in analog inputs
     % Detection parameters
-    all_thresholds = [6000, 10000, 10000, 10000, 10000, 10000, 10000, 10000];
+    all_thresholds = [6000, 10000, Inf, Inf, Inf, Inf, Inf, Inf];
     all_steps = [20, 1, 1, 1, 1, 1, 1, 1];
     % Selecting unprocessed channels
     for i=1:num_channels_adc
@@ -240,42 +274,49 @@ else
             detect_rising_falling_edges(t_raw,y,filepath_csv,thresh,step);
         end
     end
-    
 end
 
 
-% Read amplifier.dat
+% Reading and subsmapling amplifier data by bouts
 if isfile(fullfile(lfp_folder,'amplifier.mat'))
     fprintf('File amplifier.mat already exported.\n');
 else
+    bout_dur = 60; % bout duration
     
-    if isfield(S,'amplifier_channels')
-        
-        fprintf('--- Loading amplifier data.\n');
+    if num_channels_amp > 0
+        fprintf('--- Loading amplifier data by bouts .\n');
         num_channels = length(S.amplifier_channels); % amplifier channel info from header file
         fileinfo = dir(fullfile(filepath,'amplifier.dat'));
         num_samples = fileinfo.bytes/(num_channels * 2); % int16 = 2 bytes
-        % Reading and subsmapling amplifier data
-        fid = fopen(fullfile(filepath,'amplifier.dat'), 'r');
-        numbersToSkip = subsamp_amp-1;
-        bytesToSkip = numbersToSkip * 2; % Multiply by 2 for uint16, which is 2 bytes
-        num_samples_sub = ceil(num_samples/subsamp_amp);
-        data_amp = NaN(num_samples_sub,num_channels);
-        h = waitbar(0,'Please wait');
-        for i = 1:num_samples_sub
-            data_amp(i,:) = fread(fid, [num_channels, 1], 'int16', bytesToSkip, 'ieee-le');
-            prop = i/num_samples_sub;
-            waitbar(prop,h,sprintf('Amplifier Data Loaded %.2f %%',100*prop));
-        end
-        close(h);
-        fclose(fid);
         fprintf('%d channels and %d samples found. \n',num_channels,num_samples);
+        
+        % Reading and subsmapling amplifier data
+        %     numbersToSkip = subsamp_amp-1;
+        %     bytesToSkip = numbersToSkip * 2; % Multiply by 2 for uint16, which is 2 bytes
+        %     num_samples_sub = ceil(num_samples/subsamp_amp);
+        %     data_amp = NaN(num_samples_sub,num_channels);
+        data_amp=[];
+        nBouts = ceil(num_samples/(f_amp*bout_dur));
+        h = waitbar(0,'Please wait');
+        fid = fopen(fullfile(filepath,'amplifier.dat'), 'r');
+        for i=1:nBouts
+            
+            data_bout = fread(fid, [num_channels, f_amp*bout_dur], 'int16', 0, 'ieee-le');
+            data_amp = [data_amp,data_bout(:,1:subsamp_amp:end)];
+            prop = i/nBouts;
+            waitbar(prop,h,sprintf('Amplifier Data Bout Loaded %.2f %%',100*prop));
+            
+        end
+        fclose(fid);
+        close(h);
         % convert to microvolts
         data_amp = (data_amp* 0.195);
         % Saving amplifier data
         InfoRHD = S.amplifier_channels;
         f_samp=f_out;
         data = data_amp;
+        num_channels = size(data,1);
+        num_samples = size(data,2);
         save(fullfile(lfp_folder,'amplifier.mat'),'data','f_samp','num_channels','num_samples','InfoRHD','-v7.3');
         fprintf('Amplifier Data saved in [%s].\n',fullfile(lfp_folder,'amplifier.mat'));
     end
@@ -287,7 +328,7 @@ if isfile(fullfile(lfp_folder,'auxiliary.mat'))
     fprintf('File auxiliary.mat already exported.\n');
 else
     
-    if isfield(S,'aux_input_channels')
+    if num_channels_aux > 0
         fprintf('--- Loading auxiliary input.\n');
         num_channels = length(S.aux_input_channels); % aux input channel info from header file
         fileinfo = dir(fullfile(filepath,'auxiliary.dat'));
@@ -302,7 +343,6 @@ else
         % data_aux = data_aux(:,1:subsamp_aux:end);
         data_aux = data_aux(:,1:subsamp_amp:end);
         data_aux = data_aux * 0.0000374;
-        data_aux = data_aux';
         % Saving auxiliary data
         InfoRHD = S.aux_input_channels;
         f_samp=f_out;
@@ -314,14 +354,16 @@ end
 
 
 % Saving MetaData
-if isfile(fullfile(lfp_folder,'info.rhd2'))
+temp = regexp(filepath,filesep,'split');
+filename_rhd2 = [char(temp(end)),'.rhd2'];
+if isfile(fullfile(lfp_folder,filename_rhd2))
     fprintf('File info.rhd2 already exported.\n');
 else
-    parent = filepath;
     %duration = t(end);
+    parent = filepath;
     f_samp = f_out;
     DateExport = datestr(now);
-    save(fullfile(lfp_folder,'info.rhd2'),'num_channels_adc','num_channels_amp','num_channels_aux',...
+    save(fullfile(lfp_folder,filename_rhd2),'num_channels_adc','num_channels_amp','num_channels_aux',...
         'parent','f_samp','DateExport','-v7.3');
     fprintf('Intan Data saved at [%s].\n',fullfile(lfp_folder,'info.rhd2'));
 end
@@ -370,8 +412,8 @@ if  isfile(filepath_csv)
 else
     % Loading behavResources.mat
     if isfile(fullfile(filepath,'behavResources.mat'))
-
-        data_br = load(fullfile(filepath,'behavResources.mat'));   
+        
+        data_br = load(fullfile(filepath,'behavResources.mat'));
         % Tracked Frames
         numTrackedFrames = length(data_br.PosMat(:,1));
         t_gotframe = data_br.PosMat(data_br.GotFrame==1,1);
@@ -391,7 +433,7 @@ else
         if numVidFrames~=numGotFrames
             errordlg(sprintf('Mismatch between numGotFrames and numVideoFrames [%s].',fullfile(base_filepath,d_vid.name)));
         end
-
+        
         % Writing sync file
         write_time_frames_csv(filepath_csv,t_gotframe,t_apparent,video_name,numVidFrames,numGotFrames,numTrackedFrames)
         fprintf('Sync File exported [%s].\n',filepath_csv);
@@ -411,14 +453,14 @@ else
             fprintf('Body Temperature exported [%s].\n',file_ext);
         end
         
-       % Body position
+        % Body position
         parent = fullfile(filepath,'behavResources.mat');
         shortname = 'Xpos';
         fullname = 'Xposition';
         file_ext = fullfile(base_filepath,ext_name,[fullname,'.ext']);
         if ~isfile(file_ext)
             t_pos = data_br.PosMat(:,1);
-            X_pos = data_br.PosMat(:,2);     
+            X_pos = data_br.PosMat(:,2);
             write_ext_file(t_pos,X_pos,file_ext,parent,shortname,fullname);
             fprintf('X Body Position exported [%s].\n',file_ext);
         end
@@ -431,8 +473,8 @@ else
             write_ext_file(t_pos,Y_pos,file_ext,parent,shortname,fullname);
             fprintf('Y Body Position exported [%s].\n',file_ext);
         end
-     end
-
+    end
+    
 end
 
 end
@@ -441,22 +483,27 @@ end
 function detect_rising_falling_edges(t_raw,y,filepath_csv,thresh,step)
 
 % Padding vectors to extract min-max binned signal
-r=mod(length(t_raw),step);
-if r~=0
-    t_padded = [t_raw;zeros(step-r,1)];
-    y_padded = [y;zeros(step-r,1)];
+if step>1
+    r=mod(length(t_raw),step);
+    if r~=0
+        t_padded = [t_raw;zeros(step-r,1)];
+        y_padded = [y;zeros(step-r,1)];
+    else
+        t_padded = t_raw;
+        y_padded = y;
+    end
+    
+    % Reshaping Data
+    t_reshaped = reshape(t_padded,[step,(length(t_padded)/step)]);
+    y_reshaped = reshape(y_padded,[step,(length(y_padded)/step)]);
+    y_min = min(y_reshaped);
+    y_max = max(y_reshaped);
+    v = (y_min+y_max)/2;
+    t = t_reshaped(1,:);
 else
-    t_padded = t_raw;
-    y_padded = y;
+    t=t_raw;
+    v=y;
 end
-
-% Reshaping Data
-t_reshaped = reshape(t_padded,[step,(length(t_padded)/step)]);
-y_reshaped = reshape(y_padded,[step,(length(y_padded)/step)]);
-y_min = min(y_reshaped);
-y_max = max(y_reshaped);
-v = (y_min+y_max)/2;
-t = t_reshaped(1,:);
 % Detect rising and falling edges
 time_rising = t(diff(v>thresh)>0);
 time_falling = t(diff(v>thresh)<0);
@@ -471,7 +518,7 @@ write_trigger_csv(filepath_csv,time_rising,time_falling,thresh,step);
 end
 
 
-function [nTrigs,nFrames] = generate_trigger_txt(filename_fus,base_filepath,lfp_name,fus_name)
+function [nTrigs,nFrames,first_trig,last_trig,filepath_txt] = generate_trigger_txt(filename_fus,base_filepath,lfp_name,fus_name)
 
 filepath_txt = fullfile(base_filepath,fus_name,'trigger.txt');
 
@@ -483,15 +530,23 @@ if isfile(filepath_txt)
     fprintf('File trigger.txt already exported.\n');
     trigger = read_trigger_txt(filepath_txt);
     nTrigs = length(trigger);
+    first_trig = trigger(1);
+    last_trig = trigger(end);
     
 else
-
+    
     trigger_csv = 'trigger_adc-00.csv';
     if isfile(fullfile(base_filepath,lfp_name,trigger_csv))
         [time_rising,time_falling,~,~] = read_trigger_csv(fullfile(base_filepath,lfp_name,trigger_csv));
     else
-        time_rising = [];
-        time_falling = [];
+        %     time_rising = [];
+        %     time_falling = [];
+        %     trigger = [];
+        first_trig = [];
+        last_trig = [];
+        nTrigs = 0;
+        filepath_txt = [];
+        return
     end
     
     % Converting time_rising and time_falling into trigger
@@ -499,24 +554,50 @@ else
         trigger_start = [time_rising(1);time_falling(2:end-1)];
         trigger_end = time_rising(2:end);
         trigger = (trigger_start+trigger_end)/2;
-    else
+    elseif length(time_rising)==1
         trigger = (time_rising+time_falling)/2;
     end
     nTrigs = length(trigger);
+    first_trig = trigger(1);
+    last_trig = trigger(end);
     
-    if nFrames ~= nTrigs
-        warning('Found %d trigs (Expected: %d) in [%s] .\n',nTrigs,nFrames,base_filepath);
-        %         if (trigger(end)-trigger(1))/(nFrames-1) > 0.495 && (trigger(end)-trigger(1))/(nFrames-1) < 0.505
-        %             trigger = rescale((1:nFrames)',trigger(1),trigger(end));
-        %         end
-    else
-        % Write trigger.txt
-        reference = fullfile(base_filepath,lfp_name,trigger_csv);
-        write_trigger_txt(filepath_txt,trigger,reference);
+    % Trigger Correction
+    if nFrames ~= nTrigs && nTrigs>0
         
-        fprintf('Found %d trigs (Expected: %d).\n',nTrigs,nFrames);
-        fprintf('File trigger.txt saved at [%s].\n',filepath_txt);
+        f_fus=0.5; %Hertz
+        warning('Found %d trigs (Expected: %d) in [%s] .\n',nTrigs,nFrames,base_filepath);
+        if mean(diff(diff(time_rising))) < 1e-3 && (nTrigs == nFrames+1)
+            
+            % Regular timing  with one single additional trigout
+            trigger = trigger(1:end-1);
+            nTrigs = length(trigger);
+            first_trig = trigger(1);
+            last_trig = trigger(end);
+            
+        elseif time_falling(end)-time_rising(1) > 0.9999*(nFrames*f_fus) && time_falling(end)-time_rising(1) < 1.0001*(nFrames*f_fus)
+            
+            % First rising and last falling within right range
+            trigger = rescale((1:nFrames)',(time_rising(1)+time_falling(1))/2,(time_rising(end)+time_falling(end))/2);
+            nTrigs = length(trigger);
+            first_trig = trigger(1);
+            last_trig = trigger(end);
+            
+        else
+            
+            % Skip trigger saving
+            fprintf('File trigger.txt not saved.\n');
+            filepath_txt = [];
+            return;
+        end
+   
     end
+    
+    % Write trigger.txt
+    reference = fullfile(base_filepath,lfp_name,trigger_csv);
+    write_trigger_txt(filepath_txt,trigger,reference);
+    fprintf('Found %d trigs (Expected: %d).\n',nTrigs,nFrames);
+    fprintf('File trigger.txt saved at [%s].\n',filepath_txt);
+    
 end
 
 end
