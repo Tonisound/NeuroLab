@@ -3,8 +3,7 @@ function script_main_autocorr()
 
 load('Preferences.mat','GColors');
 
-
-InfoFile =[{'20190730_P1-003_E_nlab'},{'DVR2'};...
+InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'DVR2'};...
     {'20190730_P1-004_E_nlab'},{'DVR2'};...
     {'20190731_P1-005_E_nlab'},{'DVR2'};...
     {'20190731_P2-008_E_nlab'},{'DVR4'};...
@@ -48,66 +47,82 @@ InfoFile =[{'20190730_P1-003_E_nlab'},{'DVR2'};...
     {'20200726_P5-060_E_nlab'},{'DVR-PR2'};...
     {'20200726_P5-061_E_nlab'},{'DVR-PR2'}];
 
+InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'000'};...
+    {'20240820_K1656_001_E_nlab'},{'000'};...
+    {'20240820_K1657_001_E_nlab'},{'000'}];
 
-% InfoFile =[{'20240812_K1653_001_E_nlab'},{'000'};...
-%     {'20240820_K1656_001_E_nlab'},{'000'};...
-%     {'20240820_K1657_001_E_nlab'},{'000'}];
-%
-% InfoFile =[{'20190226_SD025_P401_R_nlab'},{'023'};...
-%     {'20190226_SD025_P402_R_nlab'},{'023'};...
-%     {'20190416_SD032_P101_R_nlab'},{'005'};...
-%     {'20190416_SD032_P102_R_nlab'},{'005'};...
-%     {'20190416_SD032_P103_R_nlab'},{'005'};...
-%     {'20190416_SD032_P201_R_nlab'},{'005'};...
-%     {'20190416_SD032_P202_R_nlab'},{'005'};...
-%     {'20190416_SD032_P203_R_nlab'},{'005'};...
-%     {'20190416_SD032_P301_R_nlab'},{'005'};...
-%     {'20190416_SD032_P302_R_nlab'},{'005'};...
-%     {'20190416_SD032_P303_R_nlab'},{'005'};...
-%     {'20190416_SD032_P401_R_nlab'},{'005'};...
-%     {'20190416_SD032_P402_R_nlab'},{'005'}];
+InfoFileRat =[{'20190226_SD025_P401_R_nlab'},{'023'};...
+    {'20190226_SD025_P402_R_nlab'},{'023'};...
+    {'20190416_SD032_P101_R_nlab'},{'005'};...
+    {'20190416_SD032_P102_R_nlab'},{'005'};...
+    {'20190416_SD032_P103_R_nlab'},{'005'};...
+    {'20190416_SD032_P201_R_nlab'},{'005'};...
+    {'20190416_SD032_P202_R_nlab'},{'005'};...
+    {'20190416_SD032_P203_R_nlab'},{'005'};...
+    {'20190416_SD032_P301_R_nlab'},{'005'};...
+    {'20190416_SD032_P302_R_nlab'},{'005'};...
+    {'20190416_SD032_P303_R_nlab'},{'005'};...
+    {'20190416_SD032_P401_R_nlab'},{'005'};...
+    {'20190416_SD032_P402_R_nlab'},{'005'}];
 
 % Parameters
-Params.GColors = GColors;
-Params.Fs = 1;
-Params.WinSec = 300;
-Params.StepSec = 10;
-Params.MaxLagSec = 300;
-Params.NormWinMin = 3;
-Params.t_smooth = 30;
-Params.nCol = 8; % Number Max Columns
-Params.seed_save = '/Users/tonio/Desktop/XCorrPA';
-Params.seed_nlab = '/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';
+ParamsPogo.GColors = GColors;
+ParamsPogo.Fs = 1;
+ParamsPogo.WinSec = 300;
+ParamsPogo.StepSec = 10;
+ParamsPogo.MaxLagSec = 300;
+ParamsPogo.NormWinMin = 3;
+ParamsPogo.t_smooth = 10;
+ParamsPogo.nCol = 10; % Number Max Columns
+ParamsPogo.seed_save = '/Users/tonio/Desktop/XCorrPogo';
+ParamsPogo.seed_nlab = '/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';
 
+ParamsRat.GColors = GColors;
+ParamsRat.Fs = 1;
+ParamsRat.WinSec = 150;
+ParamsRat.StepSec = 5;
+ParamsRat.MaxLagSec = 150;
+ParamsRat.NormWinMin = 1.5;
+ParamsRat.t_smooth = 5;
+ParamsRat.nCol = 10; % Number Max Columns
+ParamsRat.seed_save = '/Users/tonio/Desktop/XCorrRat';
+ParamsRat.seed_nlab = '/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';
 
-flag_recompute = true;     % if True re-computes dynamics xcorr
+ParamsMouse = ParamsRat;
+ParamsMouse.seed_save = '/Users/tonio/Desktop/XCorrMouse';
+
+flag_recompute = false;     % if True re-computes dynamics xcorr
 flag_savefig = true;       % if True saves figure
 
 
-% Compute Dynamic Xcorr
+% Compute and Plot Dynamic Xcorr Rat
 if flag_recompute
-    Params.t_smooth = 30;
-    Params.seed_save = '/Users/tonio/Desktop/XCorrPA[30]';
-    compute_dynamic_xcorr(InfoFile,Params,false);
-    compute_dynamic_xcorr(InfoFile,Params,true);
+    compute_dynamic_xcorr(InfoFilePogo,ParamsPogo,false);
+    compute_dynamic_xcorr(InfoFilePogo,ParamsPogo,true);
 end
-% Plot Dynamic Xcorr
 if flag_savefig
-    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFile,Params,false);
-    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFile,Params,true);
+    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFilePogo,ParamsPogo,false);
+    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFilePogo,ParamsPogo,true);
 end
 
-% Compute Dynamic Xcorr
+% Compute and Plot Dynamic Xcorr Rat
 if flag_recompute
-    Params.t_smooth = 10;
-    Params.seed_save = '/Users/tonio/Desktop/XCorrPA[10]';
-    compute_dynamic_xcorr(InfoFile,Params,false);
-%     compute_dynamic_xcorr(InfoFile,Params,true);
+    compute_dynamic_xcorr(InfoFileRat,ParamsRat,false);
+    compute_dynamic_xcorr(InfoFileRat,ParamsRat,true);
 end
-% Plot Dynamic Xcorr
 if flag_savefig
-    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFile,Params,false);
-%     [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFile,Params,true);
+    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFileRat,ParamsRat,false);
+    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFileRat,ParamsRat,true);
+end
+
+% Compute and Plot Dynamic Xcorr Mouse
+if flag_recompute
+    compute_dynamic_xcorr(InfoFileMouse,ParamsMouse,false);
+    compute_dynamic_xcorr(InfoFileMouse,ParamsMouse,true);
+end
+if flag_savefig
+    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFileMouse,ParamsMouse,false);
+    [XCorrMat_all,XCorrPeak_all] = plot_dynamic_xcorr(InfoFileMouse,ParamsMouse,true);
 end
 
 end
@@ -163,6 +178,7 @@ for k=1:length(all_files)
 
     % Selecting regions
     d_regions = dir(fullfile(filepath,'Sources_fUS','*.mat'));
+    d_regions = d_regions(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_regions));
     ind_regions=1:length(d_regions);
     %     ind_regions = 1:0;
     all_regions={d_regions(ind_regions).name}';
@@ -451,7 +467,7 @@ for k=1:length(all_files)
         % Prepare plot
         nFigs = ceil(nTot/nCol);
         all_f = gobjects(nFigs);
-        all_ax = gobjects(3,nTot);
+        all_ax = gobjects(4,nTot);
 
         % Figures
         for index_fig = 1:nFigs
@@ -462,10 +478,11 @@ for k=1:length(all_files)
         eps = .01;
         % Axes
         for i=1:nTot
-            framepos = [(count-1)/nCol+eps  .05  1/nCol-2*eps  .9];
-            all_ax(1,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)+.2  0.75*framepos(3)   .7]);
-            all_ax(2,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+0.75*framepos(3)  framepos(2)+.2  0.25*framepos(3)   .7]);
-            all_ax(3,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)  0.75*framepos(3)   .15]);
+            framepos = [(count-1)/nCol+2*eps  .025  1/nCol-eps  .95];
+            all_ax(1,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)+.25  0.75*framepos(3)   .7]);
+            all_ax(2,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+0.75*framepos(3)  framepos(2)+.25  0.25*framepos(3)   .7]);
+            all_ax(3,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)+.125  0.75*framepos(3)   .1]);
+            all_ax(4,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)  0.75*framepos(3)   .1]);
             count=mod(count,nCol)+1;
         end
 
@@ -481,18 +498,18 @@ for k=1:length(all_files)
             % p = pcolor(TLag,TWin,XCorrMat,'Parent',ax1);
             % shading(ax1,'flat');
             YTime = (TWin+WinSec/2+xq(1));
-            imagesc('XData',TLag,'YData',YTime,'CData',XCorrMat,'Parent',ax1);
+            imagesc('XData',TLag,'YData',YTime,'CData',XCorrMat,'Parent',ax1);           
+            % Adding peaks
             line('XData',thisPos_all(:,1,i),'YData',YTime,'LineStyle','none','Parent',ax1,...
                 'Marker','o','MarkerSize',3,'MarkerFaceColor','r','MarkerEdgeColor','none');
             line('XData',thisNeg_all(:,1,i),'YData',YTime,'LineStyle','none','Parent',ax1,...
-                'Marker','x','MarkerSize',3,'MarkerFaceColor','r','MarkerEdgeColor','none');
+                'Marker','o','MarkerSize',3,'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor','none');
             
             % ax1.YLim = [YTime(1),YTime(end)];
             ax1.YLim = [xq(1),xq(end)];
             ax1.YDir = 'reverse';
             set(ax1,'YTick',time_ticks,'YTickLabel',time_ticks_label);
-
-            % Adding peaks
+            
 
             ax2=all_ax(2,i);
             line('XData',Data_all(i,:),'YData',xq,'Parent',ax2);
@@ -521,6 +538,7 @@ for k=1:length(all_files)
                 end
             end
 
+            % Mean Autocorr
             ax3 = all_ax(3,i);
             grid(ax3,'on');
             line('XData',TLag,'YData',XCorrPeak.MeanXcorr,'Parent',ax3);
@@ -531,6 +549,23 @@ for k=1:length(all_files)
             end
             text(-MaxLagSec,ax3.YLim(2)-.25,sprintf('Amp=%.2f',XCorrPeak.Pos(2)-XCorrPeak.Neg(2)),'Parent',ax3);
             text(-MaxLagSec,ax3.YLim(2)-.1,sprintf('Lag=%dsec',XCorrPeak.Pos(1)),'Parent',ax3);
+
+            % Scatter Plot
+            ax4 = all_ax(4,i);
+            grid(ax4,'on');
+            if ~flag_crosscorr
+                line('XData',thisPos_all(:,1,i),'YData',thisPos_all(:,2,i)-thisNeg_all(:,2,i),'Parent',ax4,...
+                    'LineStyle','none','MarkerFaceColor','k','MarkerEdgeColor','none','Marker','o','MarkerSize',2);
+                ax4.YLim = [0 1.5];
+            else
+                line('XData',thisPos_all(:,1,i),'YData',thisPos_all(:,2,i),'Parent',ax4,...
+                    'LineStyle','none','MarkerFaceColor','k','MarkerEdgeColor','none','Marker','o','MarkerSize',2);
+                ax4.YLim = [0 1];
+            end
+            ax4.XLim = [0 TLag(end)];
+            
+            ax4.XLabel.String = 'Lag';
+            ax4.YLabel.String = 'XCorr Amp';
 
             linkaxes([ax1;ax3],'x');
             ax1.XLim = [TLag(1),TLag(end)];
@@ -546,8 +581,8 @@ for k=1:length(all_files)
             f.PaperPositionMode = 'manual';
             pic_name = strcat(f.Name,'.pdf');
             fprintf('Saving figure [%s]...',fullfile(folder_save,pic_name));
-            % exportgraphics(f,fullfile(folder_save,pic_name),'ContentType','vector');
             exportgraphics(f,fullfile(folder_save2,pic_name),'ContentType','vector');
+            % saveas(f,fullfile(folder_save2,pic_name),'pdf');
             fprintf(' done.\n');           
             close(f);
         end
