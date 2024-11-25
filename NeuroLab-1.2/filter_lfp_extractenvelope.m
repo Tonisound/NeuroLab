@@ -106,8 +106,8 @@ tband_smooth = [GFilt.broad_smooth;GFilt.delta_smooth;GFilt.theta_smooth;GFilt.b
 
 % Initial selection 
 % pattern_list = {'Delta','Theta','Beta','Gamma Low','Gamma Mid ','Gamma Mid-Up ','Gamma High ','Gamma High-Up ','Ripple'};
-% pattern_list = {'Beta'};
-pattern_list = {'Ripple'};
+pattern_list = {'Beta'};
+% pattern_list = {'Ripple'};
 ind_selected = find(contains(str_band,pattern_list)==1);
 % asks for user input if val == 1
 if val == 1
@@ -241,7 +241,7 @@ g_colors = get(groot,'DefaultAxesColorOrder');
 
 % Initial selection 
 %pattern_list = {'Power';'LFP-theta'};
-pattern_list = {'LFP-ripple'};
+pattern_list = {'Power-beta'};
 ind_selected = find(contains({traces.fullname}',pattern_list)==1);
 % asks for user input if val == 1
 if val == 1

@@ -10,7 +10,7 @@ if nargin<4
 end
 
 W = 185;
-H = 65;
+H = 45;
 ftsize = 10;
 
 f2 = dialog('Units','characters',...

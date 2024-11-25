@@ -101,7 +101,7 @@ if isfile(fullfile(F.fullpath,F.dir_lfp,'auxiliary.mat')) && num_channels_aux>0
         channel_type{count} = 'ACC';
         channel_list{count} = sprintf('%s/%s',char(channel_type(count)),char(channel_id(count)));        
     end
-    RawData = [RawData;data_aux.data'];
+    RawData = [RawData;data_aux.data];
     
 else
     errordlg(sprintf('Missing auxiliary.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
@@ -122,7 +122,7 @@ if isfile(fullfile(F.fullpath,F.dir_lfp,'analogin.mat')) && num_channels_adc>0
         channel_type{count} = 'TRIG';
         channel_list{count} = sprintf('%s/%s',char(channel_type(count)),char(channel_id(count)));   
     end
-    RawData = [RawData;data_adc.data'];
+    RawData = [RawData;data_adc.data];
     
 else
     errordlg(sprintf('Missing analogin.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
