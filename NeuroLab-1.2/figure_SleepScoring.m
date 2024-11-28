@@ -854,16 +854,17 @@ end
 
 if ~isempty(path_spectro)  
     handles.Checkbox1.Enable = 'on';
-    d_spectro = dir(fullfile(path_spectro,'*.mat'));
+    d_spectro = dir(fullfile(path_spectro,'*','*.mat'));
     ind_channel = find(contains({d_spectro(:).name}',channel)==1);
     if ~isempty(ind_channel)
-        ind_channel_whole = find(contains({d_spectro(:).name}',strcat(channel,'_Whole-LFP'))==1);
+%         ind_channel_whole = find(contains({d_spectro(:).name}',strcat(channel,'_Whole-LFP'))==1);
+        ind_channel_whole = find((contains({d_spectro(:).folder}','Whole-LFP') .* contains({d_spectro(:).name}',channel))==1);
         if ~isempty(ind_channel_whole)
             ind_channel = ind_channel_whole;
         elseif length(ind_channel)>1
             ind_channel = ind_channel(1);
         end
-        data_spectro = load(fullfile(path_spectro,d_spectro(ind_channel).name));
+        data_spectro = load(fullfile(d_spectro(ind_channel).folder,d_spectro(ind_channel).name));
     else
         data_spectro = [];
         handles.Checkbox1.Enable = 'off';
