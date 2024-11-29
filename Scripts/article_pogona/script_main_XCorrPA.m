@@ -86,7 +86,7 @@ all_states = {'NREM','REM','AW'};
 ParamsDefault.all_states = all_states;
 ParamsDefault.GColors = GColors;
 ParamsDefault.t_smooth = 10;
-ParamsDefault.nCol = 10;        % Number Max Columns
+ParamsDefault.nCol = 8;        % Number Max Columns
 ParamsDefault.seed_nlab = '/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';
 ParamsDefault.pattern_compute_channel = {'Power-beta';'Power-theta';'Power-delta'};
 ParamsDefault.pattern_compute_region = {'*'};
@@ -745,11 +745,15 @@ all_animals = unique(TS.animal);
 % all_regions = {'Whole.mat'};
 
 S = struct('ACorr',[],'ACorr_Lag',[],'ACorr_Amp',[],...
-    'region',[],'channel',[],'trace',[],...
-    'state',[],'animal',[],'TLag',[]);
+    'parentFile',[],'parentFolder',[],'target_time',[],'nearest_time',[],...
+    'region',[],'channel',[],'trace',[],'state',[],'animal',[]);
 
 
 prev_acorr = '';
+nSelectedTimes = 0;
+nSelectedSamples = 0;
+csv_lines = [];
+    
 for k=1:length(TS.all_times)
 
     cur_time = TS.all_times(k);
@@ -803,20 +807,22 @@ for k=1:length(TS.all_times)
     nTot = nChannels+nRegions;
 
     % Finding row
-    [val1,index_min1] = min(abs(data_acorr.XCorrMat_ydata - cur_time));
-    if val1>data_acorr.Params.StepSec
+    [~,index_nearest_time] = min(abs(data_acorr.XCorrMat_ydata - cur_time));
+    nearest_time = data_acorr.XCorrMat_ydata(index_nearest_time);
+    
+    if abs(nearest_time-cur_time) > data_acorr.Params.StepSec/2
         continue;
     else
 
         % AutoCorr Region
         for i =1:nRegions
-            ACorr = data_acorr.XCorrMat_Regions(index_min1,:,index_regions(i));
+            ACorr = data_acorr.XCorrMat_Regions(index_nearest_time,:,index_regions(i));
             if ~flag_crosscorr
-                ACorr_Lag = data_acorr.thisPos_Regions(index_min1,1,index_regions(i));
-                ACorr_Amp = data_acorr.thisPos_Regions(index_min1,2,index_regions(i))-data_acorr.thisNeg_Regions(index_min1,2,index_regions(i));
+                ACorr_Lag = data_acorr.thisPos_Regions(index_nearest_time,1,index_regions(i));
+                ACorr_Amp = data_acorr.thisPos_Regions(index_nearest_time,2,index_regions(i))-data_acorr.thisNeg_Regions(index_nearest_time,2,index_regions(i));
             else
-                ACorr_Lag = data_acorr.thisPos_Regions(index_min1,1,index_regions(i));
-                ACorr_Amp = data_acorr.thisPos_Regions(index_min1,2,index_regions(i));
+                ACorr_Lag = data_acorr.thisPos_Regions(index_nearest_time,1,index_regions(i));
+                ACorr_Amp = data_acorr.thisPos_Regions(index_nearest_time,2,index_regions(i));
             end
 
             % Storing
@@ -825,21 +831,28 @@ for k=1:length(TS.all_times)
             S.ACorr_Amp = [S.ACorr_Amp;ACorr_Amp];
             S.state = [S.state;{cur_state}];
             S.animal = [S.animal;{cur_animal}];
-            S.trace = [S.trace;data_acorr.all_regions(index_regions(i))];
-            S.region = [S.region;data_acorr.all_regions(index_regions(i))];
+            cur_trace = data_acorr.all_regions(index_regions(i));
+            S.trace = [S.trace;cur_trace];
+            S.region = [S.region;cur_trace];
             % S.channel = [S.channel;{''}];
-            S.TLag = [S.TLag;data_acorr.Params.TLag];
+            [parentFolder,parentFile,~] = fileparts(cur_acorr);
+            S.parentFile = [S.parentFile;{parentFile}];
+            S.parentFolder = [S.parentFolder;{parentFolder}];
+            S.target_time = [S.target_time;cur_time];
+            S.nearest_time = [S.nearest_time;nearest_time];
+            % csv_lines = [csv_lines;{sprintf('%s,%s,%s,%s,%s,%.3f,%.3f\n',parentFolder,parentFile,cur_state,cur_animal,cur_trace,cur_time,nearest_time)}];
         end
+        nSelectedSamples = nSelectedSamples+nRegions; 
 
         % AutoCorr Channel
         for i =1:nChannels
-            ACorr = data_acorr.XCorrMat_Channels(index_min1,:,index_channels(i));
+            ACorr = data_acorr.XCorrMat_Channels(index_nearest_time,:,index_channels(i));
             if ~flag_crosscorr
-                ACorr_Lag = data_acorr.thisPos_Channels(index_min1,1,index_channels(i));
-                ACorr_Amp = data_acorr.thisPos_Channels(index_min1,2,index_channels(i))-data_acorr.thisNeg_Channels(index_min1,2,index_channels(i));
+                ACorr_Lag = data_acorr.thisPos_Channels(index_nearest_time,1,index_channels(i));
+                ACorr_Amp = data_acorr.thisPos_Channels(index_nearest_time,2,index_channels(i))-data_acorr.thisNeg_Channels(index_nearest_time,2,index_channels(i));
             else
-                ACorr_Lag = data_acorr.thisPos_Channels(index_min1,1,index_channels(i));
-                ACorr_Amp = data_acorr.thisPos_Channels(index_min1,2,index_channels(i));
+                ACorr_Lag = data_acorr.thisPos_Channels(index_nearest_time,1,index_channels(i));
+                ACorr_Amp = data_acorr.thisPos_Channels(index_nearest_time,2,index_channels(i));
             end
 
             % Storing
@@ -848,14 +861,40 @@ for k=1:length(TS.all_times)
             S.ACorr_Amp = [S.ACorr_Amp;ACorr_Amp];
             S.state = [S.state;{cur_state}];
             S.animal = [S.animal;{cur_animal}];
-            S.trace = [S.trace;data_acorr.all_channels(index_channels(i))];
+            cur_trace = data_acorr.all_channels(index_channels(i));
+            S.trace = [S.trace;cur_trace];
             % S.region = [S.region;{''}];
-            S.channel = [S.channel;data_acorr.all_channels(index_channels(i))];
-            S.TLag = [S.TLag;data_acorr.Params.TLag];
+            S.channel = [S.channel;cur_trace];
+            [parentFolder,parentFile,~] = fileparts(cur_acorr);
+            S.parentFile = [S.parentFile;{parentFile}];
+            S.parentFolder = [S.parentFolder;{parentFolder}];
+            S.target_time = [S.target_time;cur_time];
+            S.nearest_time = [S.nearest_time;nearest_time];
         end
+        nSelectedSamples = nSelectedSamples+nChannels;
+        % csv_lines = [csv_lines;{sprintf('%s,%s,%s,%s,%s,%.3f,%.3f\n',parentFolder,parentFile,cur_state,cur_animal,cur_trace,cur_time,nearest_time)}];
     end
-
+    nSelectedTimes = nSelectedTimes+1;
+    csv_lines = [csv_lines;{sprintf('%s,%s,%s,%s,%.3f,%.3f\n',parentFolder,parentFile,cur_state,cur_animal,cur_time,nearest_time)}];
 end
+
+% Writing csv file
+if ~flag_crosscorr
+    filepath_csv = fullfile(seed_save,'_csv',sprintf('AutoCorrelation-per-state[%s].csv',batchname));
+else
+    filepath_csv = fullfile(seed_save,'_csv',sprintf('CrossCorrelation-per-state[%s][%s].csv',batchname,reference));
+end
+if ~isfolder(fullfile(seed_save,'_csv'))
+    mkdir(fullfile(seed_save,'_csv'));
+end
+fid_csv = fopen(filepath_csv,'w');
+fprintf(fid_csv,'%s',sprintf('ParentFolder,ParentName,State,Animal,Trace,TargetTime,NearestTime\n'));
+for i = 1:length(csv_lines)
+    fprintf(fid_csv,'%s',char(csv_lines(i)));
+end
+fclose(fid_csv);
+fprintf('CSV File Saved [%s].\n',filepath_csv);
+
 
 % all_traces = unique(S.trace);
 all_traces = [unique(S.channel);unique(S.region)];
@@ -864,7 +903,113 @@ all_animals = unique(TS.animal);
 nAnimals = length(all_animals);
 g_colors = get(groot,'defaultAxesColorOrder');
 
-% Prepare plot
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Writing stats file
+meanMat = NaN(nStates,nAnimals,nTraces,2);
+stdMat = NaN(nStates,nAnimals,nTraces,2);
+semMat = NaN(nStates,nAnimals,nTraces,2);
+nSamplesMat = NaN(nStates,nAnimals,nTraces,2);
+
+for i=1:nStates
+    cur_state = char(all_states(i));    
+    for j=1:nAnimals
+        cur_animal = char(all_animals(j));  
+        for k=1:nTraces
+            cur_trace = char(all_traces(k));
+
+            index_keep = find((strcmp(S.state,cur_state).*strcmp(S.animal,cur_animal)).*strcmp(S.trace,cur_trace)==1);
+            % Lags
+            data = S.ACorr_Lag(index_keep);
+            meanMat(i,j,k,1) = mean(data(:),'omitnan');
+            nSamplesMat(i,j,k,1) = sum(~(isnan(data(:))));
+            stdMat(i,j,k,1) = std(data(:),[],'omitnan');
+            semMat(i,j,k,1) = stdMat(i,j,k,1)/sqrt(nSamplesMat(i,j,k,1));
+            % XCorrAmp
+            data = S.ACorr_Lag(index_keep);
+            meanMat(i,j,k,2) = mean(data(:),'omitnan');
+            nSamplesMat(i,j,k,2) = sum(~(isnan(data(:))));
+            stdMat(i,j,k,2) = std(data(:),[],'omitnan');
+            semMat(i,j,k,2) = stdMat(i,j,k,2)/sqrt(nSamplesMat(i,j,k,2));
+
+        end
+    end
+end
+
+% Writing Lags.txt
+if ~flag_crosscorr
+    filepath_txt = fullfile(seed_save,'_txt',sprintf('AutoCorrelation-Stats[%s][%s].txt',batchname,'Lags'));
+else
+    filepath_txt = fullfile(seed_save,'_txt',sprintf('CrossCorrelation-Stats[%s][%s][%s].txt',batchname,reference,'Lags'));
+end
+if ~isfolder(fullfile(seed_save,'_txt'))
+    mkdir(fullfile(seed_save,'_txt'));
+end
+fid_txt = fopen(filepath_txt,'w');
+for k=1:nTraces
+    cur_trace = char(all_traces(k));
+    fwrite(fid_txt,sprintf('%s \t', cur_trace));
+    fwrite(fid_txt,newline);
+    
+    fwrite(fid_txt,sprintf('%s \t', 'Mean +- sem (s)'));
+    for j=1:nAnimals
+        cur_animal = char(all_animals(j));
+        fwrite(fid_txt,sprintf('%s \t', cur_animal));
+    end
+    fwrite(fid_txt,newline);
+    for i=1:nStates
+        cur_state = char(all_states(i));
+        fwrite(fid_txt,sprintf('%s \t',cur_state));
+        for j=1:nAnimals
+%             cur_animal = char(all_animals(j));
+            fwrite(fid_txt,sprintf('%.3f +- %.3f (n=%d)\t',meanMat(i,j,k,1),semMat(i,j,k,1),nSamplesMat(i,j,k,1))); 
+        end
+        fwrite(fid_txt,newline);
+    end
+    fwrite(fid_txt,newline);
+end
+fclose(fid_txt);
+fprintf('TXT File Saved [%s].\n',filepath_txt);
+
+
+% Writing XCorrAmp.txt
+if ~flag_crosscorr
+    filepath_txt = fullfile(seed_save,'_txt',sprintf('AutoCorrelation-Stats[%s][%s].txt',batchname,'Amp'));
+else
+    filepath_txt = fullfile(seed_save,'_txt',sprintf('CrossCorrelation-Stats[%s][%s][%s].txt',batchname,reference,'Amp'));
+end
+if ~isfolder(fullfile(seed_save,'_txt'))
+    mkdir(fullfile(seed_save,'_txt'));
+end
+fid_txt = fopen(filepath_txt,'w');
+for k=1:nTraces
+    cur_trace = char(all_traces(k));
+    fwrite(fid_txt,sprintf('%s \t', cur_trace));
+    fwrite(fid_txt,newline);
+    
+    fwrite(fid_txt,sprintf('%s \t', 'Mean +- sem (s)'));
+    for j=1:nAnimals
+        cur_animal = char(all_animals(j));
+        fwrite(fid_txt,sprintf('%s \t', cur_animal));
+    end
+    fwrite(fid_txt,newline);
+    for i=1:nStates
+        cur_state = char(all_states(i));
+        fwrite(fid_txt,sprintf('%s \t',cur_state));
+        for j=1:nAnimals
+%             cur_animal = char(all_animals(j));
+            fwrite(fid_txt,sprintf('%.3f +- %.3f (n=%d)\t',meanMat(i,j,k,2),semMat(i,j,k,2),nSamplesMat(i,j,k,2))); 
+        end
+        fwrite(fid_txt,newline);
+    end
+    fwrite(fid_txt,newline);
+end
+fclose(fid_txt);
+fprintf('TXT File Saved [%s].\n',filepath_txt);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plotting per state - Grouping by animals
 nFigs = ceil(nTraces/nCol);
 all_f = gobjects(nFigs);
 all_ax = gobjects(nTraces,nStates,3);
@@ -879,7 +1024,8 @@ if nFigs>1
         if ~flag_crosscorr
             all_f(index_fig).Name = sprintf('AutoCorrelation-per-state[%s-%02d]',batchname,index_fig);
         else
-            all_f(index_fig).Name = sprintf('CrossCorrelation-per-state[%s-%s-%02d]',batchname,reference,index_fig);
+            reference_preffix = largest_preffix(all_refs);
+            all_f(index_fig).Name = sprintf('CrossCorrelation-per-state[%s-%s-%02d]',batchname,reference_preffix,index_fig);
         end
     end
     count = 1;
@@ -900,7 +1046,8 @@ else
     if ~flag_crosscorr
         all_f(1).Name = sprintf('AutoCorrelation-per-state[%s]',batchname);
     else
-        all_f(1).Name = sprintf('CrossCorrelation-per-state[%s-%s]',batchname,reference);
+        reference_preffix = largest_preffix(all_refs);
+        all_f(1).Name = sprintf('CrossCorrelation-per-state[%s-%s]',batchname,reference_preffix);
     end
     for i=1:nTraces
         for j=1:nStates
@@ -1010,271 +1157,181 @@ for i = 1:nTraces
     end
 end
 
+% Saving figure
+for index_fig = 1:nFigs
+    f = all_f(index_fig);
+    f.Units='normalized';
+    f.OuterPosition = [0 0 1 1];
+    f.PaperPositionMode = 'manual';
+    pic_name = strcat(f.Name,'.pdf');
+    fprintf('Saving figure [%s]...',fullfile(seed_save,pic_name));
+    exportgraphics(f,fullfile(seed_save,pic_name),'ContentType','vector');
+    % saveas(f,fullfile(seed_save,pic_name),'pdf');
+    fprintf(' done.\n');
+    close(f);
 end
 
 
-% % Keep as control (for comparison)
-% function S = plot_xcorr_per_state(InfoFile,Params,all_states)
-% 
-% all_files = InfoFile(:,1);
-% all_refs = InfoFile(:,2);
-% nStates = length(all_states);
-% 
-% % Parameters
-% % GColors = Params.GColors;
-% % Fs = Params.Fs;
-% % WinSec = Params.WinSec;
-% % StepSec = Params.StepSec;
-% % MaxLagSec = Params.MaxLagSec;
-% % NormWinMin = Params.NormWinMin;
-% MinGroupDurSec = Params.MinGroupDurSec;
-% WinGroupSec = Params.WinGroupSec;
-% 
-% seed_save = Params.seed_save;
-% seed_nlab = Params.seed_nlab;
-% 
-% 
-% % Buidling Time_selection
-% TS = struct('all_times',[],'state',[],'animal',[],'acorr',[],'xcorr',[]);
-% 
-% for k=1:length(all_files)
-% 
-%     % Getting file info
-%     cur_file = char(all_files(k));
-%     reference = char(all_refs(k));
-%     filepath = fullfile(seed_nlab,cur_file);
-%     temp = regexp(cur_file,'_','split');
-%     temp2 = regexp(char(temp(2)),'-','split');
-%     cur_animal = char(temp2(1));
-% 
-%     % Getting time groups
-%     %     data_tr = load(fullfile(filepath,'Time_Reference.mat'));
-%     data_tg = load(fullfile(filepath,'Time_Groups.mat'));
-%     for j=1:length(all_states)
-%         cur_state = char(all_states(j));
-%         index_group = find(strcmp(data_tg.TimeGroups_name,cur_state)==1);
-% 
-%         if ~isempty(index_group)
-%             % Converting times
-%             a = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,1));
-%             b = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,2));
-%             Time_indices = [(a-floor(a))*24*3600,(b-floor(b))*24*3600];
-% 
-%             % Keeping only long bouts
-%             all_times = [];
-%             ind_long_bouts = find((Time_indices(:,2)-Time_indices(:,1))>=MinGroupDurSec);
-%             if isempty(ind_long_bouts)
-%                 continue;
-%             end
-%             for l = 1:length(ind_long_bouts)
-%                 times_keep = Time_indices(ind_long_bouts(l),1)+WinGroupSec/2 : WinGroupSec : Time_indices(ind_long_bouts(l),2);
-%                 all_times = [all_times;times_keep(:)];
-%             end
-% 
-%             TS.all_times = [TS.all_times;all_times];
-%             TS.state = [TS.state;repmat({cur_state},[size(all_times,1),1])];
-%             TS.animal = [TS.animal;repmat({cur_animal},[size(all_times,1),1])];
-% 
-%             mat_name_acorr = strcat('[ACorr]',cur_file,'.mat');
-%             TS.acorr = [TS.acorr;repmat({fullfile(seed_save,cur_animal,mat_name_acorr)},[size(all_times,1),1])];
-%             mat_name_xcorr = strcat('[XCorr]',cur_file,sprintf('[%s].mat',reference));
-%             TS.xcorr = [TS.xcorr;repmat({fullfile(seed_save,cur_animal,mat_name_xcorr)},[size(all_times,1),1])];
-%         end
-%     end
-% end
-% 
-% all_animals = unique(TS.animal);
-% % all_regions = {'Whole.mat'};
-% 
-% S = struct('ACorr',[],'ACorr_Lag',[],'ACorr_Amp',[],...
-%     'ACorr2',[],'ACorr_Lag2',[],'ACorr_Amp2',[],...
-%     'XCorr',[],'XCorr_Lag',[],'XCorr_Amp',[],...
-%     'state',[],'animal',[],'TLag',[]);
-% 
-% 
-% prev_acorr = '';
-% prev_xcorr = '';
-% for k=1:length(TS.all_times)
-% 
-%     cur_time = TS.all_times(k);
-%     cur_state = char(TS.state(k));
-%     cur_animal = char(TS.animal(k));
-%     cur_acorr = char(TS.acorr(k));
-%     cur_xcorr = char(TS.xcorr(k));
-% 
-%     % Loading autocorrelation
-%     if ~isfile(cur_acorr)
-%         warning('Impossible to load file [%s].',data_acorr);
-%         continue;
-%     else
-%         if ~strcmp(cur_acorr,prev_acorr)
-%             data_acorr = load(cur_acorr,...
-%                 'all_regions','all_channels','XCorrMat_ydata','Params',...
-%                 'XCorrMat_Regions','thisPos_Regions','thisNeg_Regions',...
-%                 'XCorrMat_Channels','thisPos_Channels','thisNeg_Channels');
-%             fprintf('Auto-correlation file loaded [%s].\n',cur_acorr);
-%             prev_acorr = cur_acorr;
-%         end
-%     end
-%     % Loading crosscorrelation
-%     if ~isfile(cur_xcorr)
-%         warning('Impossible to load file [%s].',data_xcorr);
-%         continue;
-%     else
-%         if ~strcmp(cur_xcorr,prev_xcorr)
-%             data_xcorr = load(cur_xcorr,...
-%                 'all_regions','all_channels','XCorrMat_ydata','Params','reference',...
-%                 'XCorrMat_Regions','thisPos_Regions',...
-%                 'XCorrMat_Channels','thisPos_Channels');
-%             fprintf('Cross-correlation file loaded [%s].\n',cur_xcorr);
-%             prev_xcorr = cur_xcorr;
-%         end
-%     end
-% 
-%     index_whole = find(strcmp(data_acorr.all_regions,'Whole-reg.mat')==1);
-% 
-%     if isempty(index_whole)
-%         warning('Unable to find [%s] in [%s].','Whole-reg.mat',cur_acorr);
-%         continue;
-%     end
-%     index_ref = find(strcmp(data_acorr.all_channels,[char(data_xcorr.reference),'.mat'])==1);
-%     if isempty(index_ref)
-%         warning('Unable to find [%s] in [%s].',char(data_xcorr.reference),cur_acorr);
-%         continue;
-%     end
-%     index_whole2 = find(strcmp(data_xcorr.all_regions,'Whole-reg.mat')==1);
-% 
-%     if isempty(index_whole2)
-%         warning('Unable to find [%s] in [%s].','Whole-reg.mat',cur_xcorr);
-%         continue;
-%     end
-% 
-%     % Finding row
-%     [val1,index_min1] = min(abs(data_acorr.XCorrMat_ydata - cur_time));
-%     [val2,index_min2] = min(abs(data_xcorr.XCorrMat_ydata - cur_time));
-%     if val1>data_acorr.Params.StepSec || val2>data_xcorr.Params.StepSec
-%         continue;
-%     else
-%         % AutoCorr Region
-%         ACorr = data_acorr.XCorrMat_Regions(index_min1,:,index_whole);
-%         thisPos = data_acorr.thisPos_Regions(index_min1,:,index_whole);
-%         thisNeg = data_acorr.thisNeg_Regions(index_min1,:,index_whole);
-%         ACorr_Lag = thisPos(1);
-%         ACorr_Amp = thisPos(2)-thisNeg(2);
-% 
-%         % AutoCorr Channel
-%         ACorr2 = data_acorr.XCorrMat_Channels(index_min1,:,index_ref);
-%         thisPos = data_acorr.thisPos_Channels(index_min1,:,index_ref);
-%         thisNeg = data_acorr.thisNeg_Channels(index_min1,:,index_ref);
-%         ACorr_Lag2 = thisPos(1);
-%         ACorr_Amp2 = thisPos(2)-thisNeg(2);
-% 
-%         % CrossCorr Region
-%         XCorr = data_xcorr.XCorrMat_Regions(index_min2,:,index_whole2);
-%         thisPos = data_xcorr.thisPos_Regions(index_min2,:,index_whole2);
-%         XCorr_Lag = thisPos(1);
-%         XCorr_Amp = thisPos(2);
-%     end
-% 
-%     S.ACorr = [S.ACorr;ACorr];
-%     S.ACorr_Lag = [S.ACorr_Lag;ACorr_Lag];
-%     S.ACorr_Amp = [S.ACorr_Amp;ACorr_Amp];
-%     S.ACorr2 = [S.ACorr2;ACorr2];
-%     S.ACorr_Lag2 = [S.ACorr_Lag2;ACorr_Lag2];
-%     S.ACorr_Amp2 = [S.ACorr_Amp2;ACorr_Amp2];
-%     S.XCorr = [S.XCorr;XCorr];
-%     S.XCorr_Lag = [S.XCorr_Lag;XCorr_Lag];
-%     S.XCorr_Amp = [S.XCorr_Amp;XCorr_Amp];
-% 
-%     S.state = [S.state;{cur_state}];
-%     S.animal = [S.animal;{cur_animal}];
-%     S.TLag = [S.TLag;data_acorr.Params.TLag];
-% 
-% end
-% 
-% all_animals = unique(TS.animal);
-% nAnimals = length(all_animals);
-% g_colors = get(groot,'defaultAxesColorOrder');
-% 
-% figure;
-% all_axes = gobjects(nStates,3);
-% count = 1;
-% for i = 1:nStates
-%     all_axes(i,1) = subplot(nStates,3,count);
-%     all_axes(i,2) = subplot(nStates,3,count+1);
-%     all_axes(i,3) = subplot(nStates,3,count+2);
-%     count = count+3;
-% end
-% 
-% 
-% TLag = data_acorr.Params.TLag;
-% for i = 1:nStates
-%     cur_state = char(all_states(i));
-%     ax1 = all_axes(i,1);
-%     ax1.YLabel.String = cur_state;
-%     ax1.XLabel.String = 'AutoCorr CBV';
-%     ax1.XLim = [TLag(1) TLag(end)];
-%     ax1.YLim = [-.5 1];
-%     hold(ax1,'on');
-%     grid(ax1,'on');
-% 
-%     ax2 = all_axes(i,2);
-%     ax2.YLabel.String = cur_state;
-%     ax2.XLabel.String = 'AutoCorr LFP';
-%     ax2.XLim = [TLag(1) TLag(end)];
-%     ax2.YLim = [-.5 1];
-%     grid(ax2,'on');
-%     hold(ax2,'on');
-% 
-%     ax3 = all_axes(i,3);
-%     ax3.YLabel.String = cur_state;
-%     ax3.XLabel.String = 'CrossCorr LFP-CBV';
-%     ax3.XLim = [TLag(1) TLag(end)];
-%     ax3.YLim = [-.5 1];
-%     grid(ax3,'on');
-%     hold(ax3,'on');
-% 
-%     alpha_value = .5;
-%     linewidth = 2;
-% 
-%     for j = 1:nAnimals
-%         cur_animal = char(all_animals(j));
-%         % AutoCorr Whole-reg
-%         index_keep = find(strcmp(S.state,cur_state).*strcmp(S.animal,cur_animal)==1);
-%         ACorr_mean = mean(S.ACorr(index_keep,:),1,'omitnan');
-%         ACorr_std = std(S.ACorr(index_keep,:),[],1,'omitnan');
-%         nSamples = sum(~isnan(S.ACorr(index_keep,:)),1);
-%         ACorr_sem = ACorr_std./sqrt(nSamples);
-% 
-%         ACorr2_mean = mean(S.ACorr2(index_keep,:),1,'omitnan');
-%         ACorr2_std = std(S.ACorr2(index_keep,:),[],1,'omitnan');
-%         nSamples = sum(~isnan(S.ACorr2(index_keep,:)),1);
-%         ACorr2_sem = ACorr2_std./sqrt(nSamples);
-% 
-%         XCorr_mean = mean(S.XCorr(index_keep,:),1,'omitnan');
-%         XCorr_std = std(S.XCorr(index_keep,:),[],1,'omitnan');
-%         nSamples = sum(~isnan(S.XCorr(index_keep,:)),1);
-%         XCorr_sem = XCorr_std./sqrt(nSamples);
-% 
-%         px_data = [TLag,fliplr(TLag)];
-%         py_data = [ACorr_mean+ACorr_sem,fliplr(ACorr_mean-ACorr_sem)];
-%         patch('XData',px_data,'YData',py_data,'FaceColor',g_colors(j,:),'EdgeColor','none',...
-%             'Parent',ax1,'Visible','on','FaceAlpha',alpha_value);
-%         line('XData',TLag,'YData',ACorr_mean,'Parent',ax1,'Color',g_colors(j,:),'Linewidth',linewidth);
-% 
-%         px_data = [TLag,fliplr(TLag)];
-%         py_data = [ACorr2_mean+ACorr2_sem,fliplr(ACorr2_mean-ACorr2_sem)];
-%         patch('XData',px_data,'YData',py_data,'FaceColor',g_colors(j,:),'EdgeColor','none',...
-%             'Parent',ax2,'Visible','on','FaceAlpha',alpha_value);
-%         line('XData',TLag,'YData',ACorr2_mean,'Parent',ax2,'Color',g_colors(j,:),'Linewidth',linewidth);
-% 
-%         px_data = [TLag,fliplr(TLag)];
-%         py_data = [XCorr_mean+XCorr_sem,fliplr(XCorr_mean-XCorr_sem)];
-%         patch('XData',px_data,'YData',py_data,'FaceColor',g_colors(j,:),'EdgeColor','none',...
-%             'Parent',ax3,'Visible','on','FaceAlpha',alpha_value);
-%         line('XData',TLag,'YData',XCorr_mean,'Parent',ax3,'Color',g_colors(j,:),'Linewidth',linewidth);
-%     end
-% 
-% end
-% 
-% end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plotting per animal - Grouping by state
+nFigs = ceil(nTraces/nCol);
+all_f = gobjects(nFigs);
+all_ax = gobjects(nTraces,nAnimals,3);
+
+eps1 = .02;
+eps2 = .02;
+
+if nFigs>1
+    % Multiple Figures
+    for index_fig = 1:nFigs
+        all_f(index_fig) = figure;
+        if ~flag_crosscorr
+            all_f(index_fig).Name = sprintf('AutoCorrelation-per-animal[%s-%02d]',batchname,index_fig);
+        else
+            all_f(index_fig).Name = sprintf('CrossCorrelation-per-animal[%s-%s-%02d]',batchname,reference,index_fig);
+        end
+    end
+    count = 1;
+    % Axes
+    for i=1:nTraces
+        for j=1:nAnimals
+            framepos = [(count-1)/nCol+eps1  ((nAnimals-j)/nAnimals)+eps1  1/nCol-eps1  (1/nAnimals)-2*eps1];
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1).Title.String = sprintf('Ax%d-%d',i,j);
+        end
+        count=mod(count,nCol)+1;
+    end
+else
+    % Single Figure
+    all_f(1) = figure;
+    if ~flag_crosscorr
+        all_f(1).Name = sprintf('AutoCorrelation-per-animal[%s]',batchname);
+    else
+        all_f(1).Name = sprintf('CrossCorrelation-per-animal[%s-%s]',batchname,reference);
+    end
+    for i=1:nTraces
+        for j=1:nStates
+            framepos = [(i-1)/nTraces+eps1  ((nAnimals-j)/nAnimals)+eps1  1/nTraces-2*eps1  (1/nAnimals)-2*eps1];
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1).Title.String = sprintf('Ax%d-%d',i,j);
+        end
+    end
+end
+
+
+TLag = data_acorr.Params.TLag;
+for i = 1:nTraces
+
+    cur_trace = char(all_traces(i));
+
+    for j=1:nAnimals
+
+        cur_animal = char(all_animals(j));
+
+        ax1 = all_ax(i,j,1);
+        ax1.YLabel.String = cur_animal;
+        ax1.Title.String = sprintf('AutoCorr[%s]',cur_trace);
+        ax1.XLim = [TLag(1) TLag(end)];
+        ax1.YLim = [-1 1];
+        hold(ax1,'on');
+        grid(ax1,'on');
+
+        ax2 = all_ax(i,j,2);
+        grid(ax2,"on");
+        % l = legend(list_tags);
+        ax2.XTick = 1:nStates;
+        ax2.XTickLabel = all_states;
+        ax2.XLim = [.5,nStates+.5];
+        ax2.YLim = [0,TLag(end)];
+        ax2.YLabel.String = 'Lag(s)';
+
+        ax3 = all_ax(i,j,3);
+        grid(ax3,"on");
+        % l = legend(list_tags);
+        ax3.XTick = 1:nStates;
+        ax3.XTickLabel = all_states;
+        ax3.XLim = [.5,nStates+.5];
+        ax3.YLim = [0,1.5];
+        ax3.YLabel.String = 'ACorr Amp';
+
+        alpha_value = .5;
+        linewidth = 2;
+        s_markers = {'o';'+';'.'};
+
+        all_lines =[];
+        for k = 1:nStates
+            cur_state = char(all_states(k));
+
+            % Selecting data
+            index_keep = find((strcmp(S.state,cur_state).*strcmp(S.animal,cur_animal)).*strcmp(S.trace,cur_trace)==1);
+            % Mean AutoCorr
+            ACorr_mean = mean(S.ACorr(index_keep,:),1,'omitnan');
+            ACorr_std = std(S.ACorr(index_keep,:),[],1,'omitnan');
+            nSamples = sum(~isnan(S.ACorr(index_keep,:)),1);
+            ACorr_sem = ACorr_std./sqrt(nSamples);
+            % Lags
+            ACorr_Lag = S.ACorr_Lag(index_keep);
+            % XCorrAmp
+            ACorr_Amp = S.ACorr_Amp(index_keep);
+
+            % Display Ax1
+            px_data = [TLag,fliplr(TLag)];
+            py_data = [ACorr_mean+ACorr_sem,fliplr(ACorr_mean-ACorr_sem)];
+            patch('XData',px_data,'YData',py_data,'FaceColor',g_colors(k,:),'EdgeColor','none',...
+                'Parent',ax1,'Visible','on','FaceAlpha',alpha_value);
+            l=line('XData',TLag,'YData',ACorr_mean,'Parent',ax1,'Color',g_colors(k,:),'Linewidth',linewidth,'DisplayName',sprintf('%s[N=%d]',cur_state,median(nSamples)));
+            all_lines =[all_lines;l];
+
+            % Display Ax2
+            ydata = ACorr_Lag(:);
+            xdata = k*ones(size(ydata))+rand(size(ydata))/10;
+            line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
+                'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            n_samples = sum(~isnan(ydata));
+            m = mean(ydata,'omitnan');
+            line('Xdata',k+.05,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',2,...
+                'Marker','_','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
+                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
+                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+
+            % Display Ax3
+            ydata = ACorr_Amp(:);
+            xdata = k*ones(size(ydata))+rand(size(ydata))/10;
+            line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
+                'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            n_samples = sum(~isnan(ydata));
+            m = mean(ydata,'omitnan');
+            line('Xdata',k+.05,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',2,...
+                'Marker','_','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
+                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
+                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+
+        end
+        legend(ax1, all_lines);
+    end
+end
+
+% Saving figure
+for index_fig = 1:nFigs
+    f = all_f(index_fig);
+    f.Units='normalized';
+    f.OuterPosition = [0 0 1 1];
+    f.PaperPositionMode = 'manual';
+    pic_name = strcat(f.Name,'.pdf');
+    fprintf('Saving figure [%s]...',fullfile(seed_save,pic_name));
+    exportgraphics(f,fullfile(seed_save,pic_name),'ContentType','vector');
+    % saveas(f,fullfile(seed_save,pic_name),'pdf');
+    fprintf(' done.\n');
+    close(f);
+end
+
+end
+
