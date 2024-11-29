@@ -83,8 +83,8 @@ if isfile(fullfile(F.fullpath,F.dir_lfp,'amplifier.mat')) && num_channels_amp>0
     RawData = [RawData;data_amp.data];
     
 else
-    errordlg(sprintf('Missing amplifier.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
-    return;
+    warning('Missing amplifier.mat [%s]',fullfile(F.fullpath,F.dir_lfp));
+    % return;
 end
 
 % Auxiliary Data
@@ -104,8 +104,8 @@ if isfile(fullfile(F.fullpath,F.dir_lfp,'auxiliary.mat')) && num_channels_aux>0
     RawData = [RawData;data_aux.data];
     
 else
-    errordlg(sprintf('Missing auxiliary.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
-    return;
+    warning('Missing auxiliary.mat [%s]',fullfile(F.fullpath,F.dir_lfp));
+    % return;
 end
 
 % Analogin Data
@@ -125,8 +125,8 @@ if isfile(fullfile(F.fullpath,F.dir_lfp,'analogin.mat')) && num_channels_adc>0
     RawData = [RawData;data_adc.data];
     
 else
-    errordlg(sprintf('Missing analogin.mat [%s]',fullfile(F.fullpath,F.dir_lfp)));
-    return;
+    warning('Missing analogin.mat [%s]',fullfile(F.fullpath,F.dir_lfp));
+    % return;
 end
 numSamples = size(RawData,2);
 

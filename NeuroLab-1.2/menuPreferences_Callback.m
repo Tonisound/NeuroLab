@@ -1794,7 +1794,7 @@ set(atlas_width,'Callback',{@checkfloat_callback,GColors.atlas_width,'Width',0.1
 set(atlas_transparency,'Callback',{@checkfloat_callback,GColors.atlas_transparency,'Transparency',0,1});
 
 % Atlas Color
-all_offsets = [14;16;18;20;22;24;26];
+all_offsets = [14;16;18;20;22;24;26;28;30];
 all_tg_colors = [];
 all_tg_string = [];
 all_tg_transp = [];

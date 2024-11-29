@@ -1349,7 +1349,8 @@ algorithm = char(regexprep(S.algorithm,'.m',''));
 
 % Scoring
 % t_sleepscored = sleep_score_rat(index_acc,index_emg,index_ratio1,index_ratio2);
-t_sleepscored = feval(algorithm,index_acc,index_emg,index_ratio1,index_ratio2);
+% t_sleepscored = feval(algorithm,index_acc,index_emg,index_ratio1,index_ratio2);
+t_sleepscored = feval(algorithm,t_source,index_acc,index_emg,index_ratio1,index_ratio2);
 
 % Getting times
 times1 = [];
@@ -1357,13 +1358,12 @@ times2 = [];
 times3 = [];
 times4 = [];
 
-i=1;
-cur_state = t_sleepscored(i);
+cur_state = t_sleepscored(1);
 t_start = t_source(1);
 all_times = [];
 timeData = [];
 for i=1:length(t_source)
-    if t_sleepscored(i)~=cur_state ||i==length(t_source)
+    if t_sleepscored(i)~=cur_state || i==length(t_source)
         t_end = t_source(i);
         switch cur_state
             case 1
@@ -1388,8 +1388,36 @@ for i=1:length(t_source)
     end
 end
 
-T.all_times = all_times;
-T.timeData = timeData;
+% Binary Decision Sleep vs Wake
+t_binary = t_sleepscored < 2.5;
+times5 = [];
+times6 = [];
+
+cur_state = t_binary(1);
+t_start = t_source(1);
+all_times2 = [];
+timeData2 = [];
+for i=2:length(t_source)
+    if t_binary(i)~=cur_state || i==length(t_source)
+        t_end = t_source(i);
+        if cur_state == 1
+            times5 = [times5; t_start t_end];
+            timeData2 = [timeData2;{'WAKE'} {sprintf('WAKE-%03d',size(times5,1))} {datestr(t_start/(24*3600),'HH:MM:SS.FFF')} {datestr(t_end/(24*3600),'HH:MM:SS.FFF')}];
+            all_times2 = [all_times2;t_start t_end];
+        else
+            times6 = [times6; t_start t_end];
+            timeData2 = [timeData2;{'SLEEP'} {sprintf('SLEEP-%03d',size(times6,1))} {datestr(t_start/(24*3600),'HH:MM:SS.FFF')} {datestr(t_end/(24*3600),'HH:MM:SS.FFF')}];
+            all_times2 = [all_times2;t_start t_end];
+        end
+        cur_state = t_binary(i);
+        t_start = t_end;
+    end
+end
+
+% T.all_times = all_times;
+% T.timeData = timeData;
+T.all_times = [all_times;all_times2];
+T.timeData = [timeData;timeData2];
 
 end
 
@@ -1491,39 +1519,49 @@ end
 
 % % Building TimeGroups from TimeTags
 load('Preferences.mat','GColors');
-all_names = {'QW';'AW';'NREM';'REM'};
+% all_names = {'QW';'AW';'NREM';'REM'};
+all_names = {'QW';'AW';'NREM';'REM';'WAKE';'SLEEP'};
 all_strings = [];
 for i=1:length(all_names)
     index = find(strcmp({GColors.TimeGroups(:).Name}',all_names(i))==1);
     all_strings = [all_strings;{GColors.TimeGroups(index(1)).String}'];
 end
-% all_tags = {TimeTags(:).Tag}';
-% TimeGroups_name = [];
-% TimeGroups_frames = [];
-% TimeGroups_duration = [];
-% TimeGroups_S = [];
-% for i=1:size(all_names,1)
-%     %indices = find(contains(all_tags,all_strings(i))==1);
-%     indices = find(startsWith(all_tags,all_strings(i))==1);
-%     if isempty(indices)
-%         continue;
-%     end
-%     group_name = all_names(i);
-%     n_frames = sum(TimeTags_images(indices,2)+1-TimeTags_images(indices,1));
-%     duration_s = sum(datenum(TimeTags_strings(indices,2))-datenum(TimeTags_strings(indices,1)));
-%     duration = datestr(duration_s,'HH:MM:SS.FFF');
-%     % Struct S
-%     S.Name = {TimeTags(indices).Tag}';
-%     S.Selected = indices;
-%     S.TimeTags_strings = TimeTags_strings(indices,:);
-%     S.TimeTags_images = TimeTags_images(indices,:);
-%     
-%     % Building objects
-%     TimeGroups_name = [TimeGroups_name;group_name];
-%     TimeGroups_frames = [TimeGroups_frames;{sprintf('%d',n_frames)}];
-%     TimeGroups_duration = [TimeGroups_duration;{duration}];
-%     TimeGroups_S = [TimeGroups_S;S];  
-% end
+
+% uncommented
+all_tags = {TimeTags(:).Tag}';
+TimeGroups_name = [];
+TimeGroups_frames = [];
+TimeGroups_duration = [];
+TimeGroups_S = [];
+for i=1:size(all_names,1)
+    % indices = find(contains(all_tags,all_strings(i))==1);
+    % indices = find(startsWith(all_tags,all_strings(i))==1);
+    indices = [];
+    temp = regexp(char(all_strings(i)),'/','split');
+    for k = 1:length(temp)
+        indices = [indices;find(startsWith(all_tags,char(temp(k)))==1)];
+    end
+
+    if isempty(indices)
+        continue;
+    end
+    group_name = all_names(i);
+    n_frames = sum(TimeTags_images(indices,2)+1-TimeTags_images(indices,1));
+    duration_s = sum(datenum(TimeTags_strings(indices,2))-datenum(TimeTags_strings(indices,1)));
+    duration = datestr(duration_s,'HH:MM:SS.FFF');
+    % Struct S
+    S.Name = {TimeTags(indices).Tag}';
+    S.Selected = indices;
+    S.TimeTags_strings = TimeTags_strings(indices,:);
+    S.TimeTags_images = TimeTags_images(indices,:);
+    
+    % Building objects
+    TimeGroups_name = [TimeGroups_name;group_name];
+    TimeGroups_frames = [TimeGroups_frames;{sprintf('%d',n_frames)}];
+    TimeGroups_duration = [TimeGroups_duration;{duration}];
+    TimeGroups_S = [TimeGroups_S;S];  
+end
+% end uncommented
 
 % Creating Stats Directory
 data_dir = fullfile(DIR_STATS,'Sleep_Scoring',recording);
@@ -1593,6 +1631,7 @@ else
 end
 
 
+% to debug in order to overwrite time groups
 % % Loading Time Groups
 % tg_data = handles.MainFigure.UserData.data_tg;
 % %tg_data = load(fullfile(savedir,'Time_Groups.mat'),'TimeGroups_name','TimeGroups_frames','TimeGroups_duration','TimeGroups_S');

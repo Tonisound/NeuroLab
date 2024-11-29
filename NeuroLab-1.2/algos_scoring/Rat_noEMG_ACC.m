@@ -1,7 +1,7 @@
-function t_sleepscored = sleep_score_rat_noACC(index_acc,index_emg,index_ratio1,index_ratio2)
+function t_sleepscored = Rat_noEMG_ACC(t_source,index_acc,index_emg,index_ratio1,index_ratio2)
 
 %t_sleepscored = 1+double(index_acc+index_emg+index_ratio1);
-index_acc = index_emg;
+index_emg = index_acc;
 t_sleepscored = NaN(size(index_acc));
 ind_sleepscored = 1000*index_emg+100*index_acc+10*index_ratio1+index_ratio2;
 
