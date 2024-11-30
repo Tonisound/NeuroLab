@@ -1,4 +1,4 @@
-function script_main_XCorrPA(flag_recompute,flag_savefig,flag_perstate)
+function script_main_XCorrPA(flag_recompute,flag_savefig,flag_perstate,to_compute)
 % Script written by AB
 % Article Pogona
 % November 2024
@@ -15,6 +15,9 @@ if nargin<2
 end
 if nargin<3
     flag_perstate = true;      % if True (re)computes xcorr per state
+end
+if nargin<4
+    to_compute = {'Pogona';'Mouse';'Rat'};      % if True (re)computes xcorr per state
 end
 
 load('Preferences.mat','GColors');
@@ -50,19 +53,34 @@ InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_DVR2'},{'Power-theta_DVR2
     {'20200720_P5-049_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
     {'20200721_P5-050_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
     {'20200721_P5-051_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-    {'20200722_P6-052_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-    {'20200722_P6-053_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-    {'20200723_P6-054_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-    {'20200723_P6-055_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-    {'20200724_P6-056_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
+    {'20200722_P6-052_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
+    {'20200722_P6-053_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
+    {'20200723_P6-054_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
+    {'20200723_P6-055_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
+    {'20200724_P6-056_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
     {'20200725_P5-058_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
     {'20200726_P5-060_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
     {'20200726_P5-061_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'}];
 
 
-InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_000'},{'Power-theta_000'};...
-    {'20240820_K1656_001_E_nlab'},{'Power-beta_000'},{'Power-theta_000'};...
-    {'20240820_K1657_001_E_nlab'},{'Power-beta_000'},{'Power-theta_000'}];
+InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+    {'20240812_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+    {'20240812_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+    {'20240812_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+    {'20240813_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+    {'20240813_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+    {'20240813_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+    {'20240813_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+    {'20240814_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+    {'20240814_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+    {'20240814_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+    {'20240814_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+    {'20240820_K1656_001_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+    {'20240820_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+    {'20240822_K1656_001_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+    {'20240822_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+    {'20240826_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+    {'20240826_K1656_003_E_nlab'},{'Power-beta_016'},{'Power-theta_016'}];
 
 
 InfoFileRat =[{'20190226_SD025_P401_R_nlab'},{'Power-beta_023'},{'Power-theta_023'};...
@@ -80,18 +98,19 @@ InfoFileRat =[{'20190226_SD025_P401_R_nlab'},{'Power-beta_023'},{'Power-theta_02
     {'20190416_SD032_P402_R_nlab'},{'Power-beta_005'},{'Power-theta_005'}];
 
 
-all_states = {'NREM','REM','AW'};
+all_states = {'NREM','REM','AW','QW'};
 
 % Default Parameters
-ParamsDefault.all_states = all_states;
-ParamsDefault.GColors = GColors;
-ParamsDefault.t_smooth = 10;
-ParamsDefault.nCol = 8;        % Number Max Columns
-ParamsDefault.seed_nlab = '/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';
-ParamsDefault.pattern_compute_channel = {'Power-beta';'Power-theta';'Power-delta'};
-ParamsDefault.pattern_compute_region = {'*'};
-ParamsDefault.pattern_display_channel = {'Power-beta'};
-ParamsDefault.pattern_display_region = {'Whole-reg'};
+ParamsDefault.all_states = all_states;  % States (must be Time Groups)
+ParamsDefault.GColors = GColors;        % Display Colors
+ParamsDefault.t_smooth = 10;            % Gausssian Smoothing before XCorr
+ParamsDefault.nCol = 8;                 % Number Max Columns
+ParamsDefault.seed_nlab = '/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';   % File location
+ParamsDefault.seed_save = '/Users/tonio/Desktop/Test';                                           % Save location
+ParamsDefault.pattern_compute_channel = {'Power-beta';'Power-theta';'Power-delta'};         % Channels to compute
+ParamsDefault.pattern_compute_region = {'*'};                                               % Regions to compute
+ParamsDefault.pattern_display_channel = {'Power-beta'};                                     % Channels to display
+ParamsDefault.pattern_display_region = {'Whole_reg'};                                       % Regions to display
 
 % Specific Parameters
 ParamsPogo = ParamsDefault;
@@ -100,11 +119,14 @@ ParamsPogo.WinSec = 300;
 ParamsPogo.StepSec = 10;
 ParamsPogo.MaxLagSec = 300;
 ParamsPogo.NormWinMin = 3;
-ParamsPogo.t_smooth = 10;
-ParamsPogo.seed_save = '/Users/tonio/Desktop/XCorrPogo';
+ParamsPogo.t_smooth = 15;
+ParamsPogo.seed_save = fullfile(ParamsPogo.seed_save,'XCorrPogo');
 ParamsPogo.batchname = 'Pogona';
 ParamsPogo.MinGroupDurSec = 300;
 ParamsPogo.WinGroupSec = 600;
+ParamsPogo.pattern_display_channel = {'Power-beta'};                                     % Channels to display
+ParamsPogo.pattern_display_region = {'Whole_reg'};
+ParamsPogo.all_states = {'SLEEP','WAKE'};
 
 ParamsMouse= ParamsDefault;
 ParamsMouse.Fs = 1;
@@ -113,62 +135,60 @@ ParamsMouse.StepSec = 5;
 ParamsMouse.MaxLagSec = 150;
 ParamsMouse.NormWinMin = 1.5;
 ParamsMouse.t_smooth = 5;
-ParamsMouse.seed_save = '/Users/tonio/Desktop/XCorrMouse';
+ParamsMouse.seed_save = fullfile(ParamsMouse.seed_save,'XCorrMouse');
 ParamsMouse.batchname = 'Mouse';
 ParamsMouse.MinGroupDurSec = 60;
 ParamsMouse.WinGroupSec = 120;
-ParamsMouse.pattern_display_channel = {'Power-beta_000';'Power-theta_000'};
-ParamsMouse.pattern_display_region = {'Whole-reg';'HPC'};
+ParamsMouse.pattern_display_channel = {'Power-beta'};
+ParamsMouse.pattern_display_region = {'Whole-reg'}; % ;'HPC';'CTX';'THAL'
+ParamsMouse.all_states = {'NREM','REM','AW'};
 
 ParamsRat = ParamsMouse;
-ParamsRat.seed_save = '/Users/tonio/Desktop/XCorrRat';
+ParamsRat.seed_save = fullfile(ParamsMouse.seed_save,'XCorrRat');
 ParamsRat.batchname = 'Rat';
 ParamsRat.pattern_display_channel = {'Power-beta'};
 ParamsRat.pattern_display_region = {'[SR]'};
+ParamsRat.all_states = {'NREM','REM','AW','QW'};
 
 
-% % Compute and Plot Dynamic Xcorr Pogo
-% if flag_recompute
-%     compute_dynamic_xcorr(ParamsPogo,InfoFilePogo,false);
-%     compute_dynamic_xcorr(ParamsPogo,InfoFilePogo,true);
-% end
-% if flag_savefig
-%     plot_dynamic_xcorr(ParamsPogo,InfoFilePogo,false);
-%     plot_dynamic_xcorr(ParamsPogo,InfoFilePogo,true);
-% end
-% if flag_perstate
-%     S = plot_xcorr_per_state(ParamsPogo,InfoFilePogo,all_states);
-% end
-
-% % Compute and Plot Dynamic Xcorr Rat
-% if flag_recompute
-%     compute_dynamic_xcorr(ParamsRat,InfoFileRat,false);
-%     compute_dynamic_xcorr(ParamsRat,InfoFileRat,true);
-% end
-% if flag_savefig
-%     plot_dynamic_xcorr(ParamsRat,InfoFileRat,false);
-%     plot_dynamic_xcorr(ParamsRat,InfoFileRat,true);
-% end
-% if flag_perstate
-%     plot_xcorr_per_state(ParamsRat,InfoFileRat,all_states);
-% end
+% Compute and Plot Dynamic Xcorr
 
 
-% Compute and Plot Dynamic Xcorr Mouse
-if flag_recompute
-    compute_dynamic_xcorr(ParamsMouse,InfoFileMouse(:,1));
-    compute_dynamic_xcorr(ParamsMouse,InfoFileMouse(:,1),InfoFileMouse(:,2));
-    compute_dynamic_xcorr(ParamsMouse,InfoFileMouse(:,1),InfoFileMouse(:,2));
-end
-if flag_savefig
-    plot_dynamic_xcorr(ParamsMouse,InfoFileMouse(:,1));
-    plot_dynamic_xcorr(ParamsMouse,InfoFileMouse(:,1),InfoFileMouse(:,2));
-    plot_dynamic_xcorr(ParamsMouse,InfoFileMouse(:,1),InfoFileMouse(:,3));
-end
-if flag_perstate
-    plot_autocorr_per_state(ParamsMouse,InfoFileMouse(:,1));
-    plot_autocorr_per_state(ParamsMouse,InfoFileMouse(:,1),InfoFileMouse(:,2));
-    plot_autocorr_per_state(ParamsMouse,InfoFileMouse(:,1),InfoFileMouse(:,3));
+for i = 1:length(to_compute)
+
+    switch char(to_compute(i))
+        case 'Pogona'
+            Params = ParamsPogo;
+            InfoFile = InfoFilePogo;
+        case 'Mouse'
+            Params = ParamsMouse;
+            InfoFile = InfoFileMouse;
+        case 'Rat'
+            Params = ParamsRat;
+            InfoFile = InfoFileRat;
+        otherwise
+            warning('Unrecognized Species to compute [%s]',char(to_compute(i)));
+            continue;
+    end
+
+    fprintf('============================== START (%s) ==============================\n',char(to_compute(i)));
+    % Compute and Plot Dynamic Xcorr Mouse
+    if flag_recompute
+        compute_dynamic_xcorr(Params,InfoFile(:,1));
+        compute_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,2));
+        compute_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,3));
+    end
+    if flag_savefig
+        plot_dynamic_xcorr(Params,InfoFile(:,1));
+        plot_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,2));
+        plot_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,3));
+    end
+    if flag_perstate
+        plot_autocorr_per_state(Params,InfoFile(:,1));
+        plot_autocorr_per_state(Params,InfoFile(:,1),InfoFile(:,2));
+        plot_autocorr_per_state(Params,InfoFile(:,1),InfoFile(:,3));
+    end
+    fprintf('============================== END (%s) ==============================\n',char(to_compute(i)));
 end
 
 end
@@ -650,11 +670,13 @@ for k=1:length(all_files)
             f = all_f(index_fig);
             f.Units='normalized';
             f.OuterPosition = [0 0 1 1];
-            f.PaperPositionMode = 'manual';
             pic_name = strcat(f.Name,'.pdf');
             fprintf('Saving figure [%s]...',fullfile(folder_save,pic_name));
+            % Mac
+            f.PaperPositionMode = 'manual';
             exportgraphics(f,fullfile(seed_save,pic_name),'ContentType','vector');
-            % saveas(f,fullfile(seed_save,pic_name),'pdf');
+%             % Ubuntu
+%             % saveas(f,fullfile(seed_save,pic_name),'pdf');
             fprintf(' done.\n');
             close(f);
         end
@@ -1132,7 +1154,7 @@ for i = 1:nTraces
             n_samples = sum(~isnan(ydata));
             m = mean(ydata,'omitnan');
             line('Xdata',k+.05,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',2,...
-                'Marker','_','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
                 'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
@@ -1146,7 +1168,7 @@ for i = 1:nTraces
             n_samples = sum(~isnan(ydata));
             m = mean(ydata,'omitnan');
             line('Xdata',k+.05,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',2,...
-                'Marker','_','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
                 'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
@@ -1162,10 +1184,12 @@ for index_fig = 1:nFigs
     f = all_f(index_fig);
     f.Units='normalized';
     f.OuterPosition = [0 0 1 1];
-    f.PaperPositionMode = 'manual';
     pic_name = strcat(f.Name,'.pdf');
     fprintf('Saving figure [%s]...',fullfile(seed_save,pic_name));
+    % Mac
+    f.PaperPositionMode = 'manual';
     exportgraphics(f,fullfile(seed_save,pic_name),'ContentType','vector');
+    % Ubuntu
     % saveas(f,fullfile(seed_save,pic_name),'pdf');
     fprintf(' done.\n');
     close(f);
@@ -1294,7 +1318,7 @@ for i = 1:nTraces
             n_samples = sum(~isnan(ydata));
             m = mean(ydata,'omitnan');
             line('Xdata',k+.05,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',2,...
-                'Marker','_','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
                 'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
@@ -1308,7 +1332,7 @@ for i = 1:nTraces
             n_samples = sum(~isnan(ydata));
             m = mean(ydata,'omitnan');
             line('Xdata',k+.05,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',2,...
-                'Marker','_','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
                 'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
@@ -1324,10 +1348,12 @@ for index_fig = 1:nFigs
     f = all_f(index_fig);
     f.Units='normalized';
     f.OuterPosition = [0 0 1 1];
-    f.PaperPositionMode = 'manual';
     pic_name = strcat(f.Name,'.pdf');
     fprintf('Saving figure [%s]...',fullfile(seed_save,pic_name));
+    % Mac
+    f.PaperPositionMode = 'manual';
     exportgraphics(f,fullfile(seed_save,pic_name),'ContentType','vector');
+    % Ubuntu
     % saveas(f,fullfile(seed_save,pic_name),'pdf');
     fprintf(' done.\n');
     close(f);

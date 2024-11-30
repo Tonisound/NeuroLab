@@ -43,18 +43,21 @@ for i=1:length(t_sleepscored)
 end
 
 % Keeping long bouts
-LongBoutSec = 30;
+LongBoutSec = 20; % mouse
+% LongBoutSec = 30; % pogo
 ind_keep = find(all_times(:,2)-all_times(:,1)>=LongBoutSec);
 index_endlongbouts = index_times(ind_keep,2);
 % t_endlongbouts = all_times(ind_keep,2);
 
 % Adding new bouts at the end
-AddBoutSec = 120;
+AddBoutSec = 120; % mouse
+% AddBoutSec = 1200; % pogo
 AddBoutLength = round(AddBoutSec/median(diff(t_source)));
 t_addbout = zeros(size(t_source));
 for i =1:length(index_endlongbouts)
     t_addbout(index_endlongbouts(i):index_endlongbouts(i)+AddBoutLength)=1;
 end
+t_addbout = t_addbout(1:length(t_source));
 
 % Adding state2 (QW) if not in state 1 (AW)
 t_sleepscored(t_addbout==1) = min(t_sleepscored(t_addbout==1),2);

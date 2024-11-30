@@ -147,7 +147,7 @@ t2.CellSelectionCallback = {@trace_uitable2_select,t1,t3};
             defaultans = {''};
         end
         
-        answer = inputdlg(prompt,name,[1 40],defaultans);
+        answer = inputdlg(prompt,name,[1 40],upper(defaultans));
         if ~isempty(answer)
             group_name= char(answer);
         else
