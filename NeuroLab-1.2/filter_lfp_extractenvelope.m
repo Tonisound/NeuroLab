@@ -5,7 +5,7 @@ function success = filter_lfp_extractenvelope(foldername,handles,val)
 % Selects only main channel (if specified) in batch mode
 
 success = false;
-load('Preferences.mat','GFilt');
+load('Preferences.mat','GFilt','GTraces');
 
 % if val undefined, set val = 1 (default) user can select which channels to export
 if nargin <3
@@ -61,13 +61,14 @@ else
 end
 
 % Initial selection
+% Comment / uncmoment as needed
+% % Main Channel Only
 % ind_selected = find(strcmp(channel_list,strcat('LFP_',data_config.File.mainlfp,'.mat'))==1);
-% if ~isempty(ind_selected)
-%     ind_selected = ind_selected(1);
-% else
-%     ind_selected = 1:length(channel_list);
-% end
+% % Alias Channel Only
+% ind_selected = find(strcmp(channel_list,sprintf('LFP_%s.mat',GTraces.AliasMainLFP))==1);
+% All Channels
 ind_selected = 1:length(channel_list);
+
 % asks for user input if val == 1
 if val == 1
     % user mode

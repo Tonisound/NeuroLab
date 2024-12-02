@@ -131,6 +131,7 @@ GTraces.GraphicLoadFormat_index = 1;
 GTraces.GraphicSaveFormat = 'Graphic_objects.mat';
 GTraces.GraphicSaveFormat_index = 1;
 GTraces.GaussianSmoothing = 1;
+GTraces.AliasMainLFP = '999';
 
 GImport.burst_thresh = 30;
 GImport.jump_thresh = .01;

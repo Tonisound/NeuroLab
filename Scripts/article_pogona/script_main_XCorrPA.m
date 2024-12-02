@@ -25,7 +25,7 @@ load('Preferences.mat','GColors');
 InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_DVR2'},{'Power-theta_DVR2'};...
     {'20190730_P1-004_E_nlab'},{'Power-beta_DVR2'},{'Power-theta_DVR2'};...
     {'20190731_P1-005_E_nlab'},{'Power-beta_DVR2'},{'Power-theta_DVR2'};...
-    {'20190927_P3-016_E_nlab'},{'Power-beta_DVRR4',{'Power-theta_DVR2'}};...
+    {'20190927_P3-016_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVR2'};...
     {'20190927_P3-017_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
     {'20190927_P3-018_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
     {'20190927_P3-019_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
@@ -63,25 +63,43 @@ InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_DVR2'},{'Power-theta_DVR2
     {'20200726_P5-061_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'}];
 
 
-InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-    {'20240812_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-    {'20240812_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-    {'20240812_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-    {'20240813_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-    {'20240813_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-    {'20240813_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-    {'20240813_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-    {'20240814_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-    {'20240814_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-    {'20240814_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-    {'20240814_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-    {'20240820_K1656_001_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-    {'20240820_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-    {'20240822_K1656_001_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-    {'20240822_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-    {'20240826_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-    {'20240826_K1656_003_E_nlab'},{'Power-beta_016'},{'Power-theta_016'}];
-
+% InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+%     {'20240812_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+%     {'20240812_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+%     {'20240812_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+%     {'20240813_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+%     {'20240813_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+%     {'20240813_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+%     {'20240813_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+%     {'20240814_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+%     {'20240814_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
+%     {'20240814_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+%     {'20240814_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
+%     {'20240820_K1656_001_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+%     {'20240820_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+%     {'20240822_K1656_001_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+%     {'20240822_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+%     {'20240826_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
+%     {'20240826_K1656_003_E_nlab'},{'Power-beta_016'},{'Power-theta_016'}];
+InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240812_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240812_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240812_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240813_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240813_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240813_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240813_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240814_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240814_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240814_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240814_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240820_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240820_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240822_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240822_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240826_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240826_K1656_003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'}];
+   
 
 InfoFileRat =[{'20190226_SD025_P401_R_nlab'},{'Power-beta_023'},{'Power-theta_023'};...
     {'20190226_SD025_P402_R_nlab'},{'Power-beta_023'},{'Power-theta_023'};...
@@ -105,8 +123,10 @@ ParamsDefault.all_states = all_states;  % States (must be Time Groups)
 ParamsDefault.GColors = GColors;        % Display Colors
 ParamsDefault.t_smooth = 10;            % Gausssian Smoothing before XCorr
 ParamsDefault.nCol = 8;                 % Number Max Columns
-ParamsDefault.seed_nlab = '/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';   % File location
-ParamsDefault.seed_save = '/Users/tonio/Desktop/Test';                                           % Save location
+% ParamsDefault.seed_nlab ='/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';  
+ParamsDefault.seed_nlab = '/Volumes/DataMOBs203/NEUROLAB/NLab_DATA';                         % File location
+% ParamsDefault.seed_save = '/Users/tonio/Desktop/XCorr';     
+ParamsDefault.seed_save = '/Volumes/DataMOBs203/XCorr';                                     % Save location
 ParamsDefault.pattern_compute_channel = {'Power-beta';'Power-theta';'Power-delta'};         % Channels to compute
 ParamsDefault.pattern_compute_region = {'*'};                                               % Regions to compute
 ParamsDefault.pattern_display_channel = {'Power-beta'};                                     % Channels to display
@@ -139,7 +159,7 @@ ParamsMouse.seed_save = fullfile(ParamsMouse.seed_save,'XCorrMouse');
 ParamsMouse.batchname = 'Mouse';
 ParamsMouse.MinGroupDurSec = 60;
 ParamsMouse.WinGroupSec = 120;
-ParamsMouse.pattern_display_channel = {'Power-beta'};
+ParamsMouse.pattern_display_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
 ParamsMouse.pattern_display_region = {'Whole-reg'}; % ;'HPC';'CTX';'THAL'
 ParamsMouse.all_states = {'NREM','REM','AW'};
 
@@ -674,9 +694,9 @@ for k=1:length(all_files)
             fprintf('Saving figure [%s]...',fullfile(folder_save,pic_name));
             % Mac
             f.PaperPositionMode = 'manual';
-            exportgraphics(f,fullfile(seed_save,pic_name),'ContentType','vector');
+            exportgraphics(f,fullfile(folder_save,pic_name),'ContentType','vector');
 %             % Ubuntu
-%             % saveas(f,fullfile(seed_save,pic_name),'pdf');
+%             % saveas(f,fullfile(folder_save,pic_name),'pdf');
             fprintf(' done.\n');
             close(f);
         end

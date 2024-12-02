@@ -348,7 +348,7 @@ pl = uicontrol(f,'Style','popup',...
     'Parent',botPanel);
 
 pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Convert Neuroshop Masks|';
-pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import Intan Files|Import External Files|Import NEV Tracking');
+pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import Intan Files|Import External Files|Import NEV Tracking|Duplicate main LFP channel');
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope|Compute Wavelet Spectrogram');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Locomotion Events|Detect Sleep Events');
 pl_str = strcat(pl_str,'|Detect Left-Right Runs|Detect Early-Mid-Late Runs|Detect Hippocampal Ripples|Segregate Hippocampal Ripples');

@@ -34,6 +34,9 @@ switch strtrim(str(val,:))
         
     case 'Import NEV Tracking'
         import_tracking_info(FILES(CUR_FILE),handles);
+
+    case 'Duplicate main LFP channel'
+        duplicate_main_channel(FILES(CUR_FILE),handles);
         
     case 'Divide LFP Frequency Bands'
         divide_lfp_bands(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

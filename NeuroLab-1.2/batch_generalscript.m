@@ -628,6 +628,9 @@ for i = 1:length(ind_files)
                 
             case 'Import NEV Tracking'
                 success = import_tracking_info(FILES(ii),myhandles,0);
+
+            case 'Duplicate main LFP channel'
+                success = duplicate_main_channel(FILES(ii),myhandles,0);
                 
             case 'Filter LFP channels - Extract Power Envelope'
                 % in this case 1 select band manually,
