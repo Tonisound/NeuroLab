@@ -232,7 +232,7 @@ all_colors(1:9,:) = [.47 .67 .19;...
     .5 .5 .5];
 all_visible = [true;true;true;true;false;false;false;false;true];
 all_checked = [true;true;true;true;true;true;true;true;true];
-all_transp = [.5;.5;.5;.5;.4;.2;.5;.5;.5];
+all_transp = [.5;.5;.5;.5;.4;.2;0;0;.5];
 for i =1:size(all_names,1)
     GColors.TimeGroups(i).Name = char(all_names(i));
     GColors.TimeGroups(i).String = char(all_strings(i));

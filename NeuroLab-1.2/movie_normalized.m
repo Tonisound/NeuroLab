@@ -837,8 +837,7 @@ i = START_IM;
 
 while i>=START_IM && i<=END_IM
     if ishandle(f)
-        tic
-        %disp('coucou')
+        tic;
         f.UserData.i = i;
         t_lfp = f.UserData.t_lfp;
         

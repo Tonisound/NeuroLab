@@ -27,7 +27,6 @@ elseif ~isfile(file_mainlfp)
 else
     copyfile(file_mainlfp,alias_mainlfp);
     fprintf('Main LFP Channel [%s] duplicated as [%s]. [File:%s].\n',F.mainlfp,GTraces.AliasMainLFP,F.nlab);
-    disp('coucou')
 end
 
 success = true;
