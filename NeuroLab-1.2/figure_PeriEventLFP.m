@@ -149,7 +149,7 @@ for jj=1:n_channels
     end
     [Cdata_sub,Xspectro,freqdom] = load_wavelet(recording_name,cur_channel);
     if isempty(Cdata_sub)
-        warning('No spectrogram found [%s]',cur_recording);
+        warning('No spectrogram found [%s]',recording_name);
     else
         S(jj).Yspectro = Cdata_sub;
     end

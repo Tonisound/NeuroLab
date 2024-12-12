@@ -62,10 +62,10 @@ end
 
 % Initial selection
 % Comment / uncmoment as needed
-% % Main Channel Only
-% ind_selected = find(strcmp(channel_list,strcat('LFP_',data_config.File.mainlfp,'.mat'))==1);
-% Alias Channel Only
-ind_selected = find(strcmp(channel_list,sprintf('LFP_%s.mat',GTraces.AliasMainLFP))==1);
+% Main Channel Only
+ind_selected = find(strcmp(channel_list,strcat('LFP_',data_config.File.mainlfp,'.mat'))==1);
+% % Alias Channel Only
+% ind_selected = find(strcmp(channel_list,sprintf('LFP_%s.mat',GTraces.AliasMainLFP))==1);
 % % All Channels
 % ind_selected = 1:length(channel_list);
 
@@ -107,7 +107,7 @@ tband_smooth = [GFilt.broad_smooth;GFilt.delta_smooth;GFilt.theta_smooth;GFilt.b
 
 % Initial selection 
 % pattern_list = {'Delta','Theta','Beta','Gamma Low','Gamma Mid ','Gamma Mid-Up ','Gamma High ','Gamma High-Up ','Ripple'};
-pattern_list = {'Delta';'Theta';'Beta'};
+pattern_list = {'Delta';'Theta';'Beta';'Ripple'};
 % pattern_list = {'Ripple'};
 ind_selected = find(contains(str_band,pattern_list)==1);
 % asks for user input if val == 1
@@ -241,8 +241,8 @@ g_colors = get(groot,'DefaultAxesColorOrder');
 
 
 % Initial selection 
-%pattern_list = {'Power';'LFP-theta'};
-pattern_list = {'Power-delta';'Power-theta';'Power-beta'};
+pattern_list = {'Power';'LFP-ripple'};
+% pattern_list = {'Power-delta';'Power-theta';'Power-beta'};
 ind_selected = find(contains({traces.fullname}',pattern_list)==1);
 % asks for user input if val == 1
 if val == 1

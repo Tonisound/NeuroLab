@@ -54,7 +54,7 @@ switch strtrim(str(val,:))
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     case 'Detect Hippocampal Ripples'
-        detect_ripples_both(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).dir_dat,1);
+        detect_ripples_both(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).dir_dat,1,FILES(CUR_FILE).mainlfp);
 %         detect_hippocampal_ripples(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).dir_dat,1);
 
     case 'Segregate Hippocampal Ripples'

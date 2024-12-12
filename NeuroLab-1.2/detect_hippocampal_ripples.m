@@ -57,7 +57,7 @@ else
 end
 
 % Loading noise and interpolate
-channel_noise = '099';
+channel_noise = '000';
 if exist(fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_noise)),'file')
     data_noise = load(fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_noise)));
     fprintf('Noise channel loaded [%s].\n',fullfile(savedir,'Sources_LFP',sprintf('LFP_%s.mat',channel_noise)));

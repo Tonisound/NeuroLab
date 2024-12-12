@@ -34,9 +34,10 @@ else
     else
         % batch mode
         % ind_events = 1:length(d_events);
-        % batch_csv_events = {'[Pyr]Ripples-Abs-All.csv';'[Gyr]Ripples-Abs-All.csv'};
-        batch_csv_events = {'[Pyr]Ripples-Abs-Fast.csv';'[Pyr]Ripples-Abs-Long.csv';'[Pyr]Ripples-Abs-Strong.csv';...
-        '[Gyr]Ripples-Abs-Fast.csv';'[Gyr]Ripples-Abs-Long.csv';'[Gyr]Ripples-Abs-Strong.csv'};
+%         batch_csv_events = {'Ripples-Abs-All.csv';'Ripples-Sqrt-All.csv'};
+        batch_csv_events = {'Ripples-Abs-All.csv'};
+%         batch_csv_events = {'[Pyr]Ripples-Abs-Fast.csv';'[Pyr]Ripples-Abs-Long.csv';'[Pyr]Ripples-Abs-Strong.csv';...
+%         '[Gyr]Ripples-Abs-Fast.csv';'[Gyr]Ripples-Abs-Long.csv';'[Gyr]Ripples-Abs-Strong.csv'};
         ind_events = [];
         for i=1:length(batch_csv_events)
             ind_keep = find(strcmp({d_events(:).name}',char(batch_csv_events(i))));
@@ -141,6 +142,14 @@ for kk=1:length(all_event_names)
                 atlas_coordinate = data_atlas.AP_mm;
                 
             case 'Rat Sagittal Paxinos'
+                atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
+                atlas_coordinate = data_atlas.ML_mm;
+            
+            case 'Mouse Coronal Paxinos'
+                atlas_fullname = sprintf('AP=%.2fmm',data_atlas.AP_mm);
+                atlas_coordinate = data_atlas.AP_mm;
+                
+            case 'Mouse Sagittal Paxinos'
                 atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
                 atlas_coordinate = data_atlas.ML_mm;
         end

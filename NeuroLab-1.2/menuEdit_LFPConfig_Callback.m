@@ -54,6 +54,20 @@ f2 = dialog('Units','characters',...
     'NumberTitle','off',...
     'Name','LFP Configuration Edition');
 
+% LFP Dir Dat
+uicontrol('Style','text',...
+    'Units','normalized',...
+    'Position',[.05 .14 .15 .05],...
+    'String','LFP Dat Directory',...
+    'Parent',f2);
+e1 = uicontrol('Style','Edit',...
+    'Units','normalized',...
+    'Position',[.2 .16 .75 .04],...
+    'String',data_config.File.dir_dat,...
+    'Callback',{@checkdir_callback,data_config.File.dir_dat,'Dir Dat'},...
+    'Parent',f2);
+
+
 % LFP Main channel
 d_lfp = dir(fullfile(folder_name,'Sources_LFP','LFP_*.mat'));
 lfp_str = regexprep({d_lfp(:).name}','.mat','');
@@ -145,9 +159,9 @@ set(addButton,'Callback',@addButton_callback);
 set(removeButton,'Callback',@removeButton_callback);
 
 panel1 = uipanel('FontSize',ftsize,...
-    'Title','Current Tags',...
+    'Title','',...
     'Units','normalized',...
-    'Position',[0 .175 1 .825],...
+    'Position',[0 .2 1 .8],...
     'Parent',f2);
 
 % UiTable 
@@ -164,6 +178,7 @@ t1 = uitable('ColumnName',{'index','ID','Type','Name'},...
     'Parent',panel1);
 t1.Data = D;
     
+
 
     function cancelButton_callback(~,~)
         close(f2);
@@ -211,6 +226,13 @@ t1.Data = D;
             channel_list(i) = {sprintf('%s/%s',char(channel_type(i)),char(channel_id(i)))};
         end
         
+        % Adding File struct in NConfig.mat
+        data_config.File.mainlfp = char(pu_lfp.String(pu_lfp.Value,:));
+        data_config.File.mainemg = char(pu_emg.String(pu_emg.Value,:));
+        data_config.File.mainacc = char(pu_acc.String(pu_acc.Value,:));
+        data_config.File.dir_dat = e1.String;
+        File = data_config.File;
+        
         % Saving
         if isempty(channel_id)
             delete(fullfile(folder_name,'Nconfig.mat'));
@@ -229,11 +251,7 @@ t1.Data = D;
             fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
         end
         
-        % Saving LFP EMG main channel
-        data_config.File.mainlfp = char(pu_lfp.String(pu_lfp.Value,:));
-        data_config.File.mainemg = char(pu_emg.String(pu_emg.Value,:));
-        data_config.File.mainacc = char(pu_acc.String(pu_acc.Value,:));
-        File = data_config.File;
+        % Saving File to Config.mat
         FILES(CUR_FILE)=File;
         save(fullfile(folder_name,'Config.mat'),'File','-append');
         close(f2);
@@ -250,4 +268,16 @@ if ~isempty(evnt.Indices)
 else
     hObj.UserData.Selection = [];
 end
+end
+
+function checkdir_callback(hObj,~,var,label)
+
+StrValue = get(hObj,'String');
+
+if ~isfolder(StrValue) && ~isempty(StrValue)
+    errordlg(sprintf('%s must be a directory.',label),'Directory Not found','modal');
+    set(hObj,'String',var);
+    return;
+end
+
 end
