@@ -22,46 +22,6 @@ end
 
 load('Preferences.mat','GColors');
 
-% InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_DVR2'},{'Power-theta_DVR2'};...
-%     {'20190730_P1-004_E_nlab'},{'Power-beta_DVR2'},{'Power-theta_DVR2'};...
-%     {'20190731_P1-005_E_nlab'},{'Power-beta_DVR2'},{'Power-theta_DVR2'};...
-%     {'20190927_P3-016_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20190927_P3-017_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20190927_P3-018_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20190927_P3-019_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20190930_P3-020_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20190930_P3-021_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20190930_P3-022_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20191003_P3-027_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20191003_P3-028_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20191003_P3-029_E_nlab'},{'Power-beta_DVRR4'},{'Power-theta_DVRR4'};...
-%     {'20200715_P5-033_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200716_P5-034_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200716_P5-036_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200716_P5-037_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200716_P5-038_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200716_P5-039_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200717_P5-040_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200717_P6-041_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200717_P6-042_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200717_P6-043_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200718_P6-044_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200718_P6-045_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200719_P5-046_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200719_P5-047_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200720_P5-048_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200720_P5-049_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200721_P5-050_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200721_P5-051_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200722_P6-052_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
-%     {'20200722_P6-053_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
-%     {'20200723_P6-054_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
-%     {'20200723_P6-055_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
-%     {'20200724_P6-056_E_nlab'},{'Power-beta_DVR-PL1'},{'Power-theta_DVR-PL1'};...
-%     {'20200725_P5-058_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200726_P5-060_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'};...
-%     {'20200726_P5-061_E_nlab'},{'Power-beta_DVR-PR2'},{'Power-theta_DVR-PR2'}];
-
 InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
     {'20190730_P1-004_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
     {'20190731_P1-005_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
@@ -103,24 +63,6 @@ InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'}
     {'20200726_P5-061_E_nlab'},{'Power-beta_999'},{'Power-theta_999'}];
 
 
-% InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-%     {'20240812_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-%     {'20240812_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-%     {'20240812_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-%     {'20240813_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-%     {'20240813_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-%     {'20240813_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-%     {'20240813_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-%     {'20240814_K1653_001_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-%     {'20240814_K1653_002_E_nlab'},{'Power-beta_005'},{'Power-theta_005'};
-%     {'20240814_K1654_001_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-%     {'20240814_K1654_002_E_nlab'},{'Power-beta_004'},{'Power-theta_004'};
-%     {'20240820_K1656_001_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-%     {'20240820_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-%     {'20240822_K1656_001_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-%     {'20240822_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-%     {'20240826_K1656_002_E_nlab'},{'Power-beta_016'},{'Power-theta_016'};
-%     {'20240826_K1656_003_E_nlab'},{'Power-beta_016'},{'Power-theta_016'}];
 InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
     {'20240812_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
     {'20240812_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
@@ -135,11 +77,17 @@ InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_9
     {'20240814_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
     {'20240820_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
     {'20240820_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240820_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240820_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
     {'20240822_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
     {'20240822_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240822_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240822_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
     {'20240826_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240826_K1656_003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'}];
-   
+    {'20240826_K1656_003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240826_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
+    {'20240826_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'}];
+
 
 InfoFileRat =[{'20190226_SD025_P401_R_nlab'},{'Power-beta_023'},{'Power-theta_023'};...
     {'20190226_SD025_P402_R_nlab'},{'Power-beta_023'},{'Power-theta_023'};...
@@ -163,9 +111,9 @@ ParamsDefault.all_states = all_states;  % States (must be Time Groups)
 ParamsDefault.GColors = GColors;        % Display Colors
 ParamsDefault.t_smooth = 10;            % Gausssian Smoothing before XCorr
 ParamsDefault.nCol = 8;                 % Number Max Columns
-% ParamsDefault.seed_nlab ='/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';  
+% ParamsDefault.seed_nlab ='/Users/tonio/Documents/Antoine-fUSDataset/NEUROLAB/NLab_DATA';
 ParamsDefault.seed_nlab = '/Volumes/DataMOBs203/NEUROLAB/NLab_DATA';                         % File location
-% ParamsDefault.seed_save = '/Users/tonio/Desktop/XCorr';     
+% ParamsDefault.seed_save = '/Users/tonio/Desktop/XCorr';
 ParamsDefault.seed_save = '/Volumes/DataMOBs203/XCorr';                                     % Save location
 ParamsDefault.pattern_compute_channel = {'Power-beta';'Power-theta';'Power-delta'};         % Channels to compute
 ParamsDefault.pattern_compute_region = {'*'};                                               % Regions to compute
@@ -179,13 +127,15 @@ ParamsPogo.WinSec = 300;
 ParamsPogo.StepSec = 10;
 ParamsPogo.MaxLagSec = 300;
 ParamsPogo.NormWinMin = 3;
-ParamsPogo.t_smooth = 15;
+ParamsPogo.t_smooth = 30;
 ParamsPogo.seed_save = fullfile(ParamsPogo.seed_save,'XCorrPogo');
 ParamsPogo.batchname = 'Pogona';
 ParamsPogo.MinGroupDurSec = 600;
 ParamsPogo.WinGroupSec = 600;
-ParamsPogo.pattern_display_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'}; 
-ParamsPogo.pattern_display_region = {'Whole_reg'};
+ParamsPogo.pattern_compute_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
+ParamsPogo.pattern_compute_region = {'Whole_reg';'dTel'};
+ParamsPogo.pattern_display_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
+ParamsPogo.pattern_display_region = {'Whole_reg';'dTel'};
 ParamsPogo.all_states = {'SLEEP','WAKE'};
 
 ParamsMouse= ParamsDefault;
@@ -194,11 +144,13 @@ ParamsMouse.WinSec = 150;
 ParamsMouse.StepSec = 5;
 ParamsMouse.MaxLagSec = 150;
 ParamsMouse.NormWinMin = 1.5;
-ParamsMouse.t_smooth = 5;
+ParamsMouse.t_smooth = 10;
 ParamsMouse.seed_save = fullfile(ParamsMouse.seed_save,'XCorrMouse');
 ParamsMouse.batchname = 'Mouse';
-ParamsMouse.MinGroupDurSec = 300;
-ParamsMouse.WinGroupSec = 300;
+ParamsMouse.MinGroupDurSec = 100;
+ParamsMouse.WinGroupSec = 100;
+ParamsMouse.pattern_compute_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
+ParamsMouse.pattern_compute_region = {'Whole-reg'}; % ;'HPC';'CTX';'THAL'
 ParamsMouse.pattern_display_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
 ParamsMouse.pattern_display_region = {'Whole-reg'}; % ;'HPC';'CTX';'THAL'
 ParamsMouse.all_states = {'NREM','REM','AW'};
@@ -244,9 +196,9 @@ for i = 1:length(to_compute)
         plot_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,3));
     end
     if flag_perstate
-        plot_autocorr_per_state(Params,InfoFile(:,1));
-        plot_autocorr_per_state(Params,InfoFile(:,1),InfoFile(:,2));
-        plot_autocorr_per_state(Params,InfoFile(:,1),InfoFile(:,3));
+        plot_autocorr_per_group(Params,InfoFile(:,1));
+        plot_autocorr_per_group(Params,InfoFile(:,1),InfoFile(:,2));
+        plot_autocorr_per_group(Params,InfoFile(:,1),InfoFile(:,3));
     end
     fprintf('============================== END (%s) ==============================\n',char(to_compute(i)));
 end
@@ -284,7 +236,7 @@ for k=1:length(all_files)
     temp = regexp(cur_file,'_','split');
     temp2 = regexp(char(temp(2)),'-','split');
     cur_animal = char(temp2(1));
-    folder_save = fullfile(seed_save,cur_animal);
+    folder_save = fullfile(seed_save,cur_animal,'_mat');
 
     % Getting time
     data_t = load(fullfile(filepath,'Time_Reference.mat'));
@@ -452,12 +404,16 @@ else
 end
 
 % Parameters
+all_states = Params.all_states;
 GColors = Params.GColors;
 Fs = Params.Fs;
 WinSec = Params.WinSec;
-% StepSec = Params.StepSec;
-MaxLagSec = Params.MaxLagSec;
+StepSec = Params.StepSec;
+% MaxLagSec = Params.MaxLagSec;
 % NormWinMin = Params.NormWinMin;
+WinGroupSec = Params.WinGroupSec;
+MinGroupDurSec = Params.MinGroupDurSec;
+
 seed_save = Params.seed_save;
 seed_nlab = Params.seed_nlab;
 nCol = Params.nCol; % Number Max Columns
@@ -474,6 +430,7 @@ for k=1:length(all_files)
     temp2 = regexp(char(temp(2)),'-','split');
     cur_animal = char(temp2(1));
     folder_save = fullfile(seed_save,cur_animal);
+    folder_save_mat = fullfile(seed_save,cur_animal,'_mat');
 
     % Getting time
     data_t = load(fullfile(filepath,'Time_Reference.mat'));
@@ -483,6 +440,7 @@ for k=1:length(all_files)
 
     % Getting time groups
     data_tg = load(fullfile(filepath,'Time_Groups.mat'));
+
 
     % Selecting channels
     if sum(contains(pattern_channel,{'*'}))>0
@@ -543,210 +501,306 @@ for k=1:length(all_files)
     else
         mat_name = strcat('[XCorr]',cur_file,sprintf('[%s].mat',reference));
     end
-    if ~isfile(fullfile(folder_save,mat_name))
-        warning('Missing data file [%s]',fullfile(folder_save,mat_name));
+
+    % Continue if mat_name not found
+    if ~isfile(fullfile(folder_save_mat,mat_name))
+        warning('Missing data file [%s]',fullfile(folder_save_mat,mat_name));
         continue;
-    else
+    end
 
-        % Loading file
-        fprintf('Loading data [%s]...',fullfile(folder_save,mat_name));
-        data_mat = load(fullfile(folder_save,mat_name));
-        %  data_mat = load(fullfile(folder_save,mat_name),'all_regions','all_channels','Params',...
-        %      'XCorrMat_all','XCorrPeak_all','Data_all');
+    % Loading file
+    fprintf('Loading data [%s]...',fullfile(folder_save_mat,mat_name));
+    data_mat = load(fullfile(folder_save_mat,mat_name));
 
-        Params = data_mat.Params;
-        TLag=Params.TLag;
-        TWin=Params.TWin;
+    Params = data_mat.Params;
+    TLag=Params.TLag;
+    TWin=Params.TWin;
 
-        XCorrMat_all = rand(length(TWin),length(TLag),nTot);
-        thisPos_all = rand(length(TWin),2,nTot);
-        thisNeg_all = rand(length(TWin),2,nTot);
-        XCorrPeak_all = struct('MeanXcorr',[],'Pos',[],'Neg',[]);
-        Data_Channels = rand(nChannels,length(TimeData));
-        for j=1:length(all_channels)
-            index_channel = find(strcmp(data_mat.all_channels,all_channels(j))==1);
-            XCorrMat_all(:,:,j) = data_mat.XCorrMat_Channels(:,:,index_channel);
-            XCorrPeak_all(j) = data_mat.XCorrPeak_Channels(index_channel);
-            Data_Channels(j,:) = data_mat.Data_Channels(index_channel,:);
-            thisPos_all(:,:,j) = data_mat.thisPos_Channels(:,:,index_channel);
-            thisNeg_all(:,:,j) = data_mat.thisNeg_Channels(:,:,index_channel);
+    XCorrMat_all = rand(length(TWin),length(TLag),nTot);
+    thisPos_all = rand(length(TWin),2,nTot);
+    thisNeg_all = rand(length(TWin),2,nTot);
+    XCorrPeak_all = struct('MeanXcorr',[],'Pos',[],'Neg',[]);
+    Data_Channels = rand(nChannels,length(TimeData));
+    for j=1:length(all_channels)
+        index_channel = find(strcmp(data_mat.all_channels,all_channels(j))==1);
+        XCorrMat_all(:,:,j) = data_mat.XCorrMat_Channels(:,:,index_channel);
+        XCorrPeak_all(j) = data_mat.XCorrPeak_Channels(index_channel);
+        Data_Channels(j,:) = data_mat.Data_Channels(index_channel,:);
+        thisPos_all(:,:,j) = data_mat.thisPos_Channels(:,:,index_channel);
+        thisNeg_all(:,:,j) = data_mat.thisNeg_Channels(:,:,index_channel);
+    end
+    Data_Regions = NaN(nChannels,length(TimeData));
+    for j=1:length(all_regions)
+        index_region = find(strcmp(data_mat.all_regions,all_regions(j))==1);
+        if isempty(index_region)
+            warning('Region not found [%s - %s]',char(all_regions(j)),cur_file);
+            XCorrPeak_all(nChannels+j).MeanXcorr = rand(1,size(data_mat.XCorrPeak_Regions(1).MeanXcorr,2));
+            XCorrPeak_all(nChannels+j).Pos = rand(1,2);
+            XCorrPeak_all(nChannels+j).Neg = XCorrPeak_all(nChannels+j).Pos-0.5;
+        else
+            XCorrMat_all(:,:,nChannels+j) = data_mat.XCorrMat_Regions(:,:,index_region);
+            XCorrPeak_all(nChannels+j) = data_mat.XCorrPeak_Regions(index_region);
+            Data_Regions(j,:) = data_mat.Data_Regions(index_region,:);
+            thisPos_all(:,:,nChannels+j) = data_mat.thisPos_Regions(:,:,index_region);
+            thisNeg_all(:,:,nChannels+j) = data_mat.thisNeg_Regions(:,:,index_region);
         end
-        Data_Regions = NaN(nChannels,length(TimeData));
-        for j=1:length(all_regions)
-            index_region = find(strcmp(data_mat.all_regions,all_regions(j))==1);
-            if isempty(index_region)
-                warning('Region not found [%s - %s]',char(all_regions(j)),cur_file);
-                XCorrPeak_all(nChannels+j).MeanXcorr = rand(1,size(data_mat.XCorrPeak_Regions(1).MeanXcorr,2));
-                XCorrPeak_all(nChannels+j).Pos = rand(1,2);
-                XCorrPeak_all(nChannels+j).Neg = XCorrPeak_all(nChannels+j).Pos-0.5;
-            else
-                XCorrMat_all(:,:,nChannels+j) = data_mat.XCorrMat_Regions(:,:,index_region);
-                XCorrPeak_all(nChannels+j) = data_mat.XCorrPeak_Regions(index_region);
-                Data_Regions(j,:) = data_mat.Data_Regions(index_region,:);
-                thisPos_all(:,:,nChannels+j) = data_mat.thisPos_Regions(:,:,index_region);
-                thisNeg_all(:,:,nChannels+j) = data_mat.thisNeg_Regions(:,:,index_region);
-            end
+    end
+
+    Data_all = [Data_Channels;Data_Regions];
+    fprintf(' done.\n');
+    TimeData = data_mat.TimeData;
+
+    all_labels = [];
+    for i=1:nChannels
+        channel=char(all_channels(i));
+        label = regexprep(channel,'.mat','');
+        label = regexprep(label,'_','-');
+        all_labels = [all_labels;{label}];
+    end
+    for i=1:nRegions
+        region=char(all_regions(i));
+        label = regexprep(region,'.mat','');
+        label = regexprep(label,'_','-');
+        all_labels = [all_labels;{label}];
+    end
+
+    % Saving figure
+    if ~isfolder(folder_save)
+        mkdir(folder_save)
+    end
+
+    % Plotting only if flag_savefig is True
+    % Prepare plot
+    nFigs = ceil(nTot/nCol);
+    all_f = gobjects(nFigs);
+    all_ax = gobjects(4,nTot);
+
+    % Figures
+    for index_fig = 1:nFigs
+        all_f(index_fig) = figure;
+        if ~flag_crosscorr
+            all_f(index_fig).Name = sprintf('[ACorr]%s-%03d',cur_file,index_fig);
+        else
+            all_f(index_fig).Name = sprintf('[XCorr]%s[%s]-%03d',cur_file,reference,index_fig);
         end
+    end
+    count = 1;
+    eps = .01;
+    % Axes
+    for i=1:nTot
+        framepos = [(count-1)/nCol+2*eps  .025  1/nCol-eps  .95];
+        all_ax(1,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)+.25  0.75*framepos(3)   .7]);
+        all_ax(2,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+0.75*framepos(3)  framepos(2)+.25  0.25*framepos(3)   .7]);
+        all_ax(3,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)+.125  0.75*framepos(3)   .1]);
+        all_ax(4,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)  0.75*framepos(3)   .1]);
+        count=mod(count,nCol)+1;
+    end
 
-        Data_all = [Data_Channels;Data_Regions];
-        fprintf(' done.\n');
-        TimeData = data_mat.TimeData;
+    % plot  map and mean xcorr with peaks
+    for i=1:nTot
+        label=char(all_labels(i));
+        XCorrMat = XCorrMat_all(:,:,i);
+        XCorrPeak = XCorrPeak_all(i);
+        time_ticks = (900:900:TimeData(end))';
+        time_ticks_label = datestr(time_ticks/(24*3600),'HH:MM');
 
-        all_labels = [];
-        for i=1:nChannels
-            channel=char(all_channels(i));
-            label = regexprep(channel,'.mat','');
-            label = regexprep(label,'_','-');
-            all_labels = [all_labels;{label}];
+        ax1=all_ax(1,i);
+        % p = pcolor(TLag,TWin,XCorrMat,'Parent',ax1);
+        % shading(ax1,'flat');
+        YTime = (TWin+WinSec/2+TimeData(1));
+        imagesc('XData',TLag,'YData',YTime,'CData',XCorrMat,'Parent',ax1);
+        % Adding peaks
+        line('XData',thisPos_all(:,1,i),'YData',YTime,'LineStyle','none','Parent',ax1,...
+            'Marker','o','MarkerSize',3,'MarkerFaceColor','r','MarkerEdgeColor','none');
+        line('XData',thisNeg_all(:,1,i),'YData',YTime,'LineStyle','none','Parent',ax1,...
+            'Marker','o','MarkerSize',3,'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor','none');
+
+        % ax1.YLim = [YTime(1),YTime(end)];
+        ax1.YLim = [TimeData(1),TimeData(end)];
+        ax1.CLim = [-.5 1];
+        ax1.YDir = 'reverse';
+        set(ax1,'YTick',time_ticks,'YTickLabel',time_ticks_label);
+        ax1.XLim = [TLag(1),TLag(end)];
+        ax1.Title.String = label;
+
+        ax2=all_ax(2,i);
+        line('XData',Data_all(i,:),'YData',TimeData,'Parent',ax2);
+        if sum(~isnan(Data_all(i,:)))>0
+            ax2.XLim = [mean(Data_all(i,:),'omitnan')-2.5*std(Data_all(i,:),[],'omitnan') mean(Data_all(i,:),'omitnan')+5*std(Data_all(i,:),[],'omitnan')];
+        else
+            ax2.XLim = [-1,1];
         end
-        for i=1:nRegions
-            region=char(all_regions(i));
-            label = regexprep(region,'.mat','');
-            label = regexprep(label,'_','-');
-            all_labels = [all_labels;{label}];
-        end
+        ax2.YLim = [TimeData(1),TimeData(end)];
+        ax2.YDir = 'reverse';
+        set(ax2,'YTick',time_ticks,'YTickLabel','');
 
-        % Saving figure
-        if ~isfolder(folder_save)
-            mkdir(folder_save)
-        end
-
-        % Plotting only if flag_savefig is True
-        % Prepare plot
-        nFigs = ceil(nTot/nCol);
-        all_f = gobjects(nFigs);
-        all_ax = gobjects(4,nTot);
-
-        % Figures
-        for index_fig = 1:nFigs
-            all_f(index_fig) = figure;
-            if ~flag_crosscorr
-                all_f(index_fig).Name = sprintf('[ACorr]%s-%03d',cur_file,index_fig);
-            else
-                all_f(index_fig).Name = sprintf('[XCorr]%s[%s]-%03d',cur_file,reference,index_fig);
-            end
-        end
-        count = 1;
-        eps = .01;
-        % Axes
-        for i=1:nTot
-            framepos = [(count-1)/nCol+2*eps  .025  1/nCol-eps  .95];
-            all_ax(1,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)+.25  0.75*framepos(3)   .7]);
-            all_ax(2,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+0.75*framepos(3)  framepos(2)+.25  0.25*framepos(3)   .7]);
-            all_ax(3,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)+.125  0.75*framepos(3)   .1]);
-            all_ax(4,i) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)  framepos(2)  0.75*framepos(3)   .1]);
-            count=mod(count,nCol)+1;
-        end
-
-        % plot  map and mean xcorr with peaks
-        for i=1:nTot
-            label=char(all_labels(i));
-            XCorrMat = XCorrMat_all(:,:,i);
-            XCorrPeak = XCorrPeak_all(i);
-            time_ticks = (900:900:TimeData(end))';
-            time_ticks_label = datestr(time_ticks/(24*3600),'HH:MM');
-
-            ax1=all_ax(1,i);
-            % p = pcolor(TLag,TWin,XCorrMat,'Parent',ax1);
-            % shading(ax1,'flat');
-            YTime = (TWin+WinSec/2+TimeData(1));
-            imagesc('XData',TLag,'YData',YTime,'CData',XCorrMat,'Parent',ax1);
-            % Adding peaks
-            line('XData',thisPos_all(:,1,i),'YData',YTime,'LineStyle','none','Parent',ax1,...
-                'Marker','o','MarkerSize',3,'MarkerFaceColor','r','MarkerEdgeColor','none');
-            line('XData',thisNeg_all(:,1,i),'YData',YTime,'LineStyle','none','Parent',ax1,...
-                'Marker','o','MarkerSize',3,'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor','none');
-
-            % ax1.YLim = [YTime(1),YTime(end)];
-            ax1.YLim = [TimeData(1),TimeData(end)];
-            ax1.YDir = 'reverse';
-            set(ax1,'YTick',time_ticks,'YTickLabel',time_ticks_label);
-            ax1.XLim = [TLag(1),TLag(end)];
-            ax1.Title.String = label;
-
-            ax2=all_ax(2,i);
-            line('XData',Data_all(i,:),'YData',TimeData,'Parent',ax2);
-            if sum(~isnan(Data_all(i,:)))>0
-                ax2.XLim = [mean(Data_all(i,:),'omitnan')-1.5*std(Data_all(i,:),[],'omitnan') mean(Data_all(i,:),'omitnan')+3*std(Data_all(i,:),[],'omitnan')];
-            else
-                ax2.XLim = [-1,1];
-            end
-            ax2.YLim = [TimeData(1),TimeData(end)];
-            ax2.YDir = 'reverse';
-            set(ax2,'YTick',time_ticks,'YTickLabel','');
-
-            % Time Patches
-            for index = 1:length(GColors.TimeGroups)
-                name = char(GColors.TimeGroups(index).Name);
-                if sum(strcmp(data_tg.TimeGroups_name,name))>0
-                    %create patch
-                    index_group = find(strcmp(data_tg.TimeGroups_name,name)==1);
-                    a = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,1));
-                    b = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,2));
-                    ydata = [(a-floor(a))*24*3600,(b-floor(b))*24*3600];
-                    for j = 1:size(ydata,1)
-                        p = patch('XData',[ax2.XLim(1) ax2.XLim(1) ax2.XLim(2) ax2.XLim(2)],...
-                            'YData',[ydata(j,1) ydata(j,2) ydata(j,2) ydata(j,1)],...
-                            'Parent',ax2,'Tag','TimePatch');
-                        p.EdgeColor = 'none';
-                        p.FaceColor = GColors.TimeGroups(index).Color;
-                        p.FaceAlpha = GColors.TimeGroups(index).Transparency;
-                    end
+        % Time Patches
+        for index = 1:length(GColors.TimeGroups)
+            name = char(GColors.TimeGroups(index).Name);
+            if sum(strcmp(data_tg.TimeGroups_name,name))>0
+                %create patch
+                index_group = find(strcmp(data_tg.TimeGroups_name,name)==1);
+                a = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,1));
+                b = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,2));
+                ydata = [(a-floor(a))*24*3600,(b-floor(b))*24*3600];
+                for j = 1:size(ydata,1)
+                    p = patch('XData',[ax2.XLim(1) ax2.XLim(1) ax2.XLim(2) ax2.XLim(2)],...
+                        'YData',[ydata(j,1) ydata(j,2) ydata(j,2) ydata(j,1)],...
+                        'Parent',ax2,'Tag','TimePatch');
+                    p.EdgeColor = 'none';
+                    p.FaceColor = GColors.TimeGroups(index).Color;
+                    p.FaceAlpha = GColors.TimeGroups(index).Transparency;
                 end
             end
+        end
 
-            % Mean Autocorr
-            ax3 = all_ax(3,i);
-            grid(ax3,'on');
+        % Mean Autocorr
+        ax3 = all_ax(3,i);
+        grid(ax3,'on');
+        ax3.YLim = [-.5 1];
+        ax3.XLim = [TLag(1) TLag(end)];
+        
+        % Scatter Plot
+        ax4 = all_ax(4,i);
+        grid(ax4,'on');
+        ax4.XLim = [TLag(1) TLag(end)];
+        ax4.XLabel.String = 'Lag';
+        ax4.YLabel.String = 'XCorr Amp';
+        if ~flag_crosscorr
+            ax4.YLim = [0 1.5];
+        else
+            ax4.YLim = [0 1];
+        end
+        hold(ax4,'on');
+
+        flag_plot_mean = false;
+        if flag_plot_mean
+            % if True mean across states
+
             line('XData',TLag,'YData',XCorrPeak.MeanXcorr,'Parent',ax3);
             line('XData',XCorrPeak.Pos(1),'YData',XCorrPeak.Pos(2),'Marker','o','Color','r','Parent',ax3);
             line('XData',XCorrPeak.Neg(1),'YData',XCorrPeak.Neg(2),'Marker','x','Color','r','Parent',ax3);
-            ax3.YLim = [-.5 1];
             text(-MaxLagSec,ax3.YLim(2)-.25,sprintf('Amp=%.2f',XCorrPeak.Pos(2)-XCorrPeak.Neg(2)),'Parent',ax3);
             text(-MaxLagSec,ax3.YLim(2)-.1,sprintf('Lag=%dsec',XCorrPeak.Pos(1)),'Parent',ax3);
 
-            % Scatter Plot
-            ax4 = all_ax(4,i);
-            grid(ax4,'on');
             if ~flag_crosscorr
                 line('XData',thisPos_all(:,1,i),'YData',thisPos_all(:,2,i)-thisNeg_all(:,2,i),'Parent',ax4,...
                     'LineStyle','none','MarkerFaceColor','k','MarkerEdgeColor','none','Marker','o','MarkerSize',2);
-                ax4.YLim = [0 1.5];
             else
                 line('XData',thisPos_all(:,1,i),'YData',thisPos_all(:,2,i),'Parent',ax4,...
                     'LineStyle','none','MarkerFaceColor','k','MarkerEdgeColor','none','Marker','o','MarkerSize',2);
-                ax4.YLim = [0 1];
             end
-            ax4.XLim = [TLag(1) TLag(end)];
-            ax4.XLabel.String = 'Lag';
-            ax4.YLabel.String = 'XCorr Amp';
 
-            %             linkaxes([ax1;ax3],'x');
-            count = count+1;
+        else
+            % else mean per state
+
+            all_lines = [];
+            count_leg = 0 ;
+            for j=1:length(all_states)
+
+                cur_state = char(all_states(j));
+                index_group = find(strcmp(data_tg.TimeGroups_name,cur_state)==1);
+                
+                if isempty(index_group)
+                    continue;
+                end
+
+                index_color = find(strcmp({GColors.TimeGroups(:).Name}',cur_state)==1);
+                cur_color = GColors.TimeGroups(index_color).Color;
+                
+                % Converting times
+                a = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,1));
+                b = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,2));
+                Time_indices = [(a-floor(a))*24*3600,(b-floor(b))*24*3600];
+
+                % Keeping only long bouts
+                all_times = [];
+                ind_long_bouts = find(((Time_indices(:,2)-Time_indices(:,1))>= MinGroupDurSec)==1);
+
+                for l = 1:length(ind_long_bouts)
+                    times_keep = Time_indices(ind_long_bouts(l),1)+WinGroupSec/2 : WinGroupSec : Time_indices(ind_long_bouts(l),2);
+                    all_times = [all_times;times_keep(:)];
+                end
+                index_keep_nt = [];
+                for l = 1:length(all_times)
+                    cur_time = all_times(l);
+                    [~,index_nearest_time] = min(abs(YTime - cur_time));
+                    nearest_time = YTime(index_nearest_time);
+                    if abs(nearest_time-cur_time) <= StepSec/2
+                        index_keep_nt = [index_keep_nt;index_nearest_time];
+                    end
+                end
+
+                if ~isempty(index_keep_nt)
+                    nKeep = length(index_keep_nt);
+                    
+                    % Plotting correlogram per state
+                    ACorr_mean = mean(XCorrMat(index_keep_nt,:),1,'omitnan');
+                    ACorr_std = std(XCorrMat(index_keep_nt,:),[],1,'omitnan');
+                    ACorr_sem = ACorr_std/sqrt(nKeep);
+
+                    l = line('XData',TLag,'YData',ACorr_mean,'Color',cur_color,'Parent',ax3,...
+                        'DisplayName',sprintf('%s(%d)',cur_state,nKeep));
+                    px_data = [TLag,fliplr(TLag)];
+                    py_data = [ACorr_mean+ACorr_sem,fliplr(ACorr_mean-ACorr_sem)];
+                    patch('XData',px_data,'YData',py_data,'FaceColor',cur_color,'EdgeColor','none',...
+                        'Parent',ax3,'Visible','on','FaceAlpha',.5);  
+%                     for l=1:nKeep
+%                         line('XData',TLag,'YData',XCorrMat(index_keep_nt(l),:),'Color',cur_color,'Parent',ax3);
+%                     end
+                    all_lines = [all_lines;l];
+                    
+                    % Plotting peaks per state
+                    if ~flag_crosscorr
+
+                         scatter(thisPos_all(index_keep_nt,1,i),thisPos_all(index_keep_nt,2,i)-thisNeg_all(index_keep_nt,2,i),'Parent',ax4,...
+                             'MarkerFaceColor',cur_color,'MarkerEdgeColor','none','Marker','o','MarkerFaceAlpha',.5,...
+                             'DisplayName',sprintf('%s(%d)',cur_state,nKeep));
+                         l2 = line('XData',mean(thisPos_all(index_keep_nt,1,i),1,'omitnan'),'YData',mean(thisPos_all(index_keep_nt,2,i)-thisNeg_all(index_keep_nt,2,i),1,'omitnan'),'Parent',ax4,...
+                            'LineWidth',1,'MarkerEdgeColor',cur_color,'Marker','+','MarkerSize',30);
+                    else
+
+                        scatter(thisPos_all(index_keep_nt,1,i),thisPos_all(index_keep_nt,2,i),'Parent',ax4,...
+                            'MarkerFaceColor',cur_color,'MarkerEdgeColor','none','Marker','o','MarkerFaceAlpha',.5,...
+                            'DisplayName',sprintf('%s(%d)]',cur_state,nKeep));
+                        l2 = line('XData',mean(thisPos_all(index_keep_nt,1,i),1,'omitnan'),'YData',mean(thisPos_all(index_keep_nt,2,i),1,'omitnan'),'Parent',ax4,...
+                            'LineWidth',1,'MarkerEdgeColor',cur_color,'Marker','+','MarkerSize',30);
+
+                    end 
+                    count_leg = count_leg+1;
+                    text(ax4.XLim(1)+.05*(ax4.XLim(2)-ax4.XLim(1)),ax4.YLim(2)-.15*count_leg,sprintf('%s (%.1f; %.2f)',cur_state,l2.XData,l2.YData),'Parent',ax4,'FontSize',9); %'Color',cur_color,
+                    
+                end
+                
+            end
+            legend(ax3,all_lines,'Location','northwest','FontSize',7,'Box','off');
         end
 
-        % Saving figure
-        for index_fig = 1:nFigs
-            f = all_f(index_fig);
-            f.Units='normalized';
-            f.OuterPosition = [0 0 1 1];
-            pic_name = strcat(f.Name,'.pdf');
-            fprintf('Saving figure [%s]...',fullfile(folder_save,pic_name));
-            % Mac
-            f.PaperPositionMode = 'manual';
-            exportgraphics(f,fullfile(folder_save,pic_name),'ContentType','vector');
-%             % Ubuntu
-%             % saveas(f,fullfile(folder_save,pic_name),'pdf');
-            fprintf(' done.\n');
-            close(f);
-        end
+        count = count+1;
     end
-end
+
+    % Saving figure
+    for index_fig = 1:nFigs
+        f = all_f(index_fig);
+        f.Units='normalized';
+        f.OuterPosition = [0 0 1 1];
+        pic_name = strcat(f.Name,'.pdf');
+        fprintf('Saving figure [%s]...',fullfile(folder_save,pic_name));
+        % Mac
+        f.PaperPositionMode = 'manual';
+        exportgraphics(f,fullfile(folder_save,pic_name),'ContentType','vector');
+        % Ubuntu
+        % saveas(f,fullfile(folder_save,pic_name),'pdf');
+        fprintf(' done.\n');
+        close(f);
+    end
 
 end
 
+end
 
-function S = plot_autocorr_per_state(Params,all_files,all_refs)
+
+function S = plot_autocorr_per_group(Params,all_files,all_refs)
 
 if nargin < 3 || isempty(all_refs)
     flag_crosscorr = false;
@@ -799,10 +853,7 @@ for k=1:length(all_files)
 
             % Keeping only long bouts
             all_times = [];
-            ind_long_bouts = find((Time_indices(:,2)-Time_indices(:,1))>=MinGroupDurSec);
-            if isempty(ind_long_bouts)
-                continue;
-            end
+            ind_long_bouts = find(((Time_indices(:,2)-Time_indices(:,1))>= MinGroupDurSec)==1);
             for l = 1:length(ind_long_bouts)
                 times_keep = Time_indices(ind_long_bouts(l),1)+WinGroupSec/2 : WinGroupSec : Time_indices(ind_long_bouts(l),2);
                 all_times = [all_times;times_keep(:)];
@@ -818,10 +869,11 @@ for k=1:length(all_files)
                 mat_name_acorr = strcat('[XCorr]',cur_file,sprintf('[%s].mat',reference));
             end
 
-            TS.acorr = [TS.acorr;repmat({fullfile(seed_save,cur_animal,mat_name_acorr)},[size(all_times,1),1])];
+            TS.acorr = [TS.acorr;repmat({fullfile(seed_save,cur_animal,'_mat',mat_name_acorr)},[size(all_times,1),1])];
         end
     end
 end
+
 
 all_animals = unique(TS.animal);
 % all_regions = {'Whole.mat'};
@@ -835,13 +887,14 @@ prev_acorr = '';
 nSelectedTimes = 0;
 nSelectedSamples = 0;
 csv_lines = [];
-    
+
 for k=1:length(TS.all_times)
 
     cur_time = TS.all_times(k);
     cur_state = char(TS.state(k));
     cur_animal = char(TS.animal(k));
     cur_acorr = char(TS.acorr(k));
+    [parentFolder,parentFile,~] = fileparts(cur_acorr);
 
     % Loading autocorrelation
     if ~isfile(cur_acorr)
@@ -888,14 +941,13 @@ for k=1:length(TS.all_times)
     nRegions = length(index_regions);
     nTot = nChannels+nRegions;
 
+
     % Finding row
     [~,index_nearest_time] = min(abs(data_acorr.XCorrMat_ydata - cur_time));
     nearest_time = data_acorr.XCorrMat_ydata(index_nearest_time);
-    
-    if abs(nearest_time-cur_time) > data_acorr.Params.StepSec/2
-        continue;
-    else
 
+    if abs(nearest_time-cur_time) <= data_acorr.Params.StepSec/2
+    
         % AutoCorr Region
         for i =1:nRegions
             ACorr = data_acorr.XCorrMat_Regions(index_nearest_time,:,index_regions(i));
@@ -917,14 +969,13 @@ for k=1:length(TS.all_times)
             S.trace = [S.trace;cur_trace];
             S.region = [S.region;cur_trace];
             % S.channel = [S.channel;{''}];
-            [parentFolder,parentFile,~] = fileparts(cur_acorr);
             S.parentFile = [S.parentFile;{parentFile}];
             S.parentFolder = [S.parentFolder;{parentFolder}];
             S.target_time = [S.target_time;cur_time];
             S.nearest_time = [S.nearest_time;nearest_time];
             % csv_lines = [csv_lines;{sprintf('%s,%s,%s,%s,%s,%.3f,%.3f\n',parentFolder,parentFile,cur_state,cur_animal,cur_trace,cur_time,nearest_time)}];
         end
-        nSelectedSamples = nSelectedSamples+nRegions; 
+        nSelectedSamples = nSelectedSamples+nRegions;
 
         % AutoCorr Channel
         for i =1:nChannels
@@ -994,9 +1045,9 @@ semMat = NaN(nStates,nAnimals,nTraces,2);
 nSamplesMat = NaN(nStates,nAnimals,nTraces,2);
 
 for i=1:nStates
-    cur_state = char(all_states(i));    
+    cur_state = char(all_states(i));
     for j=1:nAnimals
-        cur_animal = char(all_animals(j));  
+        cur_animal = char(all_animals(j));
         for k=1:nTraces
             cur_trace = char(all_traces(k));
 
@@ -1032,7 +1083,7 @@ for k=1:nTraces
     cur_trace = char(all_traces(k));
     fwrite(fid_txt,sprintf('%s \t', cur_trace));
     fwrite(fid_txt,newline);
-    
+
     fwrite(fid_txt,sprintf('%s \t', 'Mean +- sem (s)'));
     for j=1:nAnimals
         cur_animal = char(all_animals(j));
@@ -1043,8 +1094,8 @@ for k=1:nTraces
         cur_state = char(all_states(i));
         fwrite(fid_txt,sprintf('%s \t',cur_state));
         for j=1:nAnimals
-%             cur_animal = char(all_animals(j));
-            fwrite(fid_txt,sprintf('%.3f +- %.3f (n=%d)\t',meanMat(i,j,k,1),semMat(i,j,k,1),nSamplesMat(i,j,k,1))); 
+            %             cur_animal = char(all_animals(j));
+            fwrite(fid_txt,sprintf('%.3f +- %.3f (n=%d)\t',meanMat(i,j,k,1),semMat(i,j,k,1),nSamplesMat(i,j,k,1)));
         end
         fwrite(fid_txt,newline);
     end
@@ -1068,7 +1119,7 @@ for k=1:nTraces
     cur_trace = char(all_traces(k));
     fwrite(fid_txt,sprintf('%s \t', cur_trace));
     fwrite(fid_txt,newline);
-    
+
     fwrite(fid_txt,sprintf('%s \t', 'Mean +- sem (s)'));
     for j=1:nAnimals
         cur_animal = char(all_animals(j));
@@ -1079,8 +1130,8 @@ for k=1:nTraces
         cur_state = char(all_states(i));
         fwrite(fid_txt,sprintf('%s \t',cur_state));
         for j=1:nAnimals
-%             cur_animal = char(all_animals(j));
-            fwrite(fid_txt,sprintf('%.3f +- %.3f (n=%d)\t',meanMat(i,j,k,2),semMat(i,j,k,2),nSamplesMat(i,j,k,2))); 
+            %             cur_animal = char(all_animals(j));
+            fwrite(fid_txt,sprintf('%.3f +- %.3f (n=%d)\t',meanMat(i,j,k,2),semMat(i,j,k,2),nSamplesMat(i,j,k,2)));
         end
         fwrite(fid_txt,newline);
     end
@@ -1147,6 +1198,8 @@ TLag = data_acorr.Params.TLag;
 for i = 1:nTraces
 
     cur_trace = char(all_traces(i));
+    cur_trace_label = strrep(cur_trace,'.mat','');
+    cur_trace_label = strrep(cur_trace_label,'_','-');
 
     for j=1:nStates
 
@@ -1155,9 +1208,9 @@ for i = 1:nTraces
         ax1 = all_ax(i,j,1);
         ax1.YLabel.String = cur_state;
         if ~flag_crosscorr
-            ax1.Title.String = sprintf('AutoCorr[%s]',cur_trace);
+            ax1.Title.String = sprintf('AutoCorr [%s]',cur_trace_label);
         else
-            ax1.Title.String = sprintf('CrossCorr[%s]',cur_trace);
+            ax1.Title.String = sprintf('CrossCorr [%s]',cur_trace_label);
         end
         ax1.XLim = [TLag(1) TLag(end)];
         ax1.YLim = [-1 1];
@@ -1173,9 +1226,10 @@ for i = 1:nTraces
         if ~flag_crosscorr
             ax2.YLim = [0,TLag(end)];
         else
-            ax2.YLim = [TLag(1),TLag(end)];
+            ax2.YLim = [TLag(1),TLag(end)]/10;
         end
         ax2.YLabel.String = 'Lag(s)';
+        hold(ax2,'on');
 
         ax3 = all_ax(i,j,3);
         grid(ax3,"on");
@@ -1184,7 +1238,12 @@ for i = 1:nTraces
         ax3.XTickLabel = all_animals;
         ax3.XLim = [.5,nAnimals+.5];
         ax3.YLim = [0,1.5];
-        ax3.YLabel.String = 'ACorr Amp';
+        if ~flag_crosscorr
+            ax3.YLabel.String = 'ACorr Amp';
+        else
+            ax3.YLabel.String = 'XCorr Amp';
+        end
+        hold(ax3,'on');
 
         alpha_value = .5;
         linewidth = 2;
@@ -1216,31 +1275,37 @@ for i = 1:nTraces
 
             % Display Ax2
             ydata = ACorr_Lag(:);
-            xdata = k*ones(size(ydata))+rand(size(ydata))/5;
-            line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
-                'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            xdata = k*ones(size(ydata));%+rand(size(ydata))/5;
+            % line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
+            %     'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            swarmchart(xdata(:),ydata(:),'Color',g_colors(k,:),'Parent',ax2,...
+                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5,...
+                'XJitterWidth',.5,'SizeData',15);
+
             n_samples = sum(~isnan(ydata));
             m = mean(ydata,'omitnan');
-            line('Xdata',k+.05,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',k,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',1,...
+                'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',[k,k],'YData',[m-std(ydata,[],'omitnan')/sqrt(n_samples),m+std(ydata,[],'omitnan')/sqrt(n_samples)],'Parent',ax2,...
+                'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
+            text(k-.25,ax2.YLim(1)+.9*(ax2.YLim(2)-ax2.YLim(1)),sprintf('%.2f',m),'Parent',ax2);
 
             % Display Ax3
             ydata = ACorr_Amp(:);
-            xdata = k*ones(size(ydata))+rand(size(ydata))/5;
-            line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
-                'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            xdata = k*ones(size(ydata));%+rand(size(ydata))/5;
+            % line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
+            %     'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            swarmchart(xdata(:),ydata(:),'Color',g_colors(k,:),'Parent',ax3,...
+                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5,...
+                'XJitterWidth',.5,'SizeData',15);
+
             n_samples = sum(~isnan(ydata));
             m = mean(ydata,'omitnan');
-            line('Xdata',k+.05,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',k,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',1,...
+                'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',[k,k],'YData',[m-std(ydata,[],'omitnan')/sqrt(n_samples),m+std(ydata,[],'omitnan')/sqrt(n_samples)],'Parent',ax3,...
+                'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
+            text(k-.25,ax3.YLim(1)+.9*(ax3.YLim(2)-ax3.YLim(1)),sprintf('%.2f',m),'Parent',ax3);
 
         end
         legend(ax1, all_lines);
@@ -1319,18 +1384,23 @@ TLag = data_acorr.Params.TLag;
 for i = 1:nTraces
 
     cur_trace = char(all_traces(i));
+    cur_trace_label = strrep(cur_trace,'.mat','');
+    cur_trace_label = strrep(cur_trace_label,'_','-');
 
     for j=1:nAnimals
 
         cur_animal = char(all_animals(j));
 
         ax1 = all_ax(i,j,1);
-        try
-            ax1.YLabel.String = cur_animal;
-        catch
-            ax1.YLabel.String = cur_animal;
+        ax1.YLabel.String = cur_animal;
+        ax1.YLabel.String = cur_animal;
+
+        if ~flag_crosscorr
+            ax1.Title.String = sprintf('AutoCorr [%s]',cur_trace_label);
+        else
+            ax1.Title.String = sprintf('CrossCorr [%s]',cur_trace_label);
         end
-        ax1.Title.String = sprintf('AutoCorr[%s]',cur_trace);
+
         ax1.XLim = [TLag(1) TLag(end)];
         ax1.YLim = [-1 1];
         hold(ax1,'on');
@@ -1342,8 +1412,13 @@ for i = 1:nTraces
         ax2.XTick = 1:nStates;
         ax2.XTickLabel = all_states;
         ax2.XLim = [.5,nStates+.5];
-        ax2.YLim = [0,TLag(end)];
+        if ~flag_crosscorr
+            ax2.YLim = [0,TLag(end)];
+        else
+            ax2.YLim = [TLag(1),TLag(end)]/10;
+        end
         ax2.YLabel.String = 'Lag(s)';
+        hold(ax2,'on');
 
         ax3 = all_ax(i,j,3);
         grid(ax3,"on");
@@ -1352,7 +1427,12 @@ for i = 1:nTraces
         ax3.XTickLabel = all_states;
         ax3.XLim = [.5,nStates+.5];
         ax3.YLim = [0,1.5];
-        ax3.YLabel.String = 'ACorr Amp';
+        if ~flag_crosscorr
+            ax3.YLabel.String = 'ACorr Amp';
+        else
+            ax3.YLabel.String = 'XCorr Amp';
+        end
+        hold(ax3,'on');
 
         alpha_value = .5;
         linewidth = 2;
@@ -1384,31 +1464,33 @@ for i = 1:nTraces
 
             % Display Ax2
             ydata = ACorr_Lag(:);
-            xdata = k*ones(size(ydata))+rand(size(ydata))/10;
-            line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
-                'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            xdata = k*ones(size(ydata)); %+rand(size(ydata))/10;
+            % line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
+            %     'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            swarmchart(xdata(:),ydata(:),'Color',g_colors(k,:),'Parent',ax3,...
+                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5,...
+                'XJitterWidth',.5,'SizeData',15);
             n_samples = sum(~isnan(ydata));
             m = mean(ydata,'omitnan');
-            line('Xdata',k+.05,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax2,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',k,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',1,...
+                'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',[k,k],'YData',[m-std(ydata,[],'omitnan')/sqrt(n_samples),m+std(ydata,[],'omitnan')/sqrt(n_samples)],'Parent',ax2,...
+                'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
 
             % Display Ax3
             ydata = ACorr_Amp(:);
-            xdata = k*ones(size(ydata))+rand(size(ydata))/10;
-            line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
-                'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            xdata = k*ones(size(ydata)); %+rand(size(ydata))/10;
+            % line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
+            %     'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
+            swarmchart(xdata(:),ydata(:),'Color',g_colors(k,:),'Parent',ax3,...
+                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5,...
+                'XJitterWidth',.5,'SizeData',15);
             n_samples = sum(~isnan(ydata));
             m = mean(ydata,'omitnan');
-            line('Xdata',k+.05,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',k+.05,'YData',m+std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',k+.05,'YData',m-std(ydata,[],'omitnan')/sqrt(n_samples),'Parent',ax3,'LineStyle','none','LineWidth',2,...
-                'Marker','.','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',k,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',1,...
+                'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
+            line('Xdata',[k,k],'YData',[m-std(ydata,[],'omitnan')/sqrt(n_samples),m+std(ydata,[],'omitnan')/sqrt(n_samples)],'Parent',ax3,...
+                'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
 
         end
         legend(ax1, all_lines);
