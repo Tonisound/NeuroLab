@@ -127,25 +127,28 @@ ParamsPogo.WinSec = 300;
 ParamsPogo.StepSec = 10;
 ParamsPogo.MaxLagSec = 300;
 ParamsPogo.NormWinMin = 3;
-ParamsPogo.t_smooth = 30;
-ParamsPogo.seed_save = fullfile(ParamsPogo.seed_save,'XCorrPogo');
 ParamsPogo.batchname = 'Pogona';
-ParamsPogo.MinGroupDurSec = 600;
-ParamsPogo.WinGroupSec = 600;
+ParamsPogo.MinGroupDurSec = 300;
+ParamsPogo.WinGroupSec = 300;
 ParamsPogo.pattern_compute_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
 ParamsPogo.pattern_compute_region = {'Whole_reg';'dTel'};
 ParamsPogo.pattern_display_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
-ParamsPogo.pattern_display_region = {'Whole_reg';'dTel'};
+ParamsPogo.pattern_display_region = {'Whole_reg'};
 ParamsPogo.all_states = {'SLEEP','WAKE'};
+% ParamsPogo.t_smooth = 40;
+% ParamsPogo.seed_save = fullfile(ParamsPogo.seed_save,'XCorrPogo[40s]');
+% ParamsPogo.t_smooth = 20;
+% ParamsPogo.seed_save = fullfile(ParamsPogo.seed_save,'XCorrPogo[20s]');
+ParamsPogo.t_smooth = 10;
+ParamsPogo.seed_save = fullfile(ParamsPogo.seed_save,'XCorrPogo[10s]');
+
 
 ParamsMouse= ParamsDefault;
-ParamsMouse.Fs = 1;
+ParamsMouse.Fs = .5;
 ParamsMouse.WinSec = 150;
 ParamsMouse.StepSec = 5;
 ParamsMouse.MaxLagSec = 150;
 ParamsMouse.NormWinMin = 1.5;
-ParamsMouse.t_smooth = 10;
-ParamsMouse.seed_save = fullfile(ParamsMouse.seed_save,'XCorrMouse');
 ParamsMouse.batchname = 'Mouse';
 ParamsMouse.MinGroupDurSec = 100;
 ParamsMouse.WinGroupSec = 100;
@@ -154,6 +157,14 @@ ParamsMouse.pattern_compute_region = {'Whole-reg'}; % ;'HPC';'CTX';'THAL'
 ParamsMouse.pattern_display_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
 ParamsMouse.pattern_display_region = {'Whole-reg'}; % ;'HPC';'CTX';'THAL'
 ParamsMouse.all_states = {'NREM','REM','AW'};
+ParamsMouse.t_smooth = 20;
+ParamsMouse.seed_save = fullfile(ParamsMouse.seed_save,'XCorrMouse[20s]');
+% ParamsMouse.t_smooth = 10;
+% ParamsMouse.seed_save = fullfile(ParamsMouse.seed_save,'XCorrMouse[10s]');
+% ParamsMouse.t_smooth = 5;
+% ParamsMouse.seed_save = fullfile(ParamsMouse.seed_save,'XCorrMouse[5s]');
+
+
 
 ParamsRat = ParamsMouse;
 ParamsRat.seed_save = fullfile(ParamsMouse.seed_save,'XCorrRat');
@@ -659,7 +670,7 @@ for k=1:length(all_files)
         grid(ax3,'on');
         ax3.YLim = [-.5 1];
         ax3.XLim = [TLag(1) TLag(end)];
-        
+
         % Scatter Plot
         ax4 = all_ax(4,i);
         grid(ax4,'on');
@@ -700,14 +711,14 @@ for k=1:length(all_files)
 
                 cur_state = char(all_states(j));
                 index_group = find(strcmp(data_tg.TimeGroups_name,cur_state)==1);
-                
+
                 if isempty(index_group)
                     continue;
                 end
 
                 index_color = find(strcmp({GColors.TimeGroups(:).Name}',cur_state)==1);
                 cur_color = GColors.TimeGroups(index_color).Color;
-                
+
                 % Converting times
                 a = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,1));
                 b = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,2));
@@ -733,7 +744,7 @@ for k=1:length(all_files)
 
                 if ~isempty(index_keep_nt)
                     nKeep = length(index_keep_nt);
-                    
+
                     % Plotting correlogram per state
                     ACorr_mean = mean(XCorrMat(index_keep_nt,:),1,'omitnan');
                     ACorr_std = std(XCorrMat(index_keep_nt,:),[],1,'omitnan');
@@ -744,19 +755,19 @@ for k=1:length(all_files)
                     px_data = [TLag,fliplr(TLag)];
                     py_data = [ACorr_mean+ACorr_sem,fliplr(ACorr_mean-ACorr_sem)];
                     patch('XData',px_data,'YData',py_data,'FaceColor',cur_color,'EdgeColor','none',...
-                        'Parent',ax3,'Visible','on','FaceAlpha',.5);  
-%                     for l=1:nKeep
-%                         line('XData',TLag,'YData',XCorrMat(index_keep_nt(l),:),'Color',cur_color,'Parent',ax3);
-%                     end
+                        'Parent',ax3,'Visible','on','FaceAlpha',.5);
+                    %                     for l=1:nKeep
+                    %                         line('XData',TLag,'YData',XCorrMat(index_keep_nt(l),:),'Color',cur_color,'Parent',ax3);
+                    %                     end
                     all_lines = [all_lines;l];
-                    
+
                     % Plotting peaks per state
                     if ~flag_crosscorr
 
-                         scatter(thisPos_all(index_keep_nt,1,i),thisPos_all(index_keep_nt,2,i)-thisNeg_all(index_keep_nt,2,i),'Parent',ax4,...
-                             'MarkerFaceColor',cur_color,'MarkerEdgeColor','none','Marker','o','MarkerFaceAlpha',.5,...
-                             'DisplayName',sprintf('%s(%d)',cur_state,nKeep));
-                         l2 = line('XData',mean(thisPos_all(index_keep_nt,1,i),1,'omitnan'),'YData',mean(thisPos_all(index_keep_nt,2,i)-thisNeg_all(index_keep_nt,2,i),1,'omitnan'),'Parent',ax4,...
+                        scatter(thisPos_all(index_keep_nt,1,i),thisPos_all(index_keep_nt,2,i)-thisNeg_all(index_keep_nt,2,i),'Parent',ax4,...
+                            'MarkerFaceColor',cur_color,'MarkerEdgeColor','none','Marker','o','MarkerFaceAlpha',.5,...
+                            'DisplayName',sprintf('%s(%d)',cur_state,nKeep));
+                        l2 = line('XData',mean(thisPos_all(index_keep_nt,1,i),1,'omitnan'),'YData',mean(thisPos_all(index_keep_nt,2,i)-thisNeg_all(index_keep_nt,2,i),1,'omitnan'),'Parent',ax4,...
                             'LineWidth',1,'MarkerEdgeColor',cur_color,'Marker','+','MarkerSize',30);
                     else
 
@@ -766,12 +777,12 @@ for k=1:length(all_files)
                         l2 = line('XData',mean(thisPos_all(index_keep_nt,1,i),1,'omitnan'),'YData',mean(thisPos_all(index_keep_nt,2,i),1,'omitnan'),'Parent',ax4,...
                             'LineWidth',1,'MarkerEdgeColor',cur_color,'Marker','+','MarkerSize',30);
 
-                    end 
+                    end
                     count_leg = count_leg+1;
                     text(ax4.XLim(1)+.05*(ax4.XLim(2)-ax4.XLim(1)),ax4.YLim(2)-.15*count_leg,sprintf('%s (%.1f; %.2f)',cur_state,l2.XData,l2.YData),'Parent',ax4,'FontSize',9); %'Color',cur_color,
-                    
+
                 end
-                
+
             end
             legend(ax3,all_lines,'Location','northwest','FontSize',7,'Box','off');
         end
@@ -947,7 +958,7 @@ for k=1:length(TS.all_times)
     nearest_time = data_acorr.XCorrMat_ydata(index_nearest_time);
 
     if abs(nearest_time-cur_time) <= data_acorr.Params.StepSec/2
-    
+
         % AutoCorr Region
         for i =1:nRegions
             ACorr = data_acorr.XCorrMat_Regions(index_nearest_time,:,index_regions(i));
@@ -1145,7 +1156,7 @@ fprintf('TXT File Saved [%s].\n',filepath_txt);
 % Plotting per state - Grouping by animals
 nFigs = ceil(nTraces/nCol);
 all_f = gobjects(nFigs);
-all_ax = gobjects(nTraces,nStates,3);
+all_ax = gobjects(nTraces,nStates,4);
 
 eps1 = .02;
 eps2 = .02;
@@ -1166,10 +1177,10 @@ if nFigs>1
     for i=1:nTraces
         for j=1:nStates
             framepos = [(count-1)/nCol+eps1  ((nStates-j)/nStates)+eps1  1/nCol-eps1  (1/nStates)-2*eps1];
-            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-            all_ax(i,j,1).Title.String = sprintf('Ax%d-%d',i,j);
+            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
         end
         count=mod(count,nCol)+1;
     end
@@ -1185,10 +1196,10 @@ else
     for i=1:nTraces
         for j=1:nStates
             framepos = [(i-1)/nTraces+eps1  ((nStates-j)/nStates)+eps1  1/nTraces-2*eps1  (1/nStates)-2*eps1];
-            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-            all_ax(i,j,1).Title.String = sprintf('Ax%d-%d',i,j);
+            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
         end
     end
 end
@@ -1245,6 +1256,18 @@ for i = 1:nTraces
         end
         hold(ax3,'on');
 
+        ax4 = all_ax(i,j,4);
+        grid(ax4,"on");
+        if ~flag_crosscorr
+            ax4.XLim = [0,TLag(end)];
+            ax4.YLabel.String = 'ACorr Amp';
+        else
+            ax4.XLim = [TLag(1),TLag(end)]/10;
+            ax4.YLabel.String = 'XCorr Amp';
+        end
+        ax4.YLim = [0,1.5];
+        hold(ax4,'on');
+
         alpha_value = .5;
         linewidth = 2;
         s_markers = {'o';'+';'.'};
@@ -1274,38 +1297,47 @@ for i = 1:nTraces
             all_lines =[all_lines;l];
 
             % Display Ax2
-            ydata = ACorr_Lag(:);
-            xdata = k*ones(size(ydata));%+rand(size(ydata))/5;
-            % line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
+            ydata1 = ACorr_Lag(:);
+            xdata = k*ones(size(ydata1));%+rand(size(ydata1))/5;
+            % line('XData',xdata(:),'YData',ydata1(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
             %     'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
-            swarmchart(xdata(:),ydata(:),'Color',g_colors(k,:),'Parent',ax2,...
+            swarmchart(xdata(:),ydata1(:),'Color',g_colors(k,:),'Parent',ax2,...
                 'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5,...
                 'XJitterWidth',.5,'SizeData',15);
 
-            n_samples = sum(~isnan(ydata));
-            m = mean(ydata,'omitnan');
-            line('Xdata',k,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',1,...
+            n_samples1 = sum(~isnan(ydata1));
+            m1 = mean(ydata1,'omitnan');
+            line('Xdata',k,'YData',m1,'Parent',ax2,'LineStyle','none','LineWidth',1,...
                 'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',[k,k],'YData',[m-std(ydata,[],'omitnan')/sqrt(n_samples),m+std(ydata,[],'omitnan')/sqrt(n_samples)],'Parent',ax2,...
+            line('Xdata',[k,k],'YData',[m1-std(ydata1,[],'omitnan')/sqrt(n_samples1),m1+std(ydata1,[],'omitnan')/sqrt(n_samples1)],'Parent',ax2,...
                 'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
-            text(k-.25,ax2.YLim(1)+.9*(ax2.YLim(2)-ax2.YLim(1)),sprintf('%.2f',m),'Parent',ax2);
+            text(k-.25,ax2.YLim(1)+.9*(ax2.YLim(2)-ax2.YLim(1)),sprintf('%.2f',m1),'Parent',ax2);
 
             % Display Ax3
-            ydata = ACorr_Amp(:);
-            xdata = k*ones(size(ydata));%+rand(size(ydata))/5;
-            % line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
+            ydata2 = ACorr_Amp(:);
+            xdata = k*ones(size(ydata2));%+rand(size(ydata2))/5;
+            % line('XData',xdata(:),'YData',ydata2(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
             %     'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
-            swarmchart(xdata(:),ydata(:),'Color',g_colors(k,:),'Parent',ax3,...
+            swarmchart(xdata(:),ydata2(:),'Color',g_colors(k,:),'Parent',ax3,...
                 'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5,...
                 'XJitterWidth',.5,'SizeData',15);
 
-            n_samples = sum(~isnan(ydata));
-            m = mean(ydata,'omitnan');
-            line('Xdata',k,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',1,...
+            n_samples2 = sum(~isnan(ydata2));
+            m2 = mean(ydata2,'omitnan');
+            line('Xdata',k,'YData',m2,'Parent',ax3,'LineStyle','none','LineWidth',1,...
                 'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',[k,k],'YData',[m-std(ydata,[],'omitnan')/sqrt(n_samples),m+std(ydata,[],'omitnan')/sqrt(n_samples)],'Parent',ax3,...
+            line('Xdata',[k,k],'YData',[m2-std(ydata2,[],'omitnan')/sqrt(n_samples2),m2+std(ydata2,[],'omitnan')/sqrt(n_samples2)],'Parent',ax3,...
                 'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
-            text(k-.25,ax3.YLim(1)+.9*(ax3.YLim(2)-ax3.YLim(1)),sprintf('%.2f',m),'Parent',ax3);
+            text(k-.25,ax3.YLim(1)+.9*(ax3.YLim(2)-ax3.YLim(1)),sprintf('%.2f',m2),'Parent',ax3);
+
+            % Display Ax4
+            scatter(ydata1,ydata2,10,'Color',g_colors(k,:),'Parent',ax4,...
+                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5);
+            line('Xdata',[m1,m1],'YData',[m2-std(ydata2,[],'omitnan')/sqrt(n_samples2),m2+std(ydata2,[],'omitnan')/sqrt(n_samples2)],'Parent',ax4,...
+                'LineStyle','-','LineWidth',2,'Color',g_colors(k,:),'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',1);
+            line('Xdata',[m1-std(ydata1,[],'omitnan')/sqrt(n_samples1),m1+std(ydata1,[],'omitnan')/sqrt(n_samples1)],'YData',[m2,m2],'Parent',ax4,...
+                'LineStyle','-','LineWidth',2,'Color',g_colors(k,:),'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',1);
+
 
         end
         legend(ax1, all_lines);
@@ -1333,7 +1365,7 @@ end
 % Plotting per animal - Grouping by state
 nFigs = ceil(nTraces/nCol);
 all_f = gobjects(nFigs);
-all_ax = gobjects(nTraces,nAnimals,3);
+all_ax = gobjects(nTraces,nAnimals,4);
 
 eps1 = .02;
 eps2 = .02;
@@ -1353,10 +1385,11 @@ if nFigs>1
     for i=1:nTraces
         for j=1:nAnimals
             framepos = [(count-1)/nCol+eps1  ((nAnimals-j)/nAnimals)+eps1  1/nCol-eps1  (1/nAnimals)-2*eps1];
-            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-            all_ax(i,j,1).Title.String = sprintf('Ax%d-%d',i,j);
+            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+
         end
         count=mod(count,nCol)+1;
     end
@@ -1371,10 +1404,11 @@ else
     for i=1:nTraces
         for j=1:nAnimals
             framepos = [(i-1)/nTraces+eps1  ((nAnimals-j)/nAnimals)+eps1  1/nTraces-2*eps1  (1/nAnimals)-2*eps1];
-            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-            all_ax(i,j,1).Title.String = sprintf('Ax%d-%d',i,j);
+            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+
         end
     end
 end
@@ -1434,6 +1468,18 @@ for i = 1:nTraces
         end
         hold(ax3,'on');
 
+        ax4 = all_ax(i,j,4);
+        grid(ax4,"on");
+        if ~flag_crosscorr
+            ax4.XLim = [0,TLag(end)];
+            ax4.YLabel.String = 'ACorr Amp';
+        else
+            ax4.XLim = [TLag(1),TLag(end)]/10;
+            ax4.YLabel.String = 'XCorr Amp';
+        end
+        ax4.YLim = [0,1.5];
+        hold(ax4,'on');
+
         alpha_value = .5;
         linewidth = 2;
         s_markers = {'o';'+';'.'};
@@ -1463,34 +1509,46 @@ for i = 1:nTraces
             all_lines =[all_lines;l];
 
             % Display Ax2
-            ydata = ACorr_Lag(:);
-            xdata = k*ones(size(ydata)); %+rand(size(ydata))/10;
-            % line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
+            ydata1 = ACorr_Lag(:);
+            xdata = k*ones(size(ydata1));%+rand(size(ydata1))/5;
+            % line('XData',xdata(:),'YData',ydata1(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax2,...
             %     'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
-            swarmchart(xdata(:),ydata(:),'Color',g_colors(k,:),'Parent',ax3,...
+            swarmchart(xdata(:),ydata1(:),'Color',g_colors(k,:),'Parent',ax2,...
                 'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5,...
                 'XJitterWidth',.5,'SizeData',15);
-            n_samples = sum(~isnan(ydata));
-            m = mean(ydata,'omitnan');
-            line('Xdata',k,'YData',m,'Parent',ax2,'LineStyle','none','LineWidth',1,...
+
+            n_samples1 = sum(~isnan(ydata1));
+            m1 = mean(ydata1,'omitnan');
+            line('Xdata',k,'YData',m1,'Parent',ax2,'LineStyle','none','LineWidth',1,...
                 'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',[k,k],'YData',[m-std(ydata,[],'omitnan')/sqrt(n_samples),m+std(ydata,[],'omitnan')/sqrt(n_samples)],'Parent',ax2,...
+            line('Xdata',[k,k],'YData',[m1-std(ydata1,[],'omitnan')/sqrt(n_samples1),m1+std(ydata1,[],'omitnan')/sqrt(n_samples1)],'Parent',ax2,...
                 'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
+            text(k-.25,ax2.YLim(1)+.9*(ax2.YLim(2)-ax2.YLim(1)),sprintf('%.2f',m1),'Parent',ax2);
 
             % Display Ax3
-            ydata = ACorr_Amp(:);
-            xdata = k*ones(size(ydata)); %+rand(size(ydata))/10;
-            % line('XData',xdata(:),'YData',ydata(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
+            ydata2 = ACorr_Amp(:);
+            xdata = k*ones(size(ydata2));%+rand(size(ydata2))/5;
+            % line('XData',xdata(:),'YData',ydata2(:),'Color',g_colors(k,:),'LineStyle','none','Parent',ax3,...
             %     'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',5);
-            swarmchart(xdata(:),ydata(:),'Color',g_colors(k,:),'Parent',ax3,...
+            swarmchart(xdata(:),ydata2(:),'Color',g_colors(k,:),'Parent',ax3,...
                 'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5,...
                 'XJitterWidth',.5,'SizeData',15);
-            n_samples = sum(~isnan(ydata));
-            m = mean(ydata,'omitnan');
-            line('Xdata',k,'YData',m,'Parent',ax3,'LineStyle','none','LineWidth',1,...
+
+            n_samples2 = sum(~isnan(ydata2));
+            m2 = mean(ydata2,'omitnan');
+            line('Xdata',k,'YData',m2,'Parent',ax3,'LineStyle','none','LineWidth',1,...
                 'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
-            line('Xdata',[k,k],'YData',[m-std(ydata,[],'omitnan')/sqrt(n_samples),m+std(ydata,[],'omitnan')/sqrt(n_samples)],'Parent',ax3,...
+            line('Xdata',[k,k],'YData',[m2-std(ydata2,[],'omitnan')/sqrt(n_samples2),m2+std(ydata2,[],'omitnan')/sqrt(n_samples2)],'Parent',ax3,...
                 'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
+            text(k-.25,ax3.YLim(1)+.9*(ax3.YLim(2)-ax3.YLim(1)),sprintf('%.2f',m2),'Parent',ax3);
+
+            % Display Ax4
+            scatter(ydata1,ydata2,10,'Color',g_colors(k,:),'Parent',ax4,...
+                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',g_colors(k,:),'MarkerFaceAlpha',.5);
+            line('Xdata',[m1,m1],'YData',[m2-std(ydata2,[],'omitnan')/sqrt(n_samples2),m2+std(ydata2,[],'omitnan')/sqrt(n_samples2)],'Parent',ax4,...
+                'LineStyle','-','LineWidth',2,'Color',g_colors(k,:),'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',1);
+            line('Xdata',[m1-std(ydata1,[],'omitnan')/sqrt(n_samples1),m1+std(ydata1,[],'omitnan')/sqrt(n_samples1)],'YData',[m2,m2],'Parent',ax4,...
+                'LineStyle','-','LineWidth',2,'Color',g_colors(k,:),'Marker','o','MarkerEdgeColor',g_colors(k,:),'MarkerFaceColor',g_colors(k,:),'MarkerSize',1);
 
         end
         legend(ax1, all_lines);
@@ -1514,4 +1572,3 @@ for index_fig = 1:nFigs
 end
 
 end
-
