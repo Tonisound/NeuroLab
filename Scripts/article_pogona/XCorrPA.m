@@ -27,7 +27,7 @@ else  %no zscore normalization
     if size(Data,1)==1
         NormS=Data(1,:);
         NormS2=Data(1,:);
-    elseif size(S,1)==2
+    elseif size(Data,1)==2
         NormS=Data(1,:);
         NormS2=Data(2,:);
 
