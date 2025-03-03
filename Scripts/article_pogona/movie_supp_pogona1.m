@@ -27,11 +27,11 @@ colormap(ax100,'hot');
 t101 = uicontrol('Units','normalized','Style','text','Parent',f,'Position',[.85 .925 .1 .04],...
     'Fontsize',22,'BackgroundColor','k','ForegroundColor','w','String','Sleep');
 
-im_start = 2270;
+im_start = 2900;
 temp = datenum(myhandles.TimeDisplay.UserData(im_start,:));
 tstart = (temp-floor(temp))*24*3600;
 
-im_end = 14400;
+im_end = 3200;
 temp = datenum(myhandles.TimeDisplay.UserData(im_end,:));
 tend = (temp-floor(temp))*24*3600;
 
@@ -55,7 +55,7 @@ for i = 1:10:14400
 %     pause(.1);
     saveas(f,fullfile(folder_save,sprintf('Image_%05d.jpg',i)));
     drawnow;
-    delete(all_l100);
+%     delete(all_l100);
 end
 
 workingDir = folder_save;

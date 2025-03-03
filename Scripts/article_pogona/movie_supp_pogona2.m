@@ -12,16 +12,19 @@ t_last = (temp-floor(temp))*24*3600;
 
 % Displaying global CBV
 ax1 = axes('Parent',f,'Position',[.1 .3 .8 .2],'FontSize',16);
-data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_fUS','Whole-reg.mat'));
+% data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_fUS','Whole-reg.mat'));
+data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_fUS','Whole_reg.mat'));
 X = data.X;
 Y = data.Y;
 l1 = line('XData',X,'YData',Y,'Parent',ax1,'LineWidth',2);
-ax1.YLim = [0;150];
+% ax1.YLim = [0;150];
+ax1.YLim = [-20;30];
 
 
 % Getting regions
 all_regions = {'Neocortex-L';'Neocortex-R';'DVR-L';'DVR-R';'Dienecephalon';...
     'Mesencephalon-L';'Mesencephalon-R';'DorsalBrainstem';'VentralBrainstem'};...
+all_regions = {'CTX-L';'CTX-R';'dHPC-L';'dHPC-R';'THAL-L';'THAL-R';'vHPC-L';'vHPC-R'};
 all_Y = [];
 for i =1:length(all_regions)
     cur_region = char(all_regions(i));
@@ -32,7 +35,8 @@ end
 % Displaying local CBV
 ax2 = axes('Parent',f,'Position',[.1 .05 .8 .2],'YTick',[],'YTickLabel',[],'FontSize',16);
 imagesc('XData',X,'YData',1:length(all_regions),'CData',all_Y','Parent',ax2);
-ax2.CLim = [0;150];
+% ax2.CLim = [0;150];
+ax2.CLim = [-20;30];
 ax2.YLim = [.5;length(all_regions)+.5];
 colormap(ax2,'hot');
 ax2.YDir = 'reverse';
@@ -91,12 +95,13 @@ ax33.YLabel.FontSize = 20;
 
 ax44 = axes('Parent',f,'Position',[.09 .05 .01 .2]);
 ax44.XLim = [0 1];
-ax44.YLim = [0 9];
+ax44.YLim = [0 length(all_regions)];
 ax44.Visible='off';
 ax44.YDir = 'reverse';
 
 % Axes Time Label
-time_step = 240;
+% time_step = 240;
+time_step = 60;
 time_ticks = 0:time_step:60*ceil(t_last/60);
 time_label = datestr((time_ticks)/(24*3600),'HH:MM:SS');
 set(ax1,'XTick',time_ticks,'XTickLabel',time_label);
@@ -133,22 +138,25 @@ for j = 1:size(R,1)
         'FaceColor','r','EdgeColor','none','FaceAlpha',.25);
 end
 
+tic;
+file_db = fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).dir_fus,FILES(CUR_FILE).acq);
+data_db = load(file_db,'-mat');
+db_im = 3000;
+Doppler_film = permute(data_db.Acquisition.Data,[3,1,4,2]);
+Doppler_dB = 20*log10(abs(Doppler_film)/max(max(abs(Doppler_film(:,:,db_im)))));
+dB_frame = Doppler_dB(:,:,db_im);
+toc;
 
-% Patch Axes
-% file_db = '/media/hobbes/DataMOBs171/DATA/fUS-POGONA/20190930_Pogona3_MySession/20190930_P3-020_E/20190930_P3-020_fus/20190930_P3-020_E.acq';
-% data_db = load(file_db,'-mat');
-% db_im = 10040;
-% Doppler_film = permute(data_db.Acquisition.Data,[3,1,4,2]);
-% Doppler_dB = 20*log10(abs(Doppler_film)/max(max(abs(Doppler_film(:,:,db_im)))));
-% dB_frame = Doppler_dB(:,:,db_im);
-data_db = load('Doppler_DB_Frame.mat');
-dB_frame = data_db.dB_IM;
 
-ax99 = axes('Parent',f,'Position',[.1 .55 .2 .4],'XTickLabel','','YTickLabel','');
+%data_db = load('Doppler_DB_Frame.mat');
+%dB_frame = data_db.dB_IM;
+
+% ax99 = axes('Parent',f,'Position',[.1 .55 .2 .4],'XTickLabel','','YTickLabel','');
+ax99 = axes('Parent',f,'Position',[.05 .55 .3 .4],'XTickLabel','','YTickLabel','');
 imagesc(dB_frame,'Parent',ax99);
 colormap(ax99,'gray');
 ax99.CLim = [-38 0];
-ax99.XLim = [40 120];
+% ax99.XLim = [40 120];
 ax99.Visible='off';
 ax99.Title.String = 'Region segmentation';
 ax99.Title.Visible='on';
@@ -182,7 +190,8 @@ for i =1:length(all_patches)
 end
 
 
-ax100 = axes('Parent',f,'Position',[.3 .55 .2 .4],'XTickLabel','','YTickLabel','');
+% ax100 = axes('Parent',f,'Position',[.3 .55 .2 .4],'XTickLabel','','YTickLabel','');
+ax100 = axes('Parent',f,'Position',[.325 .55 .3 .4],'XTickLabel','','YTickLabel','');
 im = imagesc(IM(:,:,CUR_IM),'Parent',ax100);
 ax100.Title.String = 'fUS Imaging';
 ax100.Visible='off';
@@ -190,16 +199,18 @@ ax100.Title.Visible='on';
 ax100.Title.FontSize=18;
 ax100.DataAspectRatio=[1 1 1];
 ax100.Title.FontWeight='normal';
-ax100.XLim = [40 120];
+%ax100.XLim = [40 120];
 
 colormap(ax100,'hot');
 c = colorbar(ax100,'eastoutside');
 c.FontSize=14;
-ax100.CLim = [0;150];
+% ax100.CLim = [0;150];
+ax100.CLim = [-20;30];
 c.Label.String = '(% Change)';
 
 all_frames = myhandles.VideoAxes.UserData.all_frames;
-ax101 = axes('Parent',f,'Position',[.5 .55 .3 .4],'XTickLabel','','YTickLabel','');
+% ax101 = axes('Parent',f,'Position',[.5 .55 .3 .4],'XTickLabel','','YTickLabel','');
+ax101 = axes('Parent',f,'Position',[.65 .55 .3 .4],'XTickLabel','','YTickLabel','');
 im2 = imagesc(all_frames(:,:,CUR_IM),'Parent',ax101);
 ax101.Title.String = 'Infrared Video';
 ax101.Visible='off';
@@ -218,8 +229,8 @@ colormap(ax100,'hot');
 % t101 = uicontrol('Units','normalized','Style','text','Parent',f,'Position',[.4 .925 .1 .04],...
 %     'Fontsize',22,'BackgroundColor','k','ForegroundColor','w','String','REM');
 
-im_start = 10500%9612;
-im_end = 11100%11412;
+im_start = 2836;
+im_end = 3763;
 temp = datenum(myhandles.TimeDisplay.UserData(im_start,:));
 t_start = (temp-floor(temp))*24*3600;
 temp = datenum(myhandles.TimeDisplay.UserData(im_end,:));
@@ -259,6 +270,7 @@ l_cursor2 = line('XData',[NaN NaN],'YData',ax2.YLim,'Color',[.5 .5 .5],'LineWidt
 ax1.XLim = [t_start t_end];
 ax2.XLim = [t_start t_end];
 
+dir_video = fullfile('MovieSupp');
 for i = im_start:im_end
     im.CData = IM(:,:,i);
     
@@ -274,8 +286,11 @@ for i = im_start:im_end
     l_cursor.XData = [t_im,t_im];
     l_cursor2.XData = [t_im,t_im];
     
-    saveas(f,fullfile('MovieSupp','Static',sprintf('Image_%06d.jpg',i)));
+    if ~isfolder(dir_video)
+        mkdir(dir_video);
+    end
+    saveas(f,fullfile(dir_video,sprintf('Image_%06d.jpg',i)));
     drawnow;
-    delete(all_l100);
+    %delete(all_l100);
 end
-save_video('MovieSupp/Static','MovieSupp/Static','SM-v2-static-20',100);
+save_video(dir_video,dir_video,'SM-v2-static-20',100);

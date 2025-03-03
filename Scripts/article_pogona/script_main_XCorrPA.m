@@ -22,71 +22,71 @@ end
 
 load('Preferences.mat','GColors');
 
-InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190730_P1-004_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190731_P1-005_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190927_P3-016_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190927_P3-017_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190927_P3-018_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190927_P3-019_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190930_P3-020_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190930_P3-021_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20190930_P3-022_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20191003_P3-027_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20191003_P3-028_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20191003_P3-029_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200715_P5-033_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200716_P5-034_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200716_P5-036_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200716_P5-037_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200716_P5-038_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200716_P5-039_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200717_P5-040_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200717_P6-041_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200717_P6-042_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200717_P6-043_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200718_P6-044_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200718_P6-045_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200719_P5-046_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200719_P5-047_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200720_P5-048_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200720_P5-049_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200721_P5-050_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200721_P5-051_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200722_P6-052_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200722_P6-053_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200723_P6-054_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200723_P6-055_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200724_P6-056_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200725_P5-058_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200726_P5-060_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};...
-    {'20200726_P5-061_E_nlab'},{'Power-beta_999'},{'Power-theta_999'}];
+InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190730_P1-004_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190731_P1-005_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190927_P3-016_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190927_P3-017_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190927_P3-018_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190927_P3-019_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190930_P3-020_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190930_P3-021_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20190930_P3-022_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20191003_P3-027_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20191003_P3-028_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20191003_P3-029_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200715_P5-033_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200716_P5-034_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200716_P5-036_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200716_P5-037_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200716_P5-038_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200716_P5-039_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200717_P5-040_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200717_P6-041_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200717_P6-042_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200717_P6-043_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200718_P6-044_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200718_P6-045_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200719_P5-046_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200719_P5-047_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200720_P5-048_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200720_P5-049_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200721_P5-050_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200721_P5-051_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200722_P6-052_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200722_P6-053_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200723_P6-054_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200723_P6-055_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200724_P6-056_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200725_P5-058_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200726_P5-060_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
+    {'20200726_P5-061_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'}];
 
 
-InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240812_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240812_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240812_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240813_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240813_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240813_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240813_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240814_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240814_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240814_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240814_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240820_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240820_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240820_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240820_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240822_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240822_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240822_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240822_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240826_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240826_K1656_003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240826_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'};
-    {'20240826_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'}];
+InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240812_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240812_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240812_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240813_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240813_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240813_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240813_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240814_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240814_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240814_K1654_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240814_K1654_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240820_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240820_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240820_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240820_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240822_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240822_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240822_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240822_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240826_K1656_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240826_K1656_003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240826_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
+    {'20240826_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'}];
 
 
 InfoFileRat =[{'20190226_SD025_P401_R_nlab'},{'Power-beta_023'},{'Power-theta_023'};...
@@ -130,73 +130,79 @@ ParamsPogo.NormWinMin = 3;
 ParamsPogo.MinGroupDurSec = 300;
 ParamsPogo.WinGroupSec = 300;
 ParamsPogo.batchname = 'Pogona';
-ParamsPogo.t_smooth = 10;
+ParamsPogo.t_smooth = 20;
 ParamsPogo.seed_save = fullfile(seed_path,'XCorr','XCorrPogo');
 ParamsPogo.pattern_compute_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
 ParamsPogo.pattern_compute_region = {'Whole_reg';'dTel'};
 ParamsPogo.pattern_display_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
 ParamsPogo.pattern_display_region = {'Whole_reg'};
 ParamsPogo.all_states = {'SLEEP','WAKE'};
+AllParamsPogo = ParamsPogo;
 
-% Batch Parameters
-ParamsPogo1 = ParamsPogo;
-ParamsPogo1.t_smooth = 30;
-ParamsPogo1.batchname = 'Pogona-30s';
-ParamsPogo1.seed_save = fullfile(seed_path,'XCorr','XCorrPogo[30s]');
-ParamsPogo2 = ParamsPogo;
-ParamsPogo2.t_smooth = 20;
-ParamsPogo2.batchname = 'Pogona-20s';
-ParamsPogo2.seed_save = fullfile(seed_path,'XCorr','XCorrPogo[20s]');
-ParamsPogo3 = ParamsPogo;
-ParamsPogo3.batchname = 'Pogona-10s';
-ParamsPogo3.t_smooth = 10;
-ParamsPogo3.seed_save = fullfile(seed_path,'XCorr','XCorrPogo[10s]');
-% AllParamsPogo = ParamsPogo;
-AllParamsPogo = [ParamsPogo1;ParamsPogo2;ParamsPogo3];
+% % Batch Parameters
+% ParamsPogo1 = ParamsPogo;
+% ParamsPogo1.t_smooth = 30;
+% ParamsPogo1.batchname = 'Pogona-30s';
+% ParamsPogo1.seed_save = fullfile(seed_path,'XCorr','XCorrPogo[30s]');
+% ParamsPogo2 = ParamsPogo;
+% ParamsPogo2.t_smooth = 20;
+% ParamsPogo2.batchname = 'Pogona-20s';
+% ParamsPogo2.seed_save = fullfile(seed_path,'XCorr','XCorrPogo[20s]');
+% ParamsPogo3 = ParamsPogo;
+% ParamsPogo3.batchname = 'Pogona-10s';
+% ParamsPogo3.t_smooth = 10;
+% ParamsPogo3.seed_save = fullfile(seed_path,'XCorr','XCorrPogo[10s]');
+% AllParamsPogo = [ParamsPogo1;ParamsPogo2;ParamsPogo3];
 
 
 ParamsMouse= ParamsDefault;
 ParamsMouse.Fs = 1;
-ParamsMouse.WinSec = 150;
+ParamsMouse.WinSec = 180;
 ParamsMouse.StepSec = 5;
 ParamsMouse.MaxLagSec = 150;
-ParamsMouse.NormWinMin = 1.5;
+ParamsMouse.NormWinMin = 3;
 ParamsMouse.MinGroupDurSec = 100;
 ParamsMouse.WinGroupSec = 100;
 ParamsMouse.batchname = 'Mouse';
-ParamsMouse.t_smooth = 5;
+ParamsMouse.t_smooth = 10;
 ParamsMouse.seed_save = fullfile(seed_path,'XCorr','XCorrMouse');
 ParamsMouse.pattern_compute_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
 ParamsMouse.pattern_compute_region = {'Whole-reg'}; % ;'HPC';'CTX';'THAL'
 ParamsMouse.pattern_display_channel = {'Power-beta_999';'Power-theta_999';'Power-delta_999'};
 ParamsMouse.pattern_display_region = {'Whole-reg'}; % ;'HPC';'CTX';'THAL'
-ParamsMouse.all_states = {'NREM','REM','AW','QW'};
+ParamsMouse.all_states = {'NREM','REM','WAKE'};
 % ParamsMouse.all_states = {'NREM','REM','AW','QW','SLEEP','WAKE'};
+AllParamsMouse = ParamsMouse;
 
-% Batch Parameters
-ParamsMouse1 = ParamsMouse;
-ParamsMouse1.batchname = 'Mouse-20s';
-ParamsMouse1.t_smooth = 20;
-ParamsMouse1.seed_save = fullfile(seed_path,'XCorr','XCorrMouse[20s]');
-ParamsMouse2 = ParamsMouse;
-ParamsMouse2.batchname = 'Mouse-10s';
-ParamsMouse2.t_smooth = 10;
-ParamsMouse2.seed_save = fullfile(seed_path,'XCorr','XCorrMouse[10s]');
-ParamsMouse3 = ParamsMouse;
-ParamsMouse3.batchname = 'Mouse-5s';
-ParamsMouse3.t_smooth = 5;
-ParamsMouse3.seed_save = fullfile(seed_path,'XCorr','XCorrMouse[5s]');
-ParamsMouse4 = ParamsMouse;
-ParamsMouse4.batchname = 'Mouse-Norm=3';
-ParamsMouse4.NormWinMin = 3;
-ParamsMouse4.seed_save = fullfile(seed_path,'XCorr','XCorrMouse[Norm=3]');
-ParamsMouse5 = ParamsMouse;
-ParamsMouse5.batchname = 'Mouse-Norm=5';
-ParamsMouse5.NormWinMin = 5;
-ParamsMouse5.seed_save =  fullfile(seed_path,'XCorr','XCorrMouse[Norm=5]');
-% AllParamsMouse = ParamsMouse;
-AllParamsMouse = [ParamsMouse1;ParamsMouse2;ParamsMouse3;ParamsMouse4;ParamsMouse5];
-AllParamsMouse = [ParamsMouse4;ParamsMouse5];
+
+% % Batch Parameters
+% ParamsMouse1 = ParamsMouse;
+% ParamsMouse1.batchname = 'Mouse-20s';
+% ParamsMouse1.t_smooth = 20;
+% ParamsMouse1.seed_save = fullfile(seed_path,'XCorr','XCorrMouse[20s]');
+% ParamsMouse2 = ParamsMouse;
+% ParamsMouse2.batchname = 'Mouse-10s';
+% ParamsMouse2.t_smooth = 10;
+% ParamsMouse2.seed_save = fullfile(seed_path,'XCorr','XCorrMouse[10s]');
+% ParamsMouse3 = ParamsMouse;
+% ParamsMouse3.batchname = 'Mouse-5s';
+% ParamsMouse3.t_smooth = 5;
+% ParamsMouse3.seed_save = fullfile(seed_path,'XCorr','XCorrMouse[5s]');
+% ParamsMouse4 = ParamsMouse;
+% ParamsMouse4.batchname = 'Mouse-Norm=3';
+% ParamsMouse4.NormWinMin = 3;
+% ParamsMouse4.seed_save = fullfile(seed_path,'XCorr','XCorrMouse[Norm=3]');
+% ParamsMouse5 = ParamsMouse;
+% ParamsMouse5.batchname = 'Mouse-Norm=5';
+% ParamsMouse5.NormWinMin = 5;
+% ParamsMouse5.seed_save =  fullfile(seed_path,'XCorr','XCorrMouse[Norm=5]');
+% ParamsMouse6 = ParamsMouse;
+% ParamsMouse6.batchname = 'WinSec=120';
+% ParamsMouse6.NormWinMin = 2;
+% ParamsMouse.WinSec = 120;
+% ParamsMouse6.seed_save =  fullfile(seed_path,'XCorr','XCorrMouse[Norm=2.5]');
+% AllParamsMouse = ParamsMouse6;
+% AllParamsMouse = [ParamsMouse1;ParamsMouse2;ParamsMouse3;ParamsMouse4;ParamsMouse5];
 
 
 ParamsRat = ParamsMouse;
@@ -232,18 +238,21 @@ for i = 1:length(to_compute)
         % Compute and Plot Dynamic Xcorr Mouse
         if flag_recompute
             compute_dynamic_xcorr(Params,InfoFile(:,1));
-            compute_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,2));
-            compute_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,3));
+            for k = 2%:size(InfoFile,2)
+                compute_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,k));
+            end
         end
         if flag_savefig
             plot_dynamic_xcorr(Params,InfoFile(:,1));
-            plot_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,2));
-            plot_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,3));
+            for k = 2%:size(InfoFile,2)
+                plot_dynamic_xcorr(Params,InfoFile(:,1),InfoFile(:,k));
+            end
         end
         if flag_perstate
             plot_autocorr_per_group(Params,InfoFile(:,1));
-            plot_autocorr_per_group(Params,InfoFile(:,1),InfoFile(:,2));
-            plot_autocorr_per_group(Params,InfoFile(:,1),InfoFile(:,3));
+            for k = 2%:size(InfoFile,2)
+                plot_autocorr_per_group(Params,InfoFile(:,1),InfoFile(:,k));
+            end
         end
     end
     fprintf('============================== END (%s) ==============================\n',char(to_compute(i)));
@@ -679,7 +688,7 @@ for k=1:length(all_files)
         end
 
         if sum(~isnan(Data_all(i,:)))>0
-            ax2.XLim = [mean(Data_all(i,:),'omitnan')-2.5*std(Data_all(i,:),[],'omitnan') mean(Data_all(i,:),'omitnan')+5*std(Data_all(i,:),[],'omitnan')];
+            ax2.XLim = [mean(Data_all(i,:),'omitnan')-2.5*std(Data_all(i,:),[],'omitnan') mean(Data_all(i,:),'omitnan')+15*std(Data_all(i,:),[],'omitnan')];
         else
             ax2.XLim = [-1,1];
         end
@@ -690,7 +699,7 @@ for k=1:length(all_files)
         % Time Patches
         for index = 1:length(GColors.TimeGroups)
             name = char(GColors.TimeGroups(index).Name);
-            if sum(strcmp(data_tg.TimeGroups_name,name))>0
+            if sum(strcmp(all_states,name))>0 && sum(strcmp(data_tg.TimeGroups_name,name))>0
                 %create patch
                 index_group = find(strcmp(data_tg.TimeGroups_name,name)==1);
                 a = datenum(data_tg.TimeGroups_S(index_group).TimeTags_strings(:,1));
@@ -1248,10 +1257,13 @@ if nFigs>1
     for i=1:nTraces
         for j=1:nStates
             framepos = [(count-1)/nCol+eps1  ((nStates-j)/nStates)+eps1  1/nCol-eps1  (1/nStates)-2*eps1];
-            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+%             all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  ramepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+%             all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+1000*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            
         end
         count=mod(count,nCol)+1;
     end
@@ -1267,10 +1279,13 @@ else
     for i=1:nTraces
         for j=1:nStates
             framepos = [(i-1)/nTraces+eps1  ((nStates-j)/nStates)+eps1  1/nTraces-2*eps1  (1/nStates)-2*eps1];
-            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+%             all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+%             all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+1000*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            
         end
     end
 end
@@ -1455,11 +1470,13 @@ if nFigs>1
     for i=1:nTraces
         for j=1:nAnimals
             framepos = [(count-1)/nCol+eps1  ((nAnimals-j)/nAnimals)+eps1  1/nCol-eps1  (1/nAnimals)-2*eps1];
-            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+%             all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-
+%             all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+1000*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            
         end
         count=mod(count,nCol)+1;
     end
@@ -1474,11 +1491,13 @@ else
     for i=1:nTraces
         for j=1:nAnimals
             framepos = [(i-1)/nTraces+eps1  ((nAnimals-j)/nAnimals)+eps1  1/nTraces-2*eps1  (1/nAnimals)-2*eps1];
-            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+%             all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,1) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+.5*framepos(4)+eps2  framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,2) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
             all_ax(i,j,3) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
-
+%             all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+.5*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            all_ax(i,j,4) = axes('Parent',all_f(ceil(i/nCol)),'Position',[framepos(1)+1000*framepos(3)+eps2  framepos(2)+.5*framepos(4)+eps2  .5*framepos(3)-eps2   .5*framepos(4)-eps2]);
+            
         end
     end
 end
