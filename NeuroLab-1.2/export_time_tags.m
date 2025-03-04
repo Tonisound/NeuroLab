@@ -1,4 +1,4 @@
- function success = export_time_tags(dir_tags,dir_save) 
+function success = export_time_tags(dir_tags,dir_save) 
  
 success = false;
 temp = regexp(dir_save,filesep,'split');

@@ -92,6 +92,9 @@ switch strtrim(str(val,:))
         
     case 'Export LFP Traces (.dat)'
         export_lfptraces(handles,FILES(CUR_FILE));
+
+    case 'Export fUS Time Series (.csv)'
+        export_fus_time_series(handles,FILES(CUR_FILE));
 end
 
 end

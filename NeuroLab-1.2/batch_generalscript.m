@@ -692,6 +692,9 @@ for i = 1:length(ind_files)
             case 'Export LFP Traces (.dat)'
                 success = export_lfptraces(myhandles,FILES(ii),0);
                 
+            case 'Export fUS Time Series (.csv)'
+                success = export_fus_time_series(myhandles,FILES(ii),0);
+                
             case '(Movie) Normalized Movie'
                 f2 = movie_normalized(myhandles,0,str_regions,str_traces);
                 

@@ -190,6 +190,7 @@ uimenu(m2d,'Label','Export Time Tags','Tag','ExportMenu_TimeTags');
 uimenu(m2d,'Label','Export Anatomical Regions','Tag','ExportMenu_Regions');
 uimenu(m2d,'Label','Export Image Patches','Tag','ExportMenu_Patches');
 uimenu(m2d,'Label','Export LFP Traces (.dat)','Tag','ExportMenu_LFPTraces');
+uimenu(m2d,'Label','Export fUS Time Series (.csv)','Tag','ExportMenu_fUSTimeSeries');
 
 
 % handles.ColorMapsMenu
@@ -354,7 +355,7 @@ pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detec
 pl_str = strcat(pl_str,'|Detect Left-Right Runs|Detect Early-Mid-Late Runs|Detect Hippocampal Ripples|Segregate Hippocampal Ripples');
 pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Generate Region Groups');
 pl_str = strcat(pl_str,'|Run GLM Analysis');
-pl_str = strcat(pl_str,'|Export Time Tags|Export Image Patches|Export Anatomical Regions|Export LFP Traces (.dat)');
+pl_str = strcat(pl_str,'|Export Time Tags|Export Image Patches|Export Anatomical Regions|Export LFP Traces (.dat)|Export fUS Time Series (.csv)');
 pl.String = pl_str;
 
 % Process Button
@@ -719,6 +720,8 @@ set(myhandles.ExportMenu_TimeTags,'Callback','export_time_tags(FILES(CUR_FILE).f
 set(myhandles.ExportMenu_Patches,'Callback','export_image_patches(myhandles,fullfile(DIR_SAVE,FILES(CUR_FILE).nlab));');
 set(myhandles.ExportMenu_Regions,'Callback','export_regions(myhandles,FILES(CUR_FILE).recording);');
 set(myhandles.ExportMenu_LFPTraces,'Callback','export_lfptraces(myhandles,FILES(CUR_FILE));');
+set(myhandles.ExportMenu_fUSTimeSeries,'Callback','export_fus_time_series(myhandles,FILES(CUR_FILE));');
+
 
 % Control Callback Attribution
 set(myhandles.FileSelectPopup,'Callback', {@fileSelectionPopup_Callback,myhandles});
