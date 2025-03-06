@@ -17,7 +17,6 @@ f = figure('Name','Anatomical Regions Edition',...
 colormap(f,'jet');
 f.UserData.Colormap = f.Colormap;
 colormap(f,'gray');
-clrmenu(f);
 f.UserData.data_config = data_config;
 f.UserData.IM = IM;
 f.UserData.success = false;

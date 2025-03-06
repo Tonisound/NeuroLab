@@ -114,7 +114,6 @@ f.UserData.config_dir = config_dir;
 f.UserData.recording = '';
 f.UserData.timeframe = '';
 f.UserData.reference = '';
-clrmenu(f);
 colormap(f,'jet')
 
 pu1 = uicontrol('Units','normalized','Parent',f,'Style','popup','ToolTipString','recording','String',list_files,'Tag','Popup1');
@@ -801,7 +800,6 @@ end
 f2 = figure('Tag','Batch','Name',str_batch,'Units','normalized');
 f2.UserData.cur_param = cur_param;
 colormap(f2,'jet');
-clrmenu(f2);
 cb1_status = 'on';
 cb1 = uicontrol('Units','normalized','Parent',f2,'Style','checkbox','String','Atlas on/off','Tag','Checkbox1','Value',0);
 cb1.Position = [.01 0 .1 .05];
@@ -1021,7 +1019,6 @@ end
 % 
 % f2 = figure('Units','normalized','Tag','All','Name',sprintf('Birds Eye View [%s]',data_dir));
 % f2.UserData.cur_param = cur_param;
-% clrmenu(f2);
 % colormap(f2,'jet');
 % cb1_status = 'on';
 % cb1 = uicontrol('Units','normalized','Parent',f2,'Style','checkbox','String','Atlas on/off','Tag','Checkbox1','Value',0);

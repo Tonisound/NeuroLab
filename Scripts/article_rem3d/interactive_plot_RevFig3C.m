@@ -5,7 +5,6 @@ data = load('RevisedFigure3\RevisedFig3_ALL-GROUPS_REM.mat','R','L');
 R = data.R;
 L = data.L;
 f = figure;
-clrmenu(f);
 colormap(f,'jet')
 
 list_group = L.list_group;

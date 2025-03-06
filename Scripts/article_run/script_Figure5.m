@@ -344,7 +344,6 @@ function plot1_Figure5(S,list_regions,cur_list,timegroup,flag_group,flag_norm,fl
 
 % Drawing results
 f = figure;
-clrmenu(f);
 %f.Name = sprintf('Synthesis Hemodynamics Response all_trials [%s | %s]',cur_list,timegroup);
 f.Name = sprintf('Fig2_SynthesisB_%s-%s',cur_list,timegroup);
 f.Renderer = 'Painters';
@@ -555,7 +554,6 @@ function plot2_Figure5(Q,list_lfp,cur_list,timegroup,flag_norm,flag_save)
 
 % Drawing results
 f = figure;
-clrmenu(f);
 %f.Name = sprintf('Synthesis Hemodynamics Response all_trials [%s | %s]',cur_list,timegroup);
 f.Name = sprintf('Fig2_SynthesisC_%s-%s',cur_list,timegroup);
 f.Renderer = 'Painters';

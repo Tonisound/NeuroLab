@@ -43,7 +43,6 @@ end
 
 f = figure('Name','Patch Export','Visible',status_visible);
 colormap(f,'gray');
-clrmenu(f);
 %colormap(f,'jet');
 ax = copyobj(handles.CenterAxes,f);
 ax.Tag = 'AxExport';

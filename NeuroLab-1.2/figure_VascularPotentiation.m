@@ -42,7 +42,6 @@ f.UserData.n_burst = n_burst;
 f.UserData.length_burst = length_burst;
 % Colormaps
 colormap(f,'hot');
-clrmenu(f);
 
 % Information Panel
 iP = uipanel('FontSize',12,...

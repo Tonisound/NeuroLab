@@ -335,7 +335,6 @@ tmax_regions = R.tmax_regions;
 f = figure;
 %colormap(f,'parula');
 colormap(f,'copper');    
-clrmenu(f);
 cmap = f.Colormap;
 
 % Ax1
@@ -475,7 +474,6 @@ end
 % Drawing results
 f1 = figure;
 colormap(f1,'parula');
-clrmenu(f1);
 cmap = f1.Colormap;
 
 % Ax1

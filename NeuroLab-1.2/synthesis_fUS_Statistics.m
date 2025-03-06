@@ -30,7 +30,7 @@ f2.UserData.all_files = all_files;
 f2.UserData.folder = folder;
 % Colormaps
 %colormap('jet');
-clrmenu(f2);
+
 
 D_files = [];
 D_group = [];

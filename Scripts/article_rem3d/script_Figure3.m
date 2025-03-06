@@ -241,7 +241,6 @@ ax1 = axes('Parent',panel,'Position',[.125 .1 .15 .8]);
 ax2 = axes('Parent',panel,'Position',[.45 .1 .15 .8]);
 ax3 = axes('Parent',panel,'Position',[.775 .1 .15 .8]);
 %ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
-clrmenu(f);
 switch str
     case 'Rmax'
         f.Name = strcat(fName,'-A-Rmax');
@@ -447,7 +446,6 @@ ax3 = axes('Parent',panel,'Position',[.4 .05 .15 .9]);
 ax3b = axes('Parent',panel,'Position',[.6 .05 .15 .9]);
 ax4 = axes('Parent',panel,'Position',[.8 .05 .15 .9]);
 %ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
-clrmenu(f);
 switch str
     case 'Mean'
         f.Name = strcat(fName,'-B-Mean');

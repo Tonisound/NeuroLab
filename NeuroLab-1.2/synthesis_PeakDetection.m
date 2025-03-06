@@ -99,7 +99,6 @@ f2.UserData.folder = folder;
 % Colormaps
 %colormap('jet');
 f2.UserData.g_colors = get(groot,'DefaultAxesColorOrder');
-clrmenu(f2);
 
 D_files = [];
 D_traces = [];

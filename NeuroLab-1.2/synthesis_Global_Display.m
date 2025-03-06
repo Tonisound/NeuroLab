@@ -23,7 +23,6 @@ f2 = figure('Units','normalized',...
     'PaperPositionMode','auto',...
     'Name','Synthesis Episode Display');
 f2.UserData.filename = filename;
-clrmenu(f2);
 colormap(f2,'jet');
 
 % File Panel

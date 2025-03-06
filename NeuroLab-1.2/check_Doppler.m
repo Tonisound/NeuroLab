@@ -27,7 +27,6 @@ else
 end
 
 f = figure('Name','CheckDoppler','Units','normalized','Position',[.1 .3 .8 .4]);
-clrmenu(f);
 ax1 = axes('Visible','off','Parent',f);
 im  = imagesc(Doppler_film(:,:,1),'Parent',ax1);
 ax1.Visible = 'off';

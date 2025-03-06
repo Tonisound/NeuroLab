@@ -219,7 +219,6 @@ panel = uipanel('Parent',f,'Position',[0 0 1 1]);
 % ax3 = axes('Parent',panel,'Position',[.775 .1 .15 .8]);
 % all_axes = [ax1;ax2;ax3];
 
-clrmenu(f);
 switch str
     case 'Mean'
         f.Name = strcat(fName,'-Mean');

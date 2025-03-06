@@ -260,7 +260,6 @@ patch_alpha = P.patch_alpha;
 
 
 %ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
-clrmenu(f);
 switch str
     case 'Mean'
         f.Name = strcat(fName,'-B-Mean');

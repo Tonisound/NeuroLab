@@ -8,7 +8,6 @@ list_files = {FILES(:).nlab}';
 % t = data_tr.time_ref.Y;
 
 f = figure('Units','normalized','Name','Quick fUS Spectrogram','Tag','MainFigure','Position',[.1 .2 .8 .8]);
-clrmenu(f);
 pu0 = uicontrol('Style','popupmenu','Units','normalized','String',list_files,'Value',CUR_FILE,'Position',[0 .95 .5 .025],'Parent',f,'Tag','Popup0');
 pu1 = uicontrol('Style','popupmenu','Units','normalized','String','-','Position',[.5 .95 .25 .025],'Parent',f,'Tag','Popup1');
 pu2 = uicontrol('Style','popupmenu','Units','normalized','String','-','Position',[.75 .95 .25 .025],'Parent',f,'Tag','Popup2');

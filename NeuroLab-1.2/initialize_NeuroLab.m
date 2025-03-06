@@ -170,6 +170,7 @@ uimenu(m1c,'Label','Show Video','Tag','DisplayMenu_Video','Checked',UiValues.vid
 uimenu(m1c,'Label','Split axes','Tag','DisplayMenu_Split','Enable','off');
 uimenu(m1c,'Label','Select Time Tags','Tag','DisplayMenu_TagSelection','Separator','on');
 uimenu(m1c,'Label','Select Time Groups','Tag','DisplayMenu_TimeGroupSelection');
+uimenu(m1c,'Label','Colormap Editor','Tag','DisplayMenu_ColormapEditor','Separator','on');
 
 
 % handles.SynthesisMenu
@@ -192,9 +193,6 @@ uimenu(m2d,'Label','Export Image Patches','Tag','ExportMenu_Patches');
 uimenu(m2d,'Label','Export LFP Traces (.dat)','Tag','ExportMenu_LFPTraces');
 uimenu(m2d,'Label','Export fUS Time Series (.csv)','Tag','ExportMenu_fUSTimeSeries');
 
-
-% handles.ColorMapsMenu
-clrmenu(f);
 
 % handles.PrefMenu
 m3 = uimenu('Label','Preferences','Tag','PrefMenu','Parent',f);
@@ -621,13 +619,11 @@ f2 = figure('Units','normalized',...
     'IntegerHandle','off',...
     'Renderer','painters',...
     'Toolbar','figure',...
-    'MenuBar','none',...
     'NumberTitle','off',...
     'Tag','VideoFigure',...
     'Visible',UiValues.video_status,...
     'WindowStyle','normal',...
     'Name','Behavior');
-clrmenu(f2);
 
 cb_timing = uicontrol(f,'Style','checkbox',...
     'Units','normalized',...
@@ -703,6 +699,7 @@ set(myhandles.EditMenu_Delete_SourcesLFP,'Callback','menuEdit_Delete_SourcesLFP(
 set(myhandles.DisplayMenu_Video,'Callback',{@menuDisplay_Video_Callback,myhandles});
 set(myhandles.DisplayMenu_TagSelection,'Callback',{@menuDisplay_TimeTagSelection_Callback,myhandles});
 set(myhandles.DisplayMenu_TimeGroupSelection,'Callback',{@menuDisplay_TimeGroupSelection_Callback,myhandles});
+set(myhandles.DisplayMenu_ColormapEditor,'Callback','colormapeditor(myhandles.CenterAxes)');
 
 % handles.SynthesisMenu
 set(myhandles.SynthesisMenu_Batch,'Callback',{@batch_generalscript,myhandles});

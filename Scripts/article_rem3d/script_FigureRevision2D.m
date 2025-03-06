@@ -323,7 +323,6 @@ f = figure;
 panel = uipanel('Parent',f,'Position',[0 0 1 1]);
 ax = axes('Parent',panel,'Position',[.1 .1 .8 .8]);
 ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
-clrmenu(f);
 f.Name = strcat(fName,'-A');
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
@@ -496,7 +495,6 @@ panel = uipanel('Parent',f,'Position',[0 0 1 1]);
 ax1 = axes('Parent',panel,'Position',[.15 .05 .2 .9]);
 ax2 = axes('Parent',panel,'Position',[.45 .05 .2 .9]);
 ax_dummy = axes('Parent',panel,'Position',[.1 .1 .8 .8],'Visible','off');
-clrmenu(f);
 switch str1
    case 'Mean'
         switch str2

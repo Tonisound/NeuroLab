@@ -320,7 +320,6 @@ function plot1(P,R,list_regions,list_lfp,cur_list,timegroup,gather_regions)
 % Drawing results
 list_average = [list_regions;list_lfp];
 f = figure;
-clrmenu(f);
 f.Name = sprintf('Fig2A_SynthesisA_%s-%s',cur_list,timegroup);
 f.Renderer = 'Painters';
 f.PaperPositionMode='manual';
@@ -495,7 +494,6 @@ function plot2(P,S,list_regions,cur_list,timegroup,gather_regions)
 
 % Drawing results
 f = figure;
-clrmenu(f);
 if sum(contains(list_regions,'SPEED'))>0
     f.Name = sprintf('Fig2A_SynthesisC_%s-%s',cur_list,timegroup);
 else

@@ -4,7 +4,6 @@ data = load('Figure3\Fig3_ALL-GROUPS.mat','R','L');
 R = data.R;
 L = data.L;
 f = figure;
-clrmenu(f);
 colormap(f,'jet')
 
 list_ref = L.list_ref;

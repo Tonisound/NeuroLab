@@ -36,7 +36,6 @@ f2.UserData.n_burst = n_burst;
 f2.UserData.length_burst = length_burst;
 % Colormaps
 colormap(f2,'jet');
-clrmenu(f2);
 
 % Full-screen
 f2.Units ='normalized';
