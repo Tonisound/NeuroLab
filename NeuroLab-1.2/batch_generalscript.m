@@ -666,6 +666,9 @@ for i = 1:length(ind_files)
 
             case 'Segregate Hippocampal Ripples'
                 success = segregate_ripple_events(fullfile(DIR_SAVE,FILES(ii).nlab),0);
+
+            case 'Compute Peri-Event Traces'
+                success = compute_peri_event_traces(fullfile(DIR_SAVE,FILES(ii).nlab),0);
                 
             case 'Generate Time Indexes'
                 success = generate_time_indexes(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
