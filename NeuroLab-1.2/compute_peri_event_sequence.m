@@ -1,4 +1,4 @@
-function success = compute_peri_event_traces(savedir,val,str_regions,str_traces)
+function success = compute_peri_event_sequence(savedir,val,str_regions,str_traces)
 % (Figure) Computes Peri-Event Traces
 
 global DIR_STATS IM;
@@ -23,10 +23,13 @@ end
 % Parameters
 timegroup = 'NREM'; % Time Group for restriction
 band_name = 'ripple';
-t_before = -1;          % time window before (seconds)
-t_after = 5;            % time window after (seconds) 
-sampling_fus = 5;      % Hz
-sampling_lfp = 1000;    % Hz
+sampling_fus = 5;                   % fUS interpolation frequency (Hz)
+sampling_lfp = 1000;                % LFP interpolation frequency (Hz)
+t_before = -1;                      % time window start (seconds)
+t_after = 5;                        % time window end (seconds) 
+t_baseline_start = -1;              % time start baseline (seconds) 
+t_baseline_end = 0;                 % time end baseline (seconds) 
+save_ratio_spectro = 100;           % ratio for spectrogram compression 
 
 
 % Getting recording name
@@ -36,25 +39,32 @@ recording_name = char(temp(end));
 % Loading time reference
 data_tr = load(fullfile(savedir,'Time_Reference.mat'));
 
-% Loading time group duration
+% Loading time group start and end
 data_tg = load(fullfile(savedir,'Time_Groups.mat'));
 ind_group = strcmp(data_tg.TimeGroups_name,timegroup);
 if isempty(ind_group)
     warning('Time Group not found. Taking whole [%s-%s]',recording_name,timegroup);
     timegroup = 'WHOLE-FUS';
     t_start = data_tr.time_ref.Y(1);
-    t_end = data_tr.time_ref.Y(1);
-    timegroup_duration = data_tr.time_ref.Y(end)-data_tr.time_ref.Y(1);  
+    t_end = data_tr.time_ref.Y(end);
 else
     S = data_tg.TimeGroups_S(ind_group);
     temp = datenum(S.TimeTags_strings(:,1));
     t_start = (temp-floor(temp))*24*3600;
     temp = datenum(S.TimeTags_strings(:,2));
     t_end = (temp-floor(temp))*24*3600;
-    % Duration
-    temp = datenum(data_tg.TimeGroups_duration);
-    all_tg_dur = 24*3600*(temp-floor(temp));
-    timegroup_duration = all_tg_dur(ind_group);
+
+    % Keeping tags within fUS range
+    t_start = max(t_start,data_tr.time_ref.Y(1));
+    t_end = min(t_end,data_tr.time_ref.Y(end));
+    index_keep = ones(length(t_start),1);
+    for i=1:length(t_start)
+        if t_end(i)-t_start(i)<=0
+            index_keep(i)=0;
+        end
+    end
+    t_start = t_start(index_keep==1);
+    t_end = t_end(index_keep==1);
 end
 
 
@@ -80,10 +90,10 @@ else
     else
         % batch mode
         % ind_events = 1:length(d_events);
-%         batch_csv_events = {'Ripples-Abs-All.csv';'Ripples-Sqrt-All.csv'};
+        batch_csv_events = {'Ripples-Abs-All.csv';'Ripples-Sqrt-All.csv'};
 %         batch_csv_events = {'[Pyr]Ripples-Abs-Fast.csv';'[Pyr]Ripples-Abs-Long.csv';'[Pyr]Ripples-Abs-Strong.csv';...
 %         '[Gyr]Ripples-Abs-Fast.csv';'[Gyr]Ripples-Abs-Long.csv';'[Gyr]Ripples-Abs-Strong.csv'};
-        batch_csv_events = {'Ripples-Abs-All.csv'};
+%         batch_csv_events = {'Ripples-Abs-All.csv'};
         ind_events = [];
         for i=1:length(batch_csv_events)
             ind_keep = find(strcmp({d_events(:).name}',char(batch_csv_events(i))));
@@ -212,13 +222,16 @@ for kk=1:length(all_event_names)
     % Keeping events restricted to time_group
     index_keep = zeros(length(t_events),1);
     for i=1:length(t_events)
-        if sum(sign(t_start-t_events(i))~=sign(t_end-t_events(i)))>0
+        if sum(sign(t_start-t_events(i))~=sign(t_end-t_events(i)))>0 && t_events(i)>data_tr.time_ref.Y(1) && t_events(i)<data_tr.time_ref.Y(end)
             index_keep(i)=1;
         end
     end
-    t_events = t_events(index_keep);
+    events = events(index_keep==1,:);
+    t_events = t_events(index_keep==1);
     n_events = size(events,1);
+    timegroup_duration = sum((t_end-t_start));
     density_events = n_events/timegroup_duration;
+    fprintf('Number of events selected in [%s] : %d/%d events.\n',timegroup,n_events,length(index_keep));
 
     
     % Loading main channel filtered
@@ -234,13 +247,14 @@ for kk=1:length(all_event_names)
 
     % Loading main channel Wavelet
     [Cdata_sub,Xdata_sub,freqdom] = load_wavelet(recording_name,channel_id);
-    % to fix
+    % Load random spectrogram
     if isempty(Cdata_sub)
         Xdata_sub = X1;
         freqdom = 1:1:250;
-        Cdata_sub = zeros(length(freqdom),length(Xdata_sub));
+        Cdata_sub = rand(length(freqdom),length(Xdata_sub));
         % return;
     end
+
     % Correction
     exp_cor = .25;
     correction = repmat((freqdom(:).^exp_cor),1,size(Cdata_sub,2));
@@ -258,8 +272,8 @@ for kk=1:length(all_event_names)
     t_bins_fus  = (t_before:1/sampling_fus:t_after)';
     t_bins_lfp  = (t_before:1/sampling_lfp:t_after)';
     
-    % Interpolate LFP
     
+    % Interpolate LFP
     fprintf('Interpolating %d LFP channels [%s] ...',n_channels,recording_name);
     Xq_evt_lfp = [];
     for i =1:n_events
@@ -287,47 +301,51 @@ for kk=1:length(all_event_names)
     Y3q_evt_ = reshape(Y3q_evt,[size(Y3q_evt,1) length(t_bins_fus) n_events]);  
     
     % Reshaping LFP
-    % Xq_evt_lfp_ = reshape(Xq_evt_lfp,[length(t_bins_lfp) n_events]);
+    Xq_evt_lfp_ = reshape(Xq_evt_lfp,[length(t_bins_lfp) n_events]);
     Y0q_evt_ = reshape(Y0q_evt,[size(Y0q_evt,1) length(t_bins_lfp) n_events]);
     Y1q_evt_ = reshape(Y1q_evt,[length(t_bins_lfp) n_events]);
     Cdata_evt_ = reshape(Cdata_evt,[size(Cdata_evt,1) length(t_bins_lfp) n_events]);
-    Cdata_mean = mean(Cdata_evt_,3,'omitnan');
+    % Saving in int format
+    Cdata_evt_int = int16(save_ratio_spectro*Cdata_evt_);    
+    % Cdata_mean = mean(Cdata_evt_,3,'omitnan');
 
     
     % Baseline extraction and normalization
-    t_baseline_start = -1;           % seconds
-    t_baseline_end = 0;           % seconds
+    Xq_evt_fus_ = reshape(Xq_evt_fus,[length(t_bins_fus) n_events]);
     ind_baseline  = find((t_bins_fus-t_baseline_start).*(t_bins_fus-t_baseline_end)<=0);
     Y2q_evt_baseline = mean(Y2q_evt_(:,ind_baseline,:),2,'omitnan');
     Y2q_evt_normalized = Y2q_evt_-repmat(Y2q_evt_baseline,[1 size(Y2q_evt_,2) 1]);
-    Y2q_evt_mean = mean(Y2q_evt_normalized,3,'omitnan');
-    Y2q_evt_median = median(Y2q_evt_normalized,3,'omitnan');
+    % Y2q_evt_mean = mean(Y2q_evt_normalized,3,'omitnan');
+    % Y2q_evt_median = median(Y2q_evt_normalized,3,'omitnan');
 
     Y3q_evt_baseline = mean(Y3q_evt_(:,ind_baseline,:),2,'omitnan');
-    Y3q_evt_normalized = Y3q_evt_-repmat(Y3q_evt_baseline,[1 size(Y3q_evt_,2) 1]);
+    Y3q_evt_normalized = Y3q_evt_ - repmat(Y3q_evt_baseline,[1 size(Y3q_evt_,2) 1]);
     
-    % Computing sequences
+    % Computing mean-median sequences
     Y3q_evt_mean = mean(Y3q_evt_normalized,3,'omitnan');
-    Y3q_evt_reshaped = reshape(Y3q_evt_mean,[size(IM,1) size(IM,2) length(t_bins_fus)]);
+    Y3q_evt_mean_reshaped = reshape(Y3q_evt_mean,[size(IM,1) size(IM,2) length(t_bins_fus)]);
     Y3q_evt_median = median(Y3q_evt_normalized,3,'omitnan');
     Y3q_evt_median_reshaped = reshape(Y3q_evt_median,[size(IM,1) size(IM,2) length(t_bins_fus)]);
     
     
     % Saving Data
-    save_dir = fullfile(DIR_STATS,'Event_Imaging',recording_name,event_name);
+    save_dir = fullfile(DIR_STATS,'PeriEvent_Sequence',recording_name);
     if ~isfolder(save_dir)
         mkdir(save_dir);
     end
+    filename_save = sprintf(strcat('[%s][%s]PeriEvent_Sequence.mat'),event_name,timegroup);
+    
     Params.recording_name = recording_name;
     Params.timegroup = timegroup;
+    Params.event_name = event_name;
+    Params.band_name = band_name;
     Params.timegroup_duration = timegroup_duration;
-    % Params.mean_dur = mean_dur;
-    % Params.mean_freq = mean_freq;
-    % Params.mean_p2p = mean_p2p;
+    Params.EventHeader = EventHeader;
+    Params.MetaData = MetaData;
+    Params.events = events;
+    Params.t_events = t_events;
     Params.n_events = n_events;
     Params.density_events = density_events;
-    Params.t_events = t_events;
-    Params.band_name = band_name;
     Params.channel_id = channel_id;
 %   Params.all_labels_regions = all_labels_regions;
 %   Params.all_labels_channels = all_labels_channels;
@@ -337,30 +355,17 @@ for kk=1:length(all_event_names)
     Params.t_after = t_after;
     Params.sampling_fus = sampling_fus;
     Params.sampling_lfp = sampling_lfp;
-    % Params.t_bins_fus = t_bins_fus;
-    % Params.t_bins_lfp = t_bins_lfp;
+    Params.size_im = [size(IM,1),size(IM,2),size(IM,3)];
+    Params.save_ratio_spectro = save_ratio_spectro;
+%     Params.t_bins_fus = t_bins_fus;
+%     Params.t_bins_lfp = t_bins_lfp;
 
-
-    % Traces
-    filename_save = sprintf(strcat('[%s-%s]Event-Imaging_Traces.mat'),event_name,timegroup);
     save(fullfile(save_dir,filename_save),'Params',...
         'all_labels_channels','freqdom','t_bins_lfp',...
-        'Y0q_evt_','Y1q_evt_','Cdata_evt_','-v7.3');
-    fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save));
-
-    % Regions
-    filename_save = sprintf(strcat('[%s-%s]Event-Imaging_Regions.mat'),event_name,timegroup);
-    save(fullfile(save_dir,filename_save),'Params',...
+        'Xq_evt_lfp_','Y0q_evt_','Y1q_evt_','Cdata_evt_int',...
         'all_labels_regions','t_bins_fus',...
-        'Y2q_evt_mean','Y2q_evt_median',...
-        'Y2q_evt_normalized','-v7.3');
-    fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save));
-
-    % Voxels
-    filename_save = sprintf(strcat('[%s-%s]Event-Imaging_Voxels.mat'),event_name,timegroup);
-    save(fullfile(save_dir,filename_save),'Params',...
-        'Y3q_evt_reshaped','Y3q_evt_median_reshaped',...
-        't_bins_fus','-v7.3');
+        'Xq_evt_fus_','Y2q_evt_normalized',...
+        'Y3q_evt_normalized','Y3q_evt_mean_reshaped','Y3q_evt_median_reshaped','-v7.3');
     fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save));
     
 end

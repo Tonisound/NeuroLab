@@ -60,8 +60,8 @@ switch strtrim(str(val,:))
     case 'Segregate Hippocampal Ripples'
         segregate_ripple_events(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),1);
 
-    case 'Compute Peri-Event Traces'
-        compute_peri_event_traces(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),1);
+    case 'Compute Peri-Event Sequence'
+        compute_peri_event_sequence(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),1);
         
     case 'Detect Early-Mid-Late Runs'
         detect_earlymidlate_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);

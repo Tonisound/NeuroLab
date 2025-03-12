@@ -350,7 +350,7 @@ pl_str = 'Compute Normalized Movie|Edit Anatomical Regions - Register Atlas|Conv
 pl_str = strcat(pl_str,'Import Anatomical Regions|Import LFP Traces|Import Intan Files|Import External Files|Import NEV Tracking|Duplicate main LFP channel');
 pl_str = strcat(pl_str,'|Filter LFP channels - Extract Power Envelope|Filter ACC/GYR/EMG channels - Extract Power Envelope|Compute Wavelet Spectrogram');
 pl_str = strcat(pl_str,'|Divide LFP Frequency Bands|Detect Vascular Surges|Detect Locomotion Events|Detect Sleep Events');
-pl_str = strcat(pl_str,'|Detect Left-Right Runs|Detect Early-Mid-Late Runs|Detect Hippocampal Ripples|Segregate Hippocampal Ripples|Compute Peri-Event Traces');
+pl_str = strcat(pl_str,'|Detect Left-Right Runs|Detect Early-Mid-Late Runs|Detect Hippocampal Ripples|Segregate Hippocampal Ripples|Compute Peri-Event Sequence');
 pl_str = strcat(pl_str,'|Generate Time Indexes|Generate Time Groups|Generate Region Groups');
 pl_str = strcat(pl_str,'|Run GLM Analysis');
 pl_str = strcat(pl_str,'|Export Time Tags|Export Image Patches|Export Anatomical Regions|Export LFP Traces (.dat)|Export fUS Time Series (.csv)');
@@ -374,7 +374,7 @@ fl = uicontrol(f,'Style','popup',...
     'Parent',botPanel);
 fl_str = '(Movie) Normalized Movie|(Movie) Deformation Field|(Movie) Data Reconstruction';
 fl_str = strcat(fl_str,'|(Figure) Correlation Analysis|(Figure) LFP Wavelet Analysis|(Figure) Sleep Scoring|(Figure) fUS Episode Statistics|(Figure) fUS Fourier Analysis');
-fl_str = strcat(fl_str,'|(Figure) Principal and Independent Component Analysis|(Figure) Global Episode Display|(Figure) Peri-Event Time Histogram|(Figure) Peri-Event LFP|(Figure) Event Imaging');
+fl_str = strcat(fl_str,'|(Figure) Principal and Independent Component Analysis|(Figure) Global Episode Display|(Figure) Peri-Event Time Histogram|(Figure) Peri-Event LFP|(Figure) Peri-Event Sequence');
 fl_str = strcat(fl_str,'|(Figure) Timed Frames|(Figure) Peak Detection|(Figure) Auto-Correlation fUS|(Figure) Cross-Correlation LFP-fUS|(Figure) Vascular Potentiation');
 fl.String = fl_str;    
 % Process Button

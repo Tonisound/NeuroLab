@@ -11,7 +11,7 @@ if nargin <3
 end
 
 temp = regexp(foldername,filesep,'split');
-cur_recording=char(temp(end));
+cur_recording = char(temp(end));
 
 % Parameters
 fdom_min = 1;
@@ -25,14 +25,30 @@ step_save_duration = .01; % seconds
 f_save_duration = 1/step_save_duration;
 save_ratio = 100;
 
+% Loading Nconfig
+channel_mainlfp = '';
+if isfile(fullfile(foldername,'Config.mat'))
+    d_config = load(fullfile(foldername,'Config.mat'));
+    if ~isempty(d_config.File.mainlfp)
+        channel_mainlfp = d_config.File.mainlfp;
+    end
+end
+
 % LFP Channel Loading
 d_lfp = dir(fullfile(foldername,'Sources_LFP','LFP_*.mat'));
 % renaming LFP channels
 all_lfp_channels = {d_lfp(:).name}';
 all_lfp_channels = strrep(all_lfp_channels,'LFP_','');
 all_lfp_channels = strrep(all_lfp_channels,'.mat','');
-ind_selected = 1:length(all_lfp_channels);
 
+% Default Selection
+if ~isempty(channel_mainlfp)
+    % main channel only
+    ind_selected = find(strcmp(all_lfp_channels,'005')==1);
+else
+    % all channels
+    ind_selected = 1:length(all_lfp_channels);
+end
 
 % Channel Selection
 if val == 1
@@ -73,7 +89,7 @@ for j=1:n_channels
     f_sub = f_samp/sub_samp;
     scales = Fc*f_sub./freqdom;
     
-    n_samples = bout_save_duration*f_samp;
+    n_samples = round(bout_save_duration*f_samp);
     index_start = 1:n_samples:length(Yraw);
     index_end = [n_samples:n_samples:length(Yraw),length(Yraw)];
     
@@ -84,7 +100,7 @@ for j=1:n_channels
         mkdir(data_dir);
     end
     for k=1:length(index_start)
-        fprintf('Computing Time-Frequency Spectrogramm [%s] [%d/%d] ...',cur_channel,k,length(index_start));
+        fprintf('Computing Time-Frequency Spectrogramm [Channel:%s] [Bout:%d/%d] ...',cur_channel,k,length(index_start));
         Y = Yraw(index_start(k):sub_samp:index_end(k));
         coefs_wav   = cmorcwt(Y,scales,Fb,Fc);
         Cdata = log10(abs(coefs_wav)).^2;
@@ -95,12 +111,15 @@ for j=1:n_channels
         x_end = Xraw(index_end(k));
         X = Xraw(index_start(k):sub_samp:index_end(k));
         
-        % Subsampling Cdata to save
+        % Interpolating Cdata to save (long)
         Xq = x_start:step_save_duration:x_end;
         Cdata_sub_interp = (interp1(X,Cdata',Xq))';
-        step_sub = max(floor(f_sub/f_save_duration),1);
-        Cdata_sub_subsampled = Cdata(:,1:step_sub:end);
-        Cdata_sub = Cdata_sub_subsampled;
+        Cdata_sub = Cdata_sub_interp;
+%         % Subsampling Cdata to save (fast)
+%         step_sub = max(round(f_sub/f_save_duration),1);
+%         Cdata_sub_subsampled = Cdata(:,1:step_sub:end);
+%         Cdata_sub = Cdata_sub_subsampled;
+        % Saving in int format
         Cdata_sub_int = int16(save_ratio*Cdata_sub);
         
         % Saving

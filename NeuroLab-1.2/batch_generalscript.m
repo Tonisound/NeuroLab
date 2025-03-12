@@ -667,8 +667,8 @@ for i = 1:length(ind_files)
             case 'Segregate Hippocampal Ripples'
                 success = segregate_ripple_events(fullfile(DIR_SAVE,FILES(ii).nlab),0);
 
-            case 'Compute Peri-Event Traces'
-                success = compute_peri_event_traces(fullfile(DIR_SAVE,FILES(ii).nlab),0);
+            case 'Compute Peri-Event Sequence'
+                success = compute_peri_event_sequence(fullfile(DIR_SAVE,FILES(ii).nlab),0);
                 
             case 'Generate Time Indexes'
                 success = generate_time_indexes(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
@@ -733,8 +733,8 @@ for i = 1:length(ind_files)
             case '(Figure) Cross-Correlation LFP-fUS'
                 f2 = figure_CrossCorrelation(myhandles,0,str_tag);
                 
-            case '(Figure) Event Imaging'
-                f2 = figure_Event_Imaging(myhandles,0,str_regions);
+            case '(Figure) Peri-Event Sequence'
+                f2 = figure_Peri_Event_Sequence(myhandles,0,str_regions,str_traces);
                 
             case '(Figure) Timed Frames'
                 f2 = figure_Timed_Frames(myhandles,0,str_regions,str_tag);
