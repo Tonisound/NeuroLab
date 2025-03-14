@@ -44,7 +44,7 @@ all_lfp_channels = strrep(all_lfp_channels,'.mat','');
 % Default Selection
 if ~isempty(channel_mainlfp)
     % main channel only
-    ind_selected = find(strcmp(all_lfp_channels,'005')==1);
+    ind_selected = find(strcmp(all_lfp_channels,channel_mainlfp)==1);
 else
     % all channels
     ind_selected = 1:length(all_lfp_channels);

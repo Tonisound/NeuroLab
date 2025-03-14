@@ -21,15 +21,18 @@ end
 
 
 % Parameters
-timegroup = 'NREM'; % Time Group for restriction
-band_name = 'ripple';
+flag_save_large = false;            % Saving all events
+timegroup = 'NREM';                 % Time Group for restriction
+band_name = 'ripple';               % Filtered band for main channel
 sampling_fus = 5;                   % fUS interpolation frequency (Hz)
 sampling_lfp = 1000;                % LFP interpolation frequency (Hz)
+sampling_spectro = 200;             % Spectrogram interpolation frequency (Hz)
 t_before = -1;                      % time window start (seconds)
 t_after = 5;                        % time window end (seconds) 
 t_baseline_start = -1;              % time start baseline (seconds) 
 t_baseline_end = 0;                 % time end baseline (seconds) 
-save_ratio_spectro = 100;           % ratio for spectrogram compression 
+save_ratio_spectro = 100;           % ratio for spectrogram compression
+save_ratio_fus = 1000;               % ratio for fus compression 
 
 
 % Getting recording name
@@ -271,17 +274,20 @@ for kk=1:length(all_event_names)
     % Computing event averages and fUS averages
     t_bins_fus  = (t_before:1/sampling_fus:t_after)';
     t_bins_lfp  = (t_before:1/sampling_lfp:t_after)';
+    t_bins_spectro  = (t_before:1/sampling_spectro:t_after)';
     
     
     % Interpolate LFP
     fprintf('Interpolating %d LFP channels [%s] ...',n_channels,recording_name);
     Xq_evt_lfp = [];
+    Xq_evt_spectro = [];
     for i =1:n_events
         Xq_evt_lfp = [Xq_evt_lfp;t_events(i)+t_bins_lfp];
+        Xq_evt_spectro = [Xq_evt_spectro;t_events(i)+t_bins_spectro];
     end
     Y0q_evt = (interp1(X0,Y0,Xq_evt_lfp))';
     Y1q_evt = interp1(X1,Y1,Xq_evt_lfp);
-    Cdata_evt = (interp1(Xdata_sub,Cdata',Xq_evt_lfp))';
+    Cdata_evt = (interp1(Xdata_sub,Cdata',Xq_evt_spectro))';
     fprintf(' done.\n');
 
     % Interpolate fUS
@@ -302,24 +308,35 @@ for kk=1:length(all_event_names)
     
     % Reshaping LFP
     Xq_evt_lfp_ = reshape(Xq_evt_lfp,[length(t_bins_lfp) n_events]);
+    Xq_evt_spectro_ = reshape(Xq_evt_spectro,[length(t_bins_spectro) n_events]);
     Y0q_evt_ = reshape(Y0q_evt,[size(Y0q_evt,1) length(t_bins_lfp) n_events]);
+    Y0q_evt_mean = mean(Y0q_evt_,3,'omitnan');
+    Y0q_evt_median = median(Y0q_evt_,3,'omitnan');
+    Y0q_evt_std = std(Y0q_evt_,[],3,'omitnan');
+    
     Y1q_evt_ = reshape(Y1q_evt,[length(t_bins_lfp) n_events]);
-    Cdata_evt_ = reshape(Cdata_evt,[size(Cdata_evt,1) length(t_bins_lfp) n_events]);
+    Y1q_evt_mean = mean(Y1q_evt_,2,'omitnan');
+    Y1q_evt_median = mean(Y1q_evt_,2,'omitnan');
+    Y1q_evt_std = std(Y1q_evt_,[],2,'omitnan');
+    
+    Cdata_evt_ = reshape(Cdata_evt,[size(Cdata_evt,1) length(t_bins_spectro) n_events]);
+    Cdata_mean = mean(Cdata_evt_,3,'omitnan');
     % Saving in int format
     Cdata_evt_int = int16(save_ratio_spectro*Cdata_evt_);    
-    % Cdata_mean = mean(Cdata_evt_,3,'omitnan');
-
+    
     
     % Baseline extraction and normalization
     Xq_evt_fus_ = reshape(Xq_evt_fus,[length(t_bins_fus) n_events]);
     ind_baseline  = find((t_bins_fus-t_baseline_start).*(t_bins_fus-t_baseline_end)<=0);
     Y2q_evt_baseline = mean(Y2q_evt_(:,ind_baseline,:),2,'omitnan');
     Y2q_evt_normalized = Y2q_evt_-repmat(Y2q_evt_baseline,[1 size(Y2q_evt_,2) 1]);
-    % Y2q_evt_mean = mean(Y2q_evt_normalized,3,'omitnan');
-    % Y2q_evt_median = median(Y2q_evt_normalized,3,'omitnan');
+    Y2q_evt_mean = mean(Y2q_evt_normalized,3,'omitnan');
+    Y2q_evt_median = median(Y2q_evt_normalized,3,'omitnan');
 
     Y3q_evt_baseline = mean(Y3q_evt_(:,ind_baseline,:),2,'omitnan');
     Y3q_evt_normalized = Y3q_evt_ - repmat(Y3q_evt_baseline,[1 size(Y3q_evt_,2) 1]);
+%     % Saving in int format
+%     Y3q_evt_normalized_int = int16(save_ratio_fus*Y3q_evt_normalized); 
     
     % Computing mean-median sequences
     Y3q_evt_mean = mean(Y3q_evt_normalized,3,'omitnan');
@@ -333,7 +350,6 @@ for kk=1:length(all_event_names)
     if ~isfolder(save_dir)
         mkdir(save_dir);
     end
-    filename_save = sprintf(strcat('[%s][%s]PeriEvent_Sequence.mat'),event_name,timegroup);
     
     Params.recording_name = recording_name;
     Params.timegroup = timegroup;
@@ -355,18 +371,35 @@ for kk=1:length(all_event_names)
     Params.t_after = t_after;
     Params.sampling_fus = sampling_fus;
     Params.sampling_lfp = sampling_lfp;
+    Params.sampling_spectro = sampling_spectro;
     Params.size_im = [size(IM,1),size(IM,2),size(IM,3)];
     Params.save_ratio_spectro = save_ratio_spectro;
+    Params.save_ratio_fus = save_ratio_fus;
 %     Params.t_bins_fus = t_bins_fus;
 %     Params.t_bins_lfp = t_bins_lfp;
 
-    save(fullfile(save_dir,filename_save),'Params',...
-        'all_labels_channels','freqdom','t_bins_lfp',...
-        'Xq_evt_lfp_','Y0q_evt_','Y1q_evt_','Cdata_evt_int',...
+    filename_save_1 = sprintf(strcat('[%s][%s]PeriEvent_Sequence.mat'),event_name,timegroup);
+    save(fullfile(save_dir,filename_save_1),'Params',...
+        'all_labels_channels','t_bins_lfp',...
+        'Y0q_evt_mean','Y0q_evt_median','Y0q_evt_std',...
+        'Y1q_evt_mean','Y1q_evt_median','Y1q_evt_std',...
+        'freqdom','Cdata_mean',...
         'all_labels_regions','t_bins_fus',...
-        'Xq_evt_fus_','Y2q_evt_normalized',...
-        'Y3q_evt_normalized','Y3q_evt_mean_reshaped','Y3q_evt_median_reshaped','-v7.3');
-    fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save));
+        'Y2q_evt_mean','Y2q_evt_median',...
+        'Y3q_evt_mean_reshaped','Y3q_evt_median_reshaped','-v7.3');
+    fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save_1));
+
+    if flag_save_large
+        filename_save_2 = sprintf(strcat('[%s][%s]PeriEvent_AllEvents.mat'),event_name,timegroup);
+        save(fullfile(save_dir,filename_save_2),'Params',...
+            'all_labels_channels','t_bins_lfp',...
+            'Xq_evt_lfp_','Y0q_evt_','Y1q_evt_',...
+            'freqdom','Xq_evt_spectro_','Cdata_evt_int',...
+            'all_labels_regions','t_bins_fus',...
+            'Xq_evt_fus_','Y2q_evt_normalized',...
+            'Y3q_evt_normalized','-v7.3'); % ,'Y3q_evt_normalized_int'
+        fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save_2));
+    end
     
 end
 

@@ -84,7 +84,7 @@ switch strtrim(str(val,:))
         figure_AutoCorrelation(handles,1);
             
     case '(Figure) Peri-Event Sequence'
-        figure_Peri_Event_Sequence(handles,1,[]);
+        figure_PeriEventSequence(handles,1,[]);
 
     case '(Figure) Timed Frames'
         figure_Timed_Frames(handles,1,[])

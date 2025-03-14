@@ -77,6 +77,7 @@ end
 % LFP Channel Selection
 d_lfp = dir(fullfile(DIR_SAVE,recording_name,'Sources_LFP','LFP_*.mat'));
 if isempty(nc_channnels)
+    % Nconfig file absent
     if val == 1 
         % user mode
         [ind_channels,v] = listdlg('Name','Channel Selection','PromptString','Select channels to display',...
@@ -85,19 +86,28 @@ if isempty(nc_channnels)
             return;
         end
     else
+        % all channels
         ind_channels = 1:length(d_lfp);
     end
+    all_lfp_channels = {d_lfp(ind_channels).name}';
 else
-    % all LFP channels in Nconfig
-    ind_channels = [];
-    for i=1:length(nc_channnels)
-        cur_channel = sprintf('LFP_%s.mat',char(nc_channnels(i)));
-        ind_keep = find(strcmp({d_lfp(:).name}',cur_channel));
-        ind_channels = [ind_channels;ind_keep];
+    % Nconfig file present
+    if val == 1 
+        % user mode
+        [ind_channels,v] = listdlg('Name','Channel Selection','PromptString','Select channels to display',...
+            'SelectionMode','multiple','ListString',strcat('LFP_',nc_channnels,'.mat'),'InitialValue',1,'ListSize',[300 500]);
+        if v==0 || isempty(ind_channels)
+            return;
+        end
+    else
+        ind_channels = 1:length(nc_channnels);
     end
+    all_lfp_channels = strcat('LFP_',nc_channnels(ind_channels),'.mat'); 
 end
-d_lfp = d_lfp(ind_channels);
-all_lfp_channels = {d_lfp(:).name}';
+
+
+
+% all_lfp_channels = {d_lfp(:).name}';
 all_lfp_channels = strrep(all_lfp_channels,'LFP_','');
 all_lfp_channels = strrep(all_lfp_channels,'.mat','');
 n_channels = length(all_lfp_channels);

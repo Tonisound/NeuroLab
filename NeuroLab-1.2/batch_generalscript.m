@@ -734,7 +734,7 @@ for i = 1:length(ind_files)
                 f2 = figure_CrossCorrelation(myhandles,0,str_tag);
                 
             case '(Figure) Peri-Event Sequence'
-                f2 = figure_Peri_Event_Sequence(myhandles,0,str_regions,str_traces);
+                f2 = figure_PeriEventSequence(myhandles,0,str_regions,str_traces);
                 
             case '(Figure) Timed Frames'
                 f2 = figure_Timed_Frames(myhandles,0,str_regions,str_tag);
