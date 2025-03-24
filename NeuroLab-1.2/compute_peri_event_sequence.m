@@ -93,10 +93,10 @@ else
     else
         % batch mode
         % ind_events = 1:length(d_events);
-        batch_csv_events = {'Ripples-Abs-All.csv';'Ripples-Sqrt-All.csv'};
+%         batch_csv_events = {'Ripples-Abs-All.csv'};
+        batch_csv_events = {'Ripples-Abs-All.csv';'Ripples-Sqrt-All.csv';'Ripples-Sqrt-Fast.csv';'Ripples-Sqrt-Long.csv';'Ripples-Sqrt-Strong.csv'};
 %         batch_csv_events = {'[Pyr]Ripples-Abs-Fast.csv';'[Pyr]Ripples-Abs-Long.csv';'[Pyr]Ripples-Abs-Strong.csv';...
 %         '[Gyr]Ripples-Abs-Fast.csv';'[Gyr]Ripples-Abs-Long.csv';'[Gyr]Ripples-Abs-Strong.csv'};
-%         batch_csv_events = {'Ripples-Abs-All.csv'};
         ind_events = [];
         for i=1:length(batch_csv_events)
             ind_keep = find(strcmp({d_events(:).name}',char(batch_csv_events(i))));
@@ -234,7 +234,13 @@ for kk=1:length(all_event_names)
     n_events = size(events,1);
     timegroup_duration = sum((t_end-t_start));
     density_events = n_events/timegroup_duration;
-    fprintf('Number of events selected in [%s] : %d/%d events.\n',timegroup,n_events,length(index_keep));
+    
+    if n_events == 0
+        warning('No events matching selection in [%s][%s]. Proceeding.',timegroup,event_name);
+        continue;
+    else
+        fprintf('Number of events selected in [%s] : %d/%d events.\n',timegroup,n_events,length(index_keep));
+    end
 
     
     % Loading main channel filtered

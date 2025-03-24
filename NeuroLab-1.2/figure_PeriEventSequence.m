@@ -93,9 +93,9 @@ else
         end
         ind_keep1 = ind_keep1>0;
 
-        batch_csv_eventname = {'[Ripples-Abs-All]';'[Ripples-Sqrt-All]'};
-        %         batch_csv_eventname = {'[Ripples-Abs-All]'};
-        %         batch_csv_eventname = {'[[Pyr]Ripples-Abs-Fast]';'[[Pyr]Ripples-Abs-Long]';'[[Pyr]Ripples-Abs-Strong]';...
+        % batch_csv_eventname = {'[Ripples-Abs-All]'};
+        batch_csv_eventname = {'[Ripples-Abs-All]';'[Ripples-Sqrt-All]';'[Ripples-Sqrt-Fast]';'[Ripples-Sqrt-Long]';'[Ripples-Sqrt-Strong]'};
+        % batch_csv_eventname = {'[[Pyr]Ripples-Abs-Fast]';'[[Pyr]Ripples-Abs-Long]';'[[Pyr]Ripples-Abs-Strong]';...
         %             '[[Gyr]Ripples-Abs-Fast]';'[[Gyr]Ripples-Abs-Long]';'[[Gyr]Ripples-Abs-Strong]'};
         ind_keep2 = zeros(length(d_pe),1);
         for i=1:length(batch_csv_eventname)
@@ -119,7 +119,7 @@ flag_load_large = false;                    % Loading all events
 sequence_display_reg = 'median';            % Displaying region sequence
 sequence_display_vox = 'median';            % Displaying voxel sequence
 % Flag save
-flag_save_figure = 1;           % Save Figure
+flag_save_figure = 0;           % Save Figure
 flag_save_movie = 1;            % Save Movie
 
 
@@ -302,7 +302,7 @@ for kk = 1:length(all_pe_names)
             l.Color = 'r';
         end
     end
-    ax1.Title.String = sprintf('All LFP channels [N=%d][%.2fHz]',n_events,density_events);
+    ax1.Title.String = sprintf('All LFP channels [N=%d][%.2f events/s]',n_events,density_events);
     ax1.YLim = offset_stepping*[-1;length(nc_channnels)+1];
     ax1.XLim = [-.1 .1];
     ax1.XLabel.String = 'time(sec)';
@@ -311,7 +311,7 @@ for kk = 1:length(all_pe_names)
     % ax1.YDir = 'reverse';
     ax1.TickLength(2) = 0;
     % ax1.YTickLabelRotation = 90;
-    ax1.Title.FontSize = 12;
+    ax1.Title.FontSize = 14;
 
 
     % Panel 2
@@ -481,6 +481,7 @@ if flag_save_movie
             ax.Title.String = tab.Title;
             colormap(ax,"jet");
             ax.CLim = [-2.5,5];
+            % ax.CLim = [-5,10];
 
             colorbar(ax,'eastoutside');
             if ~isempty(data_atlas)
@@ -497,7 +498,7 @@ if flag_save_movie
     end
 
     close(f2);
-    video_name = sprintf(strcat('%s'),f1.Name);
+    video_name = sprintf(strcat('%s-2'),f1.Name);
     save_video(work_dir,save_dir,video_name);
     % Removing frame directory
     rmdir(work_dir,'s');

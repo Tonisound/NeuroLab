@@ -6,6 +6,7 @@ function success = import_crop_video(F,handles,flag)
 % flag 1 - reimport
 
 success = false;
+video_quality_default = 'High';
 
 % global SEED DIR_SAVE FILES CUR_FILE;
 % F = FILES(CUR_FILE);
@@ -58,15 +59,15 @@ else
     t_interp = t_ref;
     fprintf('Opening Video - Extracting %d frames [%s] ...',n_frames,F.video);
     
-    all_frames = [];
+    all_frames_uncropped = [];
     for i = 1:length(t_samp)
         %fprintf('tsamp = %.2f, i=%d, duration = %.2f \n',t_samp(i),i,v.Duration);
         v.CurrentTime = t_samp(i);
         try
             vidFrame = readFrame(v);
             if strcmp(v.VideoFormat,'RGB24')
-                vidFrame = rgb2gray(vidFrame);
-                all_frames = cat(3,all_frames,vidFrame);
+                rgbFrame = rgb2gray(vidFrame);
+                all_frames_uncropped = cat(3,all_frames_uncropped,rgbFrame);
             end
         catch
             warning('Frame Skipped: Time %.2f. File [%s]',t_samp(i),video_file);
@@ -87,7 +88,7 @@ if exist(crop_file,'file')
     if isfield(data_crop,'video_quality')
         video_quality = data_crop.video_quality;
     else
-        video_quality = 'Medium';
+        video_quality = video_quality_default;
     end
     
     x_crop = data_crop.x_crop;
@@ -102,6 +103,8 @@ if exist(crop_file,'file')
         case 'Low'
             step_quality = 4;
     end
+
+    rgbFrame_cropped = rgbFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
     
     % reading frames
     all_frames = [];
@@ -114,14 +117,14 @@ if exist(crop_file,'file')
             v.CurrentTime = t_corrected(i);
             vidFrame = readFrame(v);
             if strcmp(v.VideoFormat,'RGB24')
-                vidFrame = rgb2gray(vidFrame);
-                vidFrame = vidFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
-                all_frames = cat(3,all_frames,vidFrame);
+                rgbFrame = rgb2gray(vidFrame);
+                rgbFrame_cropped = rgbFrame(x_crop(1):step_quality:x_crop(2),y_crop(1):step_quality:y_crop(2));
+                all_frames = cat(3,all_frames,rgbFrame_cropped);
                 % all_frames(:,:,i) = vidFrame;
             end
         catch
             % Empty Image Padding
-            all_frames = cat(3,all_frames,NaN(size(vidFrame)));
+            all_frames = cat(3,all_frames,NaN(size(rgbFrame_cropped)));
             % all_frames(:,:,i) = NaN(size(vidFrame));
             warning('Missing frame. Time: %.2f. Video Length: %.2f. File [%s]\n',t_corrected(i),v.Duration, v.Name);
         end
@@ -174,7 +177,7 @@ ax2.YTickLabel=[];
 ax2.Tag = 'AxCrop';
 
 % RE-drawing patch
-video_quality = 'Medium';
+video_quality = video_quality_default;
 if ~isempty(data_video)
     x1 = data_video.x_crop(1);
     x2 = data_video.x_crop(2);
