@@ -20,7 +20,7 @@ main_sep = '\t';                                                % ledger file se
 empty_c2 = '-';                                                 % empty atlas symbol 
 empty_c3 = '-';                                                 % empty plate symbol 
 region_sep = ' ';                                               % empty plate symbol 
-% case_sensitive = false;                                         % Case sensitivity 
+% case_sensitive = false;                                       % Case sensitivity 
 
 
 % Getting region directory

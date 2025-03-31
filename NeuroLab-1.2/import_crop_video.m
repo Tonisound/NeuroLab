@@ -7,6 +7,7 @@ function success = import_crop_video(F,handles,flag)
 
 success = false;
 video_quality_default = 'High';
+video_quality = video_quality_default;
 
 % global SEED DIR_SAVE FILES CUR_FILE;
 % F = FILES(CUR_FILE);
@@ -154,6 +155,7 @@ f.UserData.v = v;
 f.UserData.t_interp = t_interp;
 f.UserData.video_file = video_file;
 f.UserData.output_file = output_file;
+f.UserData.video_quality = video_quality;
 colormap(f,'gray');
 
 % Video Axis
@@ -161,7 +163,7 @@ ax = axes('Parent',f,'Tag','AxVideo','Title','',...
     'TickLength',[0 0],'XTick',[],'XTickLabel','','YTick',[],'YTickLabel','',...
     'Position',[.05 .95-(v_ratio*.9) .9 v_ratio*.9]);
 
-imagesc(mean(all_frames,3,'omitnan'),'Parent',ax,'Tag','ImageVideo');
+imagesc(mean(all_frames_uncropped,3,'omitnan'),'Parent',ax,'Tag','ImageVideo');
 ax.XTickLabel=[];
 ax.YTickLabel=[];
 ax.Tag = 'AxVideo';
@@ -171,13 +173,12 @@ ax2 = axes('Parent',f,'Tag','AxCrop','Title','Preview',...
     'TickLength',[0 0],'XTick',[],'XTickLabel','','YTick',[],'YTickLabel','');
 %axis(ax2,'equal');
 % Add uncropped image
-imagesc(mean(all_frames,3,'omitnan'),'Parent',ax2,'Tag','ImageCrop');
+imagesc(mean(all_frames_uncropped,3,'omitnan'),'Parent',ax2,'Tag','ImageCrop');
 ax2.XTickLabel=[];
 ax2.YTickLabel=[];
 ax2.Tag = 'AxCrop';
 
 % RE-drawing patch
-video_quality = video_quality_default;
 if ~isempty(data_video)
     x1 = data_video.x_crop(1);
     x2 = data_video.x_crop(2);
@@ -263,7 +264,8 @@ e1.UserData.delay_lfp_video = delay_lfp_video;
 % Button Group
 bg = uibuttongroup('Visible','on',...
     'Units','normalized',...
-    'Tag','ButtonGroup');
+    'Tag','ButtonGroup',...
+    'Parent',f);
 % Create three radio buttons in the button group.
 bg1 = uicontrol(bg,'Style','radiobutton',...
     'Units','normalized',...
@@ -320,7 +322,7 @@ else
 end
 set(e1,'Callback',{@e1_callback,handles});
 
-%set(bg,'SelectionChangedFcn',{@bg_Callback,handles})
+set(bg,'SelectionChangedFcn',{@bg_Callback,handles})
 set(cropButton,'Callback',{@cropButton_callback,handles});
 set(okButton,'Callback',{@okButton_callback,handles});
 set(cancelButton,'Callback',{@cancelButton_callback,handles});
@@ -331,6 +333,22 @@ e1_callback(e1,[],handles);
 
 waitfor(f);
 success = true;
+
+end
+
+function bg_Callback(hObj,~,~)
+
+f = hObj.Parent;
+f.UserData.video_quality = hObj.SelectedObject.Tag;
+
+% switch hObj.SelectedObject.Tag
+%     case 'High'
+%         f.UserData.video_quality = bg1;
+%     case 'Medium'
+%         f.UserData.video_quality = bg2;
+%     case 'Low'
+%         f.UserData.video_quality = bg3;
+% end
 
 end
 
@@ -600,6 +618,7 @@ v = f.UserData.v;
 delay_lfp_video = e1.UserData.delay_lfp_video;
 t_corrected = f.UserData.t_corrected;
 t_interp = f.UserData.t_interp;
+video_quality = f.UserData.video_quality;
 
 % Getting indexes
 x_crop = f.UserData.x_crop;
@@ -610,7 +629,7 @@ output_file = strrep(f.UserData.output_file,'Video.mat','CroppingInfo.mat');
 t_video = t_corrected;
 t_ref = t_interp;
 index_frames = 1:length(t_interp);
-save(output_file,'index_frames','t_ref','t_video','delay_lfp_video','x_crop','y_crop','-v7.3');
+save(output_file,'index_frames','video_quality','t_ref','t_video','delay_lfp_video','x_crop','y_crop','-v7.3');
 fprintf('Cropping Information Saved [%s].\n',output_file);
 
 % Closing figure
