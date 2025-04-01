@@ -654,6 +654,9 @@ for i = 1:length(ind_files)
             case 'Detect Locomotion Events'
                 success = detect_locomotion_events(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
+            case 'Compute Body Speed'
+                success = compute_body_speed(fullfile(FILES(ii).fullpath,FILES(ii).dir_ext),myhandles);
+                
             case 'Detect Left-Right Runs'
                 success = detect_leftright_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                     

@@ -47,6 +47,9 @@ switch strtrim(str(val,:))
     case 'Detect Locomotion Events'
         detect_locomotion_events(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
+    case 'Compute Body Speed'
+        compute_body_speed(fullfile(FILES(CUR_FILE).fullpath,FILES(CUR_FILE).dir_ext),handles);
+        
     case 'Detect Sleep Events'
         detect_sleep_events(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
