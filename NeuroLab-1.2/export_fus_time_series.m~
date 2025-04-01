@@ -182,7 +182,7 @@ end
 if flag_groups && ~isempty(data_tg)
     
     all_groups = data_tg.TimeGroups_name;
-    all_indexes = zeros(length(data_tr.time_ref.Y),length(all_groups));
+    all_indexes = NaN(length(data_tr.time_ref.Y),length(all_groups));
     
     for j = 1:length(all_groups)
         
@@ -190,9 +190,10 @@ if flag_groups && ~isempty(data_tg)
         tt_images = data_tg.TimeGroups_S(j).TimeTags_images;
         
         for i = 1:length(data_tr.time_ref.Y)
-            if sum((tt_images(:,1)-i).*(tt_images(:,2)-i)<=0)
-                all_indexes(i,j) = 1;
-            end
+            this_ydata = squeeze(IM(i,j,:));
+            this_name = sprintf('Voxel(%d-%d)',i,j);
+            all_ydata = [all_ydata,this_ydata];
+            all_names = [all_names,{this_name}];
         end
     end
 
@@ -206,14 +207,14 @@ if flag_groups && ~isempty(data_tg)
 
     fid_w = fopen(file_txt,'w');
     fwrite(fid_w,sprintf('<im_id>,<im_time(s)>'));
-    for k = 1:length(all_groups)
-        fwrite(fid_w,sprintf(',%s',char(all_groups(k))));
+    for k = 1:length(all_names)
+        fwrite(fid_w,sprintf(',%s',char(all_names(k))));
     end
     fwrite(fid_w,newline);
     for i=1:length(data_tr.time_ref.X)
         fwrite(fid_w,sprintf('%d,%.3f',data_tr.time_ref.X(i),data_tr.time_ref.Y(i)));
-        for k = 1:length(all_groups)
-            fwrite(fid_w,sprintf(',%d',all_indexes(i,k)));
+        for k = 1:length(all_names)
+            fwrite(fid_w,sprintf(',%.3f',all_ydata(i,k)));
         end
         fwrite(fid_w,newline);
     end
