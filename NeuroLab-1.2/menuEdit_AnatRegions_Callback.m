@@ -558,7 +558,7 @@ function newButton_callback(~,~,handles)
 % getting region name
 answer = inputdlg('Enter Region Name','Region creation',[1 60]);
 if ~isempty(handles.Region_table.Data)
-    while contains(char(answer),handles.Region_table.Data)
+    while sum(strcmp(char(answer),handles.Region_table.Data(:,1)))>0
         answer = inputdlg('Enter Region Name','Invalid name (Region already exists)',[1 60]);
     end
 end

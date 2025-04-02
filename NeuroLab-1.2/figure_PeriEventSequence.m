@@ -93,8 +93,7 @@ else
         end
         ind_keep1 = ind_keep1>0;
 
-        % batch_csv_eventname = {'[Ripples-Abs-All]'};
-        batch_csv_eventname = {'[Ripples-Abs-All]';'[Ripples-Sqrt-All]';'[Ripples-Sqrt-Fast]';'[Ripples-Sqrt-Long]';'[Ripples-Sqrt-Strong]'};
+        batch_csv_eventname = {'[Ripples-Merged-All]';'[Ripples-Merged-Fast]';'[Ripples-Merged-Long]';'[Ripples-Merged-Strong]'};
         % batch_csv_eventname = {'[[Pyr]Ripples-Abs-Fast]';'[[Pyr]Ripples-Abs-Long]';'[[Pyr]Ripples-Abs-Strong]';...
         %             '[[Gyr]Ripples-Abs-Fast]';'[[Gyr]Ripples-Abs-Long]';'[[Gyr]Ripples-Abs-Strong]'};
         ind_keep2 = zeros(length(d_pe),1);
@@ -119,7 +118,7 @@ flag_load_large = false;                    % Loading all events
 sequence_display_reg = 'median';            % Displaying region sequence
 sequence_display_vox = 'median';            % Displaying voxel sequence
 % Flag save
-flag_save_figure = 0;           % Save Figure
+flag_save_figure = 1;           % Save Figure
 flag_save_movie = 1;            % Save Movie
 
 
@@ -440,7 +439,7 @@ if flag_save_figure
 end
 
 % Saving Movie
-n_col = 5 ;
+n_col = 4 ;
 n_rows = ceil(length(all_tabs)/n_col);
 w_margin_1 = .02; % left margin
 w_margin_2 = .02; % right margin
@@ -480,8 +479,8 @@ if flag_save_movie
             ax.Position = get_position(n_rows,n_col,j,margins);
             ax.Title.String = tab.Title;
             colormap(ax,"jet");
-            ax.CLim = [-2.5,5];
-            % ax.CLim = [-5,10];
+%             ax.CLim = [-2.5,5];
+            ax.CLim = [-5,10];
 
             colorbar(ax,'eastoutside');
             if ~isempty(data_atlas)
@@ -498,7 +497,8 @@ if flag_save_movie
     end
 
     close(f2);
-    video_name = sprintf(strcat('%s-2'),f1.Name);
+    video_name = sprintf(strcat('%s'),f1.Name);
+%     video_name = sprintf(strcat('%s-2'),f1.Name);
     save_video(work_dir,save_dir,video_name);
     % Removing frame directory
     rmdir(work_dir,'s');

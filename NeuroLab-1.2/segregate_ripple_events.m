@@ -5,8 +5,8 @@ success = false;
 
 % Select event file
 folder_events = fullfile(savedir,'Events');
-% pattern_event = {'[Pyr]Ripples-Abs-All.csv';'[Gyr]Ripples-Abs-All.csv'};
-pattern_event = {'Ripples-Abs-All.csv'};
+% pattern_event = {'[Pyr]Ripples-Merged-All.csv';'[Gyr]Ripples-Merged-All.csv'};
+pattern_event = {'Ripples-Merged-All.csv'};
 
 for i=1:length(pattern_event)
     
