@@ -93,9 +93,9 @@ else
         end
         ind_keep1 = ind_keep1>0;
 
-        batch_csv_eventname = {'[Ripples-Merged-All]';'[Ripples-Merged-Fast]';'[Ripples-Merged-Long]';'[Ripples-Merged-Strong]'};
-        % batch_csv_eventname = {'[[Pyr]Ripples-Abs-Fast]';'[[Pyr]Ripples-Abs-Long]';'[[Pyr]Ripples-Abs-Strong]';...
-        %             '[[Gyr]Ripples-Abs-Fast]';'[[Gyr]Ripples-Abs-Long]';'[[Gyr]Ripples-Abs-Strong]'};
+        batch_csv_eventname = {'[Ripples-Merged-All]';'[Ripples-Merged-Fast]';'[Ripples-Merged-Long]';'[Ripples-Merged-Strong]'};      
+%         batch_csv_eventname = {'[[Pyr]Ripples-Abs-All]';'[[Pyr]Ripples-Abs-Fast]';'[[Pyr]Ripples-Abs-Long]';'[[Pyr]Ripples-Abs-Strong]'};
+        
         ind_keep2 = zeros(length(d_pe),1);
         for i=1:length(batch_csv_eventname)
             this_event = char(batch_csv_eventname(i));
@@ -452,6 +452,7 @@ margins = [w_margin_1,w_margin_2,w_eps;h_margin_1,h_margin_2,h_eps];
 
 % Save Movie
 if flag_save_movie
+    
     save_dir = fullfile(DIR_FIG,'PeriEvent_Sequence',recording_name);
     if ~isfolder(save_dir)
         mkdir(save_dir);
@@ -461,6 +462,11 @@ if flag_save_movie
         rmdir(work_dir,'s');
     end
     mkdir(work_dir);
+    work_dir2 = fullfile(save_dir,'Frames2');
+    if isfolder(work_dir2)
+        rmdir(work_dir2,'s');
+    end
+    mkdir(work_dir2);
 
     f2 = figure('Units','normalized');
     f2.OuterPosition = [0    0.4    1    0.4];
@@ -472,14 +478,16 @@ if flag_save_movie
             'Units','normalized','Position',[.25 .9 .5 .1],'Parent',f2);
         t.String = sprintf('Time from Event Peak = %.1f s',t_bins_fus(i));
 
+        all_axes = gobjects(length(all_tabs),1);
         for j = 1:length(all_tabs)
             tab = all_tabs(j);
             panel3 = findobj(tab,'Tag','Panel3');
             ax = copyobj(panel3.UserData.all_axes(i),f2);
+            all_axes(j) = ax;
+            
             ax.Position = get_position(n_rows,n_col,j,margins);
             ax.Title.String = tab.Title;
             colormap(ax,"jet");
-%             ax.CLim = [-2.5,5];
             ax.CLim = [-5,10];
 
             colorbar(ax,'eastoutside');
@@ -492,17 +500,27 @@ if flag_save_movie
 
         pic_name = sprintf(strcat('%s_%03d'),recording_name,i);
         saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+        
+        for j = 1:length(all_tabs)
+            ax = all_axes(j);
+            ax.CLim = [-2.5,5];
+        end
+        saveas(f2,fullfile(work_dir2,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+        
         delete(findobj(f2,'Type','Axes'));
-
     end
 
     close(f2);
     video_name = sprintf(strcat('%s'),f1.Name);
-%     video_name = sprintf(strcat('%s-2'),f1.Name);
     save_video(work_dir,save_dir,video_name);
     % Removing frame directory
     rmdir(work_dir,'s');
+    
+    video_name = sprintf(strcat('%s-2'),f1.Name);
+    save_video(work_dir2,save_dir,video_name);
+    rmdir(work_dir2,'s');
 
+    
 end
 
 f1.UserData.success = true;

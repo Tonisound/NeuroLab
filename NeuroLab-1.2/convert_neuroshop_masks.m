@@ -19,7 +19,7 @@ global SEED_ATLAS;
 load('Preferences.mat','GImport');
 pixel_thresh = GImport.pixel_thresh; % minimum region size (pixels);
 pattern_unnamed = GImport.pattern_unnamed; % minimum region size (pixels);
-test_whole = 1; %adding whole-reg (largest cover from Neuroshop regions)
+test_whole = 0; %adding whole-reg (largest cover from Neuroshop regions)
 test_erase = 0; %empty region folder
 
 if val==1
