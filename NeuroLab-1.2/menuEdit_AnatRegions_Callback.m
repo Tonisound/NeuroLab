@@ -200,6 +200,11 @@ mergeButton = uicontrol('Style','pushbutton',...
     'String','Merge Regions',...
     'Tag','mergeButton',...
     'Parent',f);
+wholeButton = uicontrol('Style','pushbutton',...
+    'Units','normalized',...
+    'String','Make Whole Region',...
+    'Tag','wholeButton',...
+    'Parent',f);
 
 newgroupButton = uicontrol('Style','pushbutton',... 
     'Units','normalized',...
@@ -319,6 +324,7 @@ edit_okButton.Position = [.825 .87 .075 .04];
 edit_cancelButton.Position = [.9 .87 .075 .04];
 duplicateButton.Position = [.825 .83 .15 .04];
 mergeButton.Position = [.825 .79 .15 .04];
+wholeButton.Position = [.825 .75 .15 .04];
 
 newgroupButton.Position = [.825 .69 .15 .04];
 removeButton.Position = [.825 .63 .15 .04];
@@ -349,6 +355,7 @@ set(edit_cancelButton,'Callback',{@edit_cancel_Button_callback,handles2});
 set(duplicateButton,'Callback',{@duplicateButton_callback,handles2});
 set(removeButton,'Callback',{@removeButton_callback,handles2});
 set(mergeButton,'Callback',{@mergeButton_callback,handles2});
+set(wholeButton,'Callback',{@wholeButton_callback,handles2});
 
 set(newgroupButton,'Callback',{@newgroupButton_callback,handles2});
 
@@ -1214,6 +1221,107 @@ if ~isempty(selection) && length(selection)>1
 else
     warning('Select at least two regions to merge');
 end
+
+end
+
+function wholeButton_callback(~,~,handles)
+% Generates whole-region from current regions
+
+load('Preferences.mat','GColors','GImport');
+alpha = GColors.patch_transparency;
+patch_width = GColors.patch_width;
+alpha_mask = GColors.mask_transparency;
+
+
+% Mask
+selection = 1:size(handles.Region_table.Data,1);
+if isempty(selection)
+    warning('At least one region must be present.');
+    return;
+end
+P = handles.Region_table.UserData.patches(selection);
+all_mask = [];
+all_colors = [];
+all_sticker_positions = [];
+for i=1:length(P)
+    mask = P(i).UserData.Mask;
+    all_mask = cat(3,all_mask,mask);
+    all_colors = cat(3,all_colors,P(i).UserData.Color);
+    all_sticker_positions = [all_sticker_positions;P(i).UserData.Sticker.Position(1) P(i).UserData.Sticker.Position(2)];
+end
+new_mask = double(sum(all_mask,3)>0);
+new_color = mean(all_colors,3);
+% Patch
+[y,x]= find(new_mask'==1);
+k = convhull(x,y);
+pxdata = x(k);
+pydata = y(k);
+
+% patch creation
+hq = patch('XData',pydata,...
+    'YData',pxdata,...
+    'FaceColor','none',...
+    'EdgeColor',new_color,...
+    'Tag','Whole-reg',...'Tag',prefix,...
+    'FaceAlpha',alpha,...
+    'LineWidth',patch_width,...
+    'Visible','on',...
+    'Parent',handles.AxEdit);
+% adding mask
+cdata = repmat(permute(new_color,[3,1,2]),[size(new_mask,1),size(new_mask,2)]);
+im_mask = image('CData',cdata,...
+    'Parent',handles.AxEdit,...
+    'Tag','ImageMask',...
+    'Hittest','off',...
+    'AlphaData',alpha_mask*new_mask,...
+    'Visible','off');
+% adding boundary
+B = bwboundaries(new_mask);
+line_boundary=[];
+for j=1:length(B)
+    boundary = B{j};
+    l = line('XData',boundary(:,2),'YData',boundary(:,1),...
+        'Color',new_color,...
+        'Parent',handles.AxEdit,...
+        'Tag','Boundary',...
+        'Hittest','off',...
+        'Visible','off');
+    line_boundary=[line_boundary;l];
+end
+% adding sticker
+if handles.boxSticker.Value
+    sticker_status = 'on';
+else
+    sticker_status = 'off';
+end
+sticker = text(mean(all_sticker_positions(:,1)),mean(all_sticker_positions(:,2)),'Whole-reg',...
+    'FontSize',GImport.sticker_fontsize,...
+    'BackgroundColor',new_color,...
+    'EdgeColor','k',...
+    'Parent',handles.AxEdit,...
+    'Tag','Sticker',...
+    'Visible',sticker_status);
+sticker.UserData.Patch = hq;
+set(sticker,'ButtonDownFcn',{@click_sticker,hq,handles});
+
+% Updating UserData
+s.Name = 'Whole-reg';
+s.Mask = new_mask;
+s.Selected = 0;
+s.Color = new_color;
+s.Alpha = alpha;
+s.Line_Boundary = line_boundary;
+s.ImMask = im_mask;
+s.Sticker = sticker;
+hq.UserData = s;
+
+% Update table
+%     handles.Region_table.UserData.patches = [handles.Region_table.UserData.patches;hq];
+%     handles.Region_table.Data = [handles.Region_table.Data;s.Name];
+last_sel = max(selection);
+handles.Region_table.UserData.patches = [handles.Region_table.UserData.patches(1:last_sel);hq;handles.Region_table.UserData.patches(last_sel+1:end)];
+handles.Region_table.Data = [handles.Region_table.Data(1:last_sel,:);[s.Name,{'1'}];handles.Region_table.Data(last_sel+1:end,:)];
+
 
 end
 

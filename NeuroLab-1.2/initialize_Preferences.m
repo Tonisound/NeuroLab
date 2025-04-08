@@ -160,7 +160,8 @@ GImport.Region_loading_index = 1;
 GImport.Region_loading = 'unilateral';
 GImport.pixel_thresh = 10;
 GImport.sticker_fontsize = 10;
-GImport.pattern_unnamed = 'region';
+GImport.pattern_ignore1 = 'region';
+GImport.pattern_ignore2 = '%';
 %GImport.f_def = 2.5;
 GImport.f_def = 1;
 

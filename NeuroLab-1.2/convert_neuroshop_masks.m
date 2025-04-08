@@ -17,10 +17,11 @@ end
 % Parameters
 global SEED_ATLAS;
 load('Preferences.mat','GImport');
-pixel_thresh = GImport.pixel_thresh; % minimum region size (pixels);
-pattern_unnamed = GImport.pattern_unnamed; % minimum region size (pixels);
-test_whole = 0; %adding whole-reg (largest cover from Neuroshop regions)
-test_erase = 0; %empty region folder
+pixel_thresh = GImport.pixel_thresh;        % minimum region size (pixels);
+pattern_ignore1 = GImport.pattern_ignore1;    % Ignore region starting with this pattern;
+pattern_ignore2 = GImport.pattern_ignore2;    % Ignore region starting with this pattern;
+test_whole = 0;                             % adding whole-reg (largest cover from Neuroshop regions)
+test_erase = 0;                             % delete region folder
 
 if val==1
     prompt = [{'Insert whole region'};{'Erase NRegion folder'}];
@@ -48,6 +49,12 @@ else
     warning('No binary masks to export [%s].',folder_name);
     return;
 end
+
+
+% Export Parameters
+region_prefix = 'NShop_';
+region_suffix = sprintf('_%d_%d',X,Y);
+
 
 % Getting Region Name
 atlasName = strrep(data_r.AtlasName,' ','');
@@ -90,11 +97,11 @@ for i = 1:max(max(data_r.Mask(:,:,1)))
                 %fprintf('Warning: Several regions found under index %d. Keeping first. [%s]\n',i,atlas_txt);
             end
             aname = atlas_name(ind_keep(1));
-            rname = {sprintf('Nshop_%s_%d_%d.U8',char(aname),X,Y)};
+            rname = {sprintf('%s%s%s.U8',region_prefix,char(aname),region_suffix)};
             region_name = [region_name;rname];
         else
             %default name
-            region_name = [region_name;{sprintf('Nshop_reg-%03d_%d_%d.U8',i,X,Y)}];
+            region_name = [region_name;{sprintf('%sreg-%03d%s.U8',region_prefix.i,region_suffix)}];
         end
     end
 end
@@ -117,8 +124,18 @@ region_name(ind_remove)=[];
 region_index(ind_remove)=[];
 
 % Removing unnamed regions
-%pattern_unnamed = 'region';
-ind_remove = find(contains(region_name,pattern_unnamed)==1);
+if ~isempty(pattern_ignore1)
+    ind_remove1 = find(startsWith(region_name,strcat(region_prefix,pattern_ignore1))==1);
+else
+    ind_remove1 = [];
+end
+if ~isempty(pattern_ignore2)
+    ind_remove2 = find(startsWith(region_name,strcat(region_prefix,pattern_ignore2))==1);
+else
+    ind_remove2 = [];
+end
+ind_remove = unique([ind_remove1;ind_remove2]);
+
 all_masks(:,:,ind_remove)=[];
 region_name(ind_remove)=[];
 region_index(ind_remove)=[];
