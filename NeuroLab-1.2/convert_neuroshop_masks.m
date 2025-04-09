@@ -101,7 +101,7 @@ for i = 1:max(max(data_r.Mask(:,:,1)))
             region_name = [region_name;rname];
         else
             %default name
-            region_name = [region_name;{sprintf('%sreg-%03d%s.U8',region_prefix.i,region_suffix)}];
+            region_name = [region_name;{sprintf('%sreg-%03d%s.U8',region_prefix,i,region_suffix)}];
         end
     end
 end

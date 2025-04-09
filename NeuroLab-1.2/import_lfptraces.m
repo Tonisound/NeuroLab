@@ -133,8 +133,12 @@ else
     channel_list = channel_list(ind_channel);
     channel_type = channel_type(ind_channel);
     ind_channel_diff = NaN(size(ind_channel));
+    channel_ripple = [];
+    channel_noise = [];
+    channel_sharp_wave = [];
     save(fullfile(DIR_SAVE,F.nlab,'Nconfig.mat'),...
-        'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type','-v7.3');
+        'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type',...
+        'channel_ripple','channel_noise','channel_sharp_wave','-v7.3');
     %F.ncf = strcat(F.recording,'.mat');
 end
 

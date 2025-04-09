@@ -92,8 +92,12 @@ save(fullfile(folder_name,'Config.mat'),'File','-append');
 fprintf('File Config.mat appended [%s].\n',folder_name);
 
 % Save Nconfig.mat
+channel_ripple = [];
+channel_noise = [];
+channel_sharp_wave = [];
 save(fullfile(folder_name,'Nconfig.mat'),...
-    'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type');
+    'ind_channel','ind_channel_diff','channel_id','channel_list','channel_type',...
+    'channel_ripple','channel_noise','channel_sharp_wave','-v7.3');
 fprintf('===> Channel Configuration saved at %s.\n',fullfile(folder_name,'Nconfig.mat'));
 
 % Saving LFP EMG main channel
