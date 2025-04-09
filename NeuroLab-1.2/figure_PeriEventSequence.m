@@ -194,7 +194,6 @@ for kk = 1:length(all_pe_names)
 
     % Params
     recording_name = data_pe_small.Params.recording_name;
-    timegroup = data_pe_small.Params.timegroup;
     event_name = data_pe_small.Params.event_name;
     band_name = data_pe_small.Params.band_name;
     timegroup_duration = data_pe_small.Params.timegroup_duration;
@@ -243,7 +242,7 @@ for kk = 1:length(all_pe_names)
         'BackgroundColor',bg_color,...
         'Tag','MainTab');
     all_tabs(kk) = tab;
-    tab.Title = sprintf(strcat('[%s][%s]'),event_name,timegroup);
+    tab.Title = sprintf(strcat('[%s]'),event_name);
     panel1 = uipanel('Units','normalized',...
         'Position',[0 0 .33 1],...
         'bordertype','etchedin',...

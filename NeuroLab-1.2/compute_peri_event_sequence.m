@@ -22,7 +22,6 @@ end
 
 % Parameters
 flag_save_large = false;            % Saving all events
-timegroup = 'NREM';                 % Time Group for restriction
 band_name = 'ripple';               % Filtered band for main channel
 sampling_fus = 5;                   % fUS interpolation frequency (Hz)
 sampling_lfp = 1000;                % LFP interpolation frequency (Hz)
@@ -41,34 +40,6 @@ recording_name = char(temp(end));
 
 % Loading time reference
 data_tr = load(fullfile(savedir,'Time_Reference.mat'));
-
-% Loading time group start and end
-data_tg = load(fullfile(savedir,'Time_Groups.mat'));
-ind_group = strcmp(data_tg.TimeGroups_name,timegroup);
-if isempty(ind_group)
-    warning('Time Group not found. Taking whole [%s-%s]',recording_name,timegroup);
-    timegroup = 'WHOLE-FUS';
-    t_start = data_tr.time_ref.Y(1);
-    t_end = data_tr.time_ref.Y(end);
-else
-    S = data_tg.TimeGroups_S(ind_group);
-    temp = datenum(S.TimeTags_strings(:,1));
-    t_start = (temp-floor(temp))*24*3600;
-    temp = datenum(S.TimeTags_strings(:,2));
-    t_end = (temp-floor(temp))*24*3600;
-
-    % Keeping tags within fUS range
-    t_start = max(t_start,data_tr.time_ref.Y(1));
-    t_end = min(t_end,data_tr.time_ref.Y(end));
-    index_keep = ones(length(t_start),1);
-    for i=1:length(t_start)
-        if t_end(i)-t_start(i)<=0
-            index_keep(i)=0;
-        end
-    end
-    t_start = t_start(index_keep==1);
-    t_end = t_end(index_keep==1);
-end
 
 
 % Event File Selection
@@ -203,6 +174,35 @@ for kk=1:length(all_event_names)
     % channel_main_raw = strcat('LFP_',channel_id);
     channel_main_filt = sprintf('LFP-%s_%s',band_name,channel_id);
     
+    % Getting timegroup_name
+    mline = char(MetaData(contains(MetaData,'timegroup_name')));
+    textsep = ',';
+    temp = regexp(mline,textsep,'split');
+    % Removing blanks
+    while isempty(char(temp(end)))
+        temp=temp(1:end-1);
+    end
+    timegroup_name = char(temp(end));
+    
+    % Getting timegroup_duration
+    mline = char(MetaData(contains(MetaData,'timegroup_duration(s)')));
+    textsep = ',';
+    temp = regexp(mline,textsep,'split');
+    % Removing blanks
+    while isempty(char(temp(end)))
+        temp=temp(1:end-1);
+    end
+    timegroup_duration = str2double(char(temp(end)));
+    
+    % Getting density_events
+    mline = char(MetaData(contains(MetaData,'density_events(Hz)')));
+    textsep = ',';
+    temp = regexp(mline,textsep,'split');
+    % Removing blanks
+    while isempty(char(temp(end)))
+        temp=temp(1:end-1);
+    end
+    density_events = str2double(char(temp(end)));
     
     % Getting t_events
     ref_event = 'Peak(s)';
@@ -223,21 +223,19 @@ for kk=1:length(all_event_names)
     % Keeping events restricted to time_group
     index_keep = zeros(length(t_events),1);
     for i=1:length(t_events)
-        if sum(sign(t_start-t_events(i))~=sign(t_end-t_events(i)))>0 && t_events(i)>data_tr.time_ref.Y(1) && t_events(i)<data_tr.time_ref.Y(end)
+        if t_events(i)>data_tr.time_ref.Y(1) && t_events(i)<data_tr.time_ref.Y(end)
             index_keep(i)=1;
         end
     end
     events = events(index_keep==1,:);
     t_events = t_events(index_keep==1);
     n_events = size(events,1);
-    timegroup_duration = sum((t_end-t_start));
-    density_events = n_events/timegroup_duration;
     
     if n_events == 0
-        warning('No events matching selection in [%s][%s]. Proceeding.',timegroup,event_name);
+        warning('No events left within fUS bounds [%s]. Proceeding.',event_name);
         continue;
     else
-        fprintf('Number of events selected in [%s] : %d/%d events.\n',timegroup,n_events,length(index_keep));
+        fprintf('Number of events within fUS bounds : %d/%d events [%s].\n',n_events,length(index_keep),event_name);
     end
 
     
@@ -356,10 +354,10 @@ for kk=1:length(all_event_names)
     end
     
     Params.recording_name = recording_name;
-    Params.timegroup = timegroup;
+    Params.timegroup = timegroup_name;
+    Params.timegroup_duration = timegroup_duration;
     Params.event_name = event_name;
     Params.band_name = band_name;
-    Params.timegroup_duration = timegroup_duration;
     Params.EventHeader = EventHeader;
     Params.MetaData = MetaData;
     Params.events = events;
@@ -382,7 +380,7 @@ for kk=1:length(all_event_names)
 %     Params.t_bins_fus = t_bins_fus;
 %     Params.t_bins_lfp = t_bins_lfp;
 
-    filename_save_1 = sprintf(strcat('[%s][%s]PeriEvent_Sequence.mat'),event_name,timegroup);
+    filename_save_1 = sprintf(strcat('[%s]PeriEvent_Sequence.mat'),event_name);
     save(fullfile(save_dir,filename_save_1),'Params',...
         'all_labels_channels','t_bins_lfp',...
         'Y0q_evt_mean','Y0q_evt_median','Y0q_evt_std',...
@@ -394,7 +392,7 @@ for kk=1:length(all_event_names)
     fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save_1));
 
     if flag_save_large
-        filename_save_2 = sprintf(strcat('[%s][%s]PeriEvent_AllEvents.mat'),event_name,timegroup);
+        filename_save_2 = sprintf(strcat('[%s]PeriEvent_AllEvents.mat'),event_name);
         save(fullfile(save_dir,filename_save_2),'Params',...
             'all_labels_channels','t_bins_lfp',...
             'Xq_evt_lfp_','Y0q_evt_','Y1q_evt_',...

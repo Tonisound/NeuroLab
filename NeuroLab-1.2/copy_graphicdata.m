@@ -113,6 +113,7 @@ for i=length(h_line):-1:1
                     h_line(i).UserData.Graphic = hp;
                     % loading mask
                     name = regexprep(h_line(i).UserData.Name,'/','_');
+                    % name = strrep(name,'|','&');
                     data_l = load(fullfile(dir_save,strcat(name,'.mat')),'mask');
                     %fprintf('[X,Y] data loaded at %s.\n',fullfile(dir_save,strcat(name,'.mat')));
                     h_line(i).UserData.Mask = data_l.mask;

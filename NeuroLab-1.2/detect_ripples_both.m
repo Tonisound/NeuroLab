@@ -1,4 +1,4 @@
-function success = detect_hippocampal_ripples(savedir,dir_dat,val,str_group)
+function success = detect_ripples_both(savedir,dir_dat,val,str_group)
 % Detect Hippocampal Ripples Script based on Kteam/PrgMatlab
 % Two methods sqrt & abs
 % Generates events files Ripples-Abs|Sqrt|Merged-All.csv'
@@ -7,8 +7,9 @@ function success = detect_hippocampal_ripples(savedir,dir_dat,val,str_group)
 
 % Should now work stand-alone (no addpath needed)
 % all necessary functions copied in Neurolab/wrappers
-% tsd toolbox
-% Function FindRipples_abs and FindRipples_sqrt
+
+% Addpath
+% addpath(genpath('/home/hobbes/Dropbox/Kteam/PrgMatlab/'));
 
 success  = false;
 
@@ -132,21 +133,6 @@ else
 end
 
 
-% Making tsd objects
-HPCrip = tsd(X*1e4,Y);
-HPCnonRip = tsd(X*1e4,Ynoise);
-
-% params
-Info.hemisphere = '';
-Info.scoring = '';
-Info.threshold = [4 6;2 5];
-Info.durations = [15 20 200];
-Info.frequency_band = [120 250];
-Info.EventFileName = ['swr' Info.hemisphere];
-stim = 0;
-clean = 1;
-
-
 for i = 1:length(all_time_groups)
     
     cur_timegroup = char(all_time_groups(i));
@@ -158,7 +144,8 @@ for i = 1:length(all_time_groups)
     t_start = (temp-floor(temp))*24*3600;
     temp = datenum(S.TimeTags_strings(:,2));
     t_end = (temp-floor(temp))*24*3600;
-    timegroup_duration = sum((t_end-t_start));   
+    timegroup_duration = sum((t_end-t_start));
+    
     
     % Loading time indexes
     ind_nrem = find(strcmp(data_tg.TimeGroups_name,cur_timegroup)==1);
@@ -168,36 +155,69 @@ for i = 1:length(all_time_groups)
     temp2=datenum(tts2);
     t1=24*3600*(temp1-floor(temp1));
     t2=24*3600*(temp2-floor(temp2));
-
+    
+    
+    % Create folders :
+    if isfolder('ChannelsToAnalyse')
+        rmdir('ChannelsToAnalyse','s');
+    end
+    mkdir('ChannelsToAnalyse');
+    
+    if isfolder('LFPData')
+        rmdir('LFPData','s');
+    end
+    mkdir('LFPData');
+    
+    if isfolder('Ripples')
+        rmdir('Ripples','s');
+    end
+    
+    if isfile('behavResources.mat')
+        delete('behavResources.mat');
+    end
+    if isfile('StateEpochSB.mat')
+        delete('StateEpochSB.mat');
+    end
+    if isfile('SWR.mat')
+        delete('SWR.mat');
+    end
+    
+    % LFP Data
+    % LFPrip = tsd(X*1e4,Y);
+    LFP = tsd(X*1e4,Y);
+    save('LFPData/LFP0.mat','LFP') % rip chan
+    % LFPnonRip = tsd(X*1e4,zeros(size(Y)));
+    % LFP = tsd(X*1e4,zeros(size(Y)));
+    LFP = tsd(X*1e4,Ynoise);
+    save('LFPData/LFP1.mat','LFP') % non rip chan
     
     % Epoch definition
     SWSEpoch = intervalSet(t1*1e4,t2*1e4);
     TotalNoiseEpoch = intervalSet([],[]);
-   
+    Wake = intervalSet([],[]);
+    % Epoch = intervalSet(0,max(Range(LFP)));
+    Epoch = SWSEpoch;
     
-    % Ripple detection abs
-    fprintf('================ Ripple Event Detection using absolute value ================\n');
-    [ripples_abs, meanVal, stdVal] = FindRipples_abs(HPCrip, HPCnonRip, SWSEpoch, TotalNoiseEpoch,...
-        'frequency_band',Info.frequency_band, ...
-        'threshold',Info.threshold(1,:),...
-        'durations',Info.durations,...
-        'stim',stim);
-    % Removing NaN
-    ripples_abs = ripples_abs(~isnan(ripples_abs(:,1)),:);
+    save('StateEpochSB.mat','TotalNoiseEpoch','SWSEpoch','Epoch','Wake')
+    
+    % Channels to analyse
+    channel=0;
+    save('ChannelsToAnalyse/dHPC_rip.mat','channel')
+    channel=1;
+    save('ChannelsToAnalyse/nonRip.mat','channel')
+    
+    
+    % behavResources
+    TTLInfo = intervalSet([],[]);
+    save('behavResources.mat','TTLInfo')
+    
+    % CreateRipplesSleep
+    [ripples,ripples_abs,ripples_sqrt] = CreateRipplesSleep_AB();
+    density_events = size(ripples,1)/timegroup_duration;
     density_events_abs = size(ripples_abs,1)/timegroup_duration;
-    fprintf('================ Found %d events with ripple rate %.3f Hz ================\n',size(ripples_abs,1),density_events_abs);
-    
-    
-    % Ripple detection sqrt
-    fprintf('================ Ripple Event Detection using square root ================\n');
-    [ripples_sqrt,stdev] = FindRipples_sqrt(HPCrip, HPCnonRip, SWSEpoch, Info.threshold(2,:));
-    % Removing NaN
-    ripples_sqrt = ripples_sqrt(~isnan(ripples_sqrt(:,1)),:);
-    
     density_events_sqrt = size(ripples_sqrt,1)/timegroup_duration;
-    fprintf('================ Found %d events with ripple rate %.3f Hz ================\n',size(ripples_sqrt,1),density_events_sqrt);
     
-    % Saving in csv format
+    % % Saving in csv format
     folder_events = fullfile(savedir,'Events');
     if ~isfolder(folder_events)
         mkdir(folder_events);
@@ -205,12 +225,12 @@ for i = 1:length(all_time_groups)
     
     % Metadata and Header
     EventHeader = {'Start(s)';'Peak(s)';'End(s)';'MeanDur(us)';'MeanFreq(Hz)';'MeanPeaktoPeak(uV)'};
-%     MetaData =    {sprintf('file,%s',cur_file);...
-%         sprintf('channel_ripple,%s',channel_ripple);...
-%         sprintf('channel_noise,%s',channel_noise);...
-%         sprintf('timegroup_name,%s',cur_timegroup);
-%         sprintf('timegroup_duration(s),%.2f',timegroup_duration);
-%         sprintf('density_events(Hz),%.3f',density_events)};
+    MetaData =    {sprintf('file,%s',cur_file);...
+        sprintf('channel_ripple,%s',channel_ripple);...
+        sprintf('channel_noise,%s',channel_noise);...
+        sprintf('timegroup_name,%s',cur_timegroup);
+        sprintf('timegroup_duration(s),%.2f',timegroup_duration);
+        sprintf('density_events(Hz),%.3f',density_events)};
     MetaDataAbs =    {sprintf('file,%s',cur_file);...
         sprintf('channel_ripple,%s',channel_ripple);...
         sprintf('channel_noise,%s',channel_noise);...
@@ -224,15 +244,16 @@ for i = 1:length(all_time_groups)
         sprintf('timegroup_duration(s),%.2f',timegroup_duration);
         sprintf('density_events(Hz),%.3f',density_events_sqrt)};
     
-    % Writing Abs Ripples
-    output_file = fullfile(folder_events,sprintf('[%s]Ripples-Abs-All.csv',cur_timegroup));
-    write_csv_events(output_file,ripples_abs,EventHeader,MetaDataAbs);
-    % Writing Sqrt Ripples
-    output_file = fullfile(folder_events,sprintf('[%s]Ripples-Sqrt-All.csv',cur_timegroup));
-    write_csv_events(output_file,ripples_sqrt,EventHeader,MetaDataSqrt);
+    % % Writing Abs Ripples
+    % output_file = fullfile(folder_events,'Ripples-Abs-All.csv');
+    % write_csv_events(output_file,ripples_abs,EventHeader,MetaData);
+    % % Writing Sqrt Ripples
+    % output_file = fullfile(folder_events,'Ripples-Sqrt-All.csv');
+    % write_csv_events(output_file,ripples_sqrt,EventHeader,MetaData);
+    
     % Writing Merged Ripples
-    % output_file = fullfile(folder_events,sprintf('[%s]Ripples-Merged-All.csv',cur_timegroup));
-    % write_csv_events(output_file,ripples,EventHeader,MetaData);
+    output_file = fullfile(folder_events,sprintf('[%s]Ripples-Merged-All.csv',cur_timegroup));
+    write_csv_events(output_file,ripples,EventHeader,MetaData);
     
     
     % Saving in separate folder
@@ -240,14 +261,34 @@ for i = 1:length(all_time_groups)
     if ~isfolder(folder_separate)
         mkdir(folder_separate);
     end
-    %     output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Merged-All.csv',cur_timegroup,channel_ripple,channel_noise));
-    %     write_csv_events(output_file,ripples,EventHeader,MetaData);
-    
+
+    output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Merged-All.csv',cur_timegroup,channel_ripple,channel_noise));
+    write_csv_events(output_file,ripples,EventHeader,MetaData);
     output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Abs-All.csv',cur_timegroup,channel_ripple,channel_noise));
     write_csv_events(output_file,ripples_abs,EventHeader,MetaDataAbs);
     output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Sqrt-All.csv',cur_timegroup,channel_ripple,channel_noise));
     write_csv_events(output_file,ripples_sqrt,EventHeader,MetaDataSqrt);
     
+    
+    % Delete folders
+    rmdir('ChannelsToAnalyse','s');
+    rmdir('LFPData','s');
+    rmdir('Ripples','s');
+    delete('behavResources.mat');
+    delete('StateEpochSB.mat');
+    delete('Rippleraw.png');
+    delete('SWR.mat');
+    
+    
+    % Move or Delete evt file
+    if ~isempty(dir_dat)
+        evt_filename = sprintf('[%s][%s-%s]swr-merged.evt.swr',cur_timegroup,channel_ripple,channel_noise);
+        movefile('swr.evt.swr',fullfile(dir_dat,evt_filename));
+        fprintf('Event File saved [%s].\n',fullfile(dir_dat,evt_filename));
+    else
+        delete('swr.evt.swr');
+        warning('Dat Directory empty. Event file deleted.');
+    end
 end
 
 success  = true;

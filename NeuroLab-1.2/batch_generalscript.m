@@ -664,7 +664,7 @@ for i = 1:length(ind_files)
                 success = detect_earlymidlate_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
             case 'Detect Hippocampal Ripples'
-                success = detect_ripples_both(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).dir_dat,0,FILES(ii).mainlfp);
+                success = detect_ripples_both(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).dir_dat,0,str_group);
 %                 success = detect_hippocampal_ripples(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).dir_dat,0);
 
             case 'Segregate Hippocampal Ripples'
