@@ -111,27 +111,43 @@ for i=1:length(files_regions)
     end
 end
 
-% Removing largest prefix and suffix from regions.name
-%Largest Prefix
-pattern = char(regions(1).name);
-count=0;
-while (count <= length(pattern)) && (sum(contains({regions(:).name}',pattern(1:count)))== size({regions(:).name}',1))
-    count = count+1;
-end
-prefix = pattern(1:count-1);
-%Largest Suffix
-pattern = char(regions(1).name);
-count=0;
-while (count <= length(pattern)) && (sum(contains({regions(:).name}',pattern(end-count+1:end)))== size({regions(:).name}',1))
-    count = count+1;
-end
-suffix = pattern(end-count+2:end);
+% % Removing largest prefix and suffix from regions.name
+% % Largest Prefix
+% pattern = char(regions(1).name);
+% count=0;
+% while (count <= length(pattern)) && (sum(contains({regions(:).name}',pattern(1:count)))== size({regions(:).name}',1))
+%     count = count+1;
+% end
+% prefix = pattern(1:count-1);
+% % Largest Suffix
+% pattern = char(regions(1).name);
+% count=0;
+% while (count <= length(pattern)) && (sum(contains({regions(:).name}',pattern(end-count+1:end)))== size({regions(:).name}',1))
+%     count = count+1;
+% end
+% suffix = pattern(end-count+2:end);
+% % Renaming regions
+% regions_name = [];
+% for i=1:length(files_regions)
+%     root =  regions(i).name;
+%     regions(i).name = root(length(prefix)+1:end-length(suffix));
+%     regions(i).name = strrep(regions(i).name,'_','-');
+%     regions_name = [regions_name;{regions(i).name}];
+% end
+
 % Renaming regions
 regions_name = [];
 for i=1:length(files_regions)
-    root =  regions(i).name;
-    regions(i).name = root(length(prefix)+1:end-length(suffix));
-    regions(i).name = strrep(regions(i).name,'_','-');
+    root =  char(regions(i).name);
+    index_ = strfind(root,'_');
+    if length(index_)<2
+        warning('Incorrect region suffix [%s].',root);
+    else
+        root = root(1:index_(end-1)-1);
+    end
+    root = strrep(root,'NLab-reg_','');
+    root = strrep(root,'NShop_','');
+    regions(i).name = root;
     regions_name = [regions_name;{regions(i).name}];
 end
 

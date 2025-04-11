@@ -282,7 +282,7 @@ for i = 1:length(all_time_groups)
     
     % Move or Delete evt file
     if ~isempty(dir_dat)
-        evt_filename = sprintf('[%s][%s-%s]swr-merged.evt.swr',cur_timegroup,channel_ripple,channel_noise);
+        evt_filename = sprintf('[%s-%s][%s]swr-merged.evt.swr',channel_ripple,channel_noise,cur_timegroup);
         movefile('swr.evt.swr',fullfile(dir_dat,evt_filename));
         fprintf('Event File saved [%s].\n',fullfile(dir_dat,evt_filename));
     else

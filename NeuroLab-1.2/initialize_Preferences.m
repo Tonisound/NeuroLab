@@ -133,6 +133,8 @@ GTraces.GraphicSaveFormat_index = 1;
 GTraces.GaussianSmoothing = 1;
 GTraces.AliasMainLFP = '999';
 
+%GImport.f_def = 2.5;
+GImport.f_def = 1;
 GImport.burst_thresh = 30;
 GImport.jump_thresh = .01;
 GImport.jump_proportion = .05;
@@ -162,8 +164,8 @@ GImport.pixel_thresh = 10;
 GImport.sticker_fontsize = 10;
 GImport.pattern_ignore1 = 'region';
 GImport.pattern_ignore2 = '%';
-%GImport.f_def = 2.5;
-GImport.f_def = 1;
+GImport.ledger_name = 'RegionLedger.txt';
+GImport.ledger_importmode = 'both';
 
 GFilt.broad_inf = 1;
 GFilt.broad_sup = 250;

@@ -85,17 +85,17 @@ else
     else
         % batch mode
         % ind_pe = 1:length(d_pe);
-        batch_csv_timegroup = {'[NREM]'};
-        ind_keep1 = zeros(length(d_pe),1);
-        for i=1:length(batch_csv_timegroup)
-            this_timegroup = char(batch_csv_timegroup(i));
-            ind_keep1 = ind_keep1+contains({d_pe(:).name}',this_timegroup);
-        end
-        ind_keep1 = ind_keep1>0;
+%         batch_csv_timegroup = {'[NREM]'};
+%         ind_keep1 = zeros(length(d_pe),1);
+%         for i=1:length(batch_csv_timegroup)
+%             this_timegroup = char(batch_csv_timegroup(i));
+%             ind_keep1 = ind_keep1+contains({d_pe(:).name}',this_timegroup);
+%         end
+%         ind_keep1 = ind_keep1>0;
+        ind_keep1 = ones(length(d_pe),1);
 
-        batch_csv_eventname = {'[Ripples-Merged-All]';'[Ripples-Merged-Fast]';'[Ripples-Merged-Long]';'[Ripples-Merged-Strong]'};      
-%         batch_csv_eventname = {'[[Pyr]Ripples-Abs-All]';'[[Pyr]Ripples-Abs-Fast]';'[[Pyr]Ripples-Abs-Long]';'[[Pyr]Ripples-Abs-Strong]'};
-        
+%         batch_csv_eventname = {'[Ripples-Merged-All]';'[Ripples-Merged-Fast]';'[Ripples-Merged-Long]';'[Ripples-Merged-Strong]'};      
+        batch_csv_eventname = {'[AW]Ripples-Merged-All';'[QW]Ripples-Merged-All';'[NREM]Ripples-Merged-All'};        
         ind_keep2 = zeros(length(d_pe),1);
         for i=1:length(batch_csv_eventname)
             this_event = char(batch_csv_eventname(i));
@@ -149,7 +149,7 @@ for kk = 1:length(all_pe_names)
 
     % Processed File Loading
     pe_filename = d_pe(ind_pe(kk)).name;
-    pe_filename_large = strrep(pe_filename,'Sequence','AllEvents');
+    % pe_filename_large = strrep(pe_filename,'Sequence','AllEvents');
 
     fprintf('Loading Data [%s] ...',pe_filename);
     data_pe_small = load(fullfile(pe_dir,pe_filename),'Params',...
@@ -438,7 +438,7 @@ if flag_save_figure
 end
 
 % Saving Movie
-n_col = 4 ;
+n_col = 3 ;
 n_rows = ceil(length(all_tabs)/n_col);
 w_margin_1 = .02; % left margin
 w_margin_2 = .02; % right margin

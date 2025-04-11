@@ -1,5 +1,8 @@
 function success = generate_region_groups(foldername,file_recording,handles,val)
+% Searches directly within Nregions folder
+% Uses parse_ledger (in /parsers) for group attribution
 % Generates Groups of regions based on file Ledger_Regions.txt
+
 
 success = false;
 global IM SEED_REGION SEED_ATLAS;
@@ -9,35 +12,14 @@ if nargin<4
     val = 1;
 end
 
+load('Preferences.mat','GImport');
+
 % Parameters
 data_config = load(fullfile(foldername,'Config.mat'));
-% ledger_name = 'RegionLedger_BB_v2.txt';
-ledger_name = 'RegionLedger.txt';                               % ledger filename
-prefix = 'Nshop_';                                              % prefix used to search region directory
-% suffix = '.U8';                                               % suffix used to search region directory
-suffix = sprintf('_%d_%d.U8',data_config.Y,data_config.X);      % suffix used to search region directory
-main_sep = '\t';                                                % ledger file separator
-empty_c2 = '-';                                                 % empty atlas symbol 
-empty_c3 = '-';                                                 % empty plate symbol 
-region_sep = ' ';                                               % empty plate symbol 
-% case_sensitive = false;                                       % Case sensitivity 
-
-
-% Getting region directory
-if ~exist(fullfile(SEED_REGION,file_recording),'dir')
-    errordlg(sprintf('Missing Region Directory [%s]',fullfile(SEED_REGION,file_recording)));
-    return;
-else
-    dir_regions = fullfile(SEED_REGION,file_recording);
-    files_regions = dir(fullfile(dir_regions,strcat(prefix,'*',suffix)));
-    %files_regions = files_regions(arrayfun(@(x) ~strcmp(x.name(1),'.'),files_regions));
-%     if case_sensitive
-%         all_regions = regexprep({files_regions(:).name}',{prefix,suffix},'');
-%     else
-%         all_regions = lower(regexprep({files_regions(:).name}',{prefix,suffix},''));
-%     end
-     all_regions = regexprep({files_regions(:).name}',{prefix,suffix},'');
-end
+ledger_txt =  fullfile(SEED_ATLAS,char(GImport.ledger_name));
+suffix = sprintf('_%d_%d.U8',data_config.Y,data_config.X);
+dir_regions = fullfile(SEED_REGION,file_recording);
+    
 
 % Getting Time Reference
 if exist(fullfile(foldername,'Time_Reference.mat'),'file')
@@ -52,9 +34,49 @@ else
     return;
 end
 
+% % Loaded regions
+% data_tl = load(fullfile(foldername,'Trace_light.mat'),'traces');
+% all_regions_loaded = data_tl.traces(strcmp(data_tl.traces(:,2),'Trace_Region'),1);
+% % str_group_regions = data_tl.traces(strcmp(data_tl.traces(:,2),'Trace_RegionGroup'),1);
+
+
+% Getting region directory
+if ~exist(fullfile(SEED_REGION,file_recording),'dir')
+    errordlg(sprintf('Missing Region Directory [%s]',fullfile(SEED_REGION,file_recording)));
+    return;
+else
+    prefix1 = 'NLab-reg_';
+    files_regions1 = dir(fullfile(dir_regions,strcat(prefix1,'*',suffix)));
+    files_regions1 = files_regions1(arrayfun(@(x) ~strcmp(x.name(1),'.'),files_regions1));
+    all_regions1 = regexprep({files_regions1(:).name}',{prefix1,suffix},'');  
+    prefix2 = 'NShop_';
+    files_regions2 = dir(fullfile(dir_regions,strcat(prefix2,'*',suffix)));
+    files_regions2 = files_regions2(arrayfun(@(x) ~strcmp(x.name(1),'.'),files_regions2));
+    all_regions2 = regexprep({files_regions2(:).name}',{prefix2,suffix},'');
+end
+
+switch GImport.ledger_importmode
+    case 'NLab Regions'
+        % Combining
+        all_regions = all_regions1;
+        files_regions = files_regions1;
+    case 'NShop Regions'
+        % Combining
+        all_regions = all_regions2;
+        files_regions = files_regions2;
+    case 'both'
+        % Combining
+        all_regions = [all_regions1;all_regions2];
+        files_regions = [files_regions1;files_regions2];
+end
+        
+
+
 % Parsing Region Ledger
-ledger_txt =  fullfile(SEED_ATLAS,ledger_name);
+fprintf('Region Group Importation using [%s]...',char(GImport.ledger_name));
 S_ledger = parse_ledger(ledger_txt,all_regions,files_regions);
+fprintf(' done.\n',char(GImport.ledger_name));
+
 
 % Browse S_ledger to find flag_found = true
 % Then fill region_groups structure
@@ -120,7 +142,8 @@ for i=1:length(S_ledger)
                 all_patch_y = [all_patch_y;patch_y(:);patch_y(1);first_y];
                 % regions
                 num_regions = num_regions+1;
-                name_reg = strrep(char(S_ledger(i).filenames(j)),prefix,'');
+                name_reg = strrep(char(S_ledger(i).filenames(j)),prefix1,'');
+                name_reg = strrep(name_reg,prefix2,'');
                 name_reg = strrep(name_reg,suffix,'');
                 %name_regions = [name_regions;{name_reg}];
                 name_regions = strcat(name_regions,name_reg,'|');
@@ -134,46 +157,8 @@ for i=1:length(S_ledger)
         region_groups(counter).name_regions = name_regions(1:end-1);
     end
 end
+fprintf('Found %d Region Groups for selection.\n',length(region_groups));
 
-
-% % Sorting by name
-% pattern_list = {'ac';'s1bf';'lpta';'rs';'v2';'antcortex';'amidcortex';'pmidcortex';'postcortex';'neocortex';...
-%     'dg';'ca3';'ca2';'ca1';'fc';'subiculum';'dhpc';'vhpc';...
-%     'dthal';'vthal';'vpm';'po';'thalamus';'cpu';'gp';'hypothalrg'};
-% 
-% files_regions_sorted = [];
-% for i =1:length(pattern_list)
-%     pattern = strcat('_',pattern_list(i),'_');
-%     ind_sort = contains(lower({files_regions(:).name}'),pattern);
-%     files_regions_sorted = [files_regions_sorted;files_regions(ind_sort)];
-%     files_regions(ind_sort)=[];
-% end
-% files_regions = [files_regions_sorted;files_regions];
-% 
-% 
-% for i=1:length(files_regions)
-%     filename = fullfile(dir_regions,files_regions(i).name);
-%     fileID = fopen(filename,'r');
-%     raw = fread(fileID,8,'uint8')';
-%     X = raw(8);
-%     Y = raw(4);
-%     mask = fread(fileID,[X,Y],'uint8')';
-%     fclose(fileID);
-%     regions(i).name = files_regions(i).name;
-%     regions(i).mask = mask';
-%     
-%     % Creating Patch
-%     [y,x]= find(mask'==1);
-%     try
-%         k = convhull(x,y);
-%         regions(i).patch_x = x(k);
-%         regions(i).patch_y = y(k);
-%     catch
-%         % Problem when points are colinear
-%         regions(i).patch_x = x;
-%         regions(i).patch_y = y ;
-%     end
-% end
 
 
 % Selecting Region Groups to import
@@ -182,7 +167,7 @@ if val == 1
     % user mode
     str_group = strcat({region_groups.name}',' [',{region_groups.name_regions}',']');
     [ind_groups,ok] = listdlg('PromptString','Select Region Groups to import','SelectionMode','multiple',...
-        'ListString',str_group,'InitialValue',ind_selected,'ListSize',[300 500]);
+        'ListString',str_group,'InitialValue',ind_selected,'ListSize',[600 500]);
 else
     % batch mode
     ok = true;

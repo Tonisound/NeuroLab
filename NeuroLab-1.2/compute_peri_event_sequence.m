@@ -50,8 +50,8 @@ d_events = d_events(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_events));
 if isempty(d_events)
     errordlg('Absent or empty Event folder [%s].',folder_events);
     return;
-elseif length(d_events)==1
-    all_event_names = char(d_events.name);
+% elseif length(d_events)==1
+%     all_event_names = char(d_events.name);
 else
     if val == 1
         % user mode
@@ -65,7 +65,7 @@ else
         % batch mode
         % ind_events = 1:length(d_events);
 %         batch_csv_events = {'Ripples-Merged-All.csv';'Ripples-Merged-Fast.csv';'Ripples-Merged-Long.csv';'Ripples-Merged-Strong.csv'};
-        batch_csv_events = {'[Pyr]Ripples-Abs-Fast.csv';'[Pyr]Ripples-Abs-Long.csv';'[Pyr]Ripples-Abs-Strong.csv'};
+        batch_csv_events = {'[AW]Ripples-Merged-All.csv';'[QW]Ripples-Merged-All.csv';'[NREM]Ripples-Merged-All.csv'};
         ind_events = [];
         for i=1:length(batch_csv_events)
             ind_keep = find(strcmp({d_events(:).name}',char(batch_csv_events(i))));
@@ -380,7 +380,7 @@ for kk=1:length(all_event_names)
 %     Params.t_bins_fus = t_bins_fus;
 %     Params.t_bins_lfp = t_bins_lfp;
 
-    filename_save_1 = sprintf(strcat('[%s]PeriEvent_Sequence.mat'),event_name);
+    filename_save_1 = sprintf(strcat('%s_PeriEvent_Sequence.mat'),event_name);
     save(fullfile(save_dir,filename_save_1),'Params',...
         'all_labels_channels','t_bins_lfp',...
         'Y0q_evt_mean','Y0q_evt_median','Y0q_evt_std',...
@@ -392,7 +392,7 @@ for kk=1:length(all_event_names)
     fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save_1));
 
     if flag_save_large
-        filename_save_2 = sprintf(strcat('[%s]PeriEvent_AllEvents.mat'),event_name);
+        filename_save_2 = sprintf(strcat('%s_PeriEvent_AllEvents.mat'),event_name);
         save(fullfile(save_dir,filename_save_2),'Params',...
             'all_labels_channels','t_bins_lfp',...
             'Xq_evt_lfp_','Y0q_evt_','Y1q_evt_',...
