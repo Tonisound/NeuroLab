@@ -210,6 +210,7 @@ GFilt.gammahighup_smooth = 1;
 GFilt.ripple_inf = 150;
 GFilt.ripple_sup = 300;
 GFilt.ripple_smooth = 1;
+GFilt.ripple_detection_algo = 'detect_ripples_both.m';
 
 GColors.patch_color = [.5 .5 .5];
 GColors.patch_width = .1;

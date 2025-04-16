@@ -197,6 +197,17 @@ for i = 1:length(all_time_groups)
     density_events_sqrt = size(ripples_sqrt,1)/timegroup_duration;
     fprintf('================ Found %d events with ripple rate %.3f Hz ================\n',size(ripples_sqrt,1),density_events_sqrt);
     
+    
+    % Ripple merge
+    fprintf('================ Merging Ripple absolute value and square root  ================\n');
+    ripples = MergeRipples(ripples_abs,ripples_sqrt,HPCrip);
+    % Removing NaN
+    ripples = ripples(~isnan(ripples(:,1)),:);
+    
+    density_events = size(ripples,1)/timegroup_duration;
+    fprintf('================ Found %d events with ripple rate %.3f Hz ================\n',size(ripples,1),density_events);
+    
+   
     % Saving in csv format
     folder_events = fullfile(savedir,'Events');
     if ~isfolder(folder_events)
@@ -205,12 +216,12 @@ for i = 1:length(all_time_groups)
     
     % Metadata and Header
     EventHeader = {'Start(s)';'Peak(s)';'End(s)';'MeanDur(us)';'MeanFreq(Hz)';'MeanPeaktoPeak(uV)'};
-%     MetaData =    {sprintf('file,%s',cur_file);...
-%         sprintf('channel_ripple,%s',channel_ripple);...
-%         sprintf('channel_noise,%s',channel_noise);...
-%         sprintf('timegroup_name,%s',cur_timegroup);
-%         sprintf('timegroup_duration(s),%.2f',timegroup_duration);
-%         sprintf('density_events(Hz),%.3f',density_events)};
+    MetaData =    {sprintf('file,%s',cur_file);...
+        sprintf('channel_ripple,%s',channel_ripple);...
+        sprintf('channel_noise,%s',channel_noise);...
+        sprintf('timegroup_name,%s',cur_timegroup);
+        sprintf('timegroup_duration(s),%.2f',timegroup_duration);
+        sprintf('density_events(Hz),%.3f',density_events)};
     MetaDataAbs =    {sprintf('file,%s',cur_file);...
         sprintf('channel_ripple,%s',channel_ripple);...
         sprintf('channel_noise,%s',channel_noise);...
@@ -231,8 +242,8 @@ for i = 1:length(all_time_groups)
     output_file = fullfile(folder_events,sprintf('[%s]Ripples-Sqrt-All.csv',cur_timegroup));
     write_csv_events(output_file,ripples_sqrt,EventHeader,MetaDataSqrt);
     % Writing Merged Ripples
-    % output_file = fullfile(folder_events,sprintf('[%s]Ripples-Merged-All.csv',cur_timegroup));
-    % write_csv_events(output_file,ripples,EventHeader,MetaData);
+    output_file = fullfile(folder_events,sprintf('[%s]Ripples-Merged-All.csv',cur_timegroup));
+    write_csv_events(output_file,ripples,EventHeader,MetaData);
     
     
     % Saving in separate folder
@@ -240,9 +251,8 @@ for i = 1:length(all_time_groups)
     if ~isfolder(folder_separate)
         mkdir(folder_separate);
     end
-    %     output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Merged-All.csv',cur_timegroup,channel_ripple,channel_noise));
-    %     write_csv_events(output_file,ripples,EventHeader,MetaData);
-    
+    output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Merged-All.csv',cur_timegroup,channel_ripple,channel_noise));
+    write_csv_events(output_file,ripples,EventHeader,MetaData); 
     output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Abs-All.csv',cur_timegroup,channel_ripple,channel_noise));
     write_csv_events(output_file,ripples_abs,EventHeader,MetaDataAbs);
     output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Sqrt-All.csv',cur_timegroup,channel_ripple,channel_noise));
@@ -251,5 +261,45 @@ for i = 1:length(all_time_groups)
 end
 
 success  = true;
+
+end
+
+
+function ripples = MergeRipples(ripples_abs,ripples_sqrt,HPCrip)
+
+% Merge ripples
+if ~isempty(ripples_sqrt)
+    id{1}=[];id{2}=[];id{3}=[];
+    ripabs = intervalSet(ripples_abs(:,1)*1E4, ripples_abs(:,3)*1E4);
+    ripabs_tsd = Restrict(HPCrip,ripabs);
+    for ii=1:size(ripples_sqrt,1)
+        ripsqrt_ts = intervalSet(ripples_sqrt(ii,1)*1E4,ripples_sqrt(ii,3)*1E4);
+        in = inInterval(ripsqrt_ts,ripabs_tsd);
+        if sum(Data(in))
+            id{1}(end+1)=ii;
+        else
+            id{2}(end+1)=ii;
+        end
+        clear in;
+    end
+    % get abs-detected only
+    ripsqrt = intervalSet(ripples_sqrt(:,1)*1E4, ripples_sqrt(:,3)*1E4);
+    ripsqrt_tsd = Restrict(HPCrip,ripsqrt);
+    for ii=1:size(ripples_abs,1)
+        ripabs_ts = intervalSet(ripples_abs(ii,1)*1E4,ripples_abs(ii,3)*1E4);
+        in = inInterval(ripabs_ts,ripsqrt_tsd);
+        if ~sum(Data(in))
+            id{3}(end+1)=ii;
+        end
+    end
+    
+    ripples_tmp = [ripples_sqrt([id{1}'; id{2}'],:); ripples_abs(id{3}',:)];
+    % sorting events by start time
+    [~,idx] = sort(ripples_tmp(:,1)); % sort just the first column
+    ripples = ripples_tmp(idx,:);   % sort the whole matrix using the sort indices
+    
+else
+    ripples=ripples_abs;
+end
 
 end

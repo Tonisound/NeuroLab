@@ -452,7 +452,7 @@ handles.MainFigure.Pointer = 'watch';
 drawnow;
 
 % Update Preferences.mat
-load('Preferences.mat','GTraces','GImport');
+load('Preferences.mat','GTraces','GImport','GFilt');
 
 % Flag if gload changed
 if ~strcmp(strtrim(handles.Popup1.String(handles.Popup1.Value,:)),GTraces.GraphicLoadFormat)
@@ -664,8 +664,13 @@ for i = 1:length(ind_files)
                 success = detect_earlymidlate_runs(fullfile(DIR_SAVE,FILES(ii).nlab),myhandles,0);
                 
             case 'Detect Hippocampal Ripples'
-                success = detect_ripples_both(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).dir_dat,0,str_group);
-%                 success = detect_hippocampal_ripples(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).dir_dat,0);
+                
+                switch GFilt.ripple_detection_algo
+                    case 'detect_ripples_both.m'
+                        success = detect_ripples_both(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).dir_dat,0,str_group);
+                    case 'detect_hippocampal_ripples.m'
+                        success = detect_hippocampal_ripples(fullfile(DIR_SAVE,FILES(ii).nlab),FILES(ii).dir_dat,0,str_group);
+                end
 
             case 'Segregate Hippocampal Ripples'
                 success = segregate_ripple_events(fullfile(DIR_SAVE,FILES(ii).nlab),0);

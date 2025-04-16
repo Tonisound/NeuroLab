@@ -2,6 +2,7 @@ function processButtonCallback(~,~,handles)
 % 213 -- Process List Callbacks
 
 global DIR_SAVE FILES CUR_FILE;
+load('Preferences.mat','GFilt');
 
 val = get(handles.ProcessListPopup,'Value');
 str = get(handles.ProcessListPopup,'String');
@@ -57,8 +58,12 @@ switch strtrim(str(val,:))
         detect_leftright_runs(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),handles);
         
     case 'Detect Hippocampal Ripples'
-        detect_ripples_both(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).dir_dat,1);
-%         detect_hippocampal_ripples(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).dir_dat,1);
+        switch GFilt.ripple_detection_algo
+            case 'detect_ripples_both.m'
+                detect_ripples_both(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).dir_dat,1);
+            case 'detect_hippocampal_ripples.m'
+                detect_hippocampal_ripples(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),FILES(CUR_FILE).dir_dat,1);
+        end
 
     case 'Segregate Hippocampal Ripples'
         segregate_ripple_events(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),1);
