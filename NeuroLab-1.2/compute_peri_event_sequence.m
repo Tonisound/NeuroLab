@@ -41,6 +41,34 @@ recording_name = char(temp(end));
 % Loading time reference
 data_tr = load(fullfile(savedir,'Time_Reference.mat'));
 
+% Loading atlas
+if exist(fullfile(savedir,'Atlas.mat'),'file')
+    data_atlas = load(fullfile(savedir,'Atlas.mat'));
+    atlas_name = data_atlas.AtlasName;
+    switch atlas_name
+        case 'Rat Coronal Paxinos'
+            atlas_fullname = sprintf('AP=%.2fmm',data_atlas.AP_mm);
+            atlas_coordinate = data_atlas.AP_mm;
+
+        case 'Rat Sagittal Paxinos'
+            atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
+            atlas_coordinate = data_atlas.ML_mm;
+
+        case 'Mouse Coronal Paxinos'
+            atlas_fullname = sprintf('AP=%.2fmm',data_atlas.AP_mm);
+            atlas_coordinate = data_atlas.AP_mm;
+
+        case 'Mouse Sagittal Paxinos'
+            atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
+            atlas_coordinate = data_atlas.ML_mm;
+    end
+else
+    data_atlas = [];
+    atlas_name = [];
+    atlas_fullname = 'Unregistered';
+    atlas_coordinate = 0;
+end
+
 
 % Event File Selection
 folder_events = fullfile(savedir,'Events');
@@ -171,6 +199,7 @@ for kk=1:length(all_event_names)
         temp=temp(1:end-1);
     end
     channel_id = char(temp(end));
+    ind_channel_id = find(strcmp(all_labels_channels,sprintf('LFP-%s',channel_id))==1);
     % channel_main_raw = strcat('LFP_',channel_id);
     channel_main_filt = sprintf('LFP-%s_%s',band_name,channel_id);
     
@@ -315,17 +344,37 @@ for kk=1:length(all_event_names)
     Y0q_evt_mean = mean(Y0q_evt_,3,'omitnan');
     Y0q_evt_median = median(Y0q_evt_,3,'omitnan');
     Y0q_evt_std = std(Y0q_evt_,[],3,'omitnan');
+    n_true_events = sum(~isnan(Y0q_evt_),3);
+    Y0q_evt_sem = Y0q_evt_std./sqrt(n_true_events);
+
+    % time-window based zscoring
+    Z0q_evt_ = squeeze(Y0q_evt_(ind_channel_id,:,:));
+    t1_zscore = -.1;
+    t2_zscore = .1;
+    [~,ind_z1] = min((t_bins_lfp-t1_zscore).^2);
+    [~,ind_z2] = min((t_bins_lfp-t2_zscore).^2);
+    m_z = mean(Z0q_evt_(ind_z1:ind_z2,:),1,'omitnan');
+    m_z_mat = repmat(m_z,[length(t_bins_lfp) 1]);
+    std_z = std(Z0q_evt_(ind_z1:ind_z2,:),[],1,'omitnan');
+    std_z_mat = repmat(std_z,[length(t_bins_lfp) 1]);
+    Z0q_evt_zscored = (Z0q_evt_- m_z_mat)./std_z_mat;
+    Z0q_evt_mean = mean(Z0q_evt_zscored,2,'omitnan');
+    Z0q_evt_median = median(Z0q_evt_zscored,2,'omitnan');
+    Z0q_evt_std = std(Z0q_evt_zscored,[],2,'omitnan');
+    n_true_events = sum(~isnan(Z0q_evt_),2);
+    Z0q_evt_sem = Z0q_evt_std./sqrt(n_true_events);    
     
     Y1q_evt_ = reshape(Y1q_evt,[length(t_bins_lfp) n_events]);
     Y1q_evt_mean = mean(Y1q_evt_,2,'omitnan');
-    Y1q_evt_median = mean(Y1q_evt_,2,'omitnan');
+    Y1q_evt_median = median(Y1q_evt_,2,'omitnan');
     Y1q_evt_std = std(Y1q_evt_,[],2,'omitnan');
+    n_true_events = sum(~isnan(Y1q_evt_),2);
+    Y1q_evt_sem = Y1q_evt_std./sqrt(n_true_events);
     
     Cdata_evt_ = reshape(Cdata_evt,[size(Cdata_evt,1) length(t_bins_spectro) n_events]);
     Cdata_mean = mean(Cdata_evt_,3,'omitnan');
     % Saving in int format
-    Cdata_evt_int = int16(save_ratio_spectro*Cdata_evt_);    
-    
+    Cdata_evt_int = int16(save_ratio_spectro*Cdata_evt_);     
     
     % Baseline extraction and normalization
     Xq_evt_fus_ = reshape(Xq_evt_fus,[length(t_bins_fus) n_events]);
@@ -334,6 +383,9 @@ for kk=1:length(all_event_names)
     Y2q_evt_normalized = Y2q_evt_-repmat(Y2q_evt_baseline,[1 size(Y2q_evt_,2) 1]);
     Y2q_evt_mean = mean(Y2q_evt_normalized,3,'omitnan');
     Y2q_evt_median = median(Y2q_evt_normalized,3,'omitnan');
+    Y2q_evt_std = std(Y2q_evt_,[],3,'omitnan');
+    n_true_events = sum(~isnan(Y2q_evt_),3);
+    Y2q_evt_sem = Y2q_evt_std./sqrt(n_true_events);
 
     Y3q_evt_baseline = mean(Y3q_evt_(:,ind_baseline,:),2,'omitnan');
     Y3q_evt_normalized = Y3q_evt_ - repmat(Y3q_evt_baseline,[1 size(Y3q_evt_,2) 1]);
@@ -365,8 +417,7 @@ for kk=1:length(all_event_names)
     Params.n_events = n_events;
     Params.density_events = density_events;
     Params.channel_id = channel_id;
-%   Params.all_labels_regions = all_labels_regions;
-%   Params.all_labels_channels = all_labels_channels;
+    Params.ind_channel_id = ind_channel_id;
     Params.t_baseline_start = t_baseline_start;
     Params.t_baseline_end = t_baseline_end;
     Params.t_before = t_before;
@@ -379,15 +430,19 @@ for kk=1:length(all_event_names)
     Params.save_ratio_fus = save_ratio_fus;
 %     Params.t_bins_fus = t_bins_fus;
 %     Params.t_bins_lfp = t_bins_lfp;
+%     Params.all_labels_regions = all_labels_regions;
+%     Params.all_labels_channels = all_labels_channels;
 
-    filename_save_1 = sprintf(strcat('%s_PeriEvent_Sequence.mat'),event_name);
+    filename_save_1 = sprintf(strcat('%s_PeriEventSequence.mat'),event_name);
     save(fullfile(save_dir,filename_save_1),'Params',...
+        'data_atlas','atlas_name','atlas_fullname','atlas_coordinate',...
         'all_labels_channels','t_bins_lfp',...
-        'Y0q_evt_mean','Y0q_evt_median','Y0q_evt_std',...
-        'Y1q_evt_mean','Y1q_evt_median','Y1q_evt_std',...
+        'Y0q_evt_mean','Y0q_evt_median','Y0q_evt_std','Y0q_evt_sem',...
+        'Z0q_evt_mean','Z0q_evt_median','Z0q_evt_std','Z0q_evt_sem',...
+        'Y1q_evt_mean','Y1q_evt_median','Y1q_evt_std','Y1q_evt_sem',...
         'freqdom','Cdata_mean',...
         'all_labels_regions','t_bins_fus',...
-        'Y2q_evt_mean','Y2q_evt_median',...
+        'Y2q_evt_mean','Y2q_evt_median','Y2q_evt_std','Y2q_evt_sem',...
         'Y3q_evt_mean_reshaped','Y3q_evt_median_reshaped','-v7.3');
     fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save_1));
 

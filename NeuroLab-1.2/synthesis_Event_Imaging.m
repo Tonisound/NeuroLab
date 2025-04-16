@@ -1,4 +1,5 @@
 function synthesis_Event_Imaging
+% (Replaced by synthesis_PeriEvent_Sequence in April 25)
 % Reorganizes Event-Imaging figures in one folder
 % Generates a synthesis video of fUS peri-event activations
 % Generates Event Detection synthesis figures

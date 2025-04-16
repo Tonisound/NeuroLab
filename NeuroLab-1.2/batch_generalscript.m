@@ -772,6 +772,7 @@ for i = 1:length(ind_files)
             success = f2.UserData.success;
             close(f2);
             waitfor(f2);
+            clear("f2");            
         end
         % Update output table
         if success

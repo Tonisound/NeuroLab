@@ -27,33 +27,6 @@ recording_name = FILES(CUR_FILE).nlab;
 % % Loading time reference
 % data_tr = load(fullfile(DIR_SAVE,recording_name,'Time_Reference.mat'));
 
-% Loading atlas
-if exist(fullfile(DIR_SAVE,recording_name,'Atlas.mat'),'file')
-    data_atlas = load(fullfile(DIR_SAVE,recording_name,'Atlas.mat'));
-    atlas_name = data_atlas.AtlasName;
-    switch atlas_name
-        case 'Rat Coronal Paxinos'
-            atlas_fullname = sprintf('AP=%.2fmm',data_atlas.AP_mm);
-            atlas_coordinate = data_atlas.AP_mm;
-
-        case 'Rat Sagittal Paxinos'
-            atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
-            atlas_coordinate = data_atlas.ML_mm;
-
-        case 'Mouse Coronal Paxinos'
-            atlas_fullname = sprintf('AP=%.2fmm',data_atlas.AP_mm);
-            atlas_coordinate = data_atlas.AP_mm;
-
-        case 'Mouse Sagittal Paxinos'
-            atlas_fullname = sprintf('ML=%.2fmm',data_atlas.ML_mm);
-            atlas_coordinate = data_atlas.ML_mm;
-    end
-else
-    data_atlas = [];
-    atlas_name = [];
-    atlas_fullname = 'Unregistered';
-    atlas_coordinate = 0;
-end
 
 % Loading nconfig
 nc_channnels = [];
@@ -64,7 +37,7 @@ end
 
 % Processed File Selection
 pe_dir = fullfile(DIR_STATS,'PeriEvent_Sequence',recording_name);
-d_pe = dir(fullfile(pe_dir,'*Sequence.mat'));
+d_pe = dir(fullfile(pe_dir,'*_PeriEventSequence.mat'));
 % Removing hidden files
 d_pe = d_pe(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_pe));
 
@@ -127,7 +100,8 @@ flag_save_movie = 1;            % Save Movie
 f1 = figure;
 f1.UserData.success = false;
 
-f1.Name = sprintf(strcat('[%s]%s-PeriEventSequence'),atlas_fullname,strrep(recording_name,'_nlab',''));
+% f1.Name = sprintf(strcat('[%s]%s-PeriEventSequence'),data_pe_small.atlas_fullname,strrep(recording_name,'_nlab',''));
+f1.Name = sprintf(strcat('[%s]PeriEventSequence'),strrep(recording_name,'_nlab',''));
 set(f1,'Units','normalized','OuterPosition',[0 0 1 1]);
 colormap(f1,'jet');
 bg_color='w';
@@ -153,8 +127,10 @@ for kk = 1:length(all_pe_names)
 
     fprintf('Loading Data [%s] ...',pe_filename);
     data_pe_small = load(fullfile(pe_dir,pe_filename),'Params',...
+        'data_atlas','atlas_name','atlas_fullname','atlas_coordinate',...
         'all_labels_channels','t_bins_lfp',...
         'Y0q_evt_mean','Y0q_evt_median','Y0q_evt_std',...
+        'Z0q_evt_mean','Z0q_evt_median','Z0q_evt_std',...
         'Y1q_evt_mean','Y1q_evt_median','Y1q_evt_std',...
         'freqdom','Cdata_mean',...
         'all_labels_regions','t_bins_fus',...
@@ -181,14 +157,14 @@ for kk = 1:length(all_pe_names)
         Cdata_evt_ = double(data_pe_large.Cdata_evt_int/data_pe_large.Params.save_ratio_spectro);
         Y2q_evt_normalized = data_pe_large.Y2q_evt_normalized;
         Y3q_evt_normalized = data_pe_large.Y3q_evt_normalized;
-        %         Y3q_evt_normalized = double(data_pe_large.Y3q_evt_normalized_int/data_pe_large.Params.save_ratio_fus);
-        %         Y2q_evt_mean = mean(Y2q_evt_normalized,3,'omitnan');
-        %         Y2q_evt_median = median(Y2q_evt_normalized,3,'omitnan');
-        %         Y3q_evt_mean = mean(Y3q_evt_normalized,3,'omitnan');
-        %         Y3q_evt_mean_reshaped = reshape(Y3q_evt_mean,[data_pe_large.Params.size_im(1) data_pe_large.Params.size_im(2) length(data_pe_large.t_bins_fus)]);
-        %         Y3q_evt_median = median(Y3q_evt_normalized,3,'omitnan');
-        %         Y3q_evt_median_reshaped = reshape(Y3q_evt_median,[data_pe_large.Params.size_im(1) data_pe_large.Params.size_im(2) length(data_pe_large.t_bins_fus)]);
-        %         Cdata_mean = mean(Cdata_evt_,3,'omitnan');
+        % Y3q_evt_normalized = double(data_pe_large.Y3q_evt_normalized_int/data_pe_large.Params.save_ratio_fus);
+        % Y2q_evt_mean = mean(Y2q_evt_normalized,3,'omitnan');
+        % Y2q_evt_median = median(Y2q_evt_normalized,3,'omitnan');
+        % Y3q_evt_mean = mean(Y3q_evt_normalized,3,'omitnan');
+        % Y3q_evt_mean_reshaped = reshape(Y3q_evt_mean,[data_pe_large.Params.size_im(1) data_pe_large.Params.size_im(2) length(data_pe_large.t_bins_fus)]);
+        % Y3q_evt_median = median(Y3q_evt_normalized,3,'omitnan');
+        % Y3q_evt_median_reshaped = reshape(Y3q_evt_median,[data_pe_large.Params.size_im(1) data_pe_large.Params.size_im(2) length(data_pe_large.t_bins_fus)]);
+        % Cdata_mean = mean(Cdata_evt_,3,'omitnan');
     end
 
 
@@ -225,10 +201,13 @@ for kk = 1:length(all_pe_names)
 
     % Direct Loading from light file
     Y0q_evt_mean = data_pe_small.Y0q_evt_mean;
-    %     Y0q_evt_median = data_pe_small.Y0q_evt_median;
+    % Y0q_evt_median = data_pe_small.Y0q_evt_median;
     Y0q_evt_std = data_pe_small.Y0q_evt_std;
+    Z0q_evt_mean = data_pe_small.Z0q_evt_mean;
+    % Z0q_evt_median = data_pe_small.Z0q_evt_median;
+    Z0q_evt_std = data_pe_small.Z0q_evt_std;    
     Y1q_evt_mean = data_pe_small.Y1q_evt_mean;
-    %     Y1q_evt_median = data_pe_small.Y1q_evt_median;
+    % Y1q_evt_median = data_pe_small.Y1q_evt_median;
     Y1q_evt_std = data_pe_small.Y1q_evt_std;
     Cdata_mean = data_pe_small.Cdata_mean;
     Y2q_evt_mean = data_pe_small.Y2q_evt_mean;
@@ -242,21 +221,27 @@ for kk = 1:length(all_pe_names)
         'BackgroundColor',bg_color,...
         'Tag','MainTab');
     all_tabs(kk) = tab;
-    tab.Title = sprintf(strcat('[%s]'),event_name);
+    tab.Title = event_name;
+%     tab.Title = sprintf(strcat('[%s]'),event_name);
     panel1 = uipanel('Units','normalized',...
-        'Position',[0 0 .33 1],...
+        'Position',[0 0 .25 1],...
         'bordertype','etchedin',...
         'Tag','Panel1',...
         'Parent',tab);
     panel2 = uipanel('Units','normalized',...
-        'Position',[.33 .75 .67 .25],...
+        'Position',[.25 .75 .75 .25],...
         'bordertype','etchedin',...
         'Tag','Panel2',...
         'Parent',tab);
     panel3 = uipanel('Units','normalized',...
-        'Position',[.33 0 .67 .75],...
+        'Position',[.25 0 .25 .75],...
         'bordertype','etchedin',...
         'Tag','Panel3',...
+        'Parent',tab);
+    panel4 = uipanel('Units','normalized',...
+        'Position',[.5 0 .5 .75],...
+        'bordertype','etchedin',...
+        'Tag','Panel4',...
         'Parent',tab);
 
     % channel_main_raw = strcat('LFP-',channel_id);
@@ -311,66 +296,77 @@ for kk = 1:length(all_pe_names)
     % ax1.YTickLabelRotation = 90;
     ax1.Title.FontSize = 14;
 
-
+    % Zscored Peri-Ripple
+    ax11 = axes('Parent',panel2,'Position',[.05 .1 .275 .85]);
+    %     hold(ax11,'on');
+    % Error Patch
+    px_data = [t_bins_lfp;flipud(t_bins_lfp)];
+    py_data = [Z0q_evt_mean+Z0q_evt_std;flipud(Z0q_evt_mean-Z0q_evt_std)];
+    patch('XData',px_data,'YData',py_data,'FaceColor',[.5 .5 .5],'EdgeColor','none','Parent',ax11,'FaceAlpha',.5);
+    line('XData',t_bins_lfp,'YData',Z0q_evt_mean,'Color','r','Parent',ax11);
+    ax11.Title.String = 'Zscored trace LFP';
+    ax11.YLim = [-3,3];
+    ax11.XLim = ax1.XLim;
+    ax11.XLim = [-.25 .25];
+    
     % Panel 2
-    ax2 = axes('Parent',panel2,'Position',[.05 .1 .275 .85]);
-    %     hold(ax2,'on');
+    ax12 = axes('Parent',panel2,'Position',[.375 .1 .275 .85]);
+    %     hold(ax12,'on');
     %     for i=1:n_events
-    %         l=line('XData',t_bins_lfp,'YData',Y1q_evt_(:,i),'Color',[.5 .5 .5],'LineWidth',.1,'Parent',ax2);
+    %         l=line('XData',t_bins_lfp,'YData',Y1q_evt_(:,i),'Color',[.5 .5 .5],'LineWidth',.1,'Parent',ax12);
     %         l.Color(4)=.5;
     %     end
-
     % Error Patch
     px_data = [t_bins_lfp;flipud(t_bins_lfp)];
     py_data = [Y1q_evt_mean+Y1q_evt_std;flipud(Y1q_evt_mean-Y1q_evt_std)];
-    patch('XData',px_data,'YData',py_data,'FaceColor',[.5 .5 .5],'EdgeColor','none','Parent',ax2,'FaceAlpha',.5);
+    patch('XData',px_data,'YData',py_data,'FaceColor',[.5 .5 .5],'EdgeColor','none','Parent',ax12,'FaceAlpha',.5);
     % % Error Line
-    % line('XData',t_bins_lfp,'YData',Y1q_evt_mean+Y1q_evt_std,'Color',[.5 .5 .5],'LineStyle','-','Parent',ax2);
-    % line('XData',t_bins_lfp,'YData',Y1q_evt_mean-Y1q_evt_std,'Color',[.5 .5 .5],'LineStyle','-','Parent',ax2);
+    % line('XData',t_bins_lfp,'YData',Y1q_evt_mean+Y1q_evt_std,'Color',[.5 .5 .5],'LineStyle','-','Parent',ax12);
+    % line('XData',t_bins_lfp,'YData',Y1q_evt_mean-Y1q_evt_std,'Color',[.5 .5 .5],'LineStyle','-','Parent',ax12);
     % Main Line
-    line('XData',t_bins_lfp,'YData',Y1q_evt_mean,'Color','r','Parent',ax2);
-    ax2.Title.String = 'Filtered trace LFP';
+    line('XData',t_bins_lfp,'YData',Y1q_evt_mean,'Color','r','Parent',ax12);
+    ax12.Title.String = 'Filtered trace LFP';
     n_iqr = 200;
     data_iqr = Y1q_evt_mean(~isnan(Y1q_evt_mean));
-    ax2.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    ax2.XLim = ax1.XLim;
+    ax12.YLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    ax12.XLim = ax1.XLim;
 
     % Spectrogram
-    ax3 = axes('Parent',panel2,'Position',[.35 .1 .275 .85]);
-    %     hold(ax3,'on');
-    imagesc('XData',t_bins_lfp,'YData',freqdom,'CData',Cdata_mean,'HitTest','off','Parent',ax3);
+    ax13 = axes('Parent',panel2,'Position',[.7 .1 .275 .85]);
+    %     hold(ax13,'on');
+    imagesc('XData',t_bins_lfp,'YData',freqdom,'CData',Cdata_mean,'HitTest','off','Parent',ax13);
     n_iqr= 2;
     data_iqr = Cdata_mean(~isnan(Cdata_mean));
-    ax3.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    ax3.YLim = [freqdom(1),freqdom(end)];
-    % ax3.XLim = [t_bins_lfp(1),t_bins_lfp(end)];
-    ax3.XLim = ax1.XLim;
-    ax3.Title.String = 'Mean Spectrogram';
+    ax13.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    ax13.YLim = [freqdom(1),freqdom(end)];
+    % ax13.XLim = [t_bins_lfp(1),t_bins_lfp(end)];
+    ax13.XLim = ax1.XLim;
+    ax13.Title.String = 'Mean Spectrogram';
 
+    % Panel 3
     % fUS
-    ax4 = axes('Parent',panel2,'Position',[.7 .1 .275 .85]);
-    hold(ax4,'on');
+    ax5 = axes('Parent',panel3,'Position',[.15 .05 .8 .9]);
+    hold(ax5,'on');
     switch sequence_display_reg
         case 'mean'
             cdata = Y2q_evt_mean;
         case 'median'
             cdata = Y2q_evt_median;
     end
-    imagesc('XData',t_bins_fus,'YData',1:length(all_labels_regions),'CData',cdata,'HitTest','off','Parent',ax4);
+    imagesc('XData',t_bins_fus,'YData',1:length(all_labels_regions),'CData',cdata,'HitTest','off','Parent',ax5);
     % data_iqr = cdata(~isnan(cdata));
     % n_iqr = 4;
-    % ax4.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-    % ax4.CLim = [median(data_iqr(:))-2,median(data_iqr(:))+5];
-    ax4.YLim = [.5 length(all_labels_regions)+.5];
-    ax4.XLim = [t_bins_fus(1),t_bins_fus(end)];
-    ax4.YTick = 1:length(all_labels_regions);
-    ax4.YTickLabel = all_labels_regions;
-    ax4.Title.String = 'Regions fUS';
-    % ax4.FontSize = 8;
-    colorbar(ax4,'eastoutside');
+    % ax5.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+    % ax5.CLim = [median(data_iqr(:))-2,median(data_iqr(:))+5];
+    ax5.YLim = [.5 length(all_labels_regions)+.5];
+    ax5.XLim = [t_bins_fus(1),t_bins_fus(end)];
+    ax5.YTick = 1:length(all_labels_regions);
+    ax5.YTickLabel = all_labels_regions;
+    ax5.Title.String = 'Regions fUS';
+    % ax5.FontSize = 8;
+    colorbar(ax5,'southoutside');
 
-
-    % Panel 3
+    % Panel 4
     temp = 1:length(t_bins_fus);
     index_t_bins_fus = temp(1:end-1); %(1:2:end-1);
 
@@ -395,7 +391,7 @@ for kk = 1:length(all_pe_names)
 
     all_axes = gobjects(length(index_t_bins_fus),1);
     for i = index_t_bins_fus
-        ax = axes('Parent',panel3);
+        ax = axes('Parent',panel4);
         ax.Position = get_position(n_rows,n_col,i,margins);
         hold(ax,'on');
         imagesc('CData',cdata2(:,:,i),'Parent',ax);
@@ -413,11 +409,11 @@ for kk = 1:length(all_pe_names)
         ax.YDir = 'reverse';
         if i == index_t_bins_fus(end)
             cbar = colorbar(ax,'eastoutside');
-            %             cbar.Position = [.94 .01 .01 .15];
+            % cbar.Position = [.94 .01 .01 .15];
         end
         all_axes(i) = ax;
     end
-    panel3.UserData.all_axes = all_axes;
+    panel4.UserData.all_axes = all_axes;
 end
 
 % Saving Tabs
@@ -430,7 +426,8 @@ if flag_save_figure
     for i = 1: length(all_tabs)
         tab = all_tabs(i);
         tabgp.SelectedTab = tab;
-        pic_name = strcat(tab.Title,recording_name,'_PeriEventSequence',GTraces.ImageSaveExtension);
+%         pic_name = strcat(tab.Title,recording_name,'_PeriEventSequence',GTraces.ImageSaveExtension);
+        pic_name = strcat(tab.Title,'_PeriEventSequence',GTraces.ImageSaveExtension);
         saveas(f1,fullfile(save_dir,pic_name),GTraces.ImageSaveFormat);
         fprintf('Tab %s saved in [%s].\n',tab.Title,save_dir);
     end
@@ -480,8 +477,8 @@ if flag_save_movie
         all_axes = gobjects(length(all_tabs),1);
         for j = 1:length(all_tabs)
             tab = all_tabs(j);
-            panel3 = findobj(tab,'Tag','Panel3');
-            ax = copyobj(panel3.UserData.all_axes(i),f2);
+            panel4 = findobj(tab,'Tag','Panel4');
+            ax = copyobj(panel4.UserData.all_axes(i),f2);
             all_axes(j) = ax;
             
             ax.Position = get_position(n_rows,n_col,j,margins);
@@ -490,8 +487,8 @@ if flag_save_movie
             ax.CLim = [-5,10];
 
             colorbar(ax,'eastoutside');
-            if ~isempty(data_atlas)
-                l = line('XData',data_atlas.line_x,'YData',data_atlas.line_z,'Tag','AtlasMask',...
+            if ~isempty(data_pe_small.data_atlas)
+                l = line('XData',data_pe_small.data_atlas.line_x,'YData',data_pe_small.data_atlas.line_z,'Tag','AtlasMask',...
                     'LineWidth',1,'Color','r','Parent',ax);
                 l.Color(4) = .25;
             end
