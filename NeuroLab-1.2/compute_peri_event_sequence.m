@@ -386,7 +386,17 @@ for kk=1:length(all_event_names)
     Y2q_evt_std = std(Y2q_evt_,[],3,'omitnan');
     n_true_events = sum(~isnan(Y2q_evt_),3);
     Y2q_evt_sem = Y2q_evt_std./sqrt(n_true_events);
+    % Extracting max and min
+    [Y2q_valmax_mean, ind_max] = max(Y2q_evt_mean,[],2,'omitnan');
+    Y2q_tmax_mean = t_bins_fus(ind_max);
+    [Y2q_valmin_mean, ind_min] = min(Y2q_evt_mean,[],2,'omitnan');
+    Y2q_tmin_mean = t_bins_fus(ind_min);
+    [Y2q_valmax_median, ind_max] = max(Y2q_evt_median,[],2,'omitnan');
+    Y2q_tmax_median = t_bins_fus(ind_max);
+    [Y2q_valmin_median, ind_min] = min(Y2q_evt_median,[],2,'omitnan');
+    Y2q_tmin_median = t_bins_fus(ind_min);
 
+    % Baseline extraction and normalization
     Y3q_evt_baseline = mean(Y3q_evt_(:,ind_baseline,:),2,'omitnan');
     Y3q_evt_normalized = Y3q_evt_ - repmat(Y3q_evt_baseline,[1 size(Y3q_evt_,2) 1]);
 %     % Saving in int format
@@ -397,7 +407,19 @@ for kk=1:length(all_event_names)
     Y3q_evt_mean_reshaped = reshape(Y3q_evt_mean,[size(IM,1) size(IM,2) length(t_bins_fus)]);
     Y3q_evt_median = median(Y3q_evt_normalized,3,'omitnan');
     Y3q_evt_median_reshaped = reshape(Y3q_evt_median,[size(IM,1) size(IM,2) length(t_bins_fus)]);
-    
+    % Extracting max and min
+    [Y3q_valmax_mean, ind_max] = max(Y3q_evt_mean,[],2,'omitnan');
+    Y3q_valmax_mean = reshape(Y3q_valmax_mean,[size(IM,1) size(IM,2)]);
+    Y3q_tmax_mean = reshape(t_bins_fus(ind_max),[size(IM,1) size(IM,2)]);
+    [Y3q_valmin_mean, ind_min] = min(Y3q_evt_mean,[],2,'omitnan');
+    Y3q_valmin_mean = reshape(Y3q_valmin_mean,[size(IM,1) size(IM,2)]);
+    Y3q_tmin_mean = reshape(t_bins_fus(ind_min),[size(IM,1) size(IM,2)]);   
+    [Y3q_valmax_median, ind_max] = max(Y3q_evt_median,[],2,'omitnan');
+    Y3q_valmax_median = reshape(Y3q_valmax_median,[size(IM,1) size(IM,2)]);
+    Y3q_tmax_median = reshape(t_bins_fus(ind_max),[size(IM,1) size(IM,2)]);
+    [Y3q_valmin_median, ind_min] = min(Y3q_evt_median,[],2,'omitnan');
+    Y3q_valmin_median = reshape(Y3q_valmin_median,[size(IM,1) size(IM,2)]);
+    Y3q_tmin_median = reshape(t_bins_fus(ind_min),[size(IM,1) size(IM,2)]);
     
     % Saving Data
     save_dir = fullfile(DIR_STATS,'PeriEvent_Sequence',recording_name);
@@ -443,8 +465,15 @@ for kk=1:length(all_event_names)
         'freqdom','Cdata_mean',...
         'all_labels_regions','t_bins_fus',...
         'Y2q_evt_mean','Y2q_evt_median','Y2q_evt_std','Y2q_evt_sem',...
-        'Y3q_evt_mean_reshaped','Y3q_evt_median_reshaped','-v7.3');
+        'Y2q_valmax_mean','Y2q_tmax_mean','Y2q_valmin_mean','Y2q_tmin_mean',...
+        'Y2q_valmax_median','Y2q_tmax_median','Y2q_valmin_median','Y2q_tmin_median',...
+        'Y3q_evt_mean_reshaped','Y3q_evt_median_reshaped',...
+        'Y3q_valmax_mean','Y3q_tmax_mean','Y3q_valmin_mean','Y3q_tmin_mean',...
+        'Y3q_valmax_median','Y3q_tmax_median','Y3q_valmin_median','Y3q_tmin_median',...
+        '-v7.3');
     fprintf('Data saved [%s].\n',fullfile(save_dir,filename_save_1));
+
+   
 
     if flag_save_large
         filename_save_2 = sprintf(strcat('%s_PeriEvent_AllEvents.mat'),event_name);

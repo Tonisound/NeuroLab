@@ -57,16 +57,6 @@ else
 
     else
         % batch mode
-        % ind_pe = 1:length(d_pe);
-%         batch_csv_timegroup = {'[NREM]'};
-%         ind_keep1 = zeros(length(d_pe),1);
-%         for i=1:length(batch_csv_timegroup)
-%             this_timegroup = char(batch_csv_timegroup(i));
-%             ind_keep1 = ind_keep1+contains({d_pe(:).name}',this_timegroup);
-%         end
-%         ind_keep1 = ind_keep1>0;
-        ind_keep1 = ones(length(d_pe),1);
-
 %         batch_csv_eventname = {'[Ripples-Merged-All]';'[Ripples-Merged-Fast]';'[Ripples-Merged-Long]';'[Ripples-Merged-Strong]'};      
         batch_csv_eventname = {'[AW]Ripples-Merged-All';'[QW]Ripples-Merged-All';'[NREM]Ripples-Merged-All'};        
         ind_keep2 = zeros(length(d_pe),1);
@@ -74,9 +64,9 @@ else
             this_event = char(batch_csv_eventname(i));
             ind_keep2 = ind_keep2+contains({d_pe(:).name}',this_event);
         end
-        ind_keep2 = ind_keep2>0;
-
-        ind_pe = find((ind_keep1.*ind_keep2)==1);
+%         ind_keep2 = ind_keep2>0;
+%         ind_pe = find((ind_keep1.*ind_keep2)==1);
+        ind_pe = find(ind_keep2==1);
     end
 end
 
@@ -92,7 +82,7 @@ sequence_display_reg = 'median';            % Displaying region sequence
 sequence_display_vox = 'median';            % Displaying voxel sequence
 % Flag save
 flag_save_figure = 1;           % Save Figure
-flag_save_movie = 1;            % Save Movie
+flag_save_movie = 0;            % Save Movie
 
 
 
@@ -135,6 +125,10 @@ for kk = 1:length(all_pe_names)
         'freqdom','Cdata_mean',...
         'all_labels_regions','t_bins_fus',...
         'Y2q_evt_mean','Y2q_evt_median',...
+        'Y2q_valmax_mean','Y2q_tmax_mean','Y2q_valmin_mean','Y2q_tmin_mean',...
+        'Y2q_valmax_median','Y2q_tmax_median','Y2q_valmin_median','Y2q_tmin_median',...
+        'Y3q_valmax_mean','Y3q_tmax_mean','Y3q_valmin_mean','Y3q_tmin_mean',...
+        'Y3q_valmax_median','Y3q_tmax_median','Y3q_valmin_median','Y3q_tmin_median',...
         'Y3q_evt_mean_reshaped','Y3q_evt_median_reshaped');
     fprintf(' done.\n');
 
@@ -210,8 +204,26 @@ for kk = 1:length(all_pe_names)
     % Y1q_evt_median = data_pe_small.Y1q_evt_median;
     Y1q_evt_std = data_pe_small.Y1q_evt_std;
     Cdata_mean = data_pe_small.Cdata_mean;
+    
     Y2q_evt_mean = data_pe_small.Y2q_evt_mean;
     Y2q_evt_median = data_pe_small.Y2q_evt_median;
+    Y2q_valmax_mean = data_pe_small.Y2q_valmax_mean;
+    Y2q_tmax_mean = data_pe_small.Y2q_tmax_mean;
+    % Y2q_valmin_mean = data_pe_small.Y2q_valmin_mean;
+    % Y2q_tmin_mean = data_pe_small.Y2q_tmin_mean;
+    Y2q_valmax_median = data_pe_small.Y2q_valmax_median;
+    Y2q_tmax_median = data_pe_small.Y2q_tmax_median;
+    % Y2q_valmin_median = data_pe_small.Y2q_valmin_median;
+    % Y2q_tmin_median = data_pe_small.Y2q_tmin_median;
+    
+    Y3q_valmax_mean = data_pe_small.Y3q_valmax_mean;
+    Y3q_tmax_mean = data_pe_small.Y3q_tmax_mean;
+    % Y3q_valmin_mean = data_pe_small.Y3q_valmin_mean;
+    % Y3q_tmin_mean = data_pe_small.Y3q_tmin_mean;
+    Y3q_valmax_median = data_pe_small.Y3q_valmax_median;
+    Y3q_tmax_median = data_pe_small.Y3q_tmax_median;
+    % Y3q_valmin_median = data_pe_small.Y3q_valmin_median;
+    % Y3q_tmin_median = data_pe_small.Y3q_tmin_median;
     Y3q_evt_mean_reshaped = data_pe_small.Y3q_evt_mean_reshaped;
     Y3q_evt_median_reshaped = data_pe_small.Y3q_evt_median_reshaped;
 
@@ -350,10 +362,20 @@ for kk = 1:length(all_pe_names)
     switch sequence_display_reg
         case 'mean'
             cdata = Y2q_evt_mean;
+            valmax = Y2q_valmax_mean;
+            tmax = Y2q_tmax_mean;
+            % valmin = Y2q_valmin_mean;
+            % tmin = Y2q_tmin_mean;
         case 'median'
             cdata = Y2q_evt_median;
+            valmax = Y2q_valmax_median;
+            tmax = Y2q_tmax_median;
+            % valmin = Y2q_valmin_median;
+            % tmin = Y2q_tmin_median;
     end
     imagesc('XData',t_bins_fus,'YData',1:length(all_labels_regions),'CData',cdata,'HitTest','off','Parent',ax5);
+    line('XData',tmax,'YData',1:length(all_labels_regions),'LineStyle','none',...
+        'Marker','o','MarkerSize',5,'MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5],'Parent',ax5)
     % data_iqr = cdata(~isnan(cdata));
     % n_iqr = 4;
     % ax5.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
@@ -371,7 +393,7 @@ for kk = 1:length(all_pe_names)
     index_t_bins_fus = temp(1:end-1); %(1:2:end-1);
 
     n_col = 5 ;
-    n_rows = ceil(length(index_t_bins_fus)/n_col);
+    n_rows = ceil(length(index_t_bins_fus)/n_col) + 1;
     w_margin_1 = .02; % left margin
     w_margin_2 = .02; % right margin
     w_eps = .01;      % horizontal spacing
@@ -383,16 +405,63 @@ for kk = 1:length(all_pe_names)
     switch sequence_display_vox
         case 'mean'
             cdata2 = Y3q_evt_mean_reshaped;
+            valmax_map = Y3q_valmax_mean;
+            tmax_map = Y3q_tmax_mean;
+            % valmin_map = Y3q_valmin_mean;
+            % tmin_map = Y3q_tmin_mean;
         case 'median'
             cdata2 = Y3q_evt_median_reshaped;
+            valmax_map = Y3q_valmax_median;
+            tmax_map = Y3q_tmax_median;
+            % valmin_map = Y3q_valmin_median;
+            % tmin_map = Y3q_tmin_median;
     end
     n_iqr = 3;
     data_iqr = cdata2(~isnan(cdata2));
+        
+    ax11 = axes('Parent',panel4);
+    ax11.Position = get_position(n_rows,3,1,margins);
+    imagesc('CData',valmax_map,'Parent',ax11);
+    ax11.XLim = [.5 size_im(2)+.5];
+    ax11.YLim = [.5 size_im(1)+.5];
+    set(ax11,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+    ax11.YDir = 'reverse';
+    ax11.Title.String = 'Amplitude Map (%)';
+    colorbar(ax11,'eastoutside');
+    ax22 = axes('Parent',panel4);
+    ax22.Position = get_position(n_rows,3,2,margins);
+    imagesc('CData',tmax_map,'Parent',ax22);
+    ax22.XLim = [.5 size_im(2)+.5];
+    ax22.YLim = [.5 size_im(1)+.5];
+    set(ax22,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+    ax22.YDir = 'reverse';
+    ax22.Title.String = 'Time Map (s)';
+    colorbar(ax22,'eastoutside');
 
+    amp_thresh = 5 ; % Threshold ()
+    ax33 = axes('Parent',panel4);
+    ax33.Position = get_position(n_rows,3,3,margins);
+    im = imagesc('CData',tmax_map,'Parent',ax33);
+    index_AlphaData = valmax_map > amp_thresh;
+    im.AlphaData = index_AlphaData;
+    clim1 = max(max(im.CData(index_AlphaData==1)));
+    clim2 = min(min(im.CData(index_AlphaData==1)));
+   
+    ax33.XLim = [.5 size_im(2)+.5];
+    ax33.YLim = [.5 size_im(1)+.5];
+%     if clim1<clim2
+%         ax33.CLim = [clim1 clim2];
+%     end
+    ax33.CLim = [0 3];
+    set(ax33,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+    ax33.YDir = 'reverse';
+    ax33.Title.String = sprintf('Time Map (Amplitude>%.2f) (s)',amp_thresh);
+    colorbar(ax33,'eastoutside');
+        
     all_axes = gobjects(length(index_t_bins_fus),1);
     for i = index_t_bins_fus
         ax = axes('Parent',panel4);
-        ax.Position = get_position(n_rows,n_col,i,margins);
+        ax.Position = get_position(n_rows,n_col,i+n_col,margins);
         hold(ax,'on');
         imagesc('CData',cdata2(:,:,i),'Parent',ax);
         t = text(0,5,sprintf('t=%0.1fs',t_bins_fus(i)),'Parent',ax);
@@ -408,7 +477,7 @@ for kk = 1:length(all_pe_names)
         set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
         ax.YDir = 'reverse';
         if i == index_t_bins_fus(end)
-            cbar = colorbar(ax,'eastoutside');
+            % cbar = colorbar(ax,'eastoutside');
             % cbar.Position = [.94 .01 .01 .15];
         end
         all_axes(i) = ax;
