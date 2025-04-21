@@ -177,11 +177,16 @@ for i = 1:length(all_time_groups)
     
     % Ripple detection abs
     fprintf('================ Ripple Event Detection using absolute value ================\n');
-    [ripples_abs, meanVal, stdVal] = FindRipples_abs(HPCrip, HPCnonRip, SWSEpoch, TotalNoiseEpoch,...
-        'frequency_band',Info.frequency_band, ...
-        'threshold',Info.threshold(1,:),...
-        'durations',Info.durations,...
-        'stim',stim);
+%     [ripples_abs, meanVal, stdVal] = FindRipples_abs(HPCrip, HPCnonRip, SWSEpoch, TotalNoiseEpoch,...
+%         'frequency_band',Info.frequency_band, ...
+%         'threshold',Info.threshold(1,:),...
+%         'durations',Info.durations,...
+%         'stim',stim);
+    Info.Epoch = SWSEpoch-TotalNoiseEpoch;
+    Info.Restrict = SWSEpoch;
+    [ripples_abs, meanVal, stdVal] = FindRipples_abs(HPCrip, HPCnonRip, ...
+        Info.Epoch, Info.Restrict,'frequency_band',Info.frequency_band, ...
+        'threshold',Info.threshold(1,:),'durations',Info.durations,'stim',stim);
     % Removing NaN
     ripples_abs = ripples_abs(~isnan(ripples_abs(:,1)),:);
     density_events_abs = size(ripples_abs,1)/timegroup_duration;
@@ -190,7 +195,17 @@ for i = 1:length(all_time_groups)
     
     % Ripple detection sqrt
     fprintf('================ Ripple Event Detection using square root ================\n');
-    [ripples_sqrt,stdev] = FindRipples_sqrt(HPCrip, HPCnonRip, SWSEpoch, Info.threshold(2,:));
+    % Get longest epoch of sws start and stop times (for zug)
+    [~,idx]=max(End(Info.Restrict)-Start(Info.Restrict));
+    if isempty(idx)
+        restrict=0;
+    else
+        tsws(1) = Start(subset(Info.Restrict,idx))/1e4;
+        tsws(2) = End(subset(Info.Restrict,idx))/1e4;
+    end
+
+    [ripples_sqrt,stdev] = FindRipples_sqrt(HPCrip, HPCnonRip, Info.Epoch, Info.threshold(2,:), ...
+        'clean',clean,'restrict',tsws);
     % Removing NaN
     ripples_sqrt = ripples_sqrt(~isnan(ripples_sqrt(:,1)),:);
     
@@ -235,12 +250,12 @@ for i = 1:length(all_time_groups)
         sprintf('timegroup_duration(s),%.2f',timegroup_duration);
         sprintf('density_events(Hz),%.3f',density_events_sqrt)};
     
-    % Writing Abs Ripples
-    output_file = fullfile(folder_events,sprintf('[%s]Ripples-Abs-All.csv',cur_timegroup));
-    write_csv_events(output_file,ripples_abs,EventHeader,MetaDataAbs);
-    % Writing Sqrt Ripples
-    output_file = fullfile(folder_events,sprintf('[%s]Ripples-Sqrt-All.csv',cur_timegroup));
-    write_csv_events(output_file,ripples_sqrt,EventHeader,MetaDataSqrt);
+%     % Writing Abs Ripples
+%     output_file = fullfile(folder_events,sprintf('[%s]Ripples-Abs-All.csv',cur_timegroup));
+%     write_csv_events(output_file,ripples_abs,EventHeader,MetaDataAbs);
+%     % Writing Sqrt Ripples
+%     output_file = fullfile(folder_events,sprintf('[%s]Ripples-Sqrt-All.csv',cur_timegroup));
+%     write_csv_events(output_file,ripples_sqrt,EventHeader,MetaDataSqrt);
     % Writing Merged Ripples
     output_file = fullfile(folder_events,sprintf('[%s]Ripples-Merged-All.csv',cur_timegroup));
     write_csv_events(output_file,ripples,EventHeader,MetaData);
@@ -257,6 +272,20 @@ for i = 1:length(all_time_groups)
     write_csv_events(output_file,ripples_abs,EventHeader,MetaDataAbs);
     output_file = fullfile(folder_separate,sprintf('[%s][%s-%s]Ripples-Sqrt-All.csv',cur_timegroup,channel_ripple,channel_noise));
     write_csv_events(output_file,ripples_sqrt,EventHeader,MetaDataSqrt);
+    
+    
+    % Save evt file
+    if ~isempty(dir_dat)
+        evt_filename = sprintf('[%s-%s][%s]swr-merged.evt.swr',channel_ripple,channel_noise,cur_timegroup);
+        file_ID = fopen(fullfile(dir_dat,evt_filename),'w');
+        for ii = 1:size(ripples,1)
+            fprintf(file_ID,'%f\t%s\n',ripples(ii,1)*1000,'Ripple start 0'); % Convert to milliseconds
+            fprintf(file_ID,'%f\t%s\n',ripples(ii,2)*1000,'Ripple peak 0'); % Convert to milliseconds
+            fprintf(file_ID,'%f\t%s\n',ripples(ii,3)*1000,'Ripple stop 0'); % Convert to milliseconds
+        end
+        fclose(file_ID);
+        fprintf('Event File saved [%s].\n',fullfile(dir_dat,evt_filename));
+    end
     
 end
 

@@ -82,7 +82,7 @@ sequence_display_reg = 'median';            % Displaying region sequence
 sequence_display_vox = 'median';            % Displaying voxel sequence
 % Flag save
 flag_save_figure = 1;           % Save Figure
-flag_save_movie = 0;            % Save Movie
+flag_save_movie = 1;            % Save Movie
 
 
 
