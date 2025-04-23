@@ -348,7 +348,7 @@ for kk=1:length(all_event_names)
     Y0q_evt_sem = Y0q_evt_std./sqrt(n_true_events);
 
     % time-window based zscoring
-    Z0q_evt_ = squeeze(Y0q_evt_(ind_channel_id,:,:));
+    Z0q_evt_ = permute(Y0q_evt_(ind_channel_id,:,:),[2 3 1]);
     t1_zscore = -.1;
     t2_zscore = .1;
     [~,ind_z1] = min((t_bins_lfp-t1_zscore).^2);

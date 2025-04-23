@@ -50,6 +50,9 @@ else
     ind_selected = 1:length(all_lfp_channels);
 end
 
+% % forcing all channels
+% ind_selected = 1:length(all_lfp_channels);
+
 % Channel Selection
 if val == 1
     % user mode

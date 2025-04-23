@@ -66,7 +66,7 @@ end
 ind_selected = find(strcmp(channel_list,strcat('LFP_',data_config.File.mainlfp,'.mat'))==1);
 % % Alias Channel Only
 % ind_selected = find(strcmp(channel_list,sprintf('LFP_%s.mat',GTraces.AliasMainLFP))==1);
-% % All Channels
+% % forcing all channels
 % ind_selected = 1:length(channel_list);
 
 % asks for user input if val == 1

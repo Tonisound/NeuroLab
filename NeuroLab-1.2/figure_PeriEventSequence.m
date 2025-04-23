@@ -470,8 +470,8 @@ for kk = 1:length(all_pe_names)
         t.BackgroundColor = 'w';
 
         % ax.Title.String = sprintf('t= %.1f s',t_bins_fus(i));
-        ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-        % ax.CLim = [-5,10];
+        % ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
+        ax.CLim = [-5,10];
         ax.XLim = [.5 size_im(2)+.5];
         ax.YLim = [.5 size_im(1)+.5];
         set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
