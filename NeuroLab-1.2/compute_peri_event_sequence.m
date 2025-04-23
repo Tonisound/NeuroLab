@@ -92,8 +92,11 @@ else
     else
         % batch mode
         % ind_events = 1:length(d_events);
-%         batch_csv_events = {'Ripples-Merged-All.csv';'Ripples-Merged-Fast.csv';'Ripples-Merged-Long.csv';'Ripples-Merged-Strong.csv'};
-        batch_csv_events = {'[AW]Ripples-Merged-All.csv';'[QW]Ripples-Merged-All.csv';'[NREM]Ripples-Merged-All.csv'};
+%         batch_csv_events = {'[AW]Ripples-Merged-All.csv';'[QW]Ripples-Merged-All.csv';'[NREM]Ripples-Merged-All.csv'};
+        batch_csv_events = {'[NREM]Ripples-Merged-Occurence-Q1.csv';'[NREM]Ripples-Merged-Occurence-Q2.csv';'[NREM]Ripples-Merged-Occurence-Q3.csv';'[NREM]Ripples-Merged-Occurence-Q4.csv';...
+            '[NREM]Ripples-Merged-Amplitude-Q1.csv';'[NREM]Ripples-Merged-Amplitude-Q2.csv';'[NREM]Ripples-Merged-Amplitude-Q3.csv';'[NREM]Ripples-Merged-Amplitude-Q4.csv';...
+            '[NREM]Ripples-Merged-Duration-Q1.csv';'[NREM]Ripples-Merged-Duration-Q2.csv';'[NREM]Ripples-Merged-Duration-Q3.csv';'[NREM]Ripples-Merged-Duration-Q4.csv';...
+            '[NREM]Ripples-Merged-Frequency-Q1.csv';'[NREM]Ripples-Merged-Frequency-Q2.csv';'[NREM]Ripples-Merged-Frequency-Q3.csv';'[NREM]Ripples-Merged-Frequency-Q4.csv'};
         ind_events = [];
         for i=1:length(batch_csv_events)
             ind_keep = find(strcmp({d_events(:).name}',char(batch_csv_events(i))));

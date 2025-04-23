@@ -57,8 +57,12 @@ else
 
     else
         % batch mode
-%         batch_csv_eventname = {'[Ripples-Merged-All]';'[Ripples-Merged-Fast]';'[Ripples-Merged-Long]';'[Ripples-Merged-Strong]'};      
-        batch_csv_eventname = {'[AW]Ripples-Merged-All';'[QW]Ripples-Merged-All';'[NREM]Ripples-Merged-All'};        
+        % batch_csv_eventname = {'[AW]Ripples-Merged-All';'[QW]Ripples-Merged-All';'[NREM]Ripples-Merged-All'};
+        batch_csv_eventname = {'[NREM]Ripples-Merged-Occurence-Q1';'[NREM]Ripples-Merged-Occurence-Q2';'[NREM]Ripples-Merged-Occurence-Q3';'[NREM]Ripples-Merged-Occurence-Q4';...
+            '[NREM]Ripples-Merged-Amplitude-Q1';'[NREM]Ripples-Merged-Amplitude-Q2';'[NREM]Ripples-Merged-Amplitude-Q3';'[NREM]Ripples-Merged-Amplitude-Q4';...
+            '[NREM]Ripples-Merged-Duration-Q1';'[NREM]Ripples-Merged-Duration-Q2';'[NREM]Ripples-Merged-Duration-Q3';'[NREM]Ripples-Merged-Duration-Q4';...
+            '[NREM]Ripples-Merged-Frequency-Q1';'[NREM]Ripples-Merged-Frequency-Q2';'[NREM]Ripples-Merged-Frequency-Q3';'[NREM]Ripples-Merged-Frequency-Q4'};
+        
         ind_keep2 = zeros(length(d_pe),1);
         for i=1:length(batch_csv_eventname)
             this_event = char(batch_csv_eventname(i));
@@ -81,8 +85,8 @@ flag_load_large = false;                    % Loading all events
 sequence_display_reg = 'median';            % Displaying region sequence
 sequence_display_vox = 'median';            % Displaying voxel sequence
 % Flag save
-flag_save_figure = 1;           % Save Figure
-flag_save_movie = 1;            % Save Movie
+flag_save_figure = true;           % Save Figure
+flag_save_movie = true;            % Save Movie
 
 
 
@@ -504,7 +508,7 @@ if flag_save_figure
 end
 
 % Saving Movie
-n_col = 3 ;
+n_col = 4 ;
 n_rows = ceil(length(all_tabs)/n_col);
 w_margin_1 = .02; % left margin
 w_margin_2 = .02; % right margin
@@ -534,7 +538,7 @@ if flag_save_movie
     mkdir(work_dir2);
 
     f2 = figure('Units','normalized');
-    f2.OuterPosition = [0    0.4    1    0.4];
+    f2.OuterPosition = [0    0    1    1];
 
     for i = index_t_bins_fus
         delete(f2.Children);
@@ -553,7 +557,7 @@ if flag_save_movie
             ax.Position = get_position(n_rows,n_col,j,margins);
             ax.Title.String = tab.Title;
             colormap(ax,"jet");
-            ax.CLim = [-5,10];
+            ax.CLim = [-10,20];
 
             colorbar(ax,'eastoutside');
             if ~isempty(data_pe_small.data_atlas)
@@ -566,11 +570,11 @@ if flag_save_movie
         pic_name = sprintf(strcat('%s_%03d'),recording_name,i);
         saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
         
-        for j = 1:length(all_tabs)
-            ax = all_axes(j);
-            ax.CLim = [-2.5,5];
-        end
-        saveas(f2,fullfile(work_dir2,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+%         for j = 1:length(all_tabs)
+%             ax = all_axes(j);
+%             ax.CLim = [-2.5,5];
+%         end
+%         saveas(f2,fullfile(work_dir2,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
         
         delete(findobj(f2,'Type','Axes'));
     end
