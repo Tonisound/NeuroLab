@@ -57,11 +57,11 @@ else
 
     else
         % batch mode
-        % batch_csv_eventname = {'[AW]Ripples-Merged-All';'[QW]Ripples-Merged-All';'[NREM]Ripples-Merged-All'};
-        batch_csv_eventname = {'[NREM]Ripples-Merged-Occurence-Q1';'[NREM]Ripples-Merged-Occurence-Q2';'[NREM]Ripples-Merged-Occurence-Q3';'[NREM]Ripples-Merged-Occurence-Q4';...
-            '[NREM]Ripples-Merged-Amplitude-Q1';'[NREM]Ripples-Merged-Amplitude-Q2';'[NREM]Ripples-Merged-Amplitude-Q3';'[NREM]Ripples-Merged-Amplitude-Q4';...
-            '[NREM]Ripples-Merged-Duration-Q1';'[NREM]Ripples-Merged-Duration-Q2';'[NREM]Ripples-Merged-Duration-Q3';'[NREM]Ripples-Merged-Duration-Q4';...
-            '[NREM]Ripples-Merged-Frequency-Q1';'[NREM]Ripples-Merged-Frequency-Q2';'[NREM]Ripples-Merged-Frequency-Q3';'[NREM]Ripples-Merged-Frequency-Q4'};
+        batch_csv_eventname = {'[NREM]Ripples-Merged-All'};
+%         batch_csv_eventname = {'[NREM]Ripples-Merged-Occurence-Q1';'[NREM]Ripples-Merged-Occurence-Q2';'[NREM]Ripples-Merged-Occurence-Q3';'[NREM]Ripples-Merged-Occurence-Q4';...
+%             '[NREM]Ripples-Merged-Amplitude-Q1';'[NREM]Ripples-Merged-Amplitude-Q2';'[NREM]Ripples-Merged-Amplitude-Q3';'[NREM]Ripples-Merged-Amplitude-Q4';...
+%             '[NREM]Ripples-Merged-Duration-Q1';'[NREM]Ripples-Merged-Duration-Q2';'[NREM]Ripples-Merged-Duration-Q3';'[NREM]Ripples-Merged-Duration-Q4';...
+%             '[NREM]Ripples-Merged-Frequency-Q1';'[NREM]Ripples-Merged-Frequency-Q2';'[NREM]Ripples-Merged-Frequency-Q3';'[NREM]Ripples-Merged-Frequency-Q4'};
         
         ind_keep2 = zeros(length(d_pe),1);
         for i=1:length(batch_csv_eventname)
@@ -75,19 +75,25 @@ else
 end
 
 
+% Main Parameters
+flag_load_large = false;           % Loading all events
+flag_save_figure = true;           % Save Figure
+flag_save_movie = true;            % Save Movie
+flag_save_movie_2 = false;          % Save Second Movie (other clim)
+
+
 % Display Parameters
 % markersize = 3;
 % face_color = [0.9300    0.6900    0.1900];
 % face_alpha = .5 ;
 % g_colors = get_colors(n_channels+1,'jet');
-offset_stepping = 250;                 % offset between channels (uV)
-flag_load_large = false;                    % Loading all events
-sequence_display_reg = 'median';            % Displaying region sequence
-sequence_display_vox = 'median';            % Displaying voxel sequence
-% Flag save
-flag_save_figure = true;           % Save Figure
-flag_save_movie = true;            % Save Movie
-
+offset_stepping_lfp = 250;                  % offset between channels (uV)
+sequence_display_reg = 'mean';            % Displaying region sequence
+sequence_display_vox = 'mean';            % Displaying voxel sequence
+cmap_figure = 'jet';
+cmap_movie = 'jet';
+CLim_movie = [-10;20];
+CLim_movie_2 = [-5;10];
 
 
 % Building Figure and Plotting
@@ -97,7 +103,7 @@ f1.UserData.success = false;
 % f1.Name = sprintf(strcat('[%s]%s-PeriEventSequence'),data_pe_small.atlas_fullname,strrep(recording_name,'_nlab',''));
 f1.Name = sprintf(strcat('[%s]PeriEventSequence'),strrep(recording_name,'_nlab',''));
 set(f1,'Units','normalized','OuterPosition',[0 0 1 1]);
-colormap(f1,'jet');
+colormap(f1,cmap_figure);
 bg_color='w';
 
 mP = uipanel('Units','normalized',...
@@ -274,7 +280,7 @@ for kk = 1:length(all_pe_names)
         this_channel_name = strrep(char(all_labels_channels(j)),'LFP-','');
         channel_position = find(strcmp(nc_channnels,this_channel_name)==1);
         if ~isempty(channel_position)
-            y_offset = offset_stepping*(n_channels+1-channel_position);
+            y_offset = offset_stepping_lfp*(n_channels+1-channel_position);
             yTickLabel(n_channels+1-channel_position) = {this_channel_name};
         else
             y_offset = n_channels;
@@ -302,11 +308,11 @@ for kk = 1:length(all_pe_names)
         end
     end
     ax1.Title.String = sprintf('All LFP channels [N=%d][%.2f events/s]',n_events,density_events);
-    ax1.YLim = offset_stepping*[-1;length(nc_channnels)+1];
+    ax1.YLim = offset_stepping_lfp*[-1;length(nc_channnels)+1];
     ax1.XLim = [-.1 .1];
     ax1.XLabel.String = 'time(sec)';
     ax1.YTickLabel = yTickLabel;
-    ax1.YTick = offset_stepping*(1:n_channels);
+    ax1.YTick = offset_stepping_lfp*(1:n_channels);
     % ax1.YDir = 'reverse';
     ax1.TickLength(2) = 0;
     % ax1.YTickLabelRotation = 90;
@@ -531,11 +537,14 @@ if flag_save_movie
         rmdir(work_dir,'s');
     end
     mkdir(work_dir);
-    work_dir2 = fullfile(save_dir,'Frames2');
-    if isfolder(work_dir2)
-        rmdir(work_dir2,'s');
+
+    if flag_save_movie_2
+        work_dir2 = fullfile(save_dir,'Frames2');
+        if isfolder(work_dir2)
+            rmdir(work_dir2,'s');
+        end
+        mkdir(work_dir2);
     end
-    mkdir(work_dir2);
 
     f2 = figure('Units','normalized');
     f2.OuterPosition = [0    0    1    1];
@@ -556,9 +565,9 @@ if flag_save_movie
             
             ax.Position = get_position(n_rows,n_col,j,margins);
             ax.Title.String = tab.Title;
-            colormap(ax,"jet");
-            ax.CLim = [-10,20];
-
+            colormap(ax,cmap_movie);
+            ax.CLim = [CLim_movie(1),CLim_movie(2)];
+            
             colorbar(ax,'eastoutside');
             if ~isempty(data_pe_small.data_atlas)
                 l = line('XData',data_pe_small.data_atlas.line_x,'YData',data_pe_small.data_atlas.line_z,'Tag','AtlasMask',...
@@ -570,11 +579,13 @@ if flag_save_movie
         pic_name = sprintf(strcat('%s_%03d'),recording_name,i);
         saveas(f2,fullfile(work_dir,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
         
-%         for j = 1:length(all_tabs)
-%             ax = all_axes(j);
-%             ax.CLim = [-2.5,5];
-%         end
-%         saveas(f2,fullfile(work_dir2,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+        if flag_save_movie_2
+            for j = 1:length(all_tabs)
+                ax = all_axes(j);
+                ax.CLim = [CLim_movie_2(1),CLim_movie_2(2)];
+            end
+            saveas(f2,fullfile(work_dir2,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+        end
         
         delete(findobj(f2,'Type','Axes'));
     end
@@ -585,10 +596,11 @@ if flag_save_movie
     % Removing frame directory
     rmdir(work_dir,'s');
     
-    video_name = sprintf(strcat('%s-2'),f1.Name);
-    save_video(work_dir2,save_dir,video_name);
-    rmdir(work_dir2,'s');
-
+    if flag_save_movie_2
+        video_name = sprintf(strcat('%s-2'),f1.Name);
+        save_video(work_dir2,save_dir,video_name);
+        rmdir(work_dir2,'s');
+    end
     
 end
 

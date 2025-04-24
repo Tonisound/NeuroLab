@@ -3,17 +3,30 @@ function synthesis_PeriEvent_Sequence(all_event_names)
 % Generates a synthesis video of fUS peri-event activations
 % Generates Event Detection synthesis figures
 
-global DIR_SAVE DIR_SYNT DIR_FIG DIR_STATS;
+
+global DIR_SYNT DIR_FIG DIR_STATS;
 load('Preferences.mat','GTraces');
+
 
 % Parameters
 if nargin ==0
-    all_event_names = {'[NREM]Ripples-Merged-All';'[QW]Ripples-Merged-All'};
+    all_event_names = {'[NREM]Ripples-Merged-All'};
 end
 flag_moving_figures = true;
+flag_synthesis_figure = true;
 flag_synthesis_movie = true;
 flag_event_detection = true;
 flag_regions_averages = true;
+
+% Display Parameters
+% sequence_display_reg = 'mean';            % Displaying region sequence
+% sequence_display_vox = 'mean';            % Displaying voxel sequence
+cmap_figure = 'jet';
+cmap_movie = 'jet';
+CLim_movie = [-5;10];
+main_text_fontsize = 16;
+ax_fontsize = 10;
+cbar_fontsize = 6;
 
 
 % Sanity Checks
@@ -73,6 +86,12 @@ list_regions = {'[CTX-ACA-L]';'[CTX-ACA-R]';...
 %     '[SR]Amygdala-L';'[SR]Amygdala-R';...
 %     '[SR]Hypothalamus-L';'[SR]Hypothalamus-R';...
 %     '[SR]Other-L}';'[SR]Hypothalamus-R'};
+list_regions = {'dCA1-L';'dCA1-R';...
+    'dDG-L';'dDG-R';...
+    'vCA1-L';'vCA1-R';...
+    'vCA3-L';'vCA3-R';...
+    'VS-L';'VS-R'};
+
 n_regions = length(list_regions);
 
 
@@ -144,6 +163,7 @@ for index_event=1:length(all_event_names)
                     'Z0q_evt_mean','Z0q_evt_median','Z0q_evt_std','Z0q_evt_sem',...
                     'Y1q_evt_mean','Y1q_evt_median','Y1q_evt_std','Y1q_evt_sem',...
                     'all_labels_regions','t_bins_fus','Y2q_evt_mean','Y2q_evt_median','Y2q_evt_std','Y2q_evt_sem',...
+                    'Y3q_tmax_mean','Y3q_tmax_median','Y3q_valmax_mean','Y3q_valmax_median',...
                     'Y3q_evt_mean_reshaped','Y3q_evt_median_reshaped');
             else
                 warning('No PeriEvent_Sequence File found [%s][%s].',event_name,char(all_files(i)));
@@ -176,6 +196,10 @@ for index_event=1:length(all_event_names)
             S(i).Y1q_evt_sem = data_pe.Y1q_evt_sem;
 
             % Sequence
+            S(i).Y3q_tmax_mean = data_pe.Y3q_tmax_mean;
+            S(i).Y3q_tmax_median = data_pe.Y3q_tmax_median;
+            S(i).Y3q_valmax_mean = data_pe.Y3q_valmax_mean;
+            S(i).Y3q_valmax_median = data_pe.Y3q_valmax_median;                    
             S(i).Y3q_evt_mean_reshaped = data_pe.Y3q_evt_mean_reshaped;
             S(i).Y3q_evt_median_reshaped = data_pe.Y3q_evt_median_reshaped;
 
@@ -276,6 +300,114 @@ for index_event=1:length(all_event_names)
     end
     
     
+    %% Displaying synthesis figure
+    w_margin_1 = .05;       % left margin
+    w_margin_2 = .05;       % right margin
+    w_eps = .02;            % horizontal spacing
+    h_margin_1 = .05;       % bottom margin
+    h_margin_2 = .05;       % top margin
+    h_eps = .02;            % vertical spacing
+    margins = [w_margin_1,w_margin_2,w_eps;h_margin_1,h_margin_2,h_eps];
+
+    if flag_synthesis_figure
+        for j=1:length(unique_animals)
+            cur_animal = char(unique_animals(j));
+            S_animal = S(strcmp({S(:).animal}',cur_animal)==1);
+
+            for jj=1:length(unique_planes)
+                cur_plane = char(unique_planes(jj));
+                S_animal_plane = S_animal(strcmp({S_animal(:).plane}',cur_plane)==1);
+
+                % Sanity Check
+                if isempty(S_animal_plane)
+                    continue;
+                end
+
+                % n_col = 6;
+                n_col = ceil(1.2*sqrt(length(S_animal_plane)));
+                n_rows = ceil(length(S_animal_plane)/n_col);
+
+                for l=1:length(label_Y3q_evt)
+                    cur_label = char(label_Y3q_evt(l));
+                    f1 = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Event-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label));
+                    f2 = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Event-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label));
+                    colormap(f1,cmap_movie);
+                    colormap(f2,cmap_movie);
+                    f1_axes = [];
+                    f2_axes = [];
+                    for i=1:length(S_animal_plane)
+                        ax1 = axes('Parent',f1);
+                        ax2 = axes('Parent',f2);
+                        ax1.Position = get_position(n_rows,n_col,i,margins);
+                        ax2.Position = get_position(n_rows,n_col,i,margins);
+                        f1_axes = [f1_axes;ax1];
+                        f2_axes = [f2_axes;ax2];
+                    end
+                    t1 = uicontrol(f1,'Style','text','BackgroundColor','w','FontSize',main_text_fontsize,'FontWeight','bold',...
+                        'Units','normalized','Position',[.25 .96 .5 .03],'Parent',f1);
+                    t2 = uicontrol(f1,'Style','text','BackgroundColor','w','FontSize',main_text_fontsize,'FontWeight','bold',...
+                        'Units','normalized','Position',[.25 .96 .5 .03],'Parent',f2);
+
+                    for i=1:length(f1_axes)
+                        ax1 = f1_axes(i);
+                        ax2 = f2_axes(i);
+                        ax1.FontSize = ax_fontsize;
+                        ax2.FontSize = ax_fontsize;
+                        cla(ax1);
+                        cla(ax2);
+                        hold(ax1,'on');
+                        hold(ax2,'on');
+                        switch cur_label
+                            case 'Mean'
+                                valmax_map = S_animal_plane(i).Y3q_valmax_mean;
+                                tmax_map = S_animal_plane(i).Y3q_tmax_mean;
+                            case 'Median'
+                                valmax_map = S_animal_plane(i).Y3q_valmax_median;
+                                tmax_map = S_animal_plane(i).Y3q_tmax_median;
+                            otherwise
+                                Y3q_evt = NaN(1,1);
+                        end
+
+                        imagesc(valmax_map,'Parent',ax1);
+                        imagesc(tmax_map,'Parent',ax2);
+                        ax1.Title.String = sprintf('%s [N=%d][%.2fHz]',S_animal_plane(i).atlas_fullname,S_animal_plane(i).n_events,S_animal_plane(i).density_events);
+                        ax2.Title.String = sprintf('%s [N=%d][%.2fHz]',S_animal_plane(i).atlas_fullname,S_animal_plane(i).n_events,S_animal_plane(i).density_events);
+                        ax1.YLabel.String = S_animal_plane(i).name;
+                        ax2.YLabel.String = S_animal_plane(i).name;
+                        t1.String = sprintf('[%s][%s] Peak Amplitude Map',event_name,cur_label);
+                        t2.String = sprintf('[%s][%s] Peak Time Map',event_name,cur_label);
+                        
+                        ax1.CLim = [CLim_movie(1),CLim_movie(2)];
+                        ax2.CLim = [0,3];
+                        ax1.XLim = [.5 size(valmax_map,2)+.5];
+                        ax2.XLim = [.5 size(tmax_map,2)+.5];
+                        ax1.YLim = [.5 size(valmax_map,1)+.5];
+                        ax2.YLim = [.5 size(tmax_map,1)+.5];
+                        set(ax1,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+                        set(ax2,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
+                        ax1.YDir = 'reverse';
+                        ax2.YDir = 'reverse';
+                        if i == length(f1_axes)
+                            pos = ax1.Position;
+                            c1 = colorbar(ax1,"eastoutside");
+                            c2 = colorbar(ax2,"eastoutside");
+                            c1.Position(1) = pos(1)+pos(3)+.01;
+                            c2.Position(1) = pos(1)+pos(3)+.01;
+                        end
+                    end
+                    pic_name1 = sprintf(strcat('%s_PeakAmplitudeMap-%s'),event_name,cur_label);
+                    saveas(f1,fullfile(folder_dest,strcat(cur_animal,'-',cur_plane),strcat(pic_name1,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+                    pic_name2 = sprintf(strcat('%s_PeakTimeMap-%s'),event_name,cur_label);
+                    saveas(f2,fullfile(folder_dest,strcat(cur_animal,'-',cur_plane),strcat(pic_name2,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+                    % delete(c);
+                    close(f1);
+                    close(f2);
+                end
+            end
+        end
+    end
+    
+    
     %% Displaying synthesis movie
     w_margin_1 = .05;       % left margin
     w_margin_2 = .05;       % right margin
@@ -306,14 +438,14 @@ for index_event=1:length(all_event_names)
                 for l=1:length(label_Y3q_evt)
                     cur_label = char(label_Y3q_evt(l));
                     f = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Event-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label));
-                    colormap(f,"parula");
+                    colormap(f,cmap_movie);
                     f_axes = [];
                     for i=1:length(S_animal_plane)
                         ax = axes('Parent',f);
                         ax.Position = get_position(n_rows,n_col,i,margins);
                         f_axes = [f_axes;ax];
                     end
-                    t = uicontrol(f,'Style','text','BackgroundColor','w','FontSize',16,'FontWeight','bold',...
+                    t = uicontrol(f,'Style','text','BackgroundColor','w','FontSize',main_text_fontsize,'FontWeight','bold',...
                         'Units','normalized','Position',[.25 .96 .5 .03],'Parent',f);
                     
                     work_dir = fullfile(folder_dest,strcat(cur_animal,'-',cur_plane),strcat('Frames-',cur_animal,'-',cur_plane,'_',cur_label));
@@ -325,7 +457,7 @@ for index_event=1:length(all_event_names)
                     for k=1:length(t_bins_fus)
                         for i=1:length(f_axes)
                             ax = f_axes(i);
-                            ax.FontSize = 10;
+                            ax.FontSize = ax_fontsize;
                             cla(ax);
                             hold(ax,'on');
                             switch cur_label
@@ -345,7 +477,7 @@ for index_event=1:length(all_event_names)
                                 'LineWidth',.5,'Color','r','Parent',ax);
                             l_.Color(4)=.5;
                             % ax.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
-                            ax.CLim = [-5,10];
+                            ax.CLim = [CLim_movie(1),CLim_movie(2)];
                             ax.XLim = [.5 size(Y3q_evt,2)+.5];
                             ax.YLim = [.5 size(Y3q_evt,1)+.5];
                             set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
@@ -398,11 +530,11 @@ for index_event=1:length(all_event_names)
                 n_rows = ceil(length(S_animal_plane)/n_col);
                 
                 f = figure('Units','normalized','OuterPosition',[0 0 1 1],'Name',strcat('Event-Detection_',cur_animal,'-',cur_plane));
-                colormap(f,'jet');
+                colormap(f,cmap_figure);
                 f_axes = [];
                 for i=1:length(S_animal_plane)
                     ax = axes('Parent',f);
-                    ax.FontSize = 10;
+                    ax.FontSize = ax_fontsize;
                     ax.Position = get_position(n_rows,n_col,i,margins);
                     f_axes = [f_axes;ax];
                 end
@@ -554,7 +686,7 @@ for index_event=1:length(all_event_names)
 %         end
 %         
 %         f = figure('Units','normalized','OuterPosition',[0 0 1 1]);
-%         colormap(f,'jet');
+%         colormap(f,cmap_figure);
 %         
 %         ax1 = axes('Parent',f,'Position',[.1 .05 .4 .9]);
 %         hold(ax1,'on');
@@ -653,7 +785,7 @@ for index_event=1:length(all_event_names)
 %                 ax.YLim = [.5,n_regions_events(i)+.5];
 %                 ax.YDir = 'reverse';
 %                 %     colorbar(ax,'eastoutside');
-%                 %     ax.FontSize = 6;
+%                 %     ax.FontSize = cbar_fontsize;
 %                 
 %                 n_iqr= 3;
 %                 data_iqr = YData(~isnan(YData));
@@ -689,7 +821,7 @@ for index_event=1:length(all_event_names)
         end
         
         f = figure('Units','normalized','OuterPosition',[0 0 1 1]);
-        colormap(f,'jet');
+        colormap(f,cmap_figure);
         
         ax1 = axes('Parent',f,'Position',[.1 .05 .4 .9]);
         hold(ax1,'on');
@@ -792,7 +924,7 @@ for index_event=1:length(all_event_names)
                 ax.YLim = [.5,n_regions_recordings(i)+.5];
                 ax.YDir = 'reverse';
                 %     colorbar(ax,'eastoutside');
-                %     ax.FontSize = 6;
+                %     ax.FontSize = cbar_fontsize;
                 
                 n_iqr= 3;
                 data_iqr = YData(~isnan(YData));
