@@ -23,7 +23,7 @@ end
 % Parameters
 flag_save_large = false;            % Saving all events
 band_name = 'ripple';               % Filtered band for main channel
-sampling_fus = 5;                   % fUS interpolation frequency (Hz)
+sampling_fus = 20;                   % fUS interpolation frequency (Hz)
 sampling_lfp = 1000;                % LFP interpolation frequency (Hz)
 sampling_spectro = 200;             % Spectrogram interpolation frequency (Hz)
 t_before = -1;                      % time window start (seconds)
@@ -142,6 +142,8 @@ fprintf(' done.\n');
 
 % Selecting and loading fUS regions
 d_regions = dir(fullfile(savedir,'Sources_fUS','*.mat'));
+% Loading only region groups
+d_regions = dir(fullfile(savedir,'Sources_fUS','[*.mat'));
 d_regions = d_regions(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_regions));
 % % Restricting to bilateral regions
 % ind_leftright = contains({d_regions(:).name}','-L.mat')+contains({d_regions(:).name}','-R.mat');

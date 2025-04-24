@@ -13,9 +13,9 @@ if nargin ==0
     all_event_names = {'[NREM]Ripples-Merged-All'};
 end
 flag_moving_figures = false;
-flag_synthesis_figure = false;
-flag_synthesis_movie = false;
-flag_event_detection = false;
+flag_synthesis_figure = true;
+flag_synthesis_movie = true;
+flag_event_detection = true;
 flag_regions_averages = true;
 
 % Display Parameters
@@ -46,15 +46,12 @@ end
 % Regions
 list_regions = {'[CTX-ACA-L]';'[CTX-ACA-R]';...
     '[CTX-AI-L]';'[CTX-AI-R]';...
-    '[CTX-AUD-L]';'[CTX-AUD-R]';...
-    '[CTX-Ect-L]';'[CTX-Ect-R]';...
+    '[CTX-AUD-L]';'[CTX-AUD-R]';... '[CTX-Ect-L]';'[CTX-Ect-R]';...
     '[CTX-GU-L]';'[CTX-GU-R]';...
     '[CTX-ILA-L]';'[CTX-ILA-R]';...
-    '[CTX-MO-L]';'[CTX-MO-R]';...
-    '[CTX-PERI-L]';'[CTX-PERI-R]';...
+    '[CTX-MO-L]';'[CTX-MO-R]';...'[CTX-PERI-L]';'[CTX-PERI-R]';...
     '[CTX-RSP-L]';'[CTX-RSP-R]';...
-    '[CTX-SS-L]';'[CTX-SS-R]';...
-    '[CTX-TeA-L]';'[CTX-TeA-R]';...
+    '[CTX-SS-L]';'[CTX-SS-R]';...'[CTX-TeA-L]';'[CTX-TeA-R]';...
     '[CTX-VIS-L]';'[CTX-VIS-R]';...
     '[OLF-DP-L]';'[OLF-DP-R]';...
     '[OLF-PIR-L]';'[OLF-PIR-R]';...
@@ -87,11 +84,11 @@ list_regions = {'[CTX-ACA-L]';'[CTX-ACA-R]';...
 %     '[SR]Amygdala-L';'[SR]Amygdala-R';...
 %     '[SR]Hypothalamus-L';'[SR]Hypothalamus-R';...
 %     '[SR]Other-L}';'[SR]Hypothalamus-R'};
-list_regions = {'dCA1-L';'dCA1-R';...
-    'dDG-L';'dDG-R';...
-    'vCA1-L';'vCA1-R';...
-    'vCA3-L';'vCA3-R';...
-    'VS-L';'VS-R'};
+% list_regions = {'dCA1-L';'dCA1-R';...
+%     'dDG-L';'dDG-R';...
+%     'vCA1-L';'vCA1-R';...
+%     'vCA3-L';'vCA3-R';...
+%     'VS-L';'VS-R'};
 % list_regions = {'OrbitalCortex-L';'OrbitalCortex-R';...
 %     'OrbitalCortex-L';'OrbitalCortex-R';...
 %     'CingulateCortex-L';'CingulateCortex-R';...
@@ -118,7 +115,6 @@ list_regions = {'dCA1-L';'dCA1-R';...
 %     'BasalForebrain-L';'BasalForebrain-R';...
 %     'SubstantiaNigra-L';'SubstantiaNigra-R';...
 %     'SuperiorColliculus-L';'SuperiorColliculus-R';...
-%     'InferiorColliculus-L';'InferiorColliculus-R';...
 %     'DPAG-L';'DPAG-R';...
 %     'VPAG-L';'VPAG-R';...
 %     'DThalamus-L';'DThalamus-R';...
@@ -1012,34 +1008,45 @@ for index_event=1:length(all_event_names)
         % Swarn Plots per mean and tmax
         f = figure('Units','normalized','OuterPosition',[0 0 1 1]);
         colormap(f,cmap_figure);
-        f_colors = f.Colormap(round(1:length(f.Colormap)/n_regions:length(f.Colormap)),:);
+        Xq = 1:length(f.Colormap)/(n_regions+1):length(f.Colormap);
+        f_colors = interp1(1:length(f.Colormap),f.Colormap,Xq);
         
-        ax1 = axes('Parent',f,'Position',[.05 .55 .4 .4]);
-        ax1.Title.String = 'Peak Amplitude Mean';
+        % ax1 = axes('Parent',f,'Position',[.05 .55 .4 .4]);
+        ax1 = axes('Parent',f,'Position',[.05 .15 .9 .8]);
+        ax1.Title.String = 'PeakAmplitude-Mean';
         hold(ax1,'on');
         grid(ax1,'on');
         ax1.FontSize = ax_fontsize;
         ax1.Title.FontSize = title_fontsize;
         for k=1:n_regions
             ydata1 = Q(k).valmax_mean(:);
-            xdata = k*ones(size(ydata1));%+rand(size(ydata1))/5;
-            swarmchart(xdata(:),ydata1(:),'Color',f_colors(k,:),'Parent',ax1,...
-                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',f_colors(k,:),'MarkerFaceAlpha',1,...
-                'XJitterWidth',.5,'SizeData',30);
+            xdata = k*ones(size(ydata1))+rand(size(ydata1))/5;
+%             swarmchart(xdata(:),ydata1(:),'Color',f_colors(k,:),'Parent',ax1,...
+%                 'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',f_colors(k,:),'MarkerFaceAlpha',1,...
+%                 'XJitterWidth',.5,'SizeData',30);
+            line('XData',xdata(:),'YData',ydata1(:),'Color',f_colors(k,:),'LineStyle','none','Parent',ax1,...
+                'Marker','o','MarkerEdgeColor',f_colors(k,:),'MarkerFaceColor',f_colors(k,:),'MarkerSize',5);
+            
             n_samples1 = sum(~isnan(ydata1));
             m1 = mean(ydata1,'omitnan');
             line('Xdata',k,'YData',m1,'Parent',ax1,'LineStyle','none','LineWidth',1,...
                 'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',[k,k],'YData',[m1-std(ydata1,[],'omitnan')/sqrt(n_samples1),m1+std(ydata1,[],'omitnan')/sqrt(n_samples1)],'Parent',ax1,...
                 'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
-            text(k-.25,ax1.YLim(1)+.9*(ax1.YLim(2)-ax1.YLim(1)),sprintf('%.2f',m1),'Parent',ax1);
+%             text(k-.25,ax1.YLim(1)+.9*(ax1.YLim(2)-ax1.YLim(1)),sprintf('%.2f',m1),'Parent',ax1);
             ax1.XLim = [.5 n_regions+.5];
             ax1.XTick = 1:n_regions;
             ax1.XTickLabel = label_regions;
             ax1.XTickLabelRotation = 45;            
         end
+        % Intermediate save
+        pic_name = strcat(event_name,'_','Regional-Responses_',ax1.Title.String);
+        saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+        fprintf('File Saved  [%s].\n',pic_name);
 
-        ax2 = axes('Parent',f,'Position',[.55 .55 .4 .4]);
+        clf(f);
+        % ax2 = axes('Parent',f,'Position',[.55 .55 .4 .4]);
+        ax2 = axes('Parent',f,'Position',[.05 .15 .9 .8]);
         ax2.Title.String = 'Peak Amplitude Median';
         hold(ax2,'on');
         grid(ax2,'on');
@@ -1047,24 +1054,32 @@ for index_event=1:length(all_event_names)
         ax2.Title.FontSize = title_fontsize;
         for k=1:n_regions
             ydata1 = Q(k).valmax_median(:);
-            xdata = k*ones(size(ydata1));%+rand(size(ydata1))/5;
-            swarmchart(xdata(:),ydata1(:),'Color',f_colors(k,:),'Parent',ax2,...
-                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',f_colors(k,:),'MarkerFaceAlpha',1,...
-                'XJitterWidth',.5,'SizeData',30);
+            xdata = k*ones(size(ydata1))+rand(size(ydata1))/5;
+%             swarmchart(xdata(:),ydata1(:),'Color',f_colors(k,:),'Parent',ax2,...
+%                 'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',f_colors(k,:),'MarkerFaceAlpha',1,...
+%                 'XJitterWidth',.5,'SizeData',30);
+            line('XData',xdata(:),'YData',ydata1(:),'Color',f_colors(k,:),'LineStyle','none','Parent',ax2,...
+                'Marker','o','MarkerEdgeColor',f_colors(k,:),'MarkerFaceColor',f_colors(k,:),'MarkerSize',5);
             n_samples1 = sum(~isnan(ydata1));
             m1 = mean(ydata1,'omitnan');
             line('Xdata',k,'YData',m1,'Parent',ax2,'LineStyle','none','LineWidth',1,...
                 'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',[k,k],'YData',[m1-std(ydata1,[],'omitnan')/sqrt(n_samples1),m1+std(ydata1,[],'omitnan')/sqrt(n_samples1)],'Parent',ax2,...
                 'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
-            text(k-.25,ax2.YLim(1)+.9*(ax2.YLim(2)-ax2.YLim(1)),sprintf('%.2f',m1),'Parent',ax2);
+%             text(k-.25,ax2.YLim(1)+.9*(ax2.YLim(2)-ax2.YLim(1)),sprintf('%.2f',m1),'Parent',ax2);
             ax2.XLim = [.5 n_regions+.5];
             ax2.XTick = 1:n_regions;
             ax2.XTickLabel = label_regions;
             ax2.XTickLabelRotation = 45;            
         end
+        % Intermediate save
+        pic_name = strcat(event_name,'_','Regional-Responses_',ax2.Title.String);
+        saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+        fprintf('File Saved  [%s].\n',pic_name);
 
-        ax3 = axes('Parent',f,'Position',[.05 .05 .4 .4]);
+        clf(f);
+        % ax3 = axes('Parent',f,'Position',[.05 .05 .4 .4]);
+        ax3 = axes('Parent',f,'Position',[.05 .15 .9 .8]);
         ax3.Title.String = 'Peak Time Mean';
         hold(ax3,'on');
         grid(ax3,'on');
@@ -1072,24 +1087,32 @@ for index_event=1:length(all_event_names)
         ax3.Title.FontSize = title_fontsize;
         for k=1:n_regions
             ydata1 = Q(k).tmax_mean(:);
-            xdata = k*ones(size(ydata1));%+rand(size(ydata1))/5;
-            swarmchart(xdata(:),ydata1(:),'Color',f_colors(k,:),'Parent',ax3,...
-                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',f_colors(k,:),'MarkerFaceAlpha',1,...
-                'XJitterWidth',.5,'SizeData',30);
+            xdata = k*ones(size(ydata1))+rand(size(ydata1))/5;
+%             swarmchart(xdata(:),ydata1(:),'Color',f_colors(k,:),'Parent',ax3,...
+%                 'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',f_colors(k,:),'MarkerFaceAlpha',1,...
+%                 'XJitterWidth',.5,'SizeData',30);
+            line('XData',xdata(:),'YData',ydata1(:),'Color',f_colors(k,:),'LineStyle','none','Parent',ax3,...
+                'Marker','o','MarkerEdgeColor',f_colors(k,:),'MarkerFaceColor',f_colors(k,:),'MarkerSize',5);
             n_samples1 = sum(~isnan(ydata1));
             m1 = mean(ydata1,'omitnan');
             line('Xdata',k,'YData',m1,'Parent',ax3,'LineStyle','none','LineWidth',1,...
                 'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',[k,k],'YData',[m1-std(ydata1,[],'omitnan')/sqrt(n_samples1),m1+std(ydata1,[],'omitnan')/sqrt(n_samples1)],'Parent',ax3,...
                 'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
-            text(k-.25,ax3.YLim(1)+.9*(ax3.YLim(2)-ax3.YLim(1)),sprintf('%.2f',m1),'Parent',ax3);
+%             text(k-.25,ax3.YLim(1)+.9*(ax3.YLim(2)-ax3.YLim(1)),sprintf('%.2f',m1),'Parent',ax3);
             ax3.XLim = [.5 n_regions+.5];
             ax3.XTick = 1:n_regions;
             ax3.XTickLabel = label_regions;
             ax3.XTickLabelRotation = 45;
         end
+        % Intermediate save
+        pic_name = strcat(event_name,'_','Regional-Responses_',ax3.Title.String);
+        saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+        fprintf('File Saved  [%s].\n',pic_name);
 
-        ax4 = axes('Parent',f,'Position',[.55 .05 .4 .4]);
+        clf(f);
+        % ax4 = axes('Parent',f,'Position',[.55 .05 .4 .4]);
+        ax4 = axes('Parent',f,'Position',[.05 .15 .9 .8]);
         ax4.Title.String = 'Peak Time Median';
         hold(ax4,'on');
         grid(ax4,'on');
@@ -1097,26 +1120,32 @@ for index_event=1:length(all_event_names)
         ax4.Title.FontSize = title_fontsize;
         for k=1:n_regions
             ydata1 = Q(k).tmax_median(:);
-            xdata = k*ones(size(ydata1));%+rand(size(ydata1))/5;
-            swarmchart(xdata(:),ydata1(:),'Color',f_colors(k,:),'Parent',ax4,...
-                'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',f_colors(k,:),'MarkerFaceAlpha',1,...
-                'XJitterWidth',.5,'SizeData',30);
+            xdata = k*ones(size(ydata1))+rand(size(ydata1))/5;
+%             swarmchart(xdata(:),ydata1(:),'Color',f_colors(k,:),'Parent',ax4,...
+%                 'Marker','o','MarkerEdgeColor','none','MarkerFaceColor',f_colors(k,:),'MarkerFaceAlpha',1,...
+%                 'XJitterWidth',.5,'SizeData',30);
+            line('XData',xdata(:),'YData',ydata1(:),'Color',f_colors(k,:),'LineStyle','none','Parent',ax4,...
+                'Marker','o','MarkerEdgeColor',f_colors(k,:),'MarkerFaceColor',f_colors(k,:),'MarkerSize',5);
             n_samples1 = sum(~isnan(ydata1));
             m1 = mean(ydata1,'omitnan');
             line('Xdata',k,'YData',m1,'Parent',ax4,'LineStyle','none','LineWidth',1,...
                 'Marker','+','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',10);
             line('Xdata',[k,k],'YData',[m1-std(ydata1,[],'omitnan')/sqrt(n_samples1),m1+std(ydata1,[],'omitnan')/sqrt(n_samples1)],'Parent',ax4,...
                 'LineStyle','-','LineWidth',2,'Marker','o','MarkerEdgeColor','k','MarkerFaceColor','k','MarkerSize',1);
-            text(k-.25,ax4.YLim(1)+.9*(ax4.YLim(2)-ax4.YLim(1)),sprintf('%.2f',m1),'Parent',ax4);
+%             text(k-.25,ax4.YLim(1)+.9*(ax4.YLim(2)-ax4.YLim(1)),sprintf('%.2f',m1),'Parent',ax4);
             ax4.XLim = [.5 n_regions+.5];
             ax4.XTick = 1:n_regions;
             ax4.XTickLabel = label_regions;
             ax4.XTickLabelRotation = 45;
         end
-
-        pic_name = strcat(event_name,'_','Regional-Responses_MeanTimeDistributions');
+        % Intermediate save
+        pic_name = strcat(event_name,'_','Regional-Responses_',ax4.Title.String);
         saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
         fprintf('File Saved  [%s].\n',pic_name);
+
+%         pic_name = strcat(event_name,'_','Regional-Responses_MeanTimeDistributions');
+%         saveas(f,fullfile(folder_dest,strcat(pic_name,GTraces.ImageSaveExtension)),GTraces.ImageSaveFormat);
+%         fprintf('File Saved  [%s].\n',pic_name);
         close(f);
         
     end
