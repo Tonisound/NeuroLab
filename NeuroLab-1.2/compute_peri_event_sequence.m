@@ -97,13 +97,13 @@ else
 %             '[NREM]Ripples-Merged-Amplitude-Q1';'[NREM]Ripples-Merged-Amplitude-Q2';'[NREM]Ripples-Merged-Amplitude-Q3';'[NREM]Ripples-Merged-Amplitude-Q4';...
 %             '[NREM]Ripples-Merged-Duration-Q1';'[NREM]Ripples-Merged-Duration-Q2';'[NREM]Ripples-Merged-Duration-Q3';'[NREM]Ripples-Merged-Duration-Q4';...
 %             '[NREM]Ripples-Merged-Frequency-Q1';'[NREM]Ripples-Merged-Frequency-Q2';'[NREM]Ripples-Merged-Frequency-Q3';'[NREM]Ripples-Merged-Frequency-Q4'};
-        batch_csv_eventname = {'[NREM]Ripples-Merged-Amplitude[Top50]';...
-            '[NREM]Ripples-Merged-Duration[Top50]';...
-            '[NREM]Ripples-Merged-Frequency[Top50]';...
-            '[NREM]Ripples-Merged-Burst-Single[1.00sec].csv';...
-            '[NREM]Ripples-Merged-Burst-Duet[1.00sec].csv';...
-            '[NREM]Ripples-Merged-Burst-Triplet[1.00sec].csv';...
-            '[NREM]Ripples-Merged-Burst-Quadruplet[1.00sec].csv'};
+%         batch_csv_eventname = {'[NREM]Ripples-Merged-Amplitude[Top50]';...
+%             '[NREM]Ripples-Merged-Duration[Top50]';...
+%             '[NREM]Ripples-Merged-Frequency[Top50]'};
+        batch_csv_eventname = {'[NREM]Ripples-Merged-Burst-Single[1.00sec]';...
+            '[NREM]Ripples-Merged-Burst-Duet[1.00sec]';...
+            '[NREM]Ripples-Merged-Burst-Triplet[1.00sec]';...
+            '[NREM]Ripples-Merged-Burst-Quadruplet[1.00sec]'};
 
 
         ind_events = [];
@@ -204,6 +204,11 @@ for kk=1:length(all_event_names)
     event_file = fullfile(savedir,'Events',event_name_csv);
     [events,EventHeader,MetaData] = read_csv_events(event_file);
     
+    if isempty(events)
+        warning('No events in file [%s]. Proceeding.',event_name);
+        continue;
+    else
+    
     % Getting channel_ripple identifier
     mline = char(MetaData(contains(MetaData,'channel_ripple')));
     textsep = ',';
@@ -253,6 +258,7 @@ for kk=1:length(all_event_names)
         % Selecting reference event
         t_events = events(:,strcmp(EventHeader,ref_event)==1);
     else
+        ref_event = EventHeader{1};
         % Taking first column as default
         t_events = events(:,1);
     end
@@ -280,7 +286,6 @@ for kk=1:length(all_event_names)
     else
         fprintf('Number of events within fUS bounds : %d/%d events [%s].\n',n_events,length(index_keep),event_name);
     end
-
     
     % Loading main channel filtered
     d1 = dir(fullfile(savedir,'*',strcat(channel_main_filt,'.mat')));
@@ -442,7 +447,7 @@ for kk=1:length(all_event_names)
     end
     
     Params.recording_name = recording_name;
-    Params.timegroup = timegroup_name;
+    Params.ref_event = ref_event;
     Params.timegroup_duration = timegroup_duration;
     Params.event_name = event_name;
     Params.band_name = band_name;

@@ -10,25 +10,24 @@ load('Preferences.mat','GTraces');
 
 % Parameters
 if nargin ==0
-    %     all_event_names = {'[NREM]Ripples-Merged-All'};
+%     all_event_names = {'[NREM]Ripples-Merged-All'};
 %     all_event_names = {'[NREM]Ripples-Merged-Occurence-Q1';'[NREM]Ripples-Merged-Occurence-Q2';'[NREM]Ripples-Merged-Occurence-Q3';'[NREM]Ripples-Merged-Occurence-Q4';...
 %         '[NREM]Ripples-Merged-Amplitude-Q1';'[NREM]Ripples-Merged-Amplitude-Q2';'[NREM]Ripples-Merged-Amplitude-Q3';'[NREM]Ripples-Merged-Amplitude-Q4';...
 %         '[NREM]Ripples-Merged-Duration-Q1';'[NREM]Ripples-Merged-Duration-Q2';'[NREM]Ripples-Merged-Duration-Q3';'[NREM]Ripples-Merged-Duration-Q4';...
 %         '[NREM]Ripples-Merged-Frequency-Q1';'[NREM]Ripples-Merged-Frequency-Q2';'[NREM]Ripples-Merged-Frequency-Q3';'[NREM]Ripples-Merged-Frequency-Q4'};
-    all_event_names = {'[NREM]Ripples-Merged-Amplitude[Top50]';...
-        '[NREM]Ripples-Merged-Duration[Top50]';...
-        '[NREM]Ripples-Merged-Frequency[Top50]';...
-        '[NREM]Ripples-Merged-Burst-Single[1.00sec].csv';...
-        '[NREM]Ripples-Merged-Burst-Duet[1.00sec].csv';...
-        '[NREM]Ripples-Merged-Burst-Triplet[1.00sec].csv';...
-        '[NREM]Ripples-Merged-Burst-Quadruplet[1.00sec].csv'};
-    
+%     all_event_names = {'[NREM]Ripples-Merged-Amplitude[Top50]';...
+%         '[NREM]Ripples-Merged-Duration[Top50]';...
+%         '[NREM]Ripples-Merged-Frequency[Top50]'};
+    all_event_names = {'[NREM]Ripples-Merged-Burst-Single[1.00sec]';...
+        '[NREM]Ripples-Merged-Burst-Duet[1.00sec]';...
+        '[NREM]Ripples-Merged-Burst-Triplet[1.00sec]';...
+        '[NREM]Ripples-Merged-Burst-Quadruplet[1.00sec]'};   
 end
 flag_moving_figures = false;
-flag_synthesis_figure = false;
+flag_synthesis_figure = true;
 flag_synthesis_movie = false;
 flag_event_detection = false;
-flag_regions_averages = true;
+flag_regions_averages = false;
 
 % Display Parameters
 % sequence_display_reg = 'mean';            % Displaying region sequence
@@ -411,9 +410,9 @@ for index_event=1:length(all_event_names)
                         f2_axes = [f2_axes;ax2];
                     end
                     t1 = uicontrol(f1,'Style','text','BackgroundColor','w','FontSize',main_text_fontsize,'FontWeight','bold',...
-                        'Units','normalized','Position',[.25 .96 .5 .03],'Parent',f1);
+                        'Units','normalized','Position',[.15 .96 .7 .03],'Parent',f1);
                     t2 = uicontrol(f1,'Style','text','BackgroundColor','w','FontSize',main_text_fontsize,'FontWeight','bold',...
-                        'Units','normalized','Position',[.25 .96 .5 .03],'Parent',f2);
+                        'Units','normalized','Position',[.15 .96 .7 .03],'Parent',f2);
                     
                     for i=1:length(f1_axes)
                         ax1 = f1_axes(i);
@@ -519,7 +518,7 @@ for index_event=1:length(all_event_names)
                         f_axes = [f_axes;ax];
                     end
                     t = uicontrol(f,'Style','text','BackgroundColor','w','FontSize',main_text_fontsize,'FontWeight','bold',...
-                        'Units','normalized','Position',[.25 .96 .5 .03],'Parent',f);
+                        'Units','normalized','Position',[.15 .96 .7 .03],'Parent',f);
                     
                     work_dir = fullfile(folder_dest,strcat(cur_animal,'-',cur_plane),strcat('Frames-',cur_animal,'-',cur_plane,'_',cur_label));
                     if isfolder(work_dir)
