@@ -97,71 +97,87 @@ for i=1:length(pattern_event)
     write_csv_events(fullfile(folder_events,output_name),events(ind_segreg(index_q4_start:index_q4_end),:),EventHeader,MetaData);
     
     
-%     % % Keeping fixed ratio
-%     % ratio_keep = .1;
-%     % n_keep = round(ratio_keep*n_events)
-%     % Keeping fixed amount
-%     n_fixed = 50;
-%     n_keep = min(n_events,n_fixed);
-%     
-%     ind_keep_duration = ind_sorted_duration(1:n_keep);
-%     ind_keep_frequency = ind_sorted_frequency(1:n_keep);
-%     ind_keep_amplitude = ind_sorted_amplitude(1:n_keep);
-%     
-%     output_name = strrep(event_name,'All','Long');
-%     write_csv_events(fullfile(folder_events,output_name),events(ind_keep_duration,:),EventHeader,MetaData);
-%     output_name = strrep(event_name,'All','Fast');
-%     write_csv_events(fullfile(folder_events,output_name),events(ind_keep_frequency,:),EventHeader,MetaData);
-%     output_name = strrep(event_name,'All','Strong');
-%     write_csv_events(fullfile(folder_events,output_name),events(ind_keep_amplitude,:),EventHeader,MetaData);
+    % % Keeping fixed ratio
+    % ratio_keep = .1;
+    % n_keep = round(ratio_keep*n_events)
+    % Keeping fixed amount
+    n_fixed = 50;
+    n_keep = min(n_events,n_fixed);
     
-%     % Sorting events
-%     %     ind_duet = (diff(t_events)) < thresh_coupled;
-%     %     ind_keep_duet = ([false;ind_duet]+[ind_duet;false])>0;
-%     events = events(ind_sorted_occurence,:);
-%     t_events = events(:,2);
-%     
-%     all_thresholds = [1,2,5];
-%     for j=1:length(all_thresholds)
-%         
-%         thresh_coupled = all_thresholds(j);
-%         counter = 1;
-%         events_isolated = [];
-%         events_grouped = [];
-%         events_merged = [];
-%         
-%         while counter<n_events
-%             counter_start = counter;
-%             while (counter<n_events) && ((t_events(counter+1)-t_events(counter)) < thresh_coupled)
-%                 counter = counter+1;
-%             end
-%             counter_stop = counter;
-%             % Assigning isolated or grouped
-%             if counter_start == counter_stop
-%                 % isolated
-%                 events_isolated = [events_isolated;events(counter_start,1:3)];
-%                 events_merged = [events_merged;events(counter_start,1:3)];
-%             else
-%                 % coupled
-%                 t_mid = (events(counter_start,1)+events(counter_stop,3))/2;
-%                 events_grouped = [events_grouped;[events(counter_start,1),t_mid,events(counter_stop,3)]];
-%                 events_merged = [events_merged;[events(counter_start,1),t_mid,events(counter_stop,3)]];
-%             end
-%             counter = counter+1;
-%             if counter==n_events
-%                 % last isolated ripple
-%                 events_isolated = [events_isolated;events(counter_start,1:3)];
-%             end
-%         end
-%         
-%         output_name = strrep(event_name,'All',sprintf('Isolated[%.2fsec]',thresh_coupled));
-%         write_csv_events(fullfile(folder_events,output_name),events_isolated,EventHeader,MetaData);
-%         output_name = strrep(event_name,'All',sprintf('Grouped[%.2fsec]',thresh_coupled));
-%         write_csv_events(fullfile(folder_events,output_name),events_grouped,EventHeader,MetaData);
-%         output_name = strrep(event_name,'All',sprintf('Merged[%.2fsec]',thresh_coupled));
-%         write_csv_events(fullfile(folder_events,output_name),events_merged,EventHeader,MetaData);
-%         
-%     end
+    ind_keep_duration = ind_sorted_duration(1:n_keep);
+    ind_keep_frequency = ind_sorted_frequency(1:n_keep);
+    ind_keep_amplitude = ind_sorted_amplitude(1:n_keep);
+    
+    output_name = strrep(event_name,'All',sprintf('Duration[Top%d]',n_fixed));
+    write_csv_events(fullfile(folder_events,output_name),events(ind_keep_duration,:),EventHeader,MetaData);
+    output_name = strrep(event_name,'All',sprintf('Frequency[Top%d]',n_fixed));
+    write_csv_events(fullfile(folder_events,output_name),events(ind_keep_frequency,:),EventHeader,MetaData);
+    output_name = strrep(event_name,'All',sprintf('Amplitude[Top%d]',n_fixed));
+    write_csv_events(fullfile(folder_events,output_name),events(ind_keep_amplitude,:),EventHeader,MetaData);
+    
+    % Sorting events
+    %     ind_duet = (diff(t_events)) < thresh_coupled;
+    %     ind_keep_duet = ([false;ind_duet]+[ind_duet;false])>0;
+    events = events(ind_sorted_occurence,:);
+    t_events = events(:,2);
+    
+    all_thresholds = 1;   % [1,2,5]; % threshold in seconds
+    for j=1:length(all_thresholds)
+        
+        thresh_coupled = all_thresholds(j);
+        counter = 1;
+        events_single = [];
+        % events_grouped = [];
+        events_duet = [];
+        events_triplet = [];
+        events_more = [];
+        events_merged = [];
+        
+        while counter<n_events
+            counter_start = counter;
+            while (counter<n_events) && ((t_events(counter+1)-t_events(counter)) < thresh_coupled)
+                counter = counter+1;
+            end
+            counter_stop = counter;
+            % Assigning isolated or grouped
+            if counter_start == counter_stop
+                % isolated
+                events_single = [events_single;events(counter_start,:)];
+                events_merged = [events_merged;events(counter_start,:)];
+            else
+                t_start = events(counter_start,1);
+                t_mid = (events(counter_start,1)+events(counter_stop,3))/2;
+                t_end = events(counter_stop,3);
+                mean_dur = mean(events(counter_start:counter_stop,4));
+                mean_freq = mean(events(counter_start:counter_stop,5));
+                mean_p2p = mean(events(counter_start:counter_stop,6));
+                events_merged = [events_merged;[t_start,t_mid,t_end,mean_dur,mean_freq,mean_p2p]];
+                if (counter_stop-counter_start) == 1
+                    % duet
+                    events_duet = [events_duet;[t_start,t_mid,t_end,mean_dur,mean_freq,mean_p2p]];              
+                elseif (counter_stop-counter_start) == 2
+                    % triplet
+                    events_triplet = [events_triplet;[t_start,t_mid,t_end,mean_dur,mean_freq,mean_p2p]];
+                else
+                    % more
+                    events_more = [events_more;[t_start,t_mid,t_end,mean_dur,mean_freq,mean_p2p]];                
+                end
+            end
+            counter=counter+1;
+        end
+        
+        output_name = strrep(event_name,'All',sprintf('Burst-Single[%.2fsec]',thresh_coupled));
+        write_csv_events(fullfile(folder_events,output_name),events_single,EventHeader,MetaData);
+        output_name = strrep(event_name,'All',sprintf('Burst-Duet[%.2fsec]',thresh_coupled));
+        write_csv_events(fullfile(folder_events,output_name),events_duet,EventHeader,MetaData);
+        output_name = strrep(event_name,'All',sprintf('Burst-Triplet[%.2fsec]',thresh_coupled));
+        write_csv_events(fullfile(folder_events,output_name),events_triplet,EventHeader,MetaData);
+        output_name = strrep(event_name,'All',sprintf('Burst-Quadruplet[%.2fsec]',thresh_coupled));
+        write_csv_events(fullfile(folder_events,output_name),events_more,EventHeader,MetaData);
+        output_name = strrep(event_name,'All',sprintf('Burst-All[%.2fsec]',thresh_coupled));
+        write_csv_events(fullfile(folder_events,output_name),events_merged,EventHeader,MetaData);
+        
+    end
 end
 
 success = true;
