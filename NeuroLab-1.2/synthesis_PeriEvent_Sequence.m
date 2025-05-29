@@ -10,7 +10,7 @@ load('Preferences.mat','GTraces');
 
 % Parameters
 if nargin ==0
-%     all_event_names = {'[NREM]Ripples-Merged-All'};
+    all_event_names = {'[NREM]Ripples-Merged-All'};
 %     all_event_names = {'[NREM]Ripples-Merged-Occurence-Q1';'[NREM]Ripples-Merged-Occurence-Q2';'[NREM]Ripples-Merged-Occurence-Q3';'[NREM]Ripples-Merged-Occurence-Q4';...
 %         '[NREM]Ripples-Merged-Amplitude-Q1';'[NREM]Ripples-Merged-Amplitude-Q2';'[NREM]Ripples-Merged-Amplitude-Q3';'[NREM]Ripples-Merged-Amplitude-Q4';...
 %         '[NREM]Ripples-Merged-Duration-Q1';'[NREM]Ripples-Merged-Duration-Q2';'[NREM]Ripples-Merged-Duration-Q3';'[NREM]Ripples-Merged-Duration-Q4';...
@@ -18,10 +18,10 @@ if nargin ==0
 %     all_event_names = {'[NREM]Ripples-Merged-Amplitude[Top50]';...
 %         '[NREM]Ripples-Merged-Duration[Top50]';...
 %         '[NREM]Ripples-Merged-Frequency[Top50]'};
-    all_event_names = {'[NREM]Ripples-Merged-Burst-Single[1.00sec]';...
-        '[NREM]Ripples-Merged-Burst-Duet[1.00sec]';...
-        '[NREM]Ripples-Merged-Burst-Triplet[1.00sec]';...
-        '[NREM]Ripples-Merged-Burst-Quadruplet[1.00sec]'};   
+%     all_event_names = {'[NREM]Ripples-Merged-Burst-Single[1.00sec]';...
+%         '[NREM]Ripples-Merged-Burst-Duet[1.00sec]';...
+%         '[NREM]Ripples-Merged-Burst-Triplet[1.00sec]';...
+%         '[NREM]Ripples-Merged-Burst-Quadruplet[1.00sec]'};   
 end
 flag_moving_figures = false;
 flag_synthesis_figure = true;
@@ -35,10 +35,11 @@ flag_regions_averages = false;
 cmap_figure = 'jet';
 cmap_movie = 'jet';
 CLim_movie = [-5;10];
-main_text_fontsize = 16;
-ax_fontsize = 10;
-cbar_fontsize = 6;
+main_text_fontsize = 30;
+ax_fontsize = 12;
+cbar_fontsize = 22;
 title_fontsize = 14;
+valmax_map_thresh = 5;
 
 
 % Sanity Checks
@@ -56,19 +57,14 @@ end
 
 % Regions
 list_regions = {'[CTX-ACA-L]';'[CTX-ACA-R]';...
-    '[CTX-AI-L]';'[CTX-AI-R]';...
-    '[CTX-AUD-L]';'[CTX-AUD-R]';... '[CTX-Ect-L]';'[CTX-Ect-R]';...
+    '[CTX-AI-L]';'[CTX-AI-R]';...'[CTX-AUD-L]';'[CTX-AUD-R]';... '[CTX-Ect-L]';'[CTX-Ect-R]';...
     '[CTX-GU-L]';'[CTX-GU-R]';...
     '[CTX-ILA-L]';'[CTX-ILA-R]';...
     '[CTX-MO-L]';'[CTX-MO-R]';...'[CTX-PERI-L]';'[CTX-PERI-R]';...
     '[CTX-RSP-L]';'[CTX-RSP-R]';...
     '[CTX-SS-L]';'[CTX-SS-R]';...'[CTX-TeA-L]';'[CTX-TeA-R]';...
     '[CTX-VIS-L]';'[CTX-VIS-R]';...
-    '[OLF-DP-L]';'[OLF-DP-R]';...
-    '[OLF-PIR-L]';'[OLF-PIR-R]';...
-    '[OLF-COA-L]';'[OLF-COA-R]';...
-    '[OLF-TT-L]';'[OLF-TT-R]';...
-    '[HPF-HIPd-L]';'[HPF-HIPd-R]';...
+    '[HPF-HIPd-L]';'[HPF-HIPd-R]';...'[OLF-DP-L]';'[OLF-DP-R]';...'[OLF-PIR-L]';'[OLF-PIR-R]';...'[OLF-COA-L]';'[OLF-COA-R]';...'[OLF-TT-L]';'[OLF-TT-R]';...
     '[HPF-HIPv-L]';'[HPF-HIPv-R]';...
     '[RHP-SUB-L]';'[RHP-SUB-R]';...
     '[RHP-ENT-L]';'[RHP-ENT-R]';...
@@ -434,8 +430,9 @@ for index_event=1:length(all_event_names)
                                 Y3q_evt = NaN(1,1);
                         end
                         
-                        imagesc(valmax_map,'Parent',ax1);
-                        imagesc(tmax_map,'Parent',ax2);
+                        im1 = imagesc(valmax_map,'Parent',ax1);
+                        im2 = imagesc(tmax_map,'Parent',ax2);
+                        im2.AlphaData = im1.CData > valmax_map_thresh;
                         ax1.Title.String = sprintf('%s [N=%d][%.2fHz]',S_animal_plane(i).atlas_fullname,S_animal_plane(i).n_events,S_animal_plane(i).density_events);
                         ax2.Title.String = sprintf('%s [N=%d][%.2fHz]',S_animal_plane(i).atlas_fullname,S_animal_plane(i).n_events,S_animal_plane(i).density_events);
                         ax1.YLabel.String = S_animal_plane(i).name;
@@ -446,8 +443,9 @@ for index_event=1:length(all_event_names)
                         l1.Color(4)=.5;
                         t2.String = sprintf('[%s][%s] Peak Time Map',event_name,cur_label);
                         l2 = line('XData',S_animal_plane(i).data_atlas.line_x,'YData',S_animal_plane(i).data_atlas.line_z,'Tag','AtlasMask',...
-                            'LineWidth',.5,'Color','w','Parent',ax2);
+                            'LineWidth',.5,'Color','r','Parent',ax2);
                         l2.Color(4)=.5;
+                        l2.Visible = 'on';
                         
                         ax1.CLim = [CLim_movie(1),CLim_movie(2)];
                         ax2.CLim = [0,3];
@@ -485,7 +483,7 @@ for index_event=1:length(all_event_names)
     w_margin_2 = .05;       % right margin
     w_eps = .02;            % horizontal spacing
     h_margin_1 = .05;       % bottom margin
-    h_margin_2 = .05;       % top margin
+    h_margin_2 = .06;       % top margin
     h_eps = .02;            % vertical spacing
     margins = [w_margin_1,w_margin_2,w_eps;h_margin_1,h_margin_2,h_eps];
     
@@ -517,8 +515,8 @@ for index_event=1:length(all_event_names)
                         ax.Position = get_position(n_rows,n_col,i,margins);
                         f_axes = [f_axes;ax];
                     end
-                    t = uicontrol(f,'Style','text','BackgroundColor','w','FontSize',main_text_fontsize,'FontWeight','bold',...
-                        'Units','normalized','Position',[.15 .96 .7 .03],'Parent',f);
+                    t = uicontrol(f,'Style','text','BackgroundColor','w','FontSize',main_text_fontsize,...'FontWeight','bold',
+                        'Units','normalized','Position',[.15 .95 .7 .04],'Parent',f);
                     
                     work_dir = fullfile(folder_dest,strcat(cur_animal,'-',cur_plane),strcat('Frames-',cur_animal,'-',cur_plane,'_',cur_label));
                     if isfolder(work_dir)
@@ -544,7 +542,8 @@ for index_event=1:length(all_event_names)
                             imagesc(Y3q_evt(:,:,k),'Parent',ax);
                             ax.Title.String = sprintf('%s [N=%d][%.2fHz]',S_animal_plane(i).atlas_fullname,S_animal_plane(i).n_events,S_animal_plane(i).density_events);
                             ax.YLabel.String = S_animal_plane(i).name;
-                            t.String = sprintf('[%s][%s] Time from Event Peak = %.1f s',event_name, cur_label,t_bins_fus(k));
+                            % t.String = sprintf('[%s][%s] Time from Event Peak = %.2f s',event_name, cur_label,t_bins_fus(k));
+                            t.String = sprintf('Time from Ripple Peak = %.2f sec',t_bins_fus(k));
                             l_ = line('XData',S_animal_plane(i).data_atlas.line_x,'YData',S_animal_plane(i).data_atlas.line_z,'Tag','AtlasMask',...
                                 'LineWidth',.5,'Color','r','Parent',ax);
                             l_.Color(4)=.5;
@@ -558,6 +557,8 @@ for index_event=1:length(all_event_names)
                                 pos = ax.Position;
                                 c = colorbar(ax,"eastoutside");
                                 c.Position(1) = pos(1)+pos(3)+.01;
+                                c.Position(3) = pos(3)/10;
+                                c.FontSize = cbar_fontsize;
                             end
                         end
                         pic_name = sprintf(strcat('%s_Event-Synthesis_%03d.mat'),event_name,k);
@@ -567,7 +568,7 @@ for index_event=1:length(all_event_names)
                     
                     video_name = strcat(event_name,'_Event-Synthesis_',cur_animal,'-',cur_plane,'_',cur_label);
                     save_video(work_dir,fullfile(folder_dest,strcat(cur_animal,'-',cur_plane)),video_name);
-                    rmdir(work_dir,'s');
+%                     rmdir(work_dir,'s');
                     close(f);
                 end
             end

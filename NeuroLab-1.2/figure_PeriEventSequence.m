@@ -78,7 +78,7 @@ end
 % Main Parameters
 flag_load_large = false;           % Loading all events
 flag_save_figure = true;           % Save Figure
-flag_save_movie = true;            % Save Movie
+flag_save_movie = false;            % Save Movie
 flag_save_movie_2 = false;          % Save Second Movie (other clim)
 
 
@@ -94,15 +94,16 @@ cmap_figure = 'jet';
 cmap_movie = 'jet';
 CLim_movie = [-10;20];
 CLim_movie_2 = [-5;10];
+panel_background_color = [1 1 1];
 
 
 % Building Figure and Plotting
-f1 = figure;
+f1 = figure();
 f1.UserData.success = false;
 
 % f1.Name = sprintf(strcat('[%s]%s-PeriEventSequence'),data_pe_small.atlas_fullname,strrep(recording_name,'_nlab',''));
 f1.Name = sprintf(strcat('[%s]PeriEventSequence'),strrep(recording_name,'_nlab',''));
-set(f1,'Units','normalized','OuterPosition',[0 0 1 1]);
+set(f1,'Units','normalized','OuterPosition',[0 0 .75 1]);
 colormap(f1,cmap_figure);
 bg_color='w';
 
@@ -248,21 +249,25 @@ for kk = 1:length(all_pe_names)
     panel1 = uipanel('Units','normalized',...
         'Position',[0 0 .25 1],...
         'bordertype','etchedin',...
+        'BackgroundColor',panel_background_color,...
         'Tag','Panel1',...
         'Parent',tab);
     panel2 = uipanel('Units','normalized',...
         'Position',[.25 .75 .75 .25],...
         'bordertype','etchedin',...
+        'BackgroundColor',panel_background_color,...
         'Tag','Panel2',...
         'Parent',tab);
     panel3 = uipanel('Units','normalized',...
         'Position',[.25 0 .25 .75],...
         'bordertype','etchedin',...
+        'BackgroundColor',panel_background_color,...
         'Tag','Panel3',...
         'Parent',tab);
     panel4 = uipanel('Units','normalized',...
         'Position',[.5 0 .5 .75],...
         'bordertype','etchedin',...
+        'BackgroundColor',panel_background_color,...
         'Tag','Panel4',...
         'Parent',tab);
 
@@ -432,6 +437,12 @@ for kk = 1:length(all_pe_names)
     ax11 = axes('Parent',panel4);
     ax11.Position = get_position(n_rows,3,1,margins);
     imagesc('CData',valmax_map,'Parent',ax11);
+    % atlas
+    if ~isempty(data_pe_small.data_atlas)
+        l = line('XData',data_pe_small.data_atlas.line_x,'YData',data_pe_small.data_atlas.line_z,'Tag','AtlasMask',...
+            'LineWidth',1,'Color','r','Parent',ax11);
+        l.Color(4) = .25;
+    end
     ax11.XLim = [.5 size_im(2)+.5];
     ax11.YLim = [.5 size_im(1)+.5];
     set(ax11,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
@@ -441,6 +452,12 @@ for kk = 1:length(all_pe_names)
     ax22 = axes('Parent',panel4);
     ax22.Position = get_position(n_rows,3,2,margins);
     imagesc('CData',tmax_map,'Parent',ax22);
+    % atlas
+    if ~isempty(data_pe_small.data_atlas)
+        l = line('XData',data_pe_small.data_atlas.line_x,'YData',data_pe_small.data_atlas.line_z,'Tag','AtlasMask',...
+            'LineWidth',1,'Color','r','Parent',ax22);
+        l.Color(4) = .25;
+    end
     ax22.XLim = [.5 size_im(2)+.5];
     ax22.YLim = [.5 size_im(1)+.5];
     set(ax22,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
@@ -452,6 +469,12 @@ for kk = 1:length(all_pe_names)
     ax33 = axes('Parent',panel4);
     ax33.Position = get_position(n_rows,3,3,margins);
     im = imagesc('CData',tmax_map,'Parent',ax33);
+    % atlas
+    if ~isempty(data_pe_small.data_atlas)
+        l = line('XData',data_pe_small.data_atlas.line_x,'YData',data_pe_small.data_atlas.line_z,'Tag','AtlasMask',...
+            'LineWidth',1,'Color','r','Parent',ax33);
+        l.Color(4) = .25;
+    end
     index_AlphaData = valmax_map > amp_thresh;
     im.AlphaData = index_AlphaData;
     clim1 = max(max(im.CData(index_AlphaData==1)));
@@ -474,8 +497,15 @@ for kk = 1:length(all_pe_names)
         ax.Position = get_position(n_rows,n_col,i+n_col,margins);
         hold(ax,'on');
         imagesc('CData',cdata2(:,:,i),'Parent',ax);
-        t = text(0,5,sprintf('t=%0.1fs',t_bins_fus(i)),'Parent',ax);
-        t.FontSize = 16;
+        % atlas
+        if ~isempty(data_pe_small.data_atlas)
+            l = line('XData',data_pe_small.data_atlas.line_x,'YData',data_pe_small.data_atlas.line_z,'Tag','AtlasMask',...
+                'LineWidth',1,'Color','r','Parent',ax);
+            l.Color(4) = .25;
+        end
+        % text
+        t = text(0,size(cdata2,1)-8,sprintf('t=%0.1fs',t_bins_fus(i)),'Parent',ax);
+        t.FontSize = 12;
         % t.FontWeight = 'bold';
         t.BackgroundColor = 'w';
 

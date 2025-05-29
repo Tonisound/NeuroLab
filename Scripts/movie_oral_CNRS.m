@@ -1,55 +1,57 @@
 global DIR_SAVE FILES CUR_FILE CUR_IM IM;
 
 
-f = figure('Units','normalized','Position',[0 .25 1 .75]);
+f = figure('Units','normalized');
 
-ax1 = axes('Parent',f,'Position',[.05 .8 .45 .1]);
+
+ax1 = axes('Parent',f);
 data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_006.mat'));
 X = data.x_start:data.f:data.x_end;
 Y = data.Y;
 l1 = line('XData',X,'YData',Y,'Parent',ax1);
 
-ax2 = axes('Parent',f,'Position',[.05 .7 .45 .1],'XTickLabel','','YTickLabel','');
+ax2 = axes('Parent',f,'XTickLabel','','YTickLabel','');
 data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_005.mat'));
 X = data.x_start:data.f:data.x_end;
 Y = data.Y;
 l2 = line('XData',X,'YData',Y,'Parent',ax2);
 
-ax3 = axes('Parent',f,'Position',[.05 .6 .45 .1],'XTickLabel','','YTickLabel','');
+ax3 = axes('Parent',f,'XTickLabel','','YTickLabel','');
 data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_016.mat'));
 X = data.x_start:data.f:data.x_end;
 Y = data.Y;
 l3 = line('XData',X,'YData',Y,'Parent',ax3);
 
-ax4 = axes('Parent',f,'Position',[.05 .5 .45 .1],'XTickLabel','','YTickLabel','');
+ax4 = axes('Parent',f,'XTickLabel','','YTickLabel','');
 data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_015.mat'));
 X = data.x_start:data.f:data.x_end;
 Y = data.Y;
 l4 = line('XData',X,'YData',Y,'Parent',ax4);
 
-ax5 = axes('Parent',f,'Position',[.05 .4 .45 .1],'XTickLabel','','YTickLabel','');
+ax5 = axes('Parent',f,'XTickLabel','','YTickLabel','');
 data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_012.mat'));
 X = data.x_start:data.f:data.x_end;
 Y = data.Y;
 l5 = line('XData',X,'YData',Y,'Parent',ax5);
 
-ax6 = axes('Parent',f,'Position',[.05 .3 .45 .1],'XTickLabel','','YTickLabel','');
+ax6 = axes('Parent',f,'XTickLabel','','YTickLabel','');
 data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_009.mat'));
 X = data.x_start:data.f:data.x_end;
 Y = data.Y;
 l6 = line('XData',X,'YData',Y,'Parent',ax6);
 
-ax7 = axes('Parent',f,'Position',[.05 .2 .45 .1],'XTickLabel','','YTickLabel','');
+ax7 = axes('Parent',f,'XTickLabel','','YTickLabel','');
 data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_019.mat'));
 X = data.x_start:data.f:data.x_end;
 Y = data.Y;
 l7 = line('XData',X,'YData',Y,'Parent',ax7);
 
-ax8 = axes('Parent',f,'Position',[.05 .1 .45 .1],'XTickLabel','','YTickLabel','');
+ax8 = axes('Parent',f,'XTickLabel','','YTickLabel','');
 data = load(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab,'Sources_LFP','LFP_025.mat'));
 X = data.x_start:data.f:data.x_end;
 Y = data.Y;
 l8 = line('XData',X,'YData',Y,'Parent',ax8);
+
 
 all_axes= [ax1;ax2;ax3;ax4;ax5;ax6;ax7;ax8];
 all_lines= [l1;l2;l3;l4;l5;l6;l7;l8];
@@ -62,11 +64,12 @@ for i=1:length(all_axes)
     tstart = 728.3;
     tend = 920;
     p = patch('XData',[tstart tstart tend tend],'YData',[ax.YLim(1) ax.YLim(2) ax.YLim(2) ax.YLim(1)],'Parent',ax,...
-        'FaceColor','r','EdgeColor','none','FaceAlpha',.5);
+        'FaceColor','r','EdgeColor','none','FaceAlpha',.25);
+    uistack(p,'bottom');
 end
 
 
-ax100 = axes('Parent',f,'Position',[.55 .1 .4 .8],'XTickLabel','','YTickLabel','');
+ax100 = axes('Parent',f,'XTickLabel','','YTickLabel','');
 im = imagesc(IM(:,:,CUR_IM),'Parent',ax100);
 ax100.Title.String = 'Volume Sanguin Cerebral (%)';
 ax100.Visible='off';
@@ -79,17 +82,54 @@ c = colorbar(ax100,'eastoutside');
 c.FontSize=14;
 ax100.CLim = [-20 100];
 
-t100 = uicontrol('Units','normalized','Style','text','Parent',f,'Position',[.05 .925 .1 .04],...
+t100 = uicontrol('Units','normalized','Style','text','Parent',f,...
     'Fontsize',22,'BackgroundColor','w','FontWeight','bold');
 t100.String=myhandles.TimeDisplay.UserData(CUR_IM,:);
 colormap(ax100,'hot');
 
-t101 = uicontrol('Units','normalized','Style','text','Parent',f,'Position',[.4 .925 .1 .04],...
-    'Fontsize',22,'BackgroundColor','k','ForegroundColor','w','String','REM');
+t101 = uicontrol('Units','normalized','Style','text','Parent',f,...
+    'Fontsize',22,'BackgroundColor','k','ForegroundColor','w','String','SP');
+
+
+flag_horizontal=false;
+if flag_horizontal
+    
+    % Horizontal Setup
+    f.Position = [0 .25 1 .75];
+    ax1.Position = [.05 .8 .45 .1];
+    ax2.Position = [.05 .7 .45 .1];
+    ax3.Position = [.05 .6 .45 .1];
+    ax4.Position = [.05 .5 .45 .1];
+    ax5.Position = [.05 .4 .45 .1];
+    ax6.Position = [.05 .3 .45 .1];
+    ax7.Position = [.05 .2 .45 .1];
+    ax8.Position = [.05 .1 .45 .1];
+    ax100.Position = [.55 .1 .4 .8];
+    t100.Position = [.05 .925 .1 .04];
+    t101.Position = [.4 .925 .1 .04];
+    
+else
+    
+    % Vertical Setup
+    f.Position = [.25 0 .3 1];
+    ax1.Position = [.05 .9 .9 .04];
+    ax2.Position = [.05 .85 .9 .04];
+    ax3.Position = [.05 .8 .9 .04];
+    ax4.Position = [.05 .75 .9 .04];
+    ax5.Position = [.05 .7 .9 .04];
+    ax6.Position = [.05 .65 .9 .04];
+    ax7.Position = [.05 .6 .9 .04];
+    ax8.Position = [.05 .55 .9 .04];
+    ax100.Position = [.05 .05 .8 .45];
+    t100.Position = [.05 .95 .4 .04];
+    t101.Position = [.55 .95 .4 .04];
+end
+
+
 
 for i = 1370:1951
     im.CData = IM(:,:,i);
-    t100.String = myhandles.TimeDisplay.UserData(i,:);
+    t100.String = myhandles.TimeDisplay.UserData(i,1:end-2);
     temp = datenum(myhandles.TimeDisplay.UserData(i,:));
     t_im = (temp-floor(temp))*24*3600;
     all_l100=[];
