@@ -582,7 +582,8 @@ for i = 1:length(ind_files)
 %                 success=true;
 
             case 'Delete Cereplex Traces'
-                delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
+                delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));\
+                success=true;
                 
             case 'Import Doppler film'
                 Doppler_film = import_DopplerFilm(FILES(ii),myhandles,1);
