@@ -161,7 +161,7 @@ ft.UserData.Selection = [];
 
 % Process Table
 %ind_1 = ~(cellfun('isempty',strfind(cellstr(myhandles.FigureListPopup.String),'(Figure)')));
-D = [{'Clear Sources_LFP'};{'Clear Sources_fUS'};{'Delete Region Traces'};{'Delete Region Group Traces'};...
+D = [{'Clear Sources_LFP'};{'Clear Sources_fUS'};{'Delete Region Traces'};{'Delete Region Group Traces'};{'Delete Cereplex Traces'};...
     {'Import Doppler film'};{'Import Reference Time'};{'Import Time Tags'};{'Import - Crop Video'};{'Import LFP Configuration'};...
     cellstr(myhandles.ProcessListPopup.String);...
     cellstr(myhandles.FigureListPopup.String);...cellstr(myhandles.FigureListPopup.String(ind_1,:))
@@ -580,6 +580,9 @@ for i = 1:length(ind_files)
 %                 end                
 %                 delete(all_to_be_removed);
 %                 success=true;
+
+            case 'Delete Cereplex Traces'
+                delete(findobj(myhandles.RightAxes,'Tag','Trace_Cerep'));
                 
             case 'Import Doppler film'
                 Doppler_film = import_DopplerFilm(FILES(ii),myhandles,1);
