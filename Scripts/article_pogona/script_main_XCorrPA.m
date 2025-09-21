@@ -62,6 +62,8 @@ InfoFilePogo =[{'20190730_P1-003_E_nlab'},{'Power-beta_999'},{'Power-theta_999'}
     {'20200726_P5-060_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};...
     {'20200726_P5-061_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'}];
 
+InfoFilePogo =[{'20190731_P1-005_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'}];...
+
 
 InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
     {'20240812_K1653_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
@@ -88,6 +90,8 @@ InfoFileMouse =[{'20240812_K1653_001_E_nlab'},{'Power-beta_999'},{'Power-theta_9
     {'20240826_K1657_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'};
     {'20240826_K1657_002_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'}];
 
+InfoFileMouse =[{'20240822_K1656_001_E_nlab'},{'Power-beta_999'},{'Power-theta_999'},{'Power-delta_999'}];
+
 
 InfoFileRat =[{'20190226_SD025_P401_R_nlab'},{'Power-beta_023'},{'Power-theta_023'};...
     {'20190226_SD025_P402_R_nlab'},{'Power-beta_023'},{'Power-theta_023'};...
@@ -105,7 +109,8 @@ InfoFileRat =[{'20190226_SD025_P401_R_nlab'},{'Power-beta_023'},{'Power-theta_02
 
 
 all_states = {'NREM','REM','AW','QW'};
-seed_path = '/Volumes/DataMOBs203/';
+seed_path = '/Users/tonio/Documents/Antoine-fUSDataset';
+% seed_path = '/Volumes/DataMOBs203/';
 % seed_path = '/media/hobbes/DataMOBs203';
 
 % Default Parameters
