@@ -51,7 +51,7 @@ else
             'SelectionMode','multiple','ListString',{d.name}','ListSize',[300 500]);
     else
         % batch mode
-        pattern_list = {'ACCELEROMETER_0_Posture_power';'Body_position_X_(m)';'Body_position_Y_(m)';'Body_speed_(m_s)'};
+        pattern_list = {'Xposition';'Yposition';'MouseTemp';'BodySpeed';'zscored-465'};
         ind_ext = find(contains({d.name}',pattern_list)==1);
         ok = true;
     end
