@@ -16,7 +16,7 @@ files_temp = FILES;
 
 % Display Parameters
 W = 160;
-H = 60;
+H = 50;
 ftsize = 10;
 panelColor = get(0,'DefaultUicontrolBackgroundColor');
 backColor = [.75 .75 .75];

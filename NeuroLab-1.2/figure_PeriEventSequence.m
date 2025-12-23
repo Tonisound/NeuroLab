@@ -78,7 +78,7 @@ end
 % Main Parameters
 flag_load_large = false;           % Loading all events
 flag_save_figure = true;           % Save Figure
-flag_save_movie = false;            % Save Movie
+flag_save_movie = true;            % Save Movie
 flag_save_movie_2 = false;          % Save Second Movie (other clim)
 
 
@@ -88,8 +88,8 @@ flag_save_movie_2 = false;          % Save Second Movie (other clim)
 % face_alpha = .5 ;
 % g_colors = get_colors(n_channels+1,'jet');
 offset_stepping_lfp = 250;                  % offset between channels (uV)
-sequence_display_reg = 'mean';            % Displaying region sequence
-sequence_display_vox = 'mean';            % Displaying voxel sequence
+sequence_display_reg = 'median';            % Displaying region sequence
+sequence_display_vox = 'median';            % Displaying voxel sequence
 cmap_figure = 'jet';
 cmap_movie = 'jet';
 CLim_movie = [-10;20];
@@ -395,6 +395,7 @@ for kk = 1:length(all_pe_names)
     % n_iqr = 4;
     % ax5.CLim = [median(data_iqr(:))-n_iqr*iqr(data_iqr(:)),median(data_iqr(:))+n_iqr*iqr(data_iqr(:))];
     % ax5.CLim = [median(data_iqr(:))-2,median(data_iqr(:))+5];
+    ax5.CLim = [-5,10];
     ax5.YLim = [.5 length(all_labels_regions)+.5];
     ax5.XLim = [t_bins_fus(1),t_bins_fus(end)];
     ax5.YTick = 1:length(all_labels_regions);
@@ -517,8 +518,8 @@ for kk = 1:length(all_pe_names)
         set(ax,'XTick',[],'XTickLabel',[],'YTick',[],'YTickLabel',[]);
         ax.YDir = 'reverse';
         if i == index_t_bins_fus(end)
-            % cbar = colorbar(ax,'eastoutside');
-            % cbar.Position = [.94 .01 .01 .15];
+            cbar = colorbar(ax,'eastoutside');
+            cbar.Position = [.94 .01 .01 .15];
         end
         all_axes(i) = ax;
     end

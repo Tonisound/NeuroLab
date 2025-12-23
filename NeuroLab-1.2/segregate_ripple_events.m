@@ -121,7 +121,7 @@ for i=1:length(pattern_event)
     events = events(ind_sorted_occurence,:);
     t_events = events(:,2);
     
-    all_thresholds = 1;   % [1,2,5]; % threshold in seconds
+    all_thresholds = 1;%[1,2,5]; % threshold in seconds
     for j=1:length(all_thresholds)
         
         thresh_coupled = all_thresholds(j);
@@ -146,7 +146,8 @@ for i=1:length(pattern_event)
                 events_merged = [events_merged;events(counter_start,:)];
             else
                 t_start = events(counter_start,1);
-                t_mid = (events(counter_start,1)+events(counter_stop,3))/2;
+                % t_mid = (events(counter_start,1)+events(counter_stop,3))/2;
+                t_mid = events(counter_start,2);
                 t_end = events(counter_stop,3);
                 mean_dur = mean(events(counter_start:counter_stop,4));
                 mean_freq = mean(events(counter_start:counter_stop,5));
@@ -166,15 +167,15 @@ for i=1:length(pattern_event)
             counter=counter+1;
         end
         
-        output_name = strrep(event_name,'All',sprintf('Burst-Single[%.2fsec]',thresh_coupled));
+        output_name = strrep(event_name,'All',sprintf('1Burst[%.2fsec]',thresh_coupled));
         write_csv_events(fullfile(folder_events,output_name),events_single,EventHeader,MetaData);
-        output_name = strrep(event_name,'All',sprintf('Burst-Duet[%.2fsec]',thresh_coupled));
+        output_name = strrep(event_name,'All',sprintf('2Burst[%.2fsec]',thresh_coupled));
         write_csv_events(fullfile(folder_events,output_name),events_duet,EventHeader,MetaData);
-        output_name = strrep(event_name,'All',sprintf('Burst-Triplet[%.2fsec]',thresh_coupled));
+        output_name = strrep(event_name,'All',sprintf('3Burst[%.2fsec]',thresh_coupled));
         write_csv_events(fullfile(folder_events,output_name),events_triplet,EventHeader,MetaData);
-        output_name = strrep(event_name,'All',sprintf('Burst-Quadruplet[%.2fsec]',thresh_coupled));
+        output_name = strrep(event_name,'All',sprintf('4+Burst[%.2fsec]',thresh_coupled));
         write_csv_events(fullfile(folder_events,output_name),events_more,EventHeader,MetaData);
-        output_name = strrep(event_name,'All',sprintf('Burst-All[%.2fsec]',thresh_coupled));
+        output_name = strrep(event_name,'All',sprintf('AllBurst[%.2fsec]',thresh_coupled));
         write_csv_events(fullfile(folder_events,output_name),events_merged,EventHeader,MetaData);
         
     end
