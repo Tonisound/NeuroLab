@@ -103,7 +103,8 @@ else
         START_IM = data_config.START_IM;
         END_IM = data_config.END_IM;
         UiValues = data_config.UiValues;
-        FILES(CUR_FILE) = data_config.File;
+%         FILES(CUR_FILE) = data_config.File;
+        FILES(CUR_FILE) = fill_fields_from_struct(FILES(CUR_FILE),data_config.File);
 %         if ~exist('IM','var')||isempty(IM)
 %             load_global_image(fullfile(DIR_SAVE,FILES(CUR_FILE).nlab),UiValues.CenterPanelPopup);
 %         end

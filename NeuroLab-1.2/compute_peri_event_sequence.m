@@ -21,7 +21,7 @@ end
 
 
 % Parameters
-flag_save_large = false;             % Saving all events
+flag_save_large = true;             % Saving all events
 band_name = 'ripple';               % Filtered band for main channel
 sampling_fus = 5;                   % fUS interpolation frequency (Hz)
 sampling_lfp = 1000;                % LFP interpolation frequency (Hz)

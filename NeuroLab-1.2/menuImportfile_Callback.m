@@ -109,7 +109,10 @@ for ind_file = 1:length(FileList)
         % Direct Importation from nlab file if specified in FileName
         if isfile(fullfile(FileName,'Config.mat'))
             l = load(fullfile(FileName,'Config.mat'),'File');
-            F(ind_file) = l.File;
+
+%             F(ind_file) = l.File;
+            F(ind_file) = fill_fields_from_struct(F(ind_file),l.File);
+
             fprintf('File Imported [%s]\n',FileName);
         else
             warning('Importation aborted - Incorrect file path [%s].',FileName);
