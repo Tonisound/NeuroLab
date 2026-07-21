@@ -77,7 +77,7 @@ end
 
 % Main Parameters
 flag_load_large = false;           % Loading all events
-flag_save_figure = true;           % Save Figure
+flag_save_figure = false;           % Save Figure
 flag_save_movie = true;            % Save Movie
 flag_save_movie_2 = false;          % Save Second Movie (other clim)
 
@@ -603,8 +603,10 @@ if flag_save_movie
             if ~isempty(data_pe_small.data_atlas)
                 l = line('XData',data_pe_small.data_atlas.line_x,'YData',data_pe_small.data_atlas.line_z,'Tag','AtlasMask',...
                     'LineWidth',1,'Color','r','Parent',ax);
-                l.Color(4) = .25;
+                l.Color(4) = .5;
             end
+            
+            ax.FontSize=12;
         end
 
         pic_name = sprintf(strcat('%s_%03d'),recording_name,i);

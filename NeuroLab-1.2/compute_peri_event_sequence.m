@@ -23,13 +23,19 @@ end
 % Parameters
 flag_save_large = true;             % Saving all events
 band_name = 'ripple';               % Filtered band for main channel
-sampling_fus = 5;                   % fUS interpolation frequency (Hz)
+% sampling_fus = 5;                   % fUS interpolation frequency (Hz)
+sampling_fus = 1;                   % fUS interpolation frequency (Hz)
 sampling_lfp = 1000;                % LFP interpolation frequency (Hz)
 sampling_spectro = 200;             % Spectrogram interpolation frequency (Hz)
-t_before = -1;                      % time window start (seconds)
-t_after = 5;                        % time window end (seconds) 
-t_baseline_start = -1;              % time start baseline (seconds) 
+%t_before = -1;                      % time window start (seconds)
+%t_after = 5;                        % time window end (seconds) 
+%t_baseline_start = -1;              % time start baseline (seconds) 
+%t_baseline_end = 0;                 % time end baseline (seconds) 
+t_before = -10;                      % time window start (seconds)
+t_after = 60;                        % time window end (seconds) 
+t_baseline_start = -10;              % time start baseline (seconds) 
 t_baseline_end = 0;                 % time end baseline (seconds) 
+
 save_ratio_spectro = 100;           % ratio for spectrogram compression
 save_ratio_fus = 1000;               % ratio for fus compression 
 
@@ -91,12 +97,12 @@ else
         
     else
         % batch mode
-        % ind_events = 1:length(d_events);
-        batch_csv_eventname = {'[NREM]Ripples-Merged-All'};
-        batch_csv_eventname = {'[NREM]Ripples-Merged-Occurence-Q1';'[NREM]Ripples-Merged-Occurence-Q2';'[NREM]Ripples-Merged-Occurence-Q3';'[NREM]Ripples-Merged-Occurence-Q4';...
-            '[NREM]Ripples-Merged-Amplitude-Q1';'[NREM]Ripples-Merged-Amplitude-Q2';'[NREM]Ripples-Merged-Amplitude-Q3';'[NREM]Ripples-Merged-Amplitude-Q4';...
-            '[NREM]Ripples-Merged-Duration-Q1';'[NREM]Ripples-Merged-Duration-Q2';'[NREM]Ripples-Merged-Duration-Q3';'[NREM]Ripples-Merged-Duration-Q4';...
-            '[NREM]Ripples-Merged-Frequency-Q1';'[NREM]Ripples-Merged-Frequency-Q2';'[NREM]Ripples-Merged-Frequency-Q3';'[NREM]Ripples-Merged-Frequency-Q4'};
+        ind_events = 1:length(d_events);
+%         batch_csv_eventname = {'[NREM]Ripples-Merged-All'};
+%         batch_csv_eventname = {'[NREM]Ripples-Merged-Occurence-Q1';'[NREM]Ripples-Merged-Occurence-Q2';'[NREM]Ripples-Merged-Occurence-Q3';'[NREM]Ripples-Merged-Occurence-Q4';...
+%             '[NREM]Ripples-Merged-Amplitude-Q1';'[NREM]Ripples-Merged-Amplitude-Q2';'[NREM]Ripples-Merged-Amplitude-Q3';'[NREM]Ripples-Merged-Amplitude-Q4';...
+%             '[NREM]Ripples-Merged-Duration-Q1';'[NREM]Ripples-Merged-Duration-Q2';'[NREM]Ripples-Merged-Duration-Q3';'[NREM]Ripples-Merged-Duration-Q4';...
+%             '[NREM]Ripples-Merged-Frequency-Q1';'[NREM]Ripples-Merged-Frequency-Q2';'[NREM]Ripples-Merged-Frequency-Q3';'[NREM]Ripples-Merged-Frequency-Q4'};
 %         batch_csv_eventname = {'[NREM]Ripples-Merged-Amplitude[Top50]';...
 %             '[NREM]Ripples-Merged-Duration[Top50]';...
 %             '[NREM]Ripples-Merged-Frequency[Top50]';...
@@ -104,12 +110,11 @@ else
 %             '[NREM]Ripples-Merged-Burst-Duet[1.00sec]';...
 %             '[NREM]Ripples-Merged-Burst-Triplet[1.00sec]';...
 %             '[NREM]Ripples-Merged-Burst-Quadruplet[1.00sec]'};
-
-        ind_events = [];
-        for i=1:length(batch_csv_eventname)
-            ind_keep = find(strcmp({d_events(:).name}',strcat(batch_csv_eventname{i},'.csv')));
-            ind_events = [ind_events;ind_keep];
-        end
+%         ind_events = [];
+%         for i=1:length(batch_csv_eventname)
+%             ind_keep = find(strcmp({d_events(:).name}',strcat(batch_csv_eventname{i},'.csv')));
+%             ind_events = [ind_events;ind_keep];
+%         end
     end
     all_event_names = {d_events(ind_events).name}';
 end
@@ -151,7 +156,7 @@ fprintf(' done.\n');
 % Selecting and loading fUS regions
 d_regions = dir(fullfile(savedir,'Sources_fUS','*.mat'));
 % Loading only region groups
-d_regions = dir(fullfile(savedir,'Sources_fUS','[*.mat'));
+% d_regions = dir(fullfile(savedir,'Sources_fUS','[*.mat'));
 d_regions = d_regions(arrayfun(@(x) ~strcmp(x.name(1),'.'),d_regions));
 % % Restricting to bilateral regions
 % ind_leftright = contains({d_regions(:).name}','-L.mat')+contains({d_regions(:).name}','-R.mat');
