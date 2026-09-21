@@ -22,7 +22,7 @@ clim2 = 15;
 ylim1 = -5;
 ylim2 = 15;
 t_start_auc = 0;
-t_end_auc = 30;
+t_end_auc = 60;
 n_stim_trials = 6;
 n_control_trials = 2;
 all_bdata = [];
@@ -108,6 +108,13 @@ for j = 1:length(all_files)
     hold(ax13,'on')
     all_control_trials = [permute(d_cont.Y2q_evt_normalized(ind_stim_region,:,1:n_control_trials),[3 2 1])];
     imagesc('XData',t_bins_fus,'YData',1:n_control_trials,'CData',all_control_trials,'Parent',ax13);
+    % Stims
+    for i = 1:n_control_trials
+        py1_data = [i-1 i i i-1]+.5;
+        px1_data = [0 0 15 15];
+        patch('XData',px1_data,'YData',py1_data,'FaceColor',[.5 .5 .5],'EdgeColor','none','Parent',ax13,'FaceAlpha',.5);
+    end
+
     set(ax13,'YTick',1:n_control_trials,'YTickLabel',1:n_control_trials);
     colorbar(ax13);
 
@@ -169,13 +176,16 @@ for j = 1:length(all_files)
 end
 
 f2 = figure;
-f2.Name = sprintf('Synthesis-Stim-vs-LightControl[AUC-%.1f-%.1f]',t_start_auc,t_end_auc);
+f2.Name = sprintf('Synthesis-Stim-vs-LightControl[AUC-%d-%d]',t_start_auc,t_end_auc);
 
 ax15 = axes('Parent',f2,'Position',[.05 .05 .9 .9]);
 hold(ax15,'on');
-ax15.Title.String = sprintf('Statistics AUC (N = %d session)',size(all_bdata,1));
 bdata = mean(all_bdata,1);
 sem_data = std(all_bdata,[],1)/sqrt(size(all_bdata,1));
+
+p1 = signrank(all_bdata(:,1),all_bdata(:,2));
+[~,p2] = ttest(all_bdata(:,1),all_bdata(:,2));
+ax15.Title.String = sprintf('Statistics AUC (N = %d)(Sign rank: P=%.4f)(T-test: P=%.4f)',size(all_bdata,1),p1,p2);
 
 for i = 1:2
     b = bar(i,bdata(i),'Parent',ax15);
@@ -197,3 +207,17 @@ picname = f2.Name;
 saveas(f2,fullfile(dir_save,"Stim-vs-LightControl",picname),ImageSaveFormat);
 fprintf('File %s saved at [%s].\n',picname,dir_save);
 %close(f2);
+
+% Writing data out
+% Statistics Separate files
+filename_out = fullfile(dir_save,"Stim-vs-LightControl",[picname,'.txt']);
+fid = fopen(filename_out,'w');
+fwrite(fid,sprintf('Recording \t MouseId \t AUC-Stim \t AUC-LightControl'));
+fwrite(fid,newline);
+for i = 1:size(all_bdata,1)
+    file_nlab = char(all_files{i});
+    fwrite(fid,sprintf('%s \t %s \t %.4f \t %.4f \t',file_nlab,file_nlab(10:14),all_bdata(i,1),all_bdata(i,2)));
+    fwrite(fid,newline);
+end
+fclose(fid);
+fprintf('Data saved in file %s\n',filename_out);

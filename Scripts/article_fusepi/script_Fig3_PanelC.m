@@ -22,7 +22,7 @@ clim2 = 15;
 ylim1 = -3;
 ylim2 = 15;
 t_start_auc = 0;
-t_end_auc = 30;
+t_end_auc = 60;
 n_trials = 6 ;
 all_bdata = [];
 
@@ -94,7 +94,7 @@ for j = 1:length(all_files)
         patch('XData',px1_data,'YData',py1_data,'FaceColor',[.5 .5 .5],'EdgeColor','none','Parent',ax11,'FaceAlpha',.5);
     end
 
-    set(ax11,'YTick',1:n_trials,'YTickLabel',stim_dur);
+    set(ax11,'YTick',1:n_trials,'YTickLabel',1:n_trials);
     set(ax11,'XTick',0:10:t_end_auc);
     colorbar(ax11);
     ax11.Title.String = 'Ipsi (All trials)';
@@ -120,7 +120,7 @@ for j = 1:length(all_files)
         patch('XData',px1_data,'YData',py1_data,'FaceColor',[.5 .5 .5],'EdgeColor','none','Parent',ax13,'FaceAlpha',.5);
     end
 
-    set(ax13,'YTick',1:n_trials,'YTickLabel',stim_dur);
+    set(ax13,'YTick',1:n_trials,'YTickLabel',1:n_trials);
     colorbar(ax13);
 
     ax13.Title.String = 'Contra (All trials)';
@@ -176,18 +176,22 @@ for j = 1:length(all_files)
     picname = f1.Name;
     saveas(f1,fullfile(dir_save,"Ipsi-vs-Contra",picname),ImageSaveFormat);
     fprintf('File %s saved at [%s].\n',picname,dir_save);
-    %close(f1);
+    close(f1);
 
 end
 
 f2 = figure;
-f2.Name = sprintf('Synthesis-Ipsi-vs-Contra[AUC-%.1f-%.1f]',t_start_auc,t_end_auc);
+f2.Name = sprintf('Synthesis-Ipsi-vs-Contra[AUC-%d-%d]',t_start_auc,t_end_auc);
 
 ax15 = axes('Parent',f2,'Position',[.05 .05 .9 .9]);
 hold(ax15,'on');
-ax15.Title.String = sprintf('Statistics AUC (N = %d session)',size(all_bdata,1));
+
 bdata = mean(all_bdata,1);
 sem_data = std(all_bdata,[],1)/sqrt(size(all_bdata,1));
+
+p1 = signrank(all_bdata(:,1),all_bdata(:,2));
+[~,p2] = ttest(all_bdata(:,1),all_bdata(:,2));
+ax15.Title.String = sprintf('Statistics AUC (N = %d)(Sign rank: P=%.4f)(T-test: P=%.4f)',size(all_bdata,1),p1,p2);
 
 for i = 1:2
     b = bar(i,bdata(i),'Parent',ax15);
@@ -208,4 +212,18 @@ set(ax15,'XTick',1:2,'XTickLabel',leg_labels);
 picname = f2.Name;
 saveas(f2,fullfile(dir_save,"Ipsi-vs-Contra",picname),ImageSaveFormat);
 fprintf('File %s saved at [%s].\n',picname,dir_save);
-%close(f2);
+close(f2);
+
+% Writing data out
+% Statistics Separate files
+filename_out = fullfile(dir_save,"Ipsi-vs-Contra",[picname,'.txt']);
+fid = fopen(filename_out,'w');
+fwrite(fid,sprintf('Recording \t MouseId \t AUC-Stim \t AUC-Contra'));
+fwrite(fid,newline);
+for i = 1:size(all_bdata,1)
+    file_nlab = char(all_files{i});
+    fwrite(fid,sprintf('%s \t %s \t %.4f \t %.4f \t',file_nlab,file_nlab(10:14),all_bdata(i,1),all_bdata(i,2)));
+    fwrite(fid,newline);
+end
+fclose(fid);
+fprintf('Data saved in file %s\n',filename_out);
