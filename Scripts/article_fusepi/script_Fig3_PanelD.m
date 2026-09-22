@@ -22,7 +22,7 @@ clim2 = 15;
 ylim1 = -5;
 ylim2 = 15;
 t_start_auc = 0;
-t_end_auc = 60;
+t_end_auc = 30;
 n_stim_trials = 6;
 n_control_trials = 2;
 all_bdata = [];
@@ -78,6 +78,7 @@ for j = 1:length(all_files)
     % Stim trials
     f1 = figure;
     f1.Name = sprintf('[%s]Stim-vs-LightControl',file_nlab);
+    f1.Colormap = epi_raster_cols();
     ax11 = axes('Parent',f1,'Position',[.05 .6 .4 .35]);
     hold(ax11,'on');
 

@@ -22,7 +22,7 @@ clim2 = 15;
 ylim1 = -3;
 ylim2 = 15;
 t_start_auc = 0;
-t_end_auc = 60;
+t_end_auc = 30;
 n_trials = 6 ;
 all_bdata = [];
 
@@ -76,6 +76,7 @@ for j = 1:length(all_files)
 
     % Stim trials
     f1 = figure;
+    f1.Colormap = epi_raster_cols();
     f1.Name = sprintf('[%s]Ipsi-vs-Contra',file_nlab);
     ax11 = axes('Parent',f1,'Position',[.05 .6 .4 .35]);
     hold(ax11,'on');
